@@ -10,12 +10,36 @@ import {
   calcDriverPrice,
   resolveLanguage,
   guessDepAirport,
+  getIataInfo,
   getMapUrl,
   getWazeUrl,
   getWhatsAppUrl,
   getSmsUrl,
   TEMPLATES,
 } from "@/lib/trips";
+
+/* ------------------------------------------------------------------ */
+/*  Country code → flag emoji                                          */
+/* ------------------------------------------------------------------ */
+
+function countryFlag(iso: string): string {
+  if (!iso || iso.length !== 2) return "🌐";
+  const upper = iso.toUpperCase();
+  return String.fromCodePoint(
+    ...[...upper].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65),
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Flight status color for strip progress bar                         */
+/* ------------------------------------------------------------------ */
+
+function flightBarColor(progress: number, status?: string): string {
+  const st = (status || "").toLowerCase();
+  if (st === "landed" || st === "aterrou" || progress >= 95) return "#10b981"; // green
+  if (progress <= 5 && st !== "boarding") return "#374151"; // gray — not departed
+  return "#f59e0b"; // amber — in flight
+}
 
 /* ------------------------------------------------------------------ */
 /*  Props                                                              */
@@ -201,42 +225,94 @@ export default function DriverTripCard({
   const swipeProgress = Math.min(swipeX / SWIPE_THRESHOLD, 1);
 
   /* ================================================================ */
-  /*  STRIP CARD (compact h-20)                                        */
+  /*  STRIP: flight info for CHEGADA                                   */
+  /* ================================================================ */
+  const stripDepIata = useMemo(() => {
+    if (tipo !== "CHEGADA") return null;
+    const raw = (viagem.depAirport || viagem.depIata || depAirport || "").toUpperCase();
+    if (!raw || raw === "???") return null;
+    return raw;
+  }, [tipo, viagem.depAirport, viagem.depIata, depAirport]);
+
+  const stripIataInfo = useMemo(() => {
+    if (!stripDepIata) return null;
+    return getIataInfo(stripDepIata);
+  }, [stripDepIata]);
+
+  const stripArrTime = cleanHora(viagem.arrTime || "");
+  const stripBarColor = flightBarColor(flightProgress, viagem.status);
+
+  /* ================================================================ */
+  /*  STRIP CARD (compact)                                             */
   /* ================================================================ */
   if (!isHero) {
+    const isCHEGADA = tipo === "CHEGADA";
+    const flag = stripIataInfo ? countryFlag(stripIataInfo.c) : null;
+
     return (
       <button
         type="button"
         onClick={() => onExpand?.()}
         className={`
-          w-full h-20 flex items-center gap-4 px-4
-          bg-[#111] rounded-2xl border border-white/5
+          w-full flex flex-col bg-[#111] rounded-2xl border border-white/5
           border-l-4 ${ts.border}
           ${isDone ? "opacity-40" : ""}
-          active:bg-white/5 transition-all
+          active:bg-white/5 transition-all overflow-hidden
         `}
       >
-        {/* Left: time */}
-        <div className="flex-shrink-0 min-w-[60px]">
-          <span className={`text-xl font-bold font-mono ${ts.text}`}>{hora}</span>
+        {/* Main row */}
+        <div className="flex items-center gap-3 px-4 py-3">
+          {/* Left: time */}
+          <div className="flex-shrink-0 min-w-[56px]">
+            <span className={`text-xl font-bold font-mono ${ts.text}`}>{hora}</span>
+          </div>
+
+          {/* Middle: name + badge */}
+          <div className="flex-1 min-w-0 text-left">
+            <p className="text-base font-bold text-white truncate">{viagem.client}</p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className={`inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded ${ts.bg} ${ts.text}`}>
+                {tipo}
+              </span>
+              {/* Flight origin badge for CHEGADA */}
+              {isCHEGADA && stripDepIata && (
+                <span className="inline-flex items-center gap-1 text-[10px] font-mono text-white/50 bg-white/5 px-1.5 py-0.5 rounded">
+                  {flag && <span className="text-xs">{flag}</span>}
+                  {stripDepIata}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Right: arrival time or pax */}
+          <div className="flex-shrink-0 text-right">
+            {isCHEGADA && stripArrTime && stripArrTime !== "—:—" ? (
+              <div>
+                <span className="font-mono text-sm font-bold" style={{ color: stripBarColor }}>
+                  {stripArrTime}
+                </span>
+                <p className="text-[9px] text-white/30 font-mono">chegada</p>
+              </div>
+            ) : viagem.pax ? (
+              <span className="font-mono text-sm text-white/40">{viagem.pax} pax</span>
+            ) : (
+              <span className="text-lg text-white/30">&#8250;</span>
+            )}
+          </div>
         </div>
 
-        {/* Middle: name + badge */}
-        <div className="flex-1 min-w-0 text-left">
-          <p className="text-base font-bold text-white truncate">{viagem.client}</p>
-          <span className={`inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded ${ts.bg} ${ts.text}`}>
-            {tipo}
-          </span>
-        </div>
-
-        {/* Right: pax or arrow */}
-        <div className="flex-shrink-0 text-white/40">
-          {viagem.pax ? (
-            <span className="font-mono text-sm">{viagem.pax} pax</span>
-          ) : (
-            <span className="text-lg">{"\u203A"}</span>
-          )}
-        </div>
+        {/* Flight progress bar (CHEGADA only) */}
+        {isCHEGADA && (
+          <div className="h-1.5 w-full bg-white/5">
+            <div
+              className="h-full rounded-r-full transition-all duration-1000"
+              style={{
+                width: `${Math.max(flightProgress, 3)}%`,
+                backgroundColor: stripBarColor,
+              }}
+            />
+          </div>
+        )}
       </button>
     );
   }
