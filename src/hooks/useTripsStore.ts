@@ -12,6 +12,8 @@ import {
   HUB_CENTRAL_URL,
   DRIVERS_FALLBACK,
   TAB_INFO,
+  detectTipo,
+  calcDriverPrice,
 } from "@/lib/trips";
 
 // ─── LocalStorage Keys ───
@@ -214,8 +216,8 @@ export function useTripsStore(): TripsStore {
 
     // Sort chronologically by hora
     list.sort((a, b) => {
-      const timeA = a.hora || a.time || "";
-      const timeB = b.hora || b.time || "";
+      const timeA = a.pickupTime || "";
+      const timeB = b.pickupTime || "";
       return timeA.localeCompare(timeB);
     });
 
@@ -236,16 +238,14 @@ export function useTripsStore(): TripsStore {
     };
 
     for (const v of diaList) {
-      const tipo = (v.tipo || v.type || "").toLowerCase();
-      if (tipo === "chegada" || tipo === "arrival") stats.chegadas++;
-      else if (tipo === "recolha" || tipo === "departure" || tipo === "pickup")
-        stats.recolhas++;
-      else if (tipo === "tour") stats.tours++;
+      const tipo = detectTipo(v.origin || "", v.flight || "");
+      if (tipo === "CHEGADA") stats.chegadas++;
+      else if (tipo === "RECOLHA") stats.recolhas++;
+      else if (tipo === "TOUR") stats.tours++;
 
       if (!v.driver || v.driver.trim() === "") stats.semMotorista++;
 
-      const pay = parseFloat(String(v.valor || v.pay || v.price || 0));
-      if (!isNaN(pay)) stats.totalPay += pay;
+      if (v.driver) stats.totalPay += calcDriverPrice(v.platform);
     }
 
     return stats;
@@ -265,8 +265,7 @@ export function useTripsStore(): TripsStore {
         summary[driver] = { count: 0, total: 0 };
       }
       summary[driver].count++;
-      const pay = parseFloat(String(v.valor || v.pay || v.price || 0));
-      if (!isNaN(pay)) summary[driver].total += pay;
+      if (v.driver) summary[driver].total += calcDriverPrice(v.platform);
     }
 
     return summary;
@@ -281,11 +280,11 @@ export function useTripsStore(): TripsStore {
         return services.current;
       case "chegadas":
         return services.current.filter(
-          (s) => s.tipo === "chegada" || s.type === "chegada"
+          (s) => s.type === "CHEGADA"
         );
       case "recolhas":
         return services.current.filter(
-          (s) => s.tipo === "recolha" || s.type === "recolha"
+          (s) => s.type === "RECOLHA"
         );
       case "past":
         return services.past;
@@ -312,26 +311,32 @@ export function useTripsStore(): TripsStore {
     const id = nextIdRef.current++;
     const newService: TripService = {
       id,
-      booking: data.booking || "",
-      guest: data.guest || "",
-      pax: data.pax || 1,
-      from: data.from || "",
-      to: data.to || "",
-      date: data.date || "",
-      time: data.time || "",
-      flight: data.flight || "",
-      tipo: data.tipo || data.type || "chegada",
-      type: data.tipo || data.type || "chegada",
-      driver: data.driver || "",
-      motorista: data.motorista || data.driver || "",
+      type: data.type || "CHEGADA",
+      client: data.client || "",
+      clientPhone: data.clientPhone || "",
       platform: data.platform || "Talixo",
-      status: data.status || "active",
+      origin: data.origin || "",
+      destination: data.destination || "",
+      pickupTime: data.pickupTime || "",
+      flightNumber: data.flightNumber || "",
+      flightDate: data.flightDate || "",
+      depAirport: data.depAirport || "",
+      depCity: data.depCity || "",
+      depTime: data.depTime || "",
+      depTerminal: data.depTerminal || "",
+      arrAirport: data.arrAirport || "",
+      arrCity: data.arrCity || "",
+      arrTime: data.arrTime || "",
+      arrTerminal: data.arrTerminal || "",
+      duration: data.duration || "",
+      status: data.status || "scheduled",
+      delayMinutes: data.delayMinutes || 0,
+      progressPct: data.progressPct || 0,
+      language: data.language || "EN",
+      pax: data.pax || "",
       notes: data.notes || "",
-      price: data.price || 0,
-      createdAt: new Date().toISOString(),
-      ...data,
-      id, // ensure our ID takes precedence
-    } as TripService;
+      assignedDriver: data.assignedDriver || "",
+    };
 
     setServices((prev) => ({
       ...prev,
@@ -466,7 +471,7 @@ export function useTripsStore(): TripsStore {
           // Mark as concluida locally
           setHubViagens((prev) =>
             prev.map((v) => {
-              const vId = v.cardId ?? v.id ?? "";
+              const vId = v.id || (v.client || "").replace(/\W/g, "");
               if (String(vId) === String(cardId)) {
                 return { ...v, concluida: true, status: "concluida" };
               }
