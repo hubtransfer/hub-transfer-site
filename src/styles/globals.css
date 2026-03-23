@@ -62,6 +62,7 @@
   --animate-fade-in: fade-in 0.5s ease-out;
   --animate-slide-up: slide-up 0.5s ease-out;
   --animate-gold-pulse: gold-pulse 2s ease-in-out infinite;
+  --animate-slide-out-right: slide-out-right 0.4s ease-in forwards;
 }
 
 /* ─── Keyframes ─── */
@@ -78,6 +79,11 @@
 @keyframes gold-pulse {
   0%, 100% { box-shadow: 0 0 10px rgba(245, 197, 24, 0.1); }
   50% { box-shadow: 0 0 25px rgba(245, 197, 24, 0.25); }
+}
+
+@keyframes slide-out-right {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100vw); opacity: 0; }
 }
 
 /* ─── Base Styles ─── */

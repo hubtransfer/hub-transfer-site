@@ -196,9 +196,10 @@ export function useTripsStore(): TripsStore {
 
     // Apply local driver overrides
     list = list.map((v) => {
-      const override = diaDriverMap[v.cardId ?? v.id ?? ""];
+      const cid = v.id || (v.client || "x").replace(/\W/g, "");
+      const override = diaDriverMap[cid];
       if (override !== undefined) {
-        return { ...v, motorista: override };
+        return { ...v, driver: override };
       }
       return v;
     });
@@ -207,7 +208,7 @@ export function useTripsStore(): TripsStore {
     if (selectedDriver) {
       list = list.filter(
         (v) =>
-          (v.motorista || "").toLowerCase().includes(selectedDriver.toLowerCase())
+          (v.driver || "").toLowerCase().includes(selectedDriver.toLowerCase())
       );
     }
 
@@ -241,7 +242,7 @@ export function useTripsStore(): TripsStore {
         stats.recolhas++;
       else if (tipo === "tour") stats.tours++;
 
-      if (!v.motorista || v.motorista.trim() === "") stats.semMotorista++;
+      if (!v.driver || v.driver.trim() === "") stats.semMotorista++;
 
       const pay = parseFloat(String(v.valor || v.pay || v.price || 0));
       if (!isNaN(pay)) stats.totalPay += pay;
@@ -259,7 +260,7 @@ export function useTripsStore(): TripsStore {
     const summary: Record<string, { count: number; total: number }> = {};
 
     for (const v of diaList) {
-      const driver = v.motorista || "Sem Motorista";
+      const driver = v.driver || "Sem Motorista";
       if (!summary[driver]) {
         summary[driver] = { count: 0, total: 0 };
       }

@@ -61,8 +61,8 @@ function useLisbonClock() {
 
 function tabColor(key: TabType, active: boolean) {
   if (!active) return "";
-  if (key === "chegadas") return "bg-amber-500/10 text-amber-400 border-r-2 border-amber-500";
-  if (key === "recolhas") return "bg-emerald-500/10 text-emerald-400 border-r-2 border-emerald-500";
+  if (key === "chegadas") return "bg-[#f59e0b]/10 text-[#f59e0b] border-r-2 border-[#f59e0b]";
+  if (key === "recolhas") return "bg-[#10b981]/10 text-[#10b981] border-r-2 border-[#10b981]";
   return "bg-hub-gold/10 text-hub-gold border-r-2 border-hub-gold";
 }
 
@@ -218,10 +218,10 @@ export default function TripsPage() {
         {/* Clock + Badges */}
         <div className="flex items-center gap-3">
           {/* Badges */}
-          <span className="hidden sm:inline-flex items-center gap-1 bg-amber-500/10 text-amber-400 text-xs font-bold px-2 py-0.5 rounded-full">
+          <span className="hidden sm:inline-flex items-center gap-1 bg-[#f59e0b]/10 text-[#f59e0b] text-xs font-bold px-2 py-0.5 rounded-full">
             <span className="text-[10px]">{"\u25BC"}</span> {store.counts.chegadas}
           </span>
-          <span className="hidden sm:inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold px-2 py-0.5 rounded-full">
+          <span className="hidden sm:inline-flex items-center gap-1 bg-[#10b981]/10 text-[#10b981] text-xs font-bold px-2 py-0.5 rounded-full">
             <span className="text-[10px]">{"\u25B2"}</span> {store.counts.recolhas}
           </span>
           {/* Clock */}
@@ -518,10 +518,10 @@ export default function TripsPage() {
                       <span
                         className={`text-xs font-bold uppercase px-2 py-0.5 rounded ${
                           s.type === "CHEGADA"
-                            ? "bg-amber-500/10 text-amber-400"
+                            ? "bg-[#f59e0b]/10 text-[#f59e0b]"
                             : s.type === "RECOLHA"
-                              ? "bg-emerald-500/10 text-emerald-400"
-                              : "bg-purple-500/10 text-purple-400"
+                              ? "bg-[#10b981]/10 text-[#10b981]"
+                              : "bg-[#a855f7]/10 text-[#a855f7]"
                         }`}
                       >
                         {(s.type || "").toUpperCase()}
