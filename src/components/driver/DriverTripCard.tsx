@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useRef, useCallback } from "react";
+import React, { useMemo, useState, useRef, useCallback, useEffect } from "react";
 import type { HubViagem } from "@/lib/trips";
 import {
   detectTipo,
@@ -34,11 +34,37 @@ function countryFlag(iso: string): string {
 /*  Flight status color for strip progress bar                         */
 /* ------------------------------------------------------------------ */
 
-function flightBarColor(progress: number, status?: string): string {
+function flightBarColor(progress: number, status?: string): { color: string; pulse: boolean } {
   const st = (status || "").toLowerCase();
-  if (st === "landed" || st === "aterrou" || progress >= 95) return "#10b981"; // green
-  if (progress <= 5 && st !== "boarding") return "#374151"; // gray — not departed
-  return "#f59e0b"; // amber — in flight
+  if (st === "landed" || st === "aterrou" || progress >= 95) return { color: "#10b981", pulse: false };
+  if (progress <= 5 && st !== "boarding") return { color: "#374151", pulse: false };
+  return { color: "#f59e0b", pulse: true }; // amber + pulse when in flight
+}
+
+/* Countdown: "em 45min" or "em 2h10" — returns null if in the past or invalid */
+function formatCountdown(arrTime: string): string | null {
+  if (!arrTime || arrTime === "—:—") return null;
+  const parts = arrTime.split(":");
+  if (parts.length !== 2) return null;
+  const h = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10);
+  if (isNaN(h) || isNaN(m)) return null;
+
+  const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Lisbon" }));
+  const target = new Date(now);
+  target.setHours(h, m, 0, 0);
+  // Handle overnight
+  if (target.getTime() < now.getTime() - 60000) return null;
+
+  const diffMs = target.getTime() - now.getTime();
+  if (diffMs <= 0) return null;
+
+  const totalMin = Math.round(diffMs / 60000);
+  if (totalMin < 1) return null;
+  if (totalMin < 60) return `em ${totalMin}min`;
+  const hrs = Math.floor(totalMin / 60);
+  const mins = totalMin % 60;
+  return mins > 0 ? `em ${hrs}h${String(mins).padStart(2, "0")}` : `em ${hrs}h`;
 }
 
 /* ------------------------------------------------------------------ */
@@ -134,6 +160,13 @@ export default function DriverTripCard({
   onShowNameplate,
   onExpand,
 }: DriverTripCardProps) {
+  /* Tick every 30s to update countdown */
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 30000);
+    return () => clearInterval(id);
+  }, []);
+
   const cardId = viagem.id || (viagem.client || "x").replace(/\W/g, "");
   const tipo = detectTipo(viagem.origin || "", viagem.flight || "");
   const hora = cleanHora(viagem.pickupTime || "");
@@ -240,7 +273,9 @@ export default function DriverTripCard({
   }, [stripDepIata]);
 
   const stripArrTime = cleanHora(viagem.arrTime || "");
-  const stripBarColor = flightBarColor(flightProgress, viagem.status);
+  const stripBar = flightBarColor(flightProgress, viagem.status);
+  const hasFlightData = tipo === "CHEGADA" && !!(stripDepIata || (viagem.arrTime && viagem.arrTime !== "—:—"));
+  const countdown = stripArrTime !== "—:—" ? formatCountdown(stripArrTime) : null;
 
   /* ================================================================ */
   /*  STRIP CARD (compact)                                             */
@@ -290,48 +325,56 @@ export default function DriverTripCard({
           </div>
         </div>
 
-        {/* Flight progress row (CHEGADA only) — IATA origin → bar → LIS · ETA */}
-        {isCHEGADA && (
-          <div className="flex items-center gap-2 px-4 pb-2.5 pt-0.5">
+        {/* Flight progress row (CHEGADA with flight data only) */}
+        {hasFlightData && (
+          <div className="flex items-center gap-2.5 px-4 pb-3 pt-0.5">
             {/* Origin: flag + IATA */}
-            <div className="flex items-center gap-1 flex-shrink-0">
-              {flag && <span className="text-xs leading-none">{flag}</span>}
-              <span className="font-mono text-[11px] font-bold text-white/60">
+            <div className="flex items-center gap-1 flex-shrink-0 min-w-[52px]">
+              {flag && <span className="text-sm leading-none">{flag}</span>}
+              <span className="font-mono text-xs font-bold text-white/60">
                 {stripDepIata || "???"}
               </span>
             </div>
 
             {/* Progress bar */}
-            <div className="flex-1 h-2 rounded-full bg-white/5 relative overflow-hidden">
+            <div className="flex-1 h-2.5 rounded-full bg-white/[0.06] relative overflow-hidden">
               <div
-                className="h-full rounded-full transition-all duration-1000"
+                className={`h-full rounded-full transition-all duration-1000 ${stripBar.pulse ? "animate-flight-pulse" : ""}`}
                 style={{
                   width: `${Math.max(flightProgress, 4)}%`,
-                  backgroundColor: stripBarColor,
+                  backgroundColor: stripBar.color,
                 }}
               />
-              {/* Plane icon on the progress edge */}
-              {flightProgress > 5 && flightProgress < 95 && (
+              {/* Plane icon */}
+              {flightProgress > 8 && flightProgress < 92 && (
                 <span
-                  className="absolute top-1/2 -translate-y-1/2 text-[8px] leading-none"
-                  style={{ left: `${flightProgress}%`, transform: `translateX(-50%) translateY(-50%)` }}
+                  className="absolute top-1/2 text-[9px] leading-none drop-shadow-sm"
+                  style={{
+                    left: `calc(${flightProgress}% - 5px)`,
+                    transform: "translateY(-50%)",
+                    filter: "drop-shadow(0 0 2px rgba(0,0,0,.8))",
+                  }}
                 >
                   ✈
                 </span>
               )}
             </div>
 
-            {/* Destination: LIS + ETA */}
-            <div className="flex items-center gap-1.5 flex-shrink-0">
-              <span className="font-mono text-[11px] font-bold" style={{ color: stripBarColor }}>
-                LIS
-              </span>
+            {/* Destination: LIS */}
+            <span className="font-mono text-xs font-bold flex-shrink-0" style={{ color: stripBar.color }}>
+              LIS
+            </span>
+
+            {/* ETA: large arrival time + countdown */}
+            <div className="flex flex-col items-end flex-shrink-0 min-w-[48px]">
               {stripArrTime && stripArrTime !== "—:—" && (
-                <span
-                  className="font-mono text-[11px] font-bold"
-                  style={{ color: stripBarColor }}
-                >
+                <span className="font-mono text-base font-black leading-none" style={{ color: stripBar.color }}>
                   {stripArrTime}
+                </span>
+              )}
+              {countdown && (
+                <span className="font-mono text-[9px] leading-tight mt-0.5" style={{ color: `${stripBar.color}99` }}>
+                  {countdown}
                 </span>
               )}
             </div>

@@ -86,6 +86,15 @@
   to { transform: translateX(100vw); opacity: 0; }
 }
 
+@keyframes flight-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+.animate-flight-pulse {
+  animation: flight-pulse 2s ease-in-out infinite;
+}
+
 /* ─── Base Styles ─── */
 @layer base {
   * {
