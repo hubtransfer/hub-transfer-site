@@ -75,8 +75,10 @@ export function useDriverStore(): DriverStore {
     try {
       const dateParam = selectedDateRef.current || '';
       const url = `${gasUrl}?action=viagens&t=${Date.now()}${dateParam ? `&data=${encodeURIComponent(dateParam)}` : ''}`;
-      const res = await fetch(url);
-      const raw: HubViagem[] = await res.json();
+      const res = await fetch(url, { redirect: 'follow' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const json = await res.json();
+      const raw: HubViagem[] = Array.isArray(json) ? json : (json.viagens || []);
 
       const me = normalize(name);
       const filtered = raw.filter((v) => {
@@ -128,10 +130,22 @@ export function useDriverStore(): DriverStore {
   const darBaixa = useCallback(
     async (id: string, rowIndex: string, cardId: string) => {
       try {
-        const url = `${gasUrl}?action=darBaixa&id=${encodeURIComponent(id)}&rowIndex=${encodeURIComponent(rowIndex)}&cardId=${encodeURIComponent(cardId)}&t=${Date.now()}`;
-        await fetch(url);
-        // Refresh list after marking done
-        await syncViagens();
+        const url = `${gasUrl}?action=completar&id=${encodeURIComponent(id)}&row=${encodeURIComponent(rowIndex)}&t=${Date.now()}`;
+        const res = await fetch(url, { redirect: 'follow' });
+        const data = await res.json();
+        if (data.success) {
+          // Mark locally as done before re-syncing
+          setViagens((prev) =>
+            prev.map((v) => {
+              const vId = v.id || (v.client || '').replace(/\W/g, '');
+              return String(vId) === String(cardId)
+                ? { ...v, concluida: true, status: 'CONCLUIDA' }
+                : v;
+            }),
+          );
+        } else {
+          alert('Erro: ' + (data.error || 'Não foi possível dar baixa'));
+        }
       } catch (err) {
         console.error('[useDriverStore] darBaixa error:', err);
       }
