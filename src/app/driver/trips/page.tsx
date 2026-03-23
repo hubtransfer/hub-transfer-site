@@ -1,34 +1,34 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { useTripsStore } from "@/hooks/useTripsStore";
+import { useDriverStore } from "@/hooks/useDriverStore";
 import DriverTripCard from "@/components/driver/DriverTripCard";
 import DriverNameplate from "@/components/driver/DriverNameplate";
-import type { HubViagem } from "@/lib/trips";
 import {
   detectTipo,
   calcDriverPrice,
-  cleanHora,
   todayStr,
   dateToISO,
+  HUB_CENTRAL_URL,
 } from "@/lib/trips";
+import type { HubViagem, Driver } from "@/lib/trips";
 
 /* ================================================================== */
 /*  Constants                                                          */
 /* ================================================================== */
 
+const DRIVER_PASSWORD = "hub2026";
 const LS_DRIVER_NAME = "hub_driver_name";
-const SYNC_INTERVAL = 3 * 60 * 1000; // 3 minutes
+const SYNC_INTERVAL = 3 * 60 * 1000;
 
 /* ================================================================== */
-/*  Lisbon Clock Hook                                                  */
+/*  Lisbon Clock                                                       */
 /* ================================================================== */
 
 function useLisbonClock() {
   const [time, setTime] = useState("");
-
   useEffect(() => {
-    const tick = () => {
+    const tick = () =>
       setTime(
         new Date().toLocaleTimeString("pt-PT", {
           timeZone: "Europe/Lisbon",
@@ -37,13 +37,47 @@ function useLisbonClock() {
           second: "2-digit",
         }),
       );
-    };
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, []);
-
   return time;
+}
+
+/* ================================================================== */
+/*  Fetch drivers list from HUB Central                                */
+/* ================================================================== */
+
+async function fetchDriversList(): Promise<Driver[]> {
+  try {
+    const res = await fetch(
+      `${HUB_CENTRAL_URL}?action=motoristas&t=${Date.now()}`,
+      { redirect: "follow" },
+    );
+    if (!res.ok) return [];
+    const data = await res.json();
+    const list = Array.isArray(data)
+      ? data
+      : data.motoristas || data.drivers || [];
+    return list
+      .map((d: Record<string, unknown>) => ({
+        name: String(d.name || d.nome || d.NOME || d.motorista || "").trim(),
+        phone: String(d.phone || d.telefone || d.tel || d.TELEFONE || "")
+          .replace(/[\s\-+()]/g, ""),
+        viatura: String(d.viatura || d.car || d.vehicle || "").trim(),
+      }))
+      .filter((d: Driver) => d.name);
+  } catch {
+    return [];
+  }
+}
+
+function normalize(s: string) {
+  return s
+    .toLowerCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 }
 
 /* ================================================================== */
@@ -51,72 +85,102 @@ function useLisbonClock() {
 /* ================================================================== */
 
 export default function DriverTripsPage() {
-  const store = useTripsStore();
+  const store = useDriverStore();
   const clock = useLisbonClock();
 
-  /* ---- Driver login state ---- */
-  const [driverName, setDriverName] = useState<string>("");
+  /* ── Login state ── */
   const [loginInput, setLoginInput] = useState("");
+  const [passwordInput, setPasswordInput] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [isValidating, setIsValidating] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  /* ---- Nameplate state ---- */
+  /* ── Nameplate ── */
   const [nameplateOpen, setNameplateOpen] = useState(false);
   const [nameplateName, setNameplateName] = useState("");
 
-  /* ---- Hero expansion state ---- */
+  /* ── Hero expansion ── */
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  /* ---- Load driver name from localStorage on mount ---- */
+  /* ── Load stored session ── */
   useEffect(() => {
     const stored = localStorage.getItem(LS_DRIVER_NAME);
     if (stored) {
-      setDriverName(stored);
+      store.setDriverName(stored);
       setIsLoggedIn(true);
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  /* ---- Auto-sync viagens every 3 minutes ---- */
+  /* ── Auto-sync ── */
   useEffect(() => {
     if (!isLoggedIn) return;
-    const id = setInterval(() => {
-      store.syncViagens(false);
-    }, SYNC_INTERVAL);
+    const id = setInterval(() => store.syncViagens(), SYNC_INTERVAL);
     return () => clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoggedIn]);
+  }, [isLoggedIn, store]);
 
-  /* ---- Handle login ---- */
-  const handleLogin = useCallback(() => {
+  /* ── Login handler ── */
+  const handleLogin = useCallback(async () => {
     const name = loginInput.trim();
-    if (!name) return;
-    localStorage.setItem(LS_DRIVER_NAME, name);
-    setDriverName(name);
-    setIsLoggedIn(true);
-    // Filter trips for this driver
-    store.filterDriver(name);
-  }, [loginInput, store]);
+    const pwd = passwordInput.trim();
+    setLoginError("");
 
-  /* ---- Handle logout ---- */
+    if (!name) {
+      setLoginError("Insere o teu nome.");
+      return;
+    }
+    if (pwd !== DRIVER_PASSWORD) {
+      setLoginError("Senha incorrecta.");
+      return;
+    }
+
+    setIsValidating(true);
+
+    // Validate against HUB Central drivers list
+    const drivers = await fetchDriversList();
+    const me = normalize(name);
+    const match = drivers.find((d) => {
+      const dn = normalize(d.name);
+      return dn === me || dn.includes(me) || me.includes(dn);
+    });
+
+    if (!match) {
+      setLoginError(
+        drivers.length > 0
+          ? `"${name}" não encontrado na HUB Central.`
+          : "Não foi possível conectar à HUB Central. Tenta novamente.",
+      );
+      setIsValidating(false);
+      return;
+    }
+
+    // Login successful — use the canonical name from HUB Central
+    localStorage.setItem(LS_DRIVER_NAME, match.name);
+    store.setDriverName(match.name);
+    setIsLoggedIn(true);
+    setIsValidating(false);
+  }, [loginInput, passwordInput, store]);
+
+  /* ── Logout ── */
   const handleLogout = useCallback(() => {
     localStorage.removeItem(LS_DRIVER_NAME);
-    setDriverName("");
+    store.setDriverName("");
     setIsLoggedIn(false);
     setLoginInput("");
-    store.filterDriver("");
+    setPasswordInput("");
+    setLoginError("");
   }, [store]);
 
-  /* ---- Nameplate handlers ---- */
+  /* ── Nameplate ── */
   const openNameplate = useCallback((name: string) => {
     setNameplateName(name);
     setNameplateOpen(true);
   }, []);
-
   const closeNameplate = useCallback(() => {
     setNameplateOpen(false);
     setNameplateName("");
   }, []);
 
-  /* ---- Date navigation ---- */
+  /* ── Date navigation ── */
   const shiftDate = useCallback(
     (days: number) => {
       const current = store.selectedDate
@@ -131,47 +195,35 @@ export default function DriverTripsPage() {
     [store],
   );
 
-  const goToday = useCallback(() => {
-    store.loadDate(todayStr());
-  }, [store]);
+  /* ── Driver's trips (already filtered by useDriverStore) ── */
+  const driverTrips = store.sortedViagens;
 
-  /* ---- Filtered trips for this driver ---- */
-  const driverTrips = useMemo<HubViagem[]>(() => {
-    return store.diaList.filter((v) => {
-      if (!driverName) return true;
-      return (v.driver || "").toLowerCase().includes(driverName.toLowerCase());
-    });
-  }, [store.diaList, driverName]);
-
-  /* ---- Stats ---- */
+  /* ── Stats ── */
   const stats = useMemo(() => {
     let chegadas = 0;
     let recolhas = 0;
     let totalPay = 0;
-
     for (const v of driverTrips) {
       const tipo = detectTipo(v.origin || "", v.flight || "");
       if (tipo === "CHEGADA") chegadas++;
-      else if (tipo === "RECOLHA") recolhas++;
+      else recolhas++;
       totalPay += calcDriverPrice(v.platform || "");
     }
-
-    return {
-      total: driverTrips.length,
-      chegadas,
-      recolhas,
-      totalPay,
-    };
+    return { total: driverTrips.length, chegadas, recolhas, totalPay };
   }, [driverTrips]);
 
-  /* ---- Determine hero card ---- */
+  /* ── Hero card ID ── */
   const heroId = useMemo(() => {
     if (expandedId) return expandedId;
-    // First non-done trip
     const first = driverTrips.find(
-      (v) => !v.concluida && v.status !== "CONCLUIDA" && v.status !== "FINALIZOU",
+      (v) =>
+        !v.concluida &&
+        v.status !== "CONCLUIDA" &&
+        v.status !== "FINALIZOU",
     );
-    return first ? first.id || (first.client || "x").replace(/\W/g, "") : null;
+    return first
+      ? first.id || (first.client || "x").replace(/\W/g, "")
+      : null;
   }, [driverTrips, expandedId]);
 
   /* ================================================================ */
@@ -188,7 +240,8 @@ export default function DriverTripsPage() {
               className="text-4xl font-black tracking-wider"
               style={{
                 fontFamily: "var(--font-display), serif",
-                background: "linear-gradient(135deg, #F5C518, #FFD700, #F5C518)",
+                background:
+                  "linear-gradient(135deg, #F5C518, #FFD700, #F5C518)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
@@ -196,7 +249,9 @@ export default function DriverTripsPage() {
             >
               HUB TRANSFER
             </h1>
-            <p className="text-sm text-white/40 tracking-widest uppercase">Motorista</p>
+            <p className="text-sm text-white/40 tracking-widest uppercase">
+              Motorista
+            </p>
           </div>
 
           {/* Login form */}
@@ -207,20 +262,53 @@ export default function DriverTripsPage() {
             }}
             className="space-y-4"
           >
-            <input
-              type="text"
-              value={loginInput}
-              onChange={(e) => setLoginInput(e.target.value)}
-              placeholder="O teu nome..."
-              autoFocus
-              className="w-full h-14 text-lg bg-white/5 border border-white/10 rounded-xl px-4 text-white placeholder-white/30 focus:outline-none focus:border-[#F5C518]/50 transition-colors font-mono"
-            />
+            <div>
+              <label className="block text-xs text-white/40 mb-1.5 tracking-wider uppercase">
+                Nome
+              </label>
+              <input
+                type="text"
+                value={loginInput}
+                onChange={(e) => {
+                  setLoginInput(e.target.value);
+                  setLoginError("");
+                }}
+                placeholder="Ex: Filipe Ventura"
+                autoFocus
+                autoComplete="name"
+                className="w-full h-14 text-lg bg-white/5 border border-white/10 rounded-xl px-4 text-white placeholder-white/30 focus:outline-none focus:border-[#F5C518]/50 transition-colors"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-white/40 mb-1.5 tracking-wider uppercase">
+                Senha
+              </label>
+              <input
+                type="password"
+                value={passwordInput}
+                onChange={(e) => {
+                  setPasswordInput(e.target.value);
+                  setLoginError("");
+                }}
+                placeholder="Senha"
+                autoComplete="current-password"
+                className="w-full h-14 text-lg bg-white/5 border border-white/10 rounded-xl px-4 text-white placeholder-white/30 focus:outline-none focus:border-[#F5C518]/50 transition-colors"
+              />
+            </div>
+
+            {/* Error */}
+            {loginError && (
+              <div className="text-center text-sm text-[#ef4444] bg-[#ef4444]/10 border border-[#ef4444]/20 rounded-xl px-4 py-3">
+                {loginError}
+              </div>
+            )}
+
             <button
               type="submit"
-              disabled={!loginInput.trim()}
-              className="w-full h-14 font-bold text-lg bg-[#F5C518] text-black rounded-xl font-mono active:bg-[#F5C518]/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              disabled={!loginInput.trim() || !passwordInput.trim() || isValidating}
+              className="w-full h-14 font-bold text-lg bg-[#F5C518] text-black rounded-xl active:bg-[#F5C518]/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
-              Entrar
+              {isValidating ? "A verificar..." : "Entrar"}
             </button>
           </form>
         </div>
@@ -233,15 +321,19 @@ export default function DriverTripsPage() {
   /* ================================================================ */
 
   const nonDoneTrips = driverTrips.filter(
-    (v) => !v.concluida && v.status !== "CONCLUIDA" && v.status !== "FINALIZOU",
+    (v) =>
+      !v.concluida &&
+      v.status !== "CONCLUIDA" &&
+      v.status !== "FINALIZOU",
   );
   const doneTrips = driverTrips.filter(
-    (v) => v.concluida || v.status === "CONCLUIDA" || v.status === "FINALIZOU",
+    (v) =>
+      v.concluida || v.status === "CONCLUIDA" || v.status === "FINALIZOU",
   );
 
   return (
-    <div className="min-h-screen bg-black text-white font-mono">
-      {/* ---- TOP BAR (sticky) ---- */}
+    <div className="min-h-screen bg-black text-white">
+      {/* ── TOP BAR ── */}
       <header className="sticky top-0 z-50 bg-black/95 backdrop-blur-sm border-b border-white/5 px-4 py-3 flex items-center justify-between">
         <div className="min-w-0">
           <button
@@ -250,96 +342,129 @@ export default function DriverTripsPage() {
             className="text-[#F5C518] font-bold text-base truncate block"
             title="Sair"
           >
-            {driverName}
+            {store.driverName}
           </button>
-          <p className="text-[10px] text-white/30 tracking-wider">HUB Transfer</p>
+          <p className="text-[10px] text-white/30 tracking-wider font-mono">
+            HUB Transfer
+          </p>
         </div>
-        <span className="text-sm text-white/50 tabular-nums flex-shrink-0">{clock}</span>
+        <div className="flex items-center gap-3 flex-shrink-0">
+          {store.isLoading && (
+            <span className="text-xs text-[#F5C518]/60 animate-pulse">
+              sync...
+            </span>
+          )}
+          <span className="text-sm text-white/50 tabular-nums font-mono">
+            {clock}
+          </span>
+        </div>
       </header>
 
-      {/* ---- STATS BAR ---- */}
+      {/* ── STATS ── */}
       <div className="px-4 pt-3 pb-2 space-y-2">
         <div className="flex gap-2">
           <div className="flex-1 bg-blue-500/10 rounded-lg px-3 py-2 text-center">
-            <div className="text-lg font-bold text-blue-400">{stats.total}</div>
-            <div className="text-[10px] text-white/40 uppercase">Total</div>
+            <div className="text-lg font-bold text-blue-400 font-mono">
+              {stats.total}
+            </div>
+            <div className="text-[10px] text-white/40 uppercase font-mono">
+              Total
+            </div>
           </div>
-          <div className="flex-1 bg-amber-500/10 rounded-lg px-3 py-2 text-center">
-            <div className="text-lg font-bold text-amber-400">{stats.chegadas}</div>
-            <div className="text-[10px] text-white/40 uppercase">Chegadas</div>
+          <div className="flex-1 bg-[#f59e0b]/10 rounded-lg px-3 py-2 text-center">
+            <div className="text-lg font-bold text-[#f59e0b] font-mono">
+              {stats.chegadas}
+            </div>
+            <div className="text-[10px] text-white/40 uppercase font-mono">
+              Chegadas
+            </div>
           </div>
-          <div className="flex-1 bg-emerald-500/10 rounded-lg px-3 py-2 text-center">
-            <div className="text-lg font-bold text-emerald-400">{stats.recolhas}</div>
-            <div className="text-[10px] text-white/40 uppercase">Recolhas</div>
+          <div className="flex-1 bg-[#10b981]/10 rounded-lg px-3 py-2 text-center">
+            <div className="text-lg font-bold text-[#10b981] font-mono">
+              {stats.recolhas}
+            </div>
+            <div className="text-[10px] text-white/40 uppercase font-mono">
+              Recolhas
+            </div>
           </div>
         </div>
         <div className="flex items-center justify-between">
           <span className="font-mono font-bold text-[#F5C518]">
-            {"\u20AC"}{stats.totalPay.toFixed(0)}
+            &euro;{stats.totalPay.toFixed(0)}
           </span>
-          <span className="text-xs text-white/30">{store.selectedDate || todayStr()}</span>
+          <span className="text-xs text-white/30 font-mono">
+            {store.selectedDate || todayStr()}
+            {store.lastSyncTime && (
+              <span className="ml-2 text-white/20">
+                sync {store.lastSyncTime}
+              </span>
+            )}
+          </span>
         </div>
       </div>
 
-      {/* ---- DATE PICKER ---- */}
+      {/* ── DATE PICKER ── */}
       <div className="px-4 pb-3">
         <div className="flex items-center gap-2">
           <button
             onClick={() => shiftDate(-1)}
-            className="h-10 px-3 bg-white/5 rounded-lg text-xs text-white/60 active:bg-white/10 transition-colors"
+            className="h-10 px-3 bg-white/5 rounded-lg text-xs text-white/60 active:bg-white/10 transition-colors font-mono"
           >
-            {"\u25C0"} Ontem
+            &#9664; Ontem
           </button>
           <button
-            onClick={goToday}
-            className="h-10 px-4 bg-[#F5C518]/20 text-[#F5C518] rounded-lg text-xs font-bold active:bg-[#F5C518]/30 transition-colors"
+            onClick={() => store.loadDate("")}
+            className="h-10 px-4 bg-[#F5C518]/20 text-[#F5C518] rounded-lg text-xs font-bold active:bg-[#F5C518]/30 transition-colors font-mono"
           >
-            {"\uD83D\uDCC5"} Hoje
+            &#128197; Hoje
           </button>
           <button
             onClick={() => shiftDate(1)}
-            className="h-10 px-3 bg-white/5 rounded-lg text-xs text-white/60 active:bg-white/10 transition-colors"
+            className="h-10 px-3 bg-white/5 rounded-lg text-xs text-white/60 active:bg-white/10 transition-colors font-mono"
           >
-            Amanh{"\u00E3"} {"\u25B6"}
+            Amanh&atilde; &#9654;
           </button>
           <input
             type="date"
-            value={store.selectedDate ? dateToISO(store.selectedDate) : ""}
+            value={
+              store.selectedDate ? dateToISO(store.selectedDate) : ""
+            }
             onChange={(e) => {
               if (!e.target.value) return;
               const [y, m, d] = e.target.value.split("-");
               store.loadDate(`${d}/${m}/${y}`);
             }}
-            className="h-10 flex-1 min-w-0 bg-white/5 border border-white/10 rounded-lg px-2 text-xs text-white focus:border-[#F5C518]/40 focus:outline-none"
+            className="h-10 flex-1 min-w-0 bg-white/5 border border-white/10 rounded-lg px-2 text-xs text-white font-mono focus:border-[#F5C518]/40 focus:outline-none"
           />
         </div>
       </div>
 
-      {/* ---- TRIP CARDS ---- */}
+      {/* ── TRIP CARDS ── */}
       <div className="px-4 pb-8 space-y-3">
         {driverTrips.length === 0 ? (
-          /* Empty state */
           <div className="text-center py-20">
-            <div className="text-5xl mb-4 opacity-30">{"\uD83D\uDE95"}</div>
-            <p className="text-white/40 text-sm">Nenhuma viagem para hoje</p>
-            <p className="text-white/20 text-xs mt-1">Puxa para baixo para actualizar</p>
+            <div className="text-5xl mb-4 opacity-30">&#128661;</div>
+            <p className="text-white/40 text-sm font-mono">
+              Nenhuma viagem para hoje
+            </p>
+            <p className="text-white/20 text-xs mt-1 font-mono">
+              Puxa para baixo para actualizar
+            </p>
           </div>
         ) : (
           <>
-            {/* Render hero + strips */}
-            {nonDoneTrips.map((viagem) => {
-              const vId = viagem.id || (viagem.client || "x").replace(/\W/g, "");
+            {nonDoneTrips.map((viagem, idx) => {
+              const vId =
+                viagem.id ||
+                (viagem.client || "x").replace(/\W/g, "");
               const isHero = vId === heroId;
 
               return (
                 <React.Fragment key={vId}>
-                  {/* Separator before first non-hero card */}
-                  {!isHero && vId === nonDoneTrips.find((v) => {
-                    const id = v.id || (v.client || "x").replace(/\W/g, "");
-                    return id !== heroId;
-                  })?.id && nonDoneTrips.length > 1 && (
-                    <p className="text-[10px] text-white/20 uppercase tracking-widest text-center py-2">
-                      {"\u2015"} pr{"\u00F3"}ximas viagens {"\u2015"}
+                  {/* Separator before non-hero cards */}
+                  {!isHero && idx === 1 && nonDoneTrips.length > 1 && (
+                    <p className="text-[10px] text-white/20 uppercase tracking-widest text-center py-2 font-mono">
+                      &#8213; pr&oacute;ximas viagens &#8213;
                     </p>
                   )}
                   <DriverTripCard
@@ -353,14 +478,15 @@ export default function DriverTripsPage() {
               );
             })}
 
-            {/* Done trips at bottom, all as strips */}
             {doneTrips.length > 0 && (
               <>
-                <p className="text-[10px] text-white/20 uppercase tracking-widest text-center py-2">
-                  {"\u2015"} conclu{"\u00ED"}das {"\u2015"}
+                <p className="text-[10px] text-white/20 uppercase tracking-widest text-center py-2 font-mono">
+                  &#8213; conclu&iacute;das &#8213;
                 </p>
                 {doneTrips.map((viagem) => {
-                  const vId = viagem.id || (viagem.client || "x").replace(/\W/g, "");
+                  const vId =
+                    viagem.id ||
+                    (viagem.client || "x").replace(/\W/g, "");
                   return (
                     <DriverTripCard
                       key={vId}
@@ -377,7 +503,7 @@ export default function DriverTripsPage() {
         )}
       </div>
 
-      {/* ---- NAMEPLATE OVERLAY ---- */}
+      {/* ── NAMEPLATE ── */}
       <DriverNameplate
         isOpen={nameplateOpen}
         name={nameplateName}

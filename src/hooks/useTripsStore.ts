@@ -154,7 +154,7 @@ export function useTripsStore(): TripsStore {
   // On Mount
   // ──────────────────────────────────────────────
   useEffect(() => {
-    const storedUrl = localStorage.getItem(LS_VIAGENS_URL) || "";
+    const storedUrl = localStorage.getItem(LS_VIAGENS_URL) || HUB_CENTRAL_URL;
     const storedSync = localStorage.getItem(LS_LAST_SYNC) || "";
     setHubViagensUrl(storedUrl);
     setLastSyncTime(storedSync);
