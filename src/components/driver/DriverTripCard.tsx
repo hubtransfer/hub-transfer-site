@@ -274,43 +274,67 @@ export default function DriverTripCard({
               <span className={`inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded ${ts.bg} ${ts.text}`}>
                 {tipo}
               </span>
-              {/* Flight origin badge for CHEGADA */}
-              {isCHEGADA && stripDepIata && (
-                <span className="inline-flex items-center gap-1 text-[10px] font-mono text-white/50 bg-white/5 px-1.5 py-0.5 rounded">
-                  {flag && <span className="text-xs">{flag}</span>}
-                  {stripDepIata}
-                </span>
+              {viagem.pax && (
+                <span className="text-[10px] font-mono text-white/40">{viagem.pax} pax</span>
               )}
             </div>
           </div>
 
-          {/* Right: arrival time or pax */}
+          {/* Right: price or arrow */}
           <div className="flex-shrink-0 text-right">
-            {isCHEGADA && stripArrTime && stripArrTime !== "—:—" ? (
-              <div>
-                <span className="font-mono text-sm font-bold" style={{ color: stripBarColor }}>
-                  {stripArrTime}
-                </span>
-                <p className="text-[9px] text-white/30 font-mono">chegada</p>
-              </div>
-            ) : viagem.pax ? (
-              <span className="font-mono text-sm text-white/40">{viagem.pax} pax</span>
+            {price > 0 ? (
+              <span className="font-mono text-sm font-bold text-[#F5C518]">&euro;{price}</span>
             ) : (
               <span className="text-lg text-white/30">&#8250;</span>
             )}
           </div>
         </div>
 
-        {/* Flight progress bar (CHEGADA only) */}
+        {/* Flight progress row (CHEGADA only) — IATA origin → bar → LIS · ETA */}
         {isCHEGADA && (
-          <div className="h-1.5 w-full bg-white/5">
-            <div
-              className="h-full rounded-r-full transition-all duration-1000"
-              style={{
-                width: `${Math.max(flightProgress, 3)}%`,
-                backgroundColor: stripBarColor,
-              }}
-            />
+          <div className="flex items-center gap-2 px-4 pb-2.5 pt-0.5">
+            {/* Origin: flag + IATA */}
+            <div className="flex items-center gap-1 flex-shrink-0">
+              {flag && <span className="text-xs leading-none">{flag}</span>}
+              <span className="font-mono text-[11px] font-bold text-white/60">
+                {stripDepIata || "???"}
+              </span>
+            </div>
+
+            {/* Progress bar */}
+            <div className="flex-1 h-2 rounded-full bg-white/5 relative overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-1000"
+                style={{
+                  width: `${Math.max(flightProgress, 4)}%`,
+                  backgroundColor: stripBarColor,
+                }}
+              />
+              {/* Plane icon on the progress edge */}
+              {flightProgress > 5 && flightProgress < 95 && (
+                <span
+                  className="absolute top-1/2 -translate-y-1/2 text-[8px] leading-none"
+                  style={{ left: `${flightProgress}%`, transform: `translateX(-50%) translateY(-50%)` }}
+                >
+                  ✈
+                </span>
+              )}
+            </div>
+
+            {/* Destination: LIS + ETA */}
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <span className="font-mono text-[11px] font-bold" style={{ color: stripBarColor }}>
+                LIS
+              </span>
+              {stripArrTime && stripArrTime !== "—:—" && (
+                <span
+                  className="font-mono text-[11px] font-bold"
+                  style={{ color: stripBarColor }}
+                >
+                  {stripArrTime}
+                </span>
+              )}
+            </div>
           </div>
         )}
       </button>
