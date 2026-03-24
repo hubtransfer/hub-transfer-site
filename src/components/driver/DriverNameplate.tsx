@@ -9,6 +9,7 @@ import React, { useEffect, useRef } from "react";
 interface DriverNameplateProps {
   isOpen: boolean;
   name: string;
+  destination?: string;
   onClose: () => void;
 }
 
@@ -17,7 +18,7 @@ interface DriverNameplateProps {
 /*  Gold shimmer, landscape lock, brand watermark                      */
 /* ================================================================== */
 
-export default function DriverNameplate({ isOpen, name, onClose }: DriverNameplateProps) {
+export default function DriverNameplate({ isOpen, name, destination, onClose }: DriverNameplateProps) {
   const nameRef = useRef<HTMLDivElement>(null);
 
   /* Auto-fit text to fill screen — starts at 22vw */
@@ -129,12 +130,14 @@ export default function DriverNameplate({ isOpen, name, onClose }: DriverNamepla
         {name}
       </div>
 
-      {/* Bottom: close hint */}
-      <div className="absolute bottom-10 left-0 right-0 text-center">
-        <p
-          className="text-sm tracking-wide"
-          style={{ color: "rgba(255,255,255,0.15)" }}
-        >
+      {/* Bottom: destination + close hint */}
+      <div className="absolute bottom-6 left-0 right-0 text-center space-y-2 px-6">
+        {destination && (
+          <p className="text-sm text-gray-400 font-mono truncate max-w-[90vw] mx-auto">
+            📍 {destination}
+          </p>
+        )}
+        <p className="text-xs tracking-wide" style={{ color: "rgba(255,255,255,0.12)" }}>
           toca para fechar
         </p>
       </div>

@@ -72,7 +72,7 @@ interface DriverTripCardProps {
   viagem: HubViagem;
   drivers?: Driver[];                                                      // admin only
   onDarBaixa: (id: string, rowIndex: string, cardId: string) => void;
-  onShowNameplate: (name: string) => void;
+  onShowNameplate: (name: string, destination?: string) => void;
   onSetDriver?: (cardId: string, driver: string) => void;                  // admin only
   onDispatch?: (cid: string, type: string, client: string, lang: string, origin: string, hora: string) => void;
   onClientMsg?: (cid: string, type: string, client: string, lang: string, origin: string, hora: string, phone: string) => void;
@@ -126,6 +126,11 @@ export default function DriverTripCard({
   const onDown = useCallback((e: React.PointerEvent) => {
     if (isDone) return;
     startXRef.current = e.clientX;
+    // Ctrl+Click on desktop → skip hold, go straight to armed
+    if (e.ctrlKey || e.metaKey) {
+      setSwipeState("armed");
+      return;
+    }
     setSwipeState("holding");
     holdRef.current = setTimeout(() => setSwipeState("armed"), HOLD_MS);
   }, [isDone]);
@@ -226,7 +231,12 @@ export default function DriverTripCard({
             <span className={`text-xl font-bold font-mono ${c.text}`}>{hora}</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-base font-bold text-white truncate">{viagem.client}</p>
+            <p
+              className={`text-base font-bold text-white truncate ${expanded ? "cursor-pointer hover:text-[#F5C518] transition-colors" : ""}`}
+              onClick={expanded ? (e) => { e.stopPropagation(); onShowNameplate(viagem.client, viagem.destination); } : undefined}
+            >
+              {viagem.client}
+            </p>
             <div className="flex items-center gap-2 mt-0.5">
               <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${c.bg} ${c.text}`}>{tipo}</span>
               {viagem.pax && <span className="text-[10px] font-mono text-white/40">{viagem.pax} pax</span>}
@@ -357,12 +367,6 @@ export default function DriverTripCard({
                   📞 +{viagem.phone.replace(/\D/g, "")}
                 </button>
               )}
-
-              {/* Name plate */}
-              <button type="button" onClick={() => onShowNameplate(viagem.client)}
-                className="w-full h-12 rounded-xl bg-[#F5C518]/10 border border-[#F5C518]/20 text-[#F5C518] font-bold text-sm active:bg-[#F5C518]/20 transition-colors">
-                📋 Placa do Nome
-              </button>
 
               {/* WhatsApp + SMS */}
               <div className="grid grid-cols-2 gap-2">

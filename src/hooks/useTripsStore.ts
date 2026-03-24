@@ -56,6 +56,7 @@ interface TripsStore {
   selectedDriver: string;
   nameplateOpen: boolean;
   nameplateName: string;
+  nameplateDestination: string;
 
   // Sync state
   hubViagensSyncStatus: SyncStatus;
@@ -95,7 +96,7 @@ interface TripsStore {
   darBaixa: (id: string, rowIndex: string, cardId: string) => Promise<void>;
 
   // Nameplate
-  showNameplate: (name: string) => void;
+  showNameplate: (name: string, destination?: string) => void;
   closeNameplate: () => void;
 
   // Sync
@@ -129,6 +130,7 @@ export function useTripsStore(): TripsStore {
   const [selectedDriver, setSelectedDriver] = useState<string>("");
   const [nameplateOpen, setNameplateOpen] = useState(false);
   const [nameplateName, setNameplateName] = useState("");
+  const [nameplateDestination, setNameplateDestination] = useState("");
 
   // ─── Sync State ───
   const [hubViagensSyncStatus, setHubViagensSyncStatus] =
@@ -493,13 +495,15 @@ export function useTripsStore(): TripsStore {
   // ──────────────────────────────────────────────
   // Nameplate
   // ──────────────────────────────────────────────
-  const showNameplate = useCallback((name: string) => {
+  const showNameplate = useCallback((name: string, destination?: string) => {
     setNameplateName(name);
+    setNameplateDestination(destination || "");
     setNameplateOpen(true);
   }, []);
 
   const closeNameplate = useCallback(() => {
     setNameplateOpen(false);
+    setNameplateDestination("");
     setNameplateName("");
   }, []);
 
@@ -643,6 +647,7 @@ export function useTripsStore(): TripsStore {
     selectedDriver,
     nameplateOpen,
     nameplateName,
+    nameplateDestination,
 
     // Sync state
     hubViagensSyncStatus,

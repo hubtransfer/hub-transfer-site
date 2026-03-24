@@ -98,6 +98,7 @@ export default function DriverTripsPage() {
   /* ── Nameplate ── */
   const [nameplateOpen, setNameplateOpen] = useState(false);
   const [nameplateName, setNameplateName] = useState("");
+  const [nameplateDest, setNameplateDest] = useState("");
 
   /* ── (cards self-manage expand/collapse) ── */
 
@@ -170,13 +171,15 @@ export default function DriverTripsPage() {
   }, [store]);
 
   /* ── Nameplate ── */
-  const openNameplate = useCallback((name: string) => {
+  const openNameplate = useCallback((name: string, destination?: string) => {
     setNameplateName(name);
+    setNameplateDest(destination || "");
     setNameplateOpen(true);
   }, []);
   const closeNameplate = useCallback(() => {
     setNameplateOpen(false);
     setNameplateName("");
+    setNameplateDest("");
   }, []);
 
   /* ── Date navigation ── */
@@ -478,6 +481,7 @@ export default function DriverTripsPage() {
       <DriverNameplate
         isOpen={nameplateOpen}
         name={nameplateName}
+        destination={nameplateDest}
         onClose={closeNameplate}
       />
     </div>

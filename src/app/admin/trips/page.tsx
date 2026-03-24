@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useTripsStore } from "@/hooks/useTripsStore";
 import TripCard from "@/components/driver/DriverTripCard";
-import Nameplate from "@/components/trips/Nameplate";
+import DriverNameplate from "@/components/driver/DriverNameplate";
 import type { TabType, HubViagem, TripService } from "@/lib/trips";
 import {
   TAB_INFO,
@@ -628,9 +628,10 @@ export default function TripsPage() {
       </nav>
 
       {/* ─── NAMEPLATE OVERLAY ─── */}
-      <Nameplate
+      <DriverNameplate
         isOpen={store.nameplateOpen}
         name={store.nameplateName}
+        destination={store.nameplateDestination}
         onClose={store.closeNameplate}
       />
     </div>
