@@ -515,18 +515,17 @@ export function useTripsStore(): TripsStore {
       const res = await fetch(url);
       const data = await res.json();
 
-      let motoristas: Driver[] = [];
+      let rawList: Record<string, unknown>[] = [];
       if (Array.isArray(data)) {
-        motoristas = data;
+        rawList = data;
       } else if (data?.motoristas && Array.isArray(data.motoristas)) {
-        motoristas = data.motoristas;
+        rawList = data.motoristas;
       }
 
-      // Normalize fields
-      motoristas = motoristas.map((m: Record<string, unknown>) => ({
-        name: (m.name || m.nome || "") as string,
-        phone: (m.phone || m.telefone || "") as string,
-        viatura: (m.viatura || "") as string,
+      const motoristas: Driver[] = rawList.map((m) => ({
+        name: String(m.name || m.nome || ""),
+        phone: String(m.phone || m.telefone || ""),
+        viatura: String(m.viatura || ""),
       }));
 
       if (motoristas.length > 0) {
