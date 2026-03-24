@@ -234,7 +234,12 @@ export default function DriverTripCard({
               {!expanded && <span className="text-[10px] text-white/20">▼</span>}
             </div>
           </div>
-          <div className="flex-shrink-0 text-right">
+          <div className="flex-shrink-0 text-right flex flex-col items-end gap-0.5">
+            {mode === "admin" && (
+              viagem.driver
+                ? <span className="font-mono text-[10px] font-semibold text-[#10b981]/80 truncate max-w-[80px]">{viagem.driver}</span>
+                : <span className="font-mono text-[10px] text-white/20">Sem motorista</span>
+            )}
             {price > 0 && <span className="font-mono text-sm font-bold text-[#F5C518]">€{price}</span>}
           </div>
         </div>
