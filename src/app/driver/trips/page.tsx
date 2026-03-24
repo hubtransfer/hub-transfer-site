@@ -99,8 +99,7 @@ export default function DriverTripsPage() {
   const [nameplateOpen, setNameplateOpen] = useState(false);
   const [nameplateName, setNameplateName] = useState("");
 
-  /* ── Hero expansion ── */
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  /* ── (cards self-manage expand/collapse) ── */
 
   /* ── Load stored session ── */
   useEffect(() => {
@@ -212,19 +211,7 @@ export default function DriverTripsPage() {
     return { total: driverTrips.length, chegadas, recolhas, totalPay };
   }, [driverTrips]);
 
-  /* ── Hero card ID ── */
-  const heroId = useMemo(() => {
-    if (expandedId) return expandedId;
-    const first = driverTrips.find(
-      (v) =>
-        !v.concluida &&
-        v.status !== "CONCLUIDA" &&
-        v.status !== "FINALIZOU",
-    );
-    return first
-      ? first.id || (first.client || "x").replace(/\W/g, "")
-      : null;
-  }, [driverTrips, expandedId]);
+  /* ── (heroId removed — cards self-expand on tap) ── */
 
   /* ================================================================ */
   /*  LOGIN SCREEN                                                     */
@@ -453,28 +440,15 @@ export default function DriverTripsPage() {
           </div>
         ) : (
           <>
-            {nonDoneTrips.map((viagem, idx) => {
-              const vId =
-                viagem.id ||
-                (viagem.client || "x").replace(/\W/g, "");
-              const isHero = vId === heroId;
-
+            {nonDoneTrips.map((viagem) => {
+              const vId = viagem.id || (viagem.client || "x").replace(/\W/g, "");
               return (
-                <React.Fragment key={vId}>
-                  {/* Separator before non-hero cards */}
-                  {!isHero && idx === 1 && nonDoneTrips.length > 1 && (
-                    <p className="text-[10px] text-white/20 uppercase tracking-widest text-center py-2 font-mono">
-                      &#8213; pr&oacute;ximas viagens &#8213;
-                    </p>
-                  )}
-                  <DriverTripCard
-                    viagem={viagem}
-                    isHero={isHero}
-                    onDarBaixa={store.darBaixa}
-                    onShowNameplate={openNameplate}
-                    onExpand={() => setExpandedId(vId)}
-                  />
-                </React.Fragment>
+                <DriverTripCard
+                  key={vId}
+                  viagem={viagem}
+                  onDarBaixa={store.darBaixa}
+                  onShowNameplate={openNameplate}
+                />
               );
             })}
 
@@ -484,14 +458,11 @@ export default function DriverTripsPage() {
                   &#8213; conclu&iacute;das &#8213;
                 </p>
                 {doneTrips.map((viagem) => {
-                  const vId =
-                    viagem.id ||
-                    (viagem.client || "x").replace(/\W/g, "");
+                  const vId = viagem.id || (viagem.client || "x").replace(/\W/g, "");
                   return (
                     <DriverTripCard
                       key={vId}
                       viagem={viagem}
-                      isHero={false}
                       onDarBaixa={store.darBaixa}
                       onShowNameplate={openNameplate}
                     />

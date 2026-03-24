@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { useTripsStore } from "@/hooks/useTripsStore";
-import TripCard from "@/components/trips/TripCard";
+import TripCard from "@/components/driver/DriverTripCard";
 import Nameplate from "@/components/trips/Nameplate";
 import type { TabType, HubViagem, TripService } from "@/lib/trips";
 import {
@@ -464,7 +464,7 @@ export default function TripsPage() {
               ) : (
                 store.diaList.map((viagem) => (
                   <TripCard
-                    key={(viagem as HubViagem & { cardId?: string }).cardId ?? viagem.id}
+                    key={viagem.id || (viagem.client || "x").replace(/\W/g, "")}
                     viagem={viagem}
                     drivers={store.drivers}
                     onSetDriver={store.diaSetDriver}
@@ -473,6 +473,7 @@ export default function TripsPage() {
                     onClientMsg={handleClientMsg}
                     onSmsMsg={handleSmsMsg}
                     onShowNameplate={store.showNameplate}
+                    mode="admin"
                   />
                 ))
               )}
