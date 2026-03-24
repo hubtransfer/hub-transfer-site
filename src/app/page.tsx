@@ -769,23 +769,16 @@ export default function Home() {
             </div>
           </div>
 
-          {/* System Access */}
+          {/* Área Reservada */}
           <div>
             <h4 className="text-white text-sm font-semibold uppercase tracking-wider mb-4" style={{ fontFamily: "var(--font-mono)" }}>
-              {lang === "PT" ? "Acesso ao Sistema" : "System Access"}
+              {lang === "PT" ? "Parceiros" : "Partners"}
             </h4>
-            <div className="space-y-2">
-              <a href="/portal"
-                className="flex items-center gap-2 text-gray-400 hover:text-[#F5C518] transition-colors text-sm group">
-                <ExternalLink className="w-3.5 h-3.5 group-hover:text-[#F5C518] transition-colors" />
-                {lang === "PT" ? "Portal Hotéis" : "Hotels Portal"}
-              </a>
-              <a href="/driver/trips"
-                className="flex items-center gap-2 text-gray-400 hover:text-[#F5C518] transition-colors text-sm group">
-                <ExternalLink className="w-3.5 h-3.5 group-hover:text-[#F5C518] transition-colors" />
-                {lang === "PT" ? "Área do Motorista" : "Driver Area"}
-              </a>
-            </div>
+            <a href="/login"
+              className="inline-flex items-center gap-2 text-sm px-4 py-2 rounded-lg border border-[#F5C518]/20 text-[#F5C518] hover:bg-[#F5C518]/10 hover:border-[#F5C518]/40 transition-all">
+              <ExternalLink className="w-3.5 h-3.5" />
+              {lang === "PT" ? "Área Reservada" : "Reserved Area"}
+            </a>
           </div>
 
           {/* Legal */}
