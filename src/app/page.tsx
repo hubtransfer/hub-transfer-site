@@ -179,18 +179,23 @@ export default function Home() {
 
         {/* Right side */}
         <div className="flex items-center gap-3">
-          {/* Language selector — desktop */}
+          {/* Language selector — desktop with flags */}
           <div className="hidden md:flex items-center gap-1 bg-white/5 rounded-full p-1">
             {LANGUAGES.map((l) => (
               <button
                 key={l}
                 onClick={() => setLang(l)}
-                className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                   lang === l
                     ? "bg-[#F5C518] text-black"
                     : "text-gray-400 hover:text-white"
                 }`}
               >
+                <img
+                  src={`/flags/${l.toLowerCase()}.jpg`}
+                  alt={l}
+                  className="w-4 h-3 rounded-sm object-cover"
+                />
                 {l}
               </button>
             ))}
@@ -246,8 +251,8 @@ export default function Home() {
                 {t.navGuarantee}
               </button>
 
-              {/* Language selector — mobile */}
-              <div className="flex items-center gap-1 pt-2">
+              {/* Language selector — mobile with flags */}
+              <div className="flex items-center gap-2 pt-2">
                 {LANGUAGES.map((l) => (
                   <button
                     key={l}
@@ -255,12 +260,17 @@ export default function Home() {
                       setLang(l);
                       setMobileMenuOpen(false);
                     }}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                       lang === l
                         ? "bg-[#F5C518] text-black"
                         : "text-gray-400 bg-white/5 hover:text-white"
                     }`}
                   >
+                    <img
+                      src={`/flags/${l.toLowerCase()}.jpg`}
+                      alt={l}
+                      className="w-5 h-3.5 rounded-sm object-cover"
+                    />
                     {l}
                   </button>
                 ))}
@@ -284,22 +294,19 @@ export default function Home() {
   // ─── HERO ───
   const Hero = (
     <section className="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden">
-      {/* Background: subtle gold radial gradient */}
+      {/* Background image: airport at night */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url(/images/hub_dobra1_hero.jpg)" }}
+      />
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-black/70" />
+      {/* Gold vignette at bottom */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
             "radial-gradient(ellipse 60% 40% at 50% 100%, rgba(245,197,24,0.08) 0%, transparent 70%)",
-        }}
-      />
-
-      {/* Subtle grid pattern */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-[0.03]"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(245,197,24,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(245,197,24,0.3) 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
         }}
       />
 
@@ -396,41 +403,34 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Stats card */}
+        {/* Image: taxi queue chaos */}
         <motion.div
           initial={{ opacity: 0, x: 30 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, delay: 0.2 }}
-          className="bg-[#1A1A1A] border border-[#F5C518]/10 rounded-2xl p-8 md:p-10 space-y-6"
+          className="relative rounded-2xl overflow-hidden border border-[#F5C518]/10"
         >
-          {[
-            { icon: <Clock className="w-5 h-5 text-[#F5C518]" />, label: lang === "PT" ? "Tempo médio de espera" : lang === "EN" ? "Average wait time" : lang === "ES" ? "Tiempo medio de espera" : lang === "FR" ? "Temps d'attente moyen" : "Tempo medio di attesa", value: "< 3 min" },
-            { icon: <Radar className="w-5 h-5 text-[#F5C518]" />, label: lang === "PT" ? "Taxa de pontualidade" : lang === "EN" ? "Punctuality rate" : lang === "ES" ? "Tasa de puntualidad" : lang === "FR" ? "Taux de ponctualité" : "Tasso di puntualità", value: "99.8%" },
-            { icon: <CheckCircle2 className="w-5 h-5 text-[#F5C518]" />, label: lang === "PT" ? "Clientes satisfeitos" : lang === "EN" ? "Happy clients" : lang === "ES" ? "Clientes satisfechos" : lang === "FR" ? "Clients satisfaits" : "Clienti soddisfatti", value: "2,400+" },
-          ].map((stat, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 + i * 0.15 }}
-              className="flex items-center justify-between border-b border-white/5 pb-5 last:border-0 last:pb-0"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#F5C518]/10 flex items-center justify-center">
-                  {stat.icon}
-                </div>
-                <span className="text-gray-400 text-sm">{stat.label}</span>
+          <img
+            src="/images/hub_dobra2_dor.jpg"
+            alt="Taxi queue chaos"
+            className="w-full h-72 md:h-96 object-cover"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+          {/* Stats overlay */}
+          <div className="absolute bottom-0 left-0 right-0 p-6 flex justify-around text-center">
+            {[
+              { value: "< 3 min", label: lang === "PT" ? "Espera" : "Wait" },
+              { value: "99.8%", label: lang === "PT" ? "Pontualidade" : "Punctuality" },
+              { value: "2,400+", label: lang === "PT" ? "Clientes" : "Clients" },
+            ].map((s, i) => (
+              <div key={i}>
+                <div className="text-[#F5C518] text-xl font-bold" style={{ fontFamily: "var(--font-mono)" }}>{s.value}</div>
+                <div className="text-white/50 text-xs mt-1">{s.label}</div>
               </div>
-              <span
-                className="text-white text-2xl font-bold"
-                style={{ fontFamily: "var(--font-mono)" }}
-              >
-                {stat.value}
-              </span>
-            </motion.div>
-          ))}
+            ))}
+          </div>
         </motion.div>
       </div>
     </Section>
@@ -482,9 +482,18 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Brain visualization */}
-        <div className="mt-16">
-          <BrainVisualization />
+        {/* Algorithm image + brain viz */}
+        <div className="mt-16 relative rounded-2xl overflow-hidden border border-[#F5C518]/10">
+          <img
+            src="/images/hub_dobra3_algoritmo.jpg"
+            alt="HUB Brain Algorithm"
+            className="w-full h-64 md:h-96 object-cover"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-black/50" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <BrainVisualization />
+          </div>
         </div>
       </div>
     </Section>
@@ -505,35 +514,30 @@ export default function Home() {
           transition={{ duration: 0.7 }}
           className="relative flex items-center justify-center"
         >
-          <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden bg-[#1A1A1A] border border-[#F5C518]/10">
-            {/* Abstract premium gradient */}
-            <div
-              className="absolute inset-0"
-              style={{
-                background:
-                  "linear-gradient(135deg, rgba(245,197,24,0.05) 0%, transparent 40%, rgba(245,197,24,0.03) 70%, transparent 100%)",
-              }}
+          <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden border border-[#F5C518]/10">
+            <img
+              src="/images/hub_dobra4_carro.jpg"
+              alt="Premium Black Sedan"
+              className="w-full h-full object-cover"
+              loading="lazy"
             />
-            {/* Large car icon */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Car className="w-24 h-24 md:w-32 md:h-32 text-[#F5C518]/20" strokeWidth={1} />
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
             {/* Stats overlay */}
-            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#1A1A1A] to-transparent">
+            <div className="absolute bottom-0 left-0 right-0 p-6">
               <div className="flex justify-between text-center">
                 <div>
                   <div className="text-[#F5C518] text-2xl font-bold" style={{ fontFamily: "var(--font-mono)" }}>99.8%</div>
-                  <div className="text-gray-500 text-xs mt-1">{t.fleetFeature1.replace("99.8% ", "").replace("de ", "")}</div>
+                  <div className="text-white/50 text-xs mt-1">{lang === "PT" ? "Pontualidade" : "Punctuality"}</div>
                 </div>
                 <div className="w-px bg-white/10" />
                 <div>
                   <div className="text-[#F5C518] text-2xl font-bold" style={{ fontFamily: "var(--font-mono)" }}>24/7</div>
-                  <div className="text-gray-500 text-xs mt-1">{lang === "PT" ? "Disponível" : lang === "EN" ? "Available" : lang === "ES" ? "Disponible" : lang === "FR" ? "Disponible" : "Disponibile"}</div>
+                  <div className="text-white/50 text-xs mt-1">{lang === "PT" ? "Disponível" : "Available"}</div>
                 </div>
                 <div className="w-px bg-white/10" />
                 <div>
                   <div className="text-[#F5C518] text-2xl font-bold" style={{ fontFamily: "var(--font-mono)" }}>5★</div>
-                  <div className="text-gray-500 text-xs mt-1">{lang === "PT" ? "Avaliação" : lang === "EN" ? "Rating" : lang === "ES" ? "Calificación" : lang === "FR" ? "Evaluation" : "Valutazione"}</div>
+                  <div className="text-white/50 text-xs mt-1">{lang === "PT" ? "Avaliação" : "Rating"}</div>
                 </div>
               </div>
             </div>
@@ -674,12 +678,22 @@ export default function Home() {
           </a>
         </motion.div>
 
-        {/* Decorative line */}
-        <div className="mt-16 flex items-center justify-center gap-3">
-          <div className="h-px w-16 bg-[#F5C518]/20" />
-          <Shield className="w-4 h-4 text-[#F5C518]/30" />
-          <div className="h-px w-16 bg-[#F5C518]/20" />
-        </div>
+        {/* Guarantee seal image */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.4 }}
+          className="mt-12 relative rounded-2xl overflow-hidden border border-[#F5C518]/10 max-w-md mx-auto"
+        >
+          <img
+            src="/images/hub_dobra5_selo.jpg"
+            alt="HUB Guarantee Seal"
+            className="w-full h-48 md:h-64 object-cover"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-black/40" />
+        </motion.div>
       </div>
     </Section>
   );
@@ -733,6 +747,64 @@ export default function Home() {
     </footer>
   );
 
+  // ─── PARTNERS CAROUSEL ───
+  const PARTNER_LOGOS = [
+    { src: "/logos/tap.png", name: "TAP Portugal" },
+    { src: "/logos/emirates.png", name: "Emirates" },
+    { src: "/logos/british-airways.png", name: "British Airways" },
+    { src: "/logos/lufthansa.png", name: "Lufthansa" },
+    { src: "/logos/air-france.png", name: "Air France" },
+    { src: "/logos/klm.png", name: "KLM" },
+    { src: "/logos/iberia.png", name: "Iberia" },
+    { src: "/logos/swiss.png", name: "Swiss" },
+    { src: "/logos/turkish-airlines.png", name: "Turkish Airlines" },
+    { src: "/logos/qatar.png", name: "Qatar Airways" },
+    { src: "/logos/air-europa.png", name: "Air Europa" },
+    { src: "/logos/royal-air-maroc.png", name: "Royal Air Maroc" },
+    { src: "/logos/aer-lingus.png", name: "Aer Lingus" },
+    { src: "/logos/air-canada.png", name: "Air Canada" },
+    { src: "/logos/jet2.png", name: "Jet2" },
+    { src: "/logos/mercedes.png", name: "Mercedes-Benz" },
+    { src: "/logos/bmw.png", name: "BMW" },
+    { src: "/logos/marriott.png", name: "Marriott" },
+  ];
+
+  const PartnersSection = (
+    <section className="py-16 md:py-24 bg-black overflow-hidden border-y border-[#F5C518]/5">
+      <div className="max-w-7xl mx-auto px-6 text-center mb-12">
+        <h2
+          className="text-2xl md:text-3xl font-bold text-white"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          {t.partnersTitle}
+        </h2>
+        <p className="mt-3 text-gray-500 text-sm md:text-base max-w-2xl mx-auto">
+          {t.partnersDesc}
+        </p>
+      </div>
+      {/* Infinite scroll carousel */}
+      <div className="relative">
+        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-black to-transparent z-10" />
+        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-black to-transparent z-10" />
+        <div className="flex animate-[scroll_40s_linear_infinite] gap-12 items-center w-max">
+          {[...PARTNER_LOGOS, ...PARTNER_LOGOS].map((logo, i) => (
+            <div
+              key={i}
+              className="flex-shrink-0 w-24 h-16 md:w-32 md:h-20 flex items-center justify-center grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
+            >
+              <img
+                src={logo.src}
+                alt={logo.name}
+                className="max-w-full max-h-full object-contain"
+                loading="lazy"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+
   // ─── WHATSAPP FLOATING BUTTON ───
   const WhatsAppFloat = (
     <a
@@ -759,6 +831,7 @@ export default function Home() {
       {PainSection}
       {AlgorithmSection}
       {FleetSection}
+      {PartnersSection}
       {WhySection}
       {GuaranteeSection}
       {Footer}

@@ -95,6 +95,11 @@
   animation: flight-pulse 2s ease-in-out infinite;
 }
 
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 /* ─── Base Styles ─── */
 @layer base {
   * {
