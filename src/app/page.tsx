@@ -17,7 +17,17 @@ import {
   Phone,
   Mail,
   MapPin,
+  Plane,
+  Users,
+  CalendarDays,
+  Tag,
+  XCircle,
+  Facebook,
+  Instagram,
+  ExternalLink,
+  ArrowRight,
 } from "lucide-react";
+import Script from "next/script";
 import { COMPANY } from "@/lib/constants";
 import { getLandingT, type LandingLang } from "@/lib/landing-translations";
 
@@ -678,57 +688,78 @@ export default function Home() {
           </a>
         </motion.div>
 
-        {/* Guarantee seal image */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.4 }}
-          className="mt-12 relative rounded-2xl overflow-hidden border border-[#F5C518]/10 max-w-md mx-auto"
-        >
-          <img
-            src="/images/hub_dobra5_selo.jpg"
-            alt="HUB Guarantee Seal"
-            className="w-full h-48 md:h-64 object-cover"
-            loading="lazy"
-          />
-          <div className="absolute inset-0 bg-black/40" />
-        </motion.div>
+        {/* Animated Trust Badges */}
+        <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+          {[
+            { icon: <Tag className="w-6 h-6" />, label: lang === "PT" ? "Preço Fixo Garantido" : lang === "EN" ? "Fixed Price Guaranteed" : lang === "ES" ? "Precio Fijo Garantizado" : lang === "FR" ? "Prix Fixe Garanti" : "Prezzo Fisso Garantito" },
+            { icon: <Clock className="w-6 h-6" />, label: lang === "PT" ? "Motorista Sempre Pontual" : lang === "EN" ? "Always On Time" : lang === "ES" ? "Siempre Puntual" : lang === "FR" ? "Toujours Ponctuel" : "Sempre Puntuale" },
+            { icon: <XCircle className="w-6 h-6" />, label: lang === "PT" ? "Cancelamento Grátis 24h" : lang === "EN" ? "Free Cancellation 24h" : lang === "ES" ? "Cancelación Gratis 24h" : lang === "FR" ? "Annulation Gratuite 24h" : "Cancellazione Gratis 24h" },
+            { icon: <Plane className="w-6 h-6" />, label: lang === "PT" ? "Monitorização de Voo" : lang === "EN" ? "Flight Monitoring" : lang === "ES" ? "Monitoreo de Vuelo" : lang === "FR" ? "Suivi de Vol" : "Monitoraggio Volo" },
+          ].map((badge, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20, scale: 0.9 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 + i * 0.1, type: "spring", stiffness: 200 }}
+              className="group relative bg-[#1A1A1A] border border-[#F5C518]/15 rounded-2xl p-5 text-center hover:border-[#F5C518]/40 transition-all duration-300"
+            >
+              {/* Gold glow on hover */}
+              <div className="absolute inset-0 rounded-2xl bg-[#F5C518]/0 group-hover:bg-[#F5C518]/[0.03] transition-colors duration-300" />
+              <div className="relative">
+                <motion.div
+                  whileInView={{ rotate: [0, -5, 5, 0] }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.8 + i * 0.15, duration: 0.5 }}
+                  className="w-12 h-12 mx-auto mb-3 rounded-xl bg-[#F5C518]/10 border border-[#F5C518]/20 flex items-center justify-center text-[#F5C518]"
+                >
+                  {badge.icon}
+                </motion.div>
+                <p className="text-white text-xs md:text-sm font-semibold leading-tight">{badge.label}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </Section>
   );
 
   // ─── FOOTER ───
   const Footer = (
-    <footer className="border-t border-[#F5C518]/10 bg-black">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24 py-12 md:py-16">
-        <div className="grid md:grid-cols-3 gap-8 md:gap-12">
+    <footer className="border-t border-[#F5C518]/10 bg-[#0a0a0a]">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24 py-14 md:py-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-8">
           {/* Brand */}
           <div>
-            <div
-              className="text-2xl font-bold text-gradient-gold mb-2"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
+            <div className="text-2xl font-bold text-gradient-gold mb-2" style={{ fontFamily: "var(--font-display)" }}>
               HUB Transfer
             </div>
-            <p className="text-gray-500 text-sm">{COMPANY.slogan}</p>
+            <p className="text-gray-500 text-sm mb-4">{COMPANY.slogan}</p>
+            {/* Social */}
+            <div className="flex gap-3">
+              <a href="https://www.facebook.com/hubtransfer" target="_blank" rel="noopener noreferrer"
+                className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-[#F5C518] hover:border-[#F5C518]/30 transition-all">
+                <Facebook className="w-4 h-4" />
+              </a>
+              <a href="https://www.instagram.com/hubtransfer" target="_blank" rel="noopener noreferrer"
+                className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-[#F5C518] hover:border-[#F5C518]/30 transition-all">
+                <Instagram className="w-4 h-4" />
+              </a>
+            </div>
           </div>
 
           {/* Contact */}
           <div className="space-y-3">
-            <a
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors text-sm"
-            >
+            <h4 className="text-white text-sm font-semibold uppercase tracking-wider mb-4" style={{ fontFamily: "var(--font-mono)" }}>
+              {lang === "PT" ? "Contacto" : "Contact"}
+            </h4>
+            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors text-sm">
               <Phone className="w-4 h-4 text-[#F5C518]" />
               {COMPANY.whatsappFormatted}
             </a>
-            <a
-              href={`mailto:${COMPANY.email}`}
-              className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors text-sm"
-            >
+            <a href={`mailto:${COMPANY.email}`}
+              className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors text-sm">
               <Mail className="w-4 h-4 text-[#F5C518]" />
               {COMPANY.email}
             </a>
@@ -738,9 +769,36 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Copyright */}
-          <div className="md:text-right">
-            <p className="text-gray-500 text-sm">{t.footer}</p>
+          {/* System Access */}
+          <div>
+            <h4 className="text-white text-sm font-semibold uppercase tracking-wider mb-4" style={{ fontFamily: "var(--font-mono)" }}>
+              {lang === "PT" ? "Acesso ao Sistema" : "System Access"}
+            </h4>
+            <div className="space-y-2">
+              <a href="/portal"
+                className="flex items-center gap-2 text-gray-400 hover:text-[#F5C518] transition-colors text-sm group">
+                <ExternalLink className="w-3.5 h-3.5 group-hover:text-[#F5C518] transition-colors" />
+                {lang === "PT" ? "Portal Hotéis" : "Hotels Portal"}
+              </a>
+              <a href="/driver/trips"
+                className="flex items-center gap-2 text-gray-400 hover:text-[#F5C518] transition-colors text-sm group">
+                <ExternalLink className="w-3.5 h-3.5 group-hover:text-[#F5C518] transition-colors" />
+                {lang === "PT" ? "Área do Motorista" : "Driver Area"}
+              </a>
+            </div>
+          </div>
+
+          {/* Legal */}
+          <div className="lg:text-right">
+            <h4 className="text-white text-sm font-semibold uppercase tracking-wider mb-4 lg:text-right" style={{ fontFamily: "var(--font-mono)" }}>
+              {lang === "PT" ? "Empresa" : "Company"}
+            </h4>
+            <p className="text-gray-500 text-xs leading-relaxed">
+              HUB Transfer — Transfer and Tourism
+            </p>
+            <p className="text-gray-600 text-xs mt-2">
+              © 2026 Jornadas e Possibilidades, Unipessoal Lda
+            </p>
           </div>
         </div>
       </div>
@@ -805,6 +863,227 @@ export default function Home() {
     </section>
   );
 
+  // ─── BOOKING ENGINE ───
+  const [bookOrigin, setBookOrigin] = useState("");
+  const [bookDest, setBookDest] = useState("");
+  const [bookDate, setBookDate] = useState("");
+  const [bookPax, setBookPax] = useState(2);
+  const [bookPhone, setBookPhone] = useState("+351 ");
+  const [routeInfo, setRouteInfo] = useState<{ distance: string; duration: string } | null>(null);
+  const [calcLoading, setCalcLoading] = useState(false);
+
+  const calcRoute = useCallback(async () => {
+    if (!bookOrigin || !bookDest) return;
+    setCalcLoading(true);
+    try {
+      const gm = (window as unknown as Record<string, unknown>).google as { maps: { DistanceMatrixService: new () => { getDistanceMatrix: (opts: unknown, cb: (r: unknown, s: string) => void) => void }; DistanceMatrixStatus: { OK: string }; TravelMode: { DRIVING: string } } } | undefined;
+      if (!gm?.maps) { setCalcLoading(false); return; }
+      const service = new gm.maps.DistanceMatrixService();
+      service.getDistanceMatrix(
+        { origins: [bookOrigin], destinations: [bookDest], travelMode: gm.maps.TravelMode.DRIVING },
+        (response: unknown, status: string) => {
+          if (status === gm.maps.DistanceMatrixStatus.OK) {
+            const r = response as { rows: { elements: { distance: { text: string }; duration: { text: string }; status: string }[] }[] };
+            const el = r.rows[0]?.elements[0];
+            if (el?.status === "OK") {
+              setRouteInfo({ distance: el.distance.text, duration: el.duration.text });
+            }
+          }
+          setCalcLoading(false);
+        },
+      );
+    } catch { setCalcLoading(false); }
+  }, [bookOrigin, bookDest]);
+
+  // Auto-calc when both fields filled
+  useEffect(() => {
+    if (bookOrigin && bookDest) {
+      const timer = setTimeout(calcRoute, 500);
+      return () => clearTimeout(timer);
+    } else {
+      setRouteInfo(null);
+    }
+  }, [bookOrigin, bookDest, calcRoute]);
+
+  const bookingWhatsAppUrl = useCallback(() => {
+    const msg = encodeURIComponent(
+      `Olá! Quero um orçamento para transfer:\n\n` +
+      `📍 De: ${bookOrigin || "—"}\n` +
+      `🏁 Para: ${bookDest || "—"}\n` +
+      (routeInfo ? `📏 Distância: ${routeInfo.distance} (~${routeInfo.duration})\n` : "") +
+      `📅 Data: ${bookDate || "—"}\n` +
+      `👥 Passageiros: ${bookPax}\n` +
+      `📱 Meu WhatsApp: ${bookPhone}`
+    );
+    return `https://wa.me/351968698138?text=${msg}`;
+  }, [bookOrigin, bookDest, routeInfo, bookDate, bookPax, bookPhone]);
+
+  const quickOrigin = (place: string) => { setBookOrigin(place); setRouteInfo(null); };
+  const quickDest = (place: string) => { setBookDest(place); setRouteInfo(null); };
+
+  const BookingSection = (
+    <Section id="booking" className="bg-gradient-to-b from-black via-[#0a0a0a] to-black">
+      <div className="max-w-3xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-5xl font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>
+            {lang === "PT" ? "Reserve o Seu Transfer" : lang === "EN" ? "Book Your Transfer" : lang === "ES" ? "Reserve Su Transfer" : lang === "FR" ? "Réservez Votre Transfert" : "Prenota il Tuo Transfer"}
+          </h2>
+          <p className="mt-4 text-gray-500">{lang === "PT" ? "Orçamento gratuito em menos de 5 minutos" : "Free quote in less than 5 minutes"}</p>
+        </div>
+
+        <div className="bg-[#1A1A1A] border border-[#F5C518]/10 rounded-2xl p-6 md:p-8 space-y-5">
+          {/* Origin */}
+          <div>
+            <label className="text-gray-400 text-sm font-semibold mb-2 block" style={{ fontFamily: "var(--font-mono)" }}>
+              📍 {lang === "PT" ? "Local de Origem" : "Pick-up Location"}
+            </label>
+            <div className="flex flex-wrap gap-2 mb-2">
+              <button type="button" onClick={() => quickOrigin("Aeroporto de Lisboa (LIS), Lisboa, Portugal")}
+                className={`text-xs px-3 py-1.5 rounded-lg border transition-all ${bookOrigin.includes("Aeroporto") ? "bg-[#F5C518]/15 border-[#F5C518]/30 text-[#F5C518]" : "border-white/10 text-gray-400 hover:border-[#F5C518]/20 hover:text-white"}`}>
+                ✈️ Aeroporto de Lisboa
+              </button>
+              <button type="button" onClick={() => quickOrigin("")}
+                className="text-xs px-3 py-1.5 rounded-lg border border-white/10 text-gray-400 hover:border-[#F5C518]/20 hover:text-white transition-all">
+                🏨 {lang === "PT" ? "O meu Hotel" : "My Hotel"}
+              </button>
+            </div>
+            <input id="bookOriginInput" type="text" value={bookOrigin} onChange={(e) => setBookOrigin(e.target.value)}
+              placeholder={lang === "PT" ? "Endereço de recolha..." : "Pick-up address..."}
+              className="w-full h-12 bg-black/50 border border-white/10 rounded-xl px-4 text-white placeholder-white/25 text-sm focus:outline-none focus:border-[#F5C518]/40 transition-colors" />
+          </div>
+
+          {/* Destination */}
+          <div>
+            <label className="text-gray-400 text-sm font-semibold mb-2 block" style={{ fontFamily: "var(--font-mono)" }}>
+              🏁 {lang === "PT" ? "Local de Destino" : "Destination"}
+            </label>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {[
+                { label: "✈️ Aeroporto de Lisboa", value: "Aeroporto de Lisboa (LIS), Lisboa, Portugal" },
+                { label: "🏖 Cascais", value: "Cascais, Portugal" },
+                { label: "🏰 Sintra", value: "Sintra, Portugal" },
+                { label: "⛪ Fátima", value: "Fátima, Portugal" },
+              ].map((q) => (
+                <button key={q.label} type="button" onClick={() => quickDest(q.value)}
+                  className={`text-xs px-3 py-1.5 rounded-lg border transition-all ${bookDest === q.value ? "bg-[#F5C518]/15 border-[#F5C518]/30 text-[#F5C518]" : "border-white/10 text-gray-400 hover:border-[#F5C518]/20 hover:text-white"}`}>
+                  {q.label}
+                </button>
+              ))}
+            </div>
+            <input id="bookDestInput" type="text" value={bookDest} onChange={(e) => setBookDest(e.target.value)}
+              placeholder={lang === "PT" ? "Endereço de destino..." : "Destination address..."}
+              className="w-full h-12 bg-black/50 border border-white/10 rounded-xl px-4 text-white placeholder-white/25 text-sm focus:outline-none focus:border-[#F5C518]/40 transition-colors" />
+          </div>
+
+          {/* Date + Pax row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-gray-400 text-sm font-semibold mb-2 block" style={{ fontFamily: "var(--font-mono)" }}>
+                <CalendarDays className="w-3.5 h-3.5 inline mr-1.5" />
+                {lang === "PT" ? "Data" : "Date"}
+              </label>
+              <input type="date" value={bookDate} onChange={(e) => setBookDate(e.target.value)}
+                className="w-full h-12 bg-black/50 border border-white/10 rounded-xl px-4 text-white text-sm focus:outline-none focus:border-[#F5C518]/40 transition-colors [color-scheme:dark]" />
+            </div>
+            <div>
+              <label className="text-gray-400 text-sm font-semibold mb-2 block" style={{ fontFamily: "var(--font-mono)" }}>
+                <Users className="w-3.5 h-3.5 inline mr-1.5" />
+                {lang === "PT" ? "Passageiros" : "Passengers"}
+              </label>
+              <div className="flex gap-1.5">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                  <button key={n} type="button" onClick={() => setBookPax(n)}
+                    className={`flex-1 h-12 rounded-xl text-sm font-bold transition-all ${bookPax === n ? "bg-[#F5C518] text-black" : "bg-black/50 border border-white/10 text-gray-400 hover:border-[#F5C518]/20"}`}>
+                    {n}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Phone */}
+          <div>
+            <label className="text-gray-400 text-sm font-semibold mb-2 block" style={{ fontFamily: "var(--font-mono)" }}>
+              <Phone className="w-3.5 h-3.5 inline mr-1.5" />
+              WhatsApp
+            </label>
+            <input type="tel" value={bookPhone} onChange={(e) => setBookPhone(e.target.value)}
+              placeholder="+351 912 345 678"
+              className="w-full h-12 bg-black/50 border border-white/10 rounded-xl px-4 text-white placeholder-white/25 text-sm focus:outline-none focus:border-[#F5C518]/40 transition-colors" />
+          </div>
+
+          {/* Route info card */}
+          {calcLoading && (
+            <div className="text-center py-3">
+              <span className="text-[#F5C518]/60 text-sm animate-pulse" style={{ fontFamily: "var(--font-mono)" }}>
+                {lang === "PT" ? "A calcular rota..." : "Calculating route..."}
+              </span>
+            </div>
+          )}
+          {routeInfo && !calcLoading && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-[#F5C518]/5 border border-[#F5C518]/15 rounded-xl p-4 flex items-center justify-center gap-8"
+            >
+              <div className="text-center">
+                <div className="text-[#F5C518] text-2xl font-bold" style={{ fontFamily: "var(--font-mono)" }}>{routeInfo.distance}</div>
+                <div className="text-gray-500 text-xs mt-0.5">{lang === "PT" ? "Distância" : "Distance"}</div>
+              </div>
+              <div className="w-px h-10 bg-[#F5C518]/15" />
+              <div className="text-center">
+                <div className="text-[#F5C518] text-2xl font-bold" style={{ fontFamily: "var(--font-mono)" }}>~{routeInfo.duration}</div>
+                <div className="text-gray-500 text-xs mt-0.5">{lang === "PT" ? "Tempo estimado" : "Estimated time"}</div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* CTA */}
+          <a
+            href={bookingWhatsAppUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-3 w-full h-14 bg-[#F5C518] text-black font-bold text-sm md:text-base rounded-xl uppercase tracking-wider hover:bg-[#D4A017] hover:scale-[1.02] transition-all shadow-[0_0_30px_rgba(245,197,24,0.15)]"
+          >
+            <ArrowRight className="w-5 h-5" />
+            {lang === "PT" ? "Solicitar Orçamento por WhatsApp" : lang === "EN" ? "Request Quote via WhatsApp" : lang === "ES" ? "Solicitar Presupuesto por WhatsApp" : lang === "FR" ? "Demander un Devis par WhatsApp" : "Richiedi Preventivo via WhatsApp"}
+          </a>
+          <p className="text-center text-gray-500 text-xs">
+            {lang === "PT" ? "Resposta em menos de 5 minutos" : lang === "EN" ? "Response in less than 5 minutes" : lang === "ES" ? "Respuesta en menos de 5 minutos" : lang === "FR" ? "Réponse en moins de 5 minutes" : "Risposta in meno di 5 minuti"}
+          </p>
+        </div>
+      </div>
+    </Section>
+  );
+
+  // ─── Google Places Autocomplete init ───
+  useEffect(() => {
+    const initAutocomplete = () => {
+      const gm = (window as unknown as Record<string, unknown>).google as { maps: { places: { Autocomplete: new (el: HTMLInputElement, opts: Record<string, unknown>) => unknown } } } | undefined;
+      if (!gm?.maps?.places) return;
+      const originEl = document.getElementById("bookOriginInput") as HTMLInputElement;
+      const destEl = document.getElementById("bookDestInput") as HTMLInputElement;
+      if (originEl) {
+        const ac = new gm.maps.places.Autocomplete(originEl, { types: ["establishment", "geocode"], componentRestrictions: { country: "pt" } });
+        (ac as { addListener: (evt: string, cb: () => void) => void }).addListener("place_changed", () => {
+          setBookOrigin(originEl.value);
+        });
+      }
+      if (destEl) {
+        const ac = new gm.maps.places.Autocomplete(destEl, { types: ["establishment", "geocode"], componentRestrictions: { country: "pt" } });
+        (ac as { addListener: (evt: string, cb: () => void) => void }).addListener("place_changed", () => {
+          setBookDest(destEl.value);
+        });
+      }
+    };
+    // Retry until Google Maps loads
+    const interval = setInterval(() => {
+      const gm = (window as unknown as Record<string, unknown>).google;
+      if (gm) { initAutocomplete(); clearInterval(interval); }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   // ─── WHATSAPP FLOATING BUTTON ───
   const WhatsAppFloat = (
     <a
@@ -825,17 +1104,24 @@ export default function Home() {
 
   // ─── RENDER ───
   return (
-    <main className="bg-black min-h-screen overflow-x-hidden">
-      {Navbar}
-      {Hero}
-      {PainSection}
-      {AlgorithmSection}
-      {FleetSection}
-      {PartnersSection}
-      {WhySection}
-      {GuaranteeSection}
-      {Footer}
-      {WhatsAppFloat}
-    </main>
+    <>
+      <Script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBe4UwnVYRP5KAUOtHg3diD6kPTif3VN30&libraries=places"
+        strategy="lazyOnload"
+      />
+      <main className="bg-black min-h-screen overflow-x-hidden">
+        {Navbar}
+        {Hero}
+        {BookingSection}
+        {PainSection}
+        {AlgorithmSection}
+        {FleetSection}
+        {PartnersSection}
+        {WhySection}
+        {GuaranteeSection}
+        {Footer}
+        {WhatsAppFloat}
+      </main>
+    </>
   );
 }
