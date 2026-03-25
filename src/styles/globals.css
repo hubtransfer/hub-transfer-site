@@ -100,14 +100,21 @@
   100% { transform: translateX(-50%); }
 }
 
-/* Signature draw animation */
+/* Signature draw animation — stroke draws then fill fades in */
 .signature-path {
-  stroke-dasharray: 500;
-  stroke-dashoffset: 500;
-  animation: signatureDraw 2.5s ease-out forwards;
+  animation: signatureDraw 2s ease-out forwards;
+}
+.signature-text {
+  animation: signatureStroke 2.5s ease-out forwards, signatureFill 0.6s ease-in 2.2s forwards;
 }
 @keyframes signatureDraw {
   to { stroke-dashoffset: 0; }
+}
+@keyframes signatureStroke {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes signatureFill {
+  to { fill: #F5C518; stroke-width: 0; }
 }
 
 @keyframes heroArrow {

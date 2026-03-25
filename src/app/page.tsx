@@ -504,8 +504,8 @@ export default function LandingPage() {
               {[...Array(2)].flatMap(() => [
                 "tap", "emirates", "british-airways", "lufthansa", "air-france", "klm", "iberia", "swiss", "turkish-airlines", "qatar", "mercedes", "bmw", "marriott", "air-europa", "royal-air-maroc", "aer-lingus", "air-canada", "jet2",
               ]).map((logo, i) => (
-                <div key={i} className="flex-shrink-0 w-24 h-14 md:w-36 md:h-18 flex items-center justify-center opacity-40 hover:opacity-100 transition-all duration-300 cursor-pointer">
-                  <img src={`/logos/${logo}.png`} alt="" className="max-w-full max-h-full object-contain grayscale hover:grayscale-0 transition-all duration-300" loading="lazy" />
+                <div key={i} className="flex-shrink-0 w-24 h-14 md:w-36 md:h-18 flex items-center justify-center opacity-40 hover:opacity-100 active:opacity-100 transition-all duration-300 cursor-pointer group">
+                  <img src={`/logos/${logo}.png`} alt="" className="max-w-full max-h-full object-contain grayscale group-hover:grayscale-0 group-active:grayscale-0 transition-all duration-300" loading="lazy" />
                 </div>
               ))}
             </div>
@@ -558,18 +558,35 @@ export default function LandingPage() {
               </h2>
             </Reveal>
 
-            {/* Animated signature */}
+            {/* Animated "HUB Transfer" signature */}
             <Reveal delay={0.3}>
-              <svg viewBox="0 0 300 60" className="w-64 md:w-80 h-auto mx-auto mt-8 mb-4 signature-draw">
-                <path
-                  d="M 20 45 C 40 10, 60 10, 80 35 S 120 55, 140 30 C 155 15, 170 20, 180 35 S 200 50, 220 30 C 235 15, 250 25, 270 35 L 280 32"
-                  fill="none"
-                  stroke="#F5C518"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  className="signature-path"
-                />
-              </svg>
+              <div className="mt-8 mb-4 flex justify-center">
+                <svg viewBox="0 0 400 80" className="w-72 md:w-96 h-auto overflow-visible">
+                  {/* Decorative line before text */}
+                  <line x1="10" y1="55" x2="60" y2="55" stroke="#F5C518" strokeWidth="1.5" opacity="0.3" strokeLinecap="round" className="signature-path" style={{ strokeDasharray: 50, strokeDashoffset: 50 }} />
+                  {/* "HUB Transfer" in cursive */}
+                  <text
+                    x="70"
+                    y="58"
+                    className="signature-text"
+                    style={{
+                      fontFamily: "var(--font-cursive), 'Dancing Script', cursive",
+                      fontSize: "42px",
+                      fontWeight: 700,
+                      stroke: "#F5C518",
+                      strokeWidth: "1px",
+                      fill: "transparent",
+                      strokeDasharray: 600,
+                      strokeDashoffset: 600,
+                      letterSpacing: "0.02em",
+                    }}
+                  >
+                    HUB Transfer
+                  </text>
+                  {/* Decorative line after text */}
+                  <line x1="340" y1="55" x2="390" y2="55" stroke="#F5C518" strokeWidth="1.5" opacity="0.3" strokeLinecap="round" className="signature-path" style={{ strokeDasharray: 50, strokeDashoffset: 50 }} />
+                </svg>
+              </div>
             </Reveal>
 
             <Reveal delay={0.5}>

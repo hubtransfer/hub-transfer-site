@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, JetBrains_Mono, Dancing_Script } from "next/font/google";
 import "@/styles/globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -7,6 +7,13 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-body",
   display: "swap",
   weight: ["200", "300", "400", "500", "600", "700", "800"],
+});
+
+const dancingScript = Dancing_Script({
+  subsets: ["latin"],
+  variable: "--font-cursive",
+  display: "swap",
+  weight: ["700"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -48,7 +55,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt"
-      className={`dark ${plusJakartaSans.variable} ${jetbrainsMono.variable}`}
+      className={`dark ${plusJakartaSans.variable} ${jetbrainsMono.variable} ${dancingScript.variable}`}
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-background text-foreground antialiased">
