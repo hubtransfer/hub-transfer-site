@@ -9,6 +9,122 @@ import { getLandingT, type LandingLang } from "@/lib/landing-translations";
 // import ThemeToggle, { useTheme } from "@/components/ThemeToggle";
 
 const LANGS: LandingLang[] = ["PT", "EN", "ES", "FR", "IT"];
+
+/* ─── Binoculars SVG with cursor-following light beam ─── */
+function BinocularsIllustration() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [beam, setBeam] = useState({ x: 50, y: 50, active: false });
+
+  const handleMove = useCallback((e: React.MouseEvent) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setBeam({ x, y, active: true });
+  }, []);
+
+  const handleLeave = useCallback(() => {
+    setBeam((b) => ({ ...b, active: false }));
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      onMouseMove={handleMove}
+      onMouseLeave={handleLeave}
+      className="relative w-full aspect-square max-w-[380px] mx-auto cursor-crosshair select-none"
+    >
+      {/* Light beam that follows cursor */}
+      <div
+        className="absolute inset-0 pointer-events-none transition-opacity duration-500 rounded-full"
+        style={{
+          opacity: beam.active ? 1 : 0,
+          background: `radial-gradient(circle 90px at ${beam.x}% ${beam.y}%, rgba(245,197,24,0.12) 0%, rgba(245,197,24,0.04) 40%, transparent 70%)`,
+        }}
+      />
+
+      {/* SVG Binoculars */}
+      <svg viewBox="0 0 200 200" fill="none" className="w-full h-full" strokeLinecap="round" strokeLinejoin="round">
+        {/* Subtle grid background */}
+        <defs>
+          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(245,197,24,0.04)" strokeWidth="0.5" />
+          </pattern>
+          <radialGradient id="lensGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#F5C518" stopOpacity="0.15" />
+            <stop offset="100%" stopColor="#F5C518" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        <rect width="200" height="200" fill="url(#grid)" />
+
+        {/* Left lens — outer ring */}
+        <circle cx="70" cy="100" r="38" stroke="#F5C518" strokeWidth="1.2" opacity="0.3" />
+        <circle cx="70" cy="100" r="32" stroke="#F5C518" strokeWidth="0.6" opacity="0.15" />
+        {/* Left lens — inner glow */}
+        <circle cx="70" cy="100" r="28" fill="url(#lensGlow)" />
+        {/* Left lens — crosshair */}
+        <line x1="70" y1="78" x2="70" y2="122" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
+        <line x1="48" y1="100" x2="92" y2="100" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
+
+        {/* Right lens — outer ring */}
+        <circle cx="130" cy="100" r="38" stroke="#F5C518" strokeWidth="1.2" opacity="0.3" />
+        <circle cx="130" cy="100" r="32" stroke="#F5C518" strokeWidth="0.6" opacity="0.15" />
+        {/* Right lens — inner glow */}
+        <circle cx="130" cy="100" r="28" fill="url(#lensGlow)" />
+        {/* Right lens — crosshair */}
+        <line x1="130" y1="78" x2="130" y2="122" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
+        <line x1="108" y1="100" x2="152" y2="100" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
+
+        {/* Bridge connecting lenses */}
+        <path d="M 92 95 C 96 88, 104 88, 108 95" stroke="#F5C518" strokeWidth="1" opacity="0.3" fill="none" />
+        <path d="M 92 105 C 96 112, 104 112, 108 105" stroke="#F5C518" strokeWidth="1" opacity="0.3" fill="none" />
+
+        {/* Focus ring details — left */}
+        <path d="M 38 85 L 32 80" stroke="#F5C518" strokeWidth="0.8" opacity="0.2" />
+        <path d="M 38 115 L 32 120" stroke="#F5C518" strokeWidth="0.8" opacity="0.2" />
+        {/* Focus ring details — right */}
+        <path d="M 162 85 L 168 80" stroke="#F5C518" strokeWidth="0.8" opacity="0.2" />
+        <path d="M 162 115 L 168 120" stroke="#F5C518" strokeWidth="0.8" opacity="0.2" />
+
+        {/* Measurement marks around left lens */}
+        {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => {
+          const rad = (angle * Math.PI) / 180;
+          const x1 = 70 + Math.cos(rad) * 42;
+          const y1 = 100 + Math.sin(rad) * 42;
+          const x2 = 70 + Math.cos(rad) * 45;
+          const y2 = 100 + Math.sin(rad) * 45;
+          return <line key={`l${angle}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#F5C518" strokeWidth="0.5" opacity="0.15" />;
+        })}
+        {/* Measurement marks around right lens */}
+        {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => {
+          const rad = (angle * Math.PI) / 180;
+          const x1 = 130 + Math.cos(rad) * 42;
+          const y1 = 100 + Math.sin(rad) * 42;
+          const x2 = 130 + Math.cos(rad) * 45;
+          const y2 = 100 + Math.sin(rad) * 45;
+          return <line key={`r${angle}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#F5C518" strokeWidth="0.5" opacity="0.15" />;
+        })}
+
+        {/* Scan lines emanating from lenses (observation beams) */}
+        <line x1="70" y1="62" x2="55" y2="35" stroke="#F5C518" strokeWidth="0.4" opacity="0.1" strokeDasharray="3 3" />
+        <line x1="70" y1="62" x2="85" y2="35" stroke="#F5C518" strokeWidth="0.4" opacity="0.1" strokeDasharray="3 3" />
+        <line x1="130" y1="62" x2="115" y2="35" stroke="#F5C518" strokeWidth="0.4" opacity="0.1" strokeDasharray="3 3" />
+        <line x1="130" y1="62" x2="145" y2="35" stroke="#F5C518" strokeWidth="0.4" opacity="0.1" strokeDasharray="3 3" />
+
+        {/* Tiny plane silhouette in the "observed" area */}
+        <text x="100" y="30" textAnchor="middle" fill="#F5C518" opacity="0.12" fontSize="14">✈</text>
+
+        {/* Data readout text */}
+        <text x="100" y="170" textAnchor="middle" fill="#F5C518" opacity="0.15" fontSize="5" fontFamily="var(--font-mono)" letterSpacing="0.15em">
+          MONITORING ACTIVE
+        </text>
+        <text x="100" y="180" textAnchor="middle" fill="#F5C518" opacity="0.1" fontSize="4" fontFamily="var(--font-mono)" letterSpacing="0.1em">
+          SYNC EVERY 30s
+        </text>
+      </svg>
+    </div>
+  );
+}
 const WA_URL = `https://wa.me/${COMPANY.whatsapp.replace(/\+/g, "")}`;
 
 /* ─── Fade-in on scroll ─── */
@@ -268,15 +384,21 @@ export default function LandingPage() {
         {/*  HOW IT WORKS — 3 steps                                    */}
         {/* ═══════════════════════════════════════════════════════════ */}
         <section id="how" className="py-28 md:py-40 px-6">
-          <div className="max-w-5xl mx-auto">
-            <Reveal>
-              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{lang === "PT" ? "Como funciona" : "How it works"}</p>
-              <h2 className="text-3xl md:text-5xl font-bold leading-tight max-w-lg" style={{ fontFamily: "var(--font-display)" }}>
-                {t.algoTitle || (lang === "PT" ? "Não é mágica. É monitoramento." : "Not magic. Monitoring.")}
-              </h2>
-            </Reveal>
+          <div className="max-w-6xl mx-auto">
+            {/* Title + Binoculars */}
+            <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
+              <Reveal>
+                <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{lang === "PT" ? "Como funciona" : "How it works"}</p>
+                <h2 className="text-3xl md:text-5xl font-bold leading-tight" style={{ fontFamily: "var(--font-display)" }}>
+                  {t.algoTitle || (lang === "PT" ? "Não é mágica. É monitoramento." : "Not magic. Monitoring.")}
+                </h2>
+              </Reveal>
+              <Reveal delay={0.2} className="hidden lg:block">
+                <BinocularsIllustration />
+              </Reveal>
+            </div>
 
-            <div className="mt-20 grid md:grid-cols-3 gap-16 md:gap-12">
+            <div className="grid md:grid-cols-3 gap-16 md:gap-12">
               {[
                 { step: "01", title: lang === "PT" ? "Reserve em 2 minutos" : "Book in 2 minutes", desc: lang === "PT" ? "Informe o seu voo e destino. Nós tratamos do resto." : "Enter your flight and destination. We handle the rest." },
                 { step: "02", title: lang === "PT" ? "Monitoramos o seu voo" : "We track your flight", desc: lang === "PT" ? "O nosso sistema acompanha o seu voo em tempo real. Atrasos? Já sabemos." : "Our system follows your flight in real-time. Delays? We already know." },
@@ -354,8 +476,8 @@ export default function LandingPage() {
               {[...Array(2)].flatMap(() => [
                 "tap", "emirates", "british-airways", "lufthansa", "air-france", "klm", "iberia", "swiss", "turkish-airlines", "qatar", "mercedes", "bmw", "marriott", "air-europa", "royal-air-maroc", "aer-lingus", "air-canada", "jet2",
               ]).map((logo, i) => (
-                <div key={i} className="flex-shrink-0 w-20 h-10 md:w-28 md:h-14 flex items-center justify-center opacity-20 hover:opacity-50 transition-opacity duration-500">
-                  <img src={`/logos/${logo}.png`} alt="" className="max-w-full max-h-full object-contain grayscale brightness-200" loading="lazy" />
+                <div key={i} className="flex-shrink-0 w-20 h-10 md:w-28 md:h-14 flex items-center justify-center opacity-40 hover:opacity-100 transition-all duration-300 cursor-pointer">
+                  <img src={`/logos/${logo}.png`} alt="" className="max-w-full max-h-full object-contain grayscale hover:grayscale-0 transition-all duration-300" loading="lazy" />
                 </div>
               ))}
             </div>
