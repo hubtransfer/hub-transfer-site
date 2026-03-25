@@ -150,98 +150,84 @@ function RadarIllustration() {
 }
 const WA_URL = `https://wa.me/${COMPANY.whatsapp.replace(/\+/g, "")}`;
 
-/* ─── Handwritten signature that draws itself ─── */
+/* ─── Signature: clip-path reveal with cursor ─── */
 function SignatureAnimation() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<SVGTextElement>(null);
-  const [drawing, setDrawing] = useState(false);
-  const [pathLen, setPathLen] = useState(0);
-  const [filled, setFilled] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(false);
+  const [done, setDone] = useState(false);
 
   useEffect(() => {
-    const el = textRef.current;
-    const container = containerRef.current;
-    if (!el || !container) return;
-
-    // Measure the real stroke length
-    const len = el.getComputedTextLength() * 2.5; // multiply for stroke coverage
-    setPathLen(len);
-
-    // IntersectionObserver to trigger animation when visible
+    const el = ref.current;
+    if (!el) return;
     const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !drawing) {
-          setDrawing(true);
-          // After stroke finishes, fade in fill
-          setTimeout(() => setFilled(true), 2600);
-        }
-      },
+      ([e]) => { if (e.isIntersecting && !active) { setActive(true); setTimeout(() => setDone(true), 2800); } },
       { threshold: 0.5 },
     );
-    obs.observe(container);
+    obs.observe(el);
     return () => obs.disconnect();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [active]);
 
   return (
-    <div ref={containerRef} className="flex justify-center">
-      <svg viewBox="0 0 420 90" className="w-72 md:w-[400px] h-auto overflow-visible">
-        {/* Decorative start line */}
-        <line
-          x1="5" y1="60" x2="50" y2="60"
-          stroke="#F5C518" strokeWidth="1.5" strokeLinecap="round"
-          style={{
-            strokeDasharray: 45,
-            strokeDashoffset: drawing ? 0 : 45,
-            transition: "stroke-dashoffset 0.8s ease-out",
-            opacity: 0.4,
-          }}
+    <div ref={ref} className="flex flex-col items-center">
+      {/* Decorative lines + text container */}
+      <div className="flex items-center gap-4">
+        {/* Left line */}
+        <div className="h-px bg-[#F5C518]/30 transition-all duration-700" style={{ width: active ? 40 : 0 }} />
+
+        {/* Text with clip reveal */}
+        <div className="relative">
+          {/* The text — always rendered but clipped */}
+          <div
+            className="overflow-hidden"
+            style={{
+              width: active ? "100%" : "0%",
+              transition: "width 2.5s cubic-bezier(0.25, 0.1, 0.25, 1)",
+            }}
+          >
+            <span
+              className="whitespace-nowrap text-[#F5C518] text-3xl md:text-5xl"
+              style={{
+                fontFamily: "var(--font-cursive), 'Dancing Script', cursive",
+                fontWeight: 700,
+                display: "inline-block",
+              }}
+            >
+              HUB Transfer
+            </span>
+          </div>
+
+          {/* Cursor / pen line that moves with the reveal */}
+          {active && !done && (
+            <span
+              className="absolute top-1 bottom-1 w-0.5 bg-[#F5C518]"
+              style={{
+                right: 0,
+                animation: "cursorBlink 0.6s ease-in-out infinite",
+              }}
+            />
+          )}
+        </div>
+
+        {/* Right line */}
+        <div
+          className="h-px bg-[#F5C518]/30 transition-all duration-700"
+          style={{ width: done ? 40 : 0, transitionDelay: "0.2s" }}
         />
-        {/* The handwritten text */}
-        <text
-          ref={textRef}
-          x="58"
-          y="64"
-          style={{
-            fontFamily: "var(--font-cursive), 'Dancing Script', cursive",
-            fontSize: "48px",
-            fontWeight: 700,
-            stroke: "#F5C518",
-            strokeWidth: drawing ? "1.5px" : "0",
-            fill: filled ? "#F5C518" : "transparent",
-            strokeDasharray: pathLen || 800,
-            strokeDashoffset: drawing ? 0 : pathLen || 800,
-            transition: `stroke-dashoffset 2.5s ease-out, fill 0.5s ease-in ${filled ? "0s" : "9s"}, stroke-width 0.5s ease-in ${filled ? "0s" : "9s"}`,
-            letterSpacing: "0.01em",
-          }}
-        >
-          HUB Transfer
-        </text>
-        {/* Decorative end line */}
-        <line
-          x1="370" y1="60" x2="415" y2="60"
-          stroke="#F5C518" strokeWidth="1.5" strokeLinecap="round"
-          style={{
-            strokeDasharray: 45,
-            strokeDashoffset: drawing ? 0 : 45,
-            transition: "stroke-dashoffset 0.8s ease-out 2.2s",
-            opacity: 0.4,
-          }}
-        />
-        {/* Underline flourish */}
-        <path
-          d="M 58 72 Q 150 78, 250 70 T 370 72"
-          fill="none"
-          stroke="#F5C518"
-          strokeWidth="0.8"
-          strokeLinecap="round"
-          style={{
-            strokeDasharray: 350,
-            strokeDashoffset: drawing ? 0 : 350,
-            transition: "stroke-dashoffset 1.5s ease-out 2s",
-            opacity: 0.25,
-          }}
-        />
-      </svg>
+      </div>
+
+      {/* Underline flourish */}
+      <div
+        className="h-px bg-gradient-to-r from-transparent via-[#F5C518]/20 to-transparent mx-auto mt-3 transition-all duration-1000"
+        style={{ width: done ? 280 : 0, transitionDelay: "0.3s" }}
+      />
+
+      {/* Inline cursor blink keyframe */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes cursorBlink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+      `}} />
     </div>
   );
 }
