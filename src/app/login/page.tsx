@@ -60,7 +60,7 @@ export default function LoginPage() {
   );
 
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center px-6">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 transition-colors duration-300">
       {/* Gold vignette */}
       <div
         className="fixed inset-0 pointer-events-none"

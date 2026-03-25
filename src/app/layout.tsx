@@ -57,6 +57,7 @@ export default function RootLayout({
     <html
       lang="pt"
       className={`dark ${bodoniModa.variable} ${plusJakartaSans.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
     >
       <body className="min-h-screen bg-background text-foreground antialiased">
         {children}
