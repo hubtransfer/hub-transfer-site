@@ -10,17 +10,26 @@ import { getLandingT, type LandingLang } from "@/lib/landing-translations";
 
 const LANGS: LandingLang[] = ["PT", "EN", "ES", "FR", "IT"];
 
-/* ─── ATC Flight Radar — rotating sweep, moving planes, coordinates ─── */
+/* ─── ATC Flight Radar — all animations via CSS classes, zero JS ─── */
 function RadarIllustration() {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return <div className="w-[420px] aspect-square" />;
+  /* Fixed plane positions: x/y as SVG coords in 240x240 viewBox */
+  const planes = [
+    { cx: 80,  cy: 70,  code: "TP1923", sz: 14, moveCls: "radar-move-1", blipCls: "radar-blip-1", trail: true },
+    { cx: 150, cy: 60,  code: "AF1025", sz: 12, moveCls: "radar-move-2", blipCls: "radar-blip-2", trail: true },
+    { cx: 170, cy: 110, code: "BA502",  sz: 16, moveCls: "radar-move-3", blipCls: "radar-blip-3", trail: true },
+    { cx: 60,  cy: 140, code: "LH1148", sz: 11, moveCls: "radar-move-4", blipCls: "radar-blip-4", trail: true },
+    { cx: 130, cy: 160, code: "EK191",  sz: 13, moveCls: "radar-move-5", blipCls: "radar-blip-5", trail: false },
+    { cx: 100, cy: 90,  code: "FR8832", sz: 12, moveCls: "",             blipCls: "radar-blip-6", trail: false },
+    { cx: 180, cy: 150, code: "QR345",  sz: 14, moveCls: "radar-move-7", blipCls: "radar-blip-7", trail: true },
+    { cx: 50,  cy: 100, code: "IB3102", sz: 11, moveCls: "",             blipCls: "radar-blip-8", trail: true },
+  ];
+
   return (
     <div className="relative w-[420px] aspect-square select-none">
       {/* LIVE indicator */}
       <div className="absolute top-2 right-3 flex items-center gap-1.5 z-10">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#F5C518]" style={{ animation: "livePulse 2s ease-in-out infinite" }} />
-        <span className="text-[#F5C518] text-[9px] tracking-[0.15em] uppercase" style={{ fontFamily: "var(--font-mono)" }}>LIVE</span>
+        <span className="w-1.5 h-1.5 rounded-full bg-[#F5C518] radar-live" />
+        <span className="text-[#F5C518] text-[9px] tracking-[0.15em] uppercase font-mono">LIVE</span>
       </div>
 
       <svg viewBox="0 0 240 240" className="w-full h-full">
@@ -35,98 +44,78 @@ function RadarIllustration() {
           </radialGradient>
         </defs>
 
-        {/* ── Concentric rings ── */}
+        {/* Concentric rings */}
         <circle cx="120" cy="120" r="100" fill="none" stroke="#F5C518" strokeWidth="0.5" opacity="0.35" />
         <circle cx="120" cy="120" r="75"  fill="none" stroke="#F5C518" strokeWidth="0.4" opacity="0.25" />
         <circle cx="120" cy="120" r="50"  fill="none" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
         <circle cx="120" cy="120" r="25"  fill="none" stroke="#F5C518" strokeWidth="0.3" opacity="0.15" />
 
-        {/* ── Crosshair ── */}
+        {/* Crosshair */}
         <line x1="20" y1="120" x2="220" y2="120" stroke="#F5C518" strokeWidth="0.3" opacity="0.12" />
         <line x1="120" y1="20" x2="120" y2="220" stroke="#F5C518" strokeWidth="0.3" opacity="0.12" />
 
-        {/* ── Tick marks every 30° ── */}
-        {[0,30,60,90,120,150,180,210,240,270,300,330].map((a) => {
-          const r = (a * Math.PI) / 180;
-          const major = a % 90 === 0;
-          return <line key={a}
-            x1={120 + Math.cos(r) * 97} y1={120 + Math.sin(r) * 97}
-            x2={120 + Math.cos(r) * (major ? 104 : 102)} y2={120 + Math.sin(r) * (major ? 104 : 102)}
-            stroke="#F5C518" strokeWidth={major ? "0.7" : "0.4"} opacity={major ? "0.4" : "0.2"}
-          />;
-        })}
+        {/* Tick marks every 30° — pre-computed fixed positions */}
+        <line x1="217" y1="120" x2="224" y2="120" stroke="#F5C518" strokeWidth="0.7" opacity="0.4" />
+        <line x1="204" y1="71"  x2="207" y2="69"  stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
+        <line x1="169" y1="35"  x2="170" y2="32"  stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
+        <line x1="120" y1="23"  x2="120" y2="16"  stroke="#F5C518" strokeWidth="0.7" opacity="0.4" />
+        <line x1="71"  y1="35"  x2="70"  y2="32"  stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
+        <line x1="36"  y1="71"  x2="33"  y2="69"  stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
+        <line x1="23"  y1="120" x2="16"  y2="120" stroke="#F5C518" strokeWidth="0.7" opacity="0.4" />
+        <line x1="36"  y1="169" x2="33"  y2="171" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
+        <line x1="71"  y1="205" x2="70"  y2="208" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
+        <line x1="120" y1="217" x2="120" y2="224" stroke="#F5C518" strokeWidth="0.7" opacity="0.4" />
+        <line x1="169" y1="205" x2="170" y2="208" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
+        <line x1="204" y1="169" x2="207" y2="171" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
 
-        {/* ── Coordinates — aviation style ── */}
-        <text x="120" y="14"  textAnchor="middle" fill="#F5C518" opacity="0.5" fontSize="5.5" style={{ fontFamily: "var(--font-mono)" }}>N</text>
-        <text x="120" y="234" textAnchor="middle" fill="#F5C518" opacity="0.5" fontSize="5.5" style={{ fontFamily: "var(--font-mono)" }}>S</text>
-        <text x="10"  y="122" textAnchor="middle" fill="#F5C518" opacity="0.5" fontSize="5.5" style={{ fontFamily: "var(--font-mono)" }}>W</text>
-        <text x="232" y="122" textAnchor="middle" fill="#F5C518" opacity="0.5" fontSize="5.5" style={{ fontFamily: "var(--font-mono)" }}>E</text>
-        <text x="22"  y="28"  fill="#F5C518" opacity="0.35" fontSize="4.5" style={{ fontFamily: "var(--font-mono)" }}>38.7°N</text>
-        <text x="185" y="232" fill="#F5C518" opacity="0.35" fontSize="4.5" style={{ fontFamily: "var(--font-mono)" }}>9.1°W</text>
+        {/* Cardinal labels + coordinates */}
+        <text x="120" y="14"  textAnchor="middle" fill="#F5C518" opacity="0.5" fontSize="5.5" className="font-mono">N</text>
+        <text x="120" y="234" textAnchor="middle" fill="#F5C518" opacity="0.5" fontSize="5.5" className="font-mono">S</text>
+        <text x="10"  y="122" textAnchor="middle" fill="#F5C518" opacity="0.5" fontSize="5.5" className="font-mono">W</text>
+        <text x="232" y="122" textAnchor="middle" fill="#F5C518" opacity="0.5" fontSize="5.5" className="font-mono">E</text>
+        <text x="22"  y="28"  fill="#F5C518" opacity="0.35" fontSize="4.5" className="font-mono">38.7°N</text>
+        <text x="185" y="232" fill="#F5C518" opacity="0.35" fontSize="4.5" className="font-mono">9.1°W</text>
 
-        {/* ── Center: LIS ── */}
+        {/* Center: LIS */}
         <circle cx="120" cy="120" r="3" fill="#F5C518" opacity="0.3" />
         <circle cx="120" cy="120" r="1.2" fill="#F5C518" opacity="0.7" />
-        <text x="120" y="130" textAnchor="middle" fill="#F5C518" opacity="0.6" fontSize="5" fontWeight="bold" style={{ fontFamily: "var(--font-mono)" }}>LIS</text>
+        <text x="120" y="130" textAnchor="middle" fill="#F5C518" opacity="0.6" fontSize="5" fontWeight="bold" className="font-mono">LIS</text>
 
-        {/* ═══ Rotating sweep arm + trail ═══ */}
-        <g style={{ transformOrigin: "120px 120px", animation: "radarSpin 4s linear infinite" }}>
+        {/* Rotating sweep arm + trail — CSS class only */}
+        <g className="radar-sweep">
           <path d="M 120 120 L 220 120 A 100 100 0 0 0 203 68 Z" fill="url(#sweepCone)" />
           <line x1="120" y1="120" x2="220" y2="120" stroke="#F5C518" strokeWidth="1" opacity="0.6" />
         </g>
 
-        {/* ═══ Flight blips — 8 planes, fixed positions ═══ */}
-        {[
-          { x: 30, y: 25, code: "TP1923", sz: 14, move: "planeMove1 20s linear infinite", blip: "radarBlip 2s ease-in-out infinite", trail: true },
-          { x: 65, y: 20, code: "AF1025", sz: 12, move: "planeMove5 28s linear infinite", blip: "radarBlip 2.4s ease-in-out infinite 0.5s", trail: true },
-          { x: 75, y: 45, code: "BA502",  sz: 16, move: "planeMove3 18s linear infinite", blip: "radarBlip 1.8s ease-in-out infinite 1.2s", trail: true },
-          { x: 20, y: 60, code: "LH1148", sz: 11, move: "planeMove2 25s linear infinite", blip: "radarBlip 2.6s ease-in-out infinite 0.8s", trail: true },
-          { x: 55, y: 70, code: "EK191",  sz: 13, move: "planeMove4 22s linear infinite", blip: "radarBlip 2.2s ease-in-out infinite 1.8s", trail: false },
-          { x: 40, y: 35, code: "FR8832", sz: 12, move: "",                                blip: "radarBlip 3s ease-in-out infinite 0.3s",   trail: false },
-          { x: 80, y: 65, code: "QR345",  sz: 14, move: "planeMove1 24s linear infinite",  blip: "radarBlip 2s ease-in-out infinite 2.5s",   trail: true },
-          { x: 15, y: 40, code: "IB3102", sz: 11, move: "",                                blip: "radarBlip 2.8s ease-in-out infinite 0.9s", trail: true },
-        ].map((p, i) => {
-          // Convert percentage (0-100) to SVG coords (20-220 within 240 viewBox)
-          const cx = 20 + (p.x / 100) * 200;
-          const cy = 20 + (p.y / 100) * 200;
-          const r = p.sz * 0.35;
-          return (
-            <g key={i} style={p.move ? { animation: p.move } : undefined}>
-              {/* Flight trail */}
-              {p.trail && (
-                <line x1={cx - 8} y1={cy - 8} x2={cx} y2={cy}
-                  stroke="#F5C518" strokeWidth="0.4" opacity="0.2" strokeDasharray="2 2" />
-              )}
-              {/* Glow */}
-              <circle cx={cx} cy={cy} r={r + 2} fill="url(#blipG)" style={{ animation: p.blip }} />
-              {/* Plane icon */}
-              <text x={cx} y={cy + p.sz * 0.15} textAnchor="middle"
-                fill="#F5C518" opacity="0.9" fontSize={p.sz}
-                style={{ animation: p.blip }}>
-                ✈
-              </text>
-              {/* Callsign label */}
-              <text x={cx + r + 4} y={cy - 3}
-                fill="#F5C518" opacity="0.4" fontSize="3.8"
-                style={{ fontFamily: "var(--font-mono)" }}>
-                {p.code}
-              </text>
-            </g>
-          );
-        })}
+        {/* 8 flight blips — fixed SVG coords, CSS class animations */}
+        {planes.map((p, i) => (
+          <g key={i} className={p.moveCls}>
+            {p.trail && (
+              <line x1={p.cx - 8} y1={p.cy - 8} x2={p.cx} y2={p.cy}
+                stroke="#F5C518" strokeWidth="0.4" opacity="0.2" strokeDasharray="2 2" />
+            )}
+            <circle cx={p.cx} cy={p.cy} r={p.sz * 0.35 + 2} fill="url(#blipG)" className={p.blipCls} />
+            <text x={p.cx} y={p.cy + p.sz * 0.15} textAnchor="middle"
+              fill="#F5C518" opacity="0.9" fontSize={p.sz} className={p.blipCls}>
+              ✈
+            </text>
+            <text x={p.cx + p.sz * 0.35 + 4} y={p.cy - 3}
+              fill="#F5C518" opacity="0.4" fontSize="3.8" className="font-mono">
+              {p.code}
+            </text>
+          </g>
+        ))}
       </svg>
 
       {/* Data readout */}
       <div className="absolute -bottom-10 left-0 right-0 text-center space-y-1">
-        <p className="text-[#F5C518] text-[10px] tracking-[0.2em] uppercase opacity-80" style={{ fontFamily: "var(--font-mono)" }}>
+        <p className="text-[#F5C518] text-[10px] tracking-[0.2em] uppercase opacity-80 font-mono">
           MONITORING ACTIVE
         </p>
-        <p className="text-[#F5C518] text-[9px] tracking-[0.15em] uppercase opacity-60" style={{ fontFamily: "var(--font-mono)" }}>
+        <p className="text-[#F5C518] text-[9px] tracking-[0.15em] uppercase opacity-60 font-mono">
           SYNC EVERY 30s
         </p>
       </div>
-
-      {/* Keyframes in globals.css */}
     </div>
   );
 }

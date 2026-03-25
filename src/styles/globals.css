@@ -144,6 +144,24 @@
   100% { transform: translate(0, 0); }
 }
 
+/* Radar CSS classes */
+.radar-sweep { transform-origin: 120px 120px; animation: radarSpin 4s linear infinite; }
+.radar-live { animation: livePulse 2s ease-in-out infinite; }
+.radar-blip-1 { animation: radarBlip 2s ease-in-out infinite; }
+.radar-blip-2 { animation: radarBlip 2.4s ease-in-out infinite 0.5s; }
+.radar-blip-3 { animation: radarBlip 1.8s ease-in-out infinite 1.2s; }
+.radar-blip-4 { animation: radarBlip 2.6s ease-in-out infinite 0.8s; }
+.radar-blip-5 { animation: radarBlip 2.2s ease-in-out infinite 1.8s; }
+.radar-blip-6 { animation: radarBlip 3s ease-in-out infinite 0.3s; }
+.radar-blip-7 { animation: radarBlip 2s ease-in-out infinite 2.5s; }
+.radar-blip-8 { animation: radarBlip 2.8s ease-in-out infinite 0.9s; }
+.radar-move-1 { animation: planeMove1 20s linear infinite; }
+.radar-move-2 { animation: planeMove5 28s linear infinite; }
+.radar-move-3 { animation: planeMove3 18s linear infinite; }
+.radar-move-4 { animation: planeMove2 25s linear infinite; }
+.radar-move-5 { animation: planeMove4 22s linear infinite; }
+.radar-move-7 { animation: planeMove1 24s linear infinite; }
+
 /* ─── Base Styles ─── */
 @layer base {
   * {
