@@ -43,6 +43,10 @@ export interface LandingTranslations {
   whyReason4Title: string;
   whyReason4Desc: string;
 
+  // Commitment block
+  commitTitle: string;
+  commitSub: string;
+
   // Guarantee
   guaranteeTitle: string;
   guaranteeDesc: string;
@@ -131,9 +135,9 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     algoFeature3: 'Zero necessidade de você enviar mensagens',
 
     // Fleet
-    fleetTitle: 'Onde investimos cada centavo da HUB?',
+    fleetTitle: 'Porque investimos cada cêntimo da HUB Transfer em tecnologia?',
     fleetDesc:
-      'Muitas empresas gastam fortunas em carros de ostentação. Nós decidimos investir em Sincronização Aérea Profunda. Porque entendemos que luxo de verdade não é um banco de couro em um carro que não chega. Luxo mesmo é o seu voo atrasar 4 horas e quando você pisa no saguão de Lisboa, seu motorista está lá.',
+      'Enquanto muitas empresas gastam fortunas em carros de ostentação, nós decidimos investir em Sincronização Aérea Profunda. Porque entendemos que luxo de verdade não é um banco de couro em um carro que não chega. Luxo mesmo é o seu voo atrasar 4 horas e quando você pisa no saguão de Lisboa, seu motorista está lá.',
     fleetFeature1: '99.8% de Pontualidade',
     fleetFeature2: 'Sedans Mercedes e BMW',
     fleetFeature3: 'Motoristas Profissionais',
@@ -153,6 +157,10 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     whyReason4Title: 'Concierges Digitais 24/7',
     whyReason4Desc:
       'Tecnologia para garantir, humanos para acolher. Nossa central não é um bot gelado; é uma equipe pronta para ajudar em segundos.',
+
+    // Commitment block
+    commitTitle: 'Ou apertamos sua mão, ou pagamos a conta.',
+    commitSub: 'O nosso compromisso, por escrito.',
 
     // Guarantee
     guaranteeTitle: 'Garantia HUB: Risco Zero',
@@ -176,7 +184,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     labelTech: 'Tecnologia',
     techTitle: 'Sincronização aérea a cada 30 segundos.',
     labelProblem: 'O problema',
-    labelFleet: 'A frota',
+    labelFleet: 'Porquê nós',
     labelHow: 'Como funciona',
     labelWhyUs: 'Porquê nós',
     labelReviews: 'Avaliações',
@@ -242,9 +250,9 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     algoFeature3: 'Driver Always Ready',
 
     // Fleet
-    fleetTitle: 'Premium Black Sedans',
+    fleetTitle: 'Why do we invest every penny of HUB Transfer in technology?',
     fleetDesc:
-      'Efficiency, comfort and punctuality. Every detail was designed for your experience.',
+      'While many companies spend fortunes on flashy cars, we chose to invest in Deep Flight Synchronisation. Because we understand that real luxury isn\'t a leather seat in a car that never shows up. Real luxury is your flight being delayed 4 hours and when you step into Lisbon\'s terminal, your driver is already there.',
     fleetFeature1: '99.8% Punctuality',
     fleetFeature2: 'Mercedes and BMW Sedans',
     fleetFeature3: 'Professional Drivers',
@@ -265,6 +273,10 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     whyReason4Title: '24/7 Support',
     whyReason4Desc:
       'Team available anytime. Problem? We solve it in minutes, not hours.',
+
+    // Commitment block
+    commitTitle: 'We shake your hand, or we pay the bill.',
+    commitSub: 'Our commitment, in writing.',
 
     // Guarantee
     guaranteeTitle: 'HUB Guarantee: Zero Risk',
@@ -288,7 +300,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     labelTech: 'Technology',
     techTitle: 'Flight sync every 30 seconds.',
     labelProblem: 'The problem',
-    labelFleet: 'The fleet',
+    labelFleet: 'Why us',
     labelHow: 'How it works',
     labelWhyUs: 'Why us',
     labelReviews: 'Reviews',
@@ -354,9 +366,9 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     algoFeature3: 'Conductor Siempre Listo',
 
     // Fleet
-    fleetTitle: 'Sedanes Negros Premium',
+    fleetTitle: '¿Por qué invertimos cada céntimo de HUB Transfer en tecnología?',
     fleetDesc:
-      'Eficiencia, comodidad y puntualidad. Cada detalle fue diseñado para tu experiencia.',
+      'Mientras muchas empresas gastan fortunas en coches de ostentación, nosotros decidimos invertir en Sincronización Aérea Profunda. Porque entendemos que el verdadero lujo no es un asiento de cuero en un coche que no llega. El verdadero lujo es que tu vuelo se retrase 4 horas y cuando pisas el aeropuerto de Lisboa, tu conductor ya está ahí.',
     fleetFeature1: '99.8% de Puntualidad',
     fleetFeature2: 'Sedanes Mercedes y BMW',
     fleetFeature3: 'Conductores Profesionales',
@@ -377,6 +389,10 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     whyReason4Title: 'Soporte 24/7',
     whyReason4Desc:
       'Equipo disponible en cualquier momento. ¿Problema? Lo resolvemos en minutos, no en horas.',
+
+    // Commitment block
+    commitTitle: 'O le damos la mano, o pagamos la cuenta.',
+    commitSub: 'Nuestro compromiso, por escrito.',
 
     // Guarantee
     guaranteeTitle: 'Garantía HUB: Riesgo Cero',
@@ -400,7 +416,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     labelTech: 'Tecnología',
     techTitle: 'Sincronización aérea cada 30 segundos.',
     labelProblem: 'El problema',
-    labelFleet: 'La flota',
+    labelFleet: 'Por qué nosotros',
     labelHow: 'Cómo funciona',
     labelWhyUs: 'Por qué nosotros',
     labelReviews: 'Opiniones',
@@ -466,9 +482,9 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     algoFeature3: 'Conducteur Toujours Prêt',
 
     // Fleet
-    fleetTitle: 'Berlines Noires Premium',
+    fleetTitle: 'Pourquoi investissons-nous chaque centime de HUB Transfer dans la technologie ?',
     fleetDesc:
-      'Efficacité, confort et ponctualité. Chaque détail a été pensé pour votre expérience.',
+      "Alors que beaucoup d'entreprises dépensent des fortunes en voitures de prestige, nous avons choisi d'investir dans la Synchronisation Aérienne Profonde. Car nous savons que le vrai luxe, ce n'est pas un siège en cuir dans une voiture qui n'arrive jamais. Le vrai luxe, c'est quand votre vol a 4 heures de retard et qu'en arrivant à Lisbonne, votre chauffeur est déjà là.",
     fleetFeature1: '99.8% de Ponctualité',
     fleetFeature2: 'Berlines Mercedes et BMW',
     fleetFeature3: 'Conducteurs Professionnels',
@@ -489,6 +505,10 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     whyReason4Title: 'Support 24/7',
     whyReason4Desc:
       'Équipe disponible à tout moment. Problème? On le résout en minutes, pas en heures.',
+
+    // Commitment block
+    commitTitle: "On vous serre la main, ou on paie l'addition.",
+    commitSub: 'Notre engagement, par écrit.',
 
     // Guarantee
     guaranteeTitle: 'Garantie HUB: Zéro Risque',
@@ -512,7 +532,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     labelTech: 'Technologie',
     techTitle: 'Synchronisation aérienne toutes les 30 secondes.',
     labelProblem: 'Le problème',
-    labelFleet: 'La flotte',
+    labelFleet: 'Pourquoi nous',
     labelHow: 'Comment ça marche',
     labelWhyUs: 'Pourquoi nous',
     labelReviews: 'Avis',
@@ -578,9 +598,9 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     algoFeature3: 'Conducente Sempre Pronto',
 
     // Fleet
-    fleetTitle: 'Berlina Nere Premium',
+    fleetTitle: 'Perché investiamo ogni centesimo di HUB Transfer in tecnologia?',
     fleetDesc:
-      'Efficienza, comfort e puntualità. Ogni dettaglio è stato pensato per la tua esperienza.',
+      "Mentre molte aziende spendono fortune in auto appariscenti, noi abbiamo scelto di investire nella Sincronizzazione Aerea Profonda. Perché sappiamo che il vero lusso non è un sedile in pelle in un'auto che non arriva mai. Il vero lusso è quando il tuo volo ritarda di 4 ore e appena metti piede a Lisbona, il tuo autista è già lì.",
     fleetFeature1: '99.8% di Puntualità',
     fleetFeature2: 'Berline Mercedes e BMW',
     fleetFeature3: 'Conducenti Professionisti',
@@ -601,6 +621,10 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     whyReason4Title: 'Supporto 24/7',
     whyReason4Desc:
       'Team disponibile in qualsiasi momento. Problema? Lo risolviamo in minuti, non in ore.',
+
+    // Commitment block
+    commitTitle: 'O vi stringiamo la mano, o paghiamo il conto.',
+    commitSub: 'Il nostro impegno, nero su bianco.',
 
     // Guarantee
     guaranteeTitle: 'Garanzia HUB: Zero Rischi',
@@ -624,7 +648,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     labelTech: 'Tecnologia',
     techTitle: 'Sincronizzazione aerea ogni 30 secondi.',
     labelProblem: 'Il problema',
-    labelFleet: 'La flotta',
+    labelFleet: 'Perché noi',
     labelHow: 'Come funziona',
     labelWhyUs: 'Perché noi',
     labelReviews: 'Recensioni',

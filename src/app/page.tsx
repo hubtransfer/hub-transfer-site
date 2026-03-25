@@ -457,9 +457,9 @@ export default function LandingPage() {
         </section>
 
         {/* ═══════════════════════════════════════════════════════════ */}
-        {/*  FLEET — Image left, text right                            */}
+        {/*  WHY US — Image left, text right                            */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section className="py-16 md:py-24">
+        <section id="why" className="py-16 md:py-24">
           <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 lg:gap-0 items-center">
             <Reveal>
               <div className="relative">
@@ -548,37 +548,33 @@ export default function LandingPage() {
         </section>
 
         {/* ═══════════════════════════════════════════════════════════ */}
-        {/*  WHY — 4 reasons, minimal                                  */}
+        {/*  COMMITMENT — Signature block                              */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section id="why" className="py-16 md:py-24 px-6">
-          <div className="max-w-5xl mx-auto">
+        <section className="py-16 md:py-20 px-6">
+          <div className="max-w-3xl mx-auto text-center">
             <Reveal>
-              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelWhyUs}</p>
-              <h2 className="text-3xl md:text-5xl font-bold leading-tight max-w-lg" style={{ fontFamily: "var(--font-display)" }}>
-                {t.whyTitle}
+              <h2 className="text-2xl md:text-4xl font-bold leading-tight text-white" style={{ fontFamily: "var(--font-display)" }}>
+                {t.commitTitle}
               </h2>
             </Reveal>
 
-            <div className="mt-20 grid md:grid-cols-2 gap-x-16 gap-y-14">
-              {[
-                { title: t.whyReason1Title, desc: t.whyReason1Desc },
-                { title: t.whyReason2Title, desc: t.whyReason2Desc },
-                { title: t.whyReason3Title, desc: t.whyReason3Desc },
-                { title: t.whyReason4Title, desc: t.whyReason4Desc },
-              ].map((r, i) => (
-                <Reveal key={i} delay={i * 0.1}>
-                  <div className="flex gap-5">
-                    <div className="text-[#F5C518]/20 text-3xl font-bold leading-none flex-shrink-0 w-10" style={{ fontFamily: "var(--font-mono)" }}>
-                      {String(i + 1).padStart(2, "0")}
-                    </div>
-                    <div>
-                      <h3 className="text-base font-semibold text-white mb-2">{r.title}</h3>
-                      <p className="text-[#E5E5E5] text-sm leading-relaxed">{r.desc}</p>
-                    </div>
-                  </div>
-                </Reveal>
-              ))}
-            </div>
+            {/* Animated signature */}
+            <Reveal delay={0.3}>
+              <svg viewBox="0 0 300 60" className="w-64 md:w-80 h-auto mx-auto mt-8 mb-4 signature-draw">
+                <path
+                  d="M 20 45 C 40 10, 60 10, 80 35 S 120 55, 140 30 C 155 15, 170 20, 180 35 S 200 50, 220 30 C 235 15, 250 25, 270 35 L 280 32"
+                  fill="none"
+                  stroke="#F5C518"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  className="signature-path"
+                />
+              </svg>
+            </Reveal>
+
+            <Reveal delay={0.5}>
+              <p className="text-[#888] text-sm">{t.commitSub}</p>
+            </Reveal>
           </div>
         </section>
 
