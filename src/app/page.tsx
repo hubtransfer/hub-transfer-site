@@ -374,26 +374,28 @@ export default function LandingPage() {
             </motion.div>
           </div>
 
-          <motion.div
+          <motion.button
             initial={{ opacity: 0 }}
-            animate={{ opacity: showHighlight ? 0.4 : 0 }}
+            animate={{ opacity: showHighlight ? 0.6 : 0 }}
             transition={{ delay: 2 }}
-            className="absolute bottom-10 left-1/2 -translate-x-1/2"
+            whileHover={{ opacity: 1 }}
+            onClick={() => scrollTo("stats")}
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 mt-4 cursor-pointer"
           >
-            <ChevronDown className="w-5 h-5 text-white animate-bounce" style={{ animationDuration: "2s" }} />
-          </motion.div>
+            <ChevronDown className="w-9 h-9 text-white" style={{ animation: "heroArrow 2s ease-in-out infinite" }} />
+          </motion.button>
         </section>
 
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  SOCIAL PROOF — Numbers strip                              */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section className="border-y border-white/5">
+        <section id="stats" className="border-y border-white/5">
           <div className="max-w-6xl mx-auto px-6 py-14 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4">
             {[
-              { n: "4.387", l: lang === "PT" ? "Clientes satisfeitos" : "Happy clients" },
-              { n: "99.8%", l: lang === "PT" ? "Pontualidade" : "Punctuality" },
-              { n: "0 min", l: lang === "PT" ? "Tempo de espera" : "Wait time" },
-              { n: "24/7", l: lang === "PT" ? "Suporte disponível" : "Support available" },
+              { n: "4.387", l: t.statClients },
+              { n: "99.8%", l: t.statPunctuality },
+              { n: "0 min", l: t.statWait },
+              { n: "24/7", l: t.statSupport },
             ].map((s, i) => (
               <Reveal key={i} delay={i * 0.1} className="text-center">
                 <div className="text-2xl md:text-3xl font-bold text-[#F5C518] tracking-tight" style={{ fontFamily: "var(--font-mono)" }}>{s.n}</div>
@@ -406,7 +408,7 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  TECHNOLOGY — Radar + sync description                     */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section id="how" className="py-28 md:py-40 px-6">
+        <section id="how" className="py-16 md:py-24 px-6">
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col lg:grid lg:grid-cols-[1fr_auto] gap-8 lg:gap-6 items-center">
               {/* Radar — above text on mobile, right side on desktop */}
@@ -414,9 +416,9 @@ export default function LandingPage() {
                 <RadarIllustration />
               </Reveal>
               <Reveal className="lg:order-1">
-                <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{lang === "PT" ? "Tecnologia" : "Technology"}</p>
+                <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{t.labelTech}</p>
                 <h2 className="text-3xl md:text-5xl font-bold leading-tight mb-6" style={{ fontFamily: "var(--font-display)" }}>
-                  {lang === "PT" ? "Sincronização aérea a cada 30 segundos." : "Flight sync every 30 seconds."}
+                  {t.techTitle}
                 </h2>
                 <p className="text-[#E5E5E5] text-base leading-relaxed mb-8 max-w-lg">{t.algoDesc}</p>
                 <div className="space-y-5">
@@ -435,10 +437,10 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  PAIN — Asymmetric image + text                            */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section className="py-28 md:py-40">
+        <section className="py-16 md:py-24">
           <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 lg:gap-0 items-center">
             <Reveal className="order-2 lg:order-1 lg:pr-20">
-              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{lang === "PT" ? "O problema" : "The problem"}</p>
+              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{t.labelProblem}</p>
               <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-6" style={{ fontFamily: "var(--font-display)" }}>
                 {t.painTitle}
               </h2>
@@ -457,7 +459,7 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  FLEET — Image left, text right                            */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section className="py-28 md:py-40">
+        <section className="py-16 md:py-24">
           <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 lg:gap-0 items-center">
             <Reveal>
               <div className="relative">
@@ -466,7 +468,7 @@ export default function LandingPage() {
               </div>
             </Reveal>
             <Reveal delay={0.2} className="lg:pl-20">
-              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{lang === "PT" ? "A frota" : "The fleet"}</p>
+              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{t.labelFleet}</p>
               <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-6" style={{ fontFamily: "var(--font-display)" }}>
                 {t.fleetTitle}
               </h2>
@@ -486,15 +488,23 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  PARTNERS — Discrete scrolling logos                       */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section className="py-16 border-y border-white/5 overflow-hidden">
+        <section className="py-10 md:py-14 border-y border-white/5 overflow-hidden">
+          {/* Title + subtitle */}
+          <div className="max-w-6xl mx-auto px-6 text-center mb-8">
+            <Reveal>
+              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-3">{t.partnersLabel}</p>
+              <p className="text-[#B0B0B0] text-sm max-w-xl mx-auto">{t.partnersSub}</p>
+            </Reveal>
+          </div>
+          {/* Carousel */}
           <div className="relative">
-            <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-black to-transparent z-10" />
-            <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-black to-transparent z-10" />
-            <div className="flex animate-[scroll_50s_linear_infinite] gap-16 items-center w-max">
+            <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-black to-transparent z-10" />
+            <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-black to-transparent z-10" />
+            <div className="flex animate-[scroll_50s_linear_infinite] gap-12 md:gap-16 items-center w-max">
               {[...Array(2)].flatMap(() => [
                 "tap", "emirates", "british-airways", "lufthansa", "air-france", "klm", "iberia", "swiss", "turkish-airlines", "qatar", "mercedes", "bmw", "marriott", "air-europa", "royal-air-maroc", "aer-lingus", "air-canada", "jet2",
               ]).map((logo, i) => (
-                <div key={i} className="flex-shrink-0 w-20 h-10 md:w-28 md:h-14 flex items-center justify-center opacity-40 hover:opacity-100 transition-all duration-300 cursor-pointer">
+                <div key={i} className="flex-shrink-0 w-24 h-14 md:w-36 md:h-18 flex items-center justify-center opacity-40 hover:opacity-100 transition-all duration-300 cursor-pointer">
                   <img src={`/logos/${logo}.png`} alt="" className="max-w-full max-h-full object-contain grayscale hover:grayscale-0 transition-all duration-300" loading="lazy" />
                 </div>
               ))}
@@ -505,18 +515,18 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  HOW IT WORKS — 3 steps + image                            */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section className="py-28 md:py-40 px-6">
+        <section className="py-16 md:py-24 px-6">
           <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-0 items-center">
             <Reveal className="lg:pr-20">
-              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{lang === "PT" ? "Como funciona" : "How it works"}</p>
+              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{t.labelHow}</p>
               <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-10" style={{ fontFamily: "var(--font-display)" }}>
-                {t.algoTitle || (lang === "PT" ? "Não é mágica. É monitoramento." : "Not magic. Monitoring.")}
+                {t.algoTitle}
               </h2>
               <div className="space-y-10">
                 {[
-                  { step: "01", title: lang === "PT" ? "Reserve em 2 minutos" : "Book in 2 minutes", desc: lang === "PT" ? "Informe o seu voo e destino. Nós tratamos do resto." : "Enter your flight and destination. We handle the rest." },
-                  { step: "02", title: lang === "PT" ? "Monitoramos o seu voo" : "We track your flight", desc: lang === "PT" ? "O nosso sistema acompanha o seu voo em tempo real. Atrasos? Já sabemos." : "Our system follows your flight in real-time. Delays? We already know." },
-                  { step: "03", title: lang === "PT" ? "Motorista à sua espera" : "Driver waiting for you", desc: lang === "PT" ? "Desembarca e o seu motorista já está lá. Sem filas. Sem stress." : "You land and your driver is already there. No queues. No stress." },
+                  { step: "01", title: t.step1Title, desc: t.step1Desc },
+                  { step: "02", title: t.step2Title, desc: t.step2Desc },
+                  { step: "03", title: t.step3Title, desc: t.step3Desc },
                 ].map((s, i) => (
                   <div key={i} className="flex gap-5">
                     <div className="text-[#F5C518]/25 text-4xl font-bold leading-none flex-shrink-0 w-12" style={{ fontFamily: "var(--font-mono)" }}>{s.step}</div>
@@ -540,10 +550,10 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  WHY — 4 reasons, minimal                                  */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section id="why" className="py-28 md:py-40 px-6">
+        <section id="why" className="py-16 md:py-24 px-6">
           <div className="max-w-5xl mx-auto">
             <Reveal>
-              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{lang === "PT" ? "Porquê nós" : "Why us"}</p>
+              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{t.labelWhyUs}</p>
               <h2 className="text-3xl md:text-5xl font-bold leading-tight max-w-lg" style={{ fontFamily: "var(--font-display)" }}>
                 {t.whyTitle}
               </h2>
@@ -575,16 +585,16 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  TESTIMONIALS                                               */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section className="py-28 md:py-40 px-6 border-t border-white/5">
+        <section className="py-16 md:py-24 px-6 border-t border-white/5">
           <div className="max-w-5xl mx-auto">
             <Reveal>
-              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{lang === "PT" ? "Avaliações" : "Reviews"}</p>
+              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{t.labelReviews}</p>
             </Reveal>
             <div className="mt-12 grid md:grid-cols-3 gap-12">
               {[
-                { name: "Sarah Mitchell", from: "London, UK", text: lang === "PT" ? "O meu voo atrasou 3 horas e quando desembarquei o motorista já estava à minha espera. Incrível." : "My flight was delayed 3 hours and when I landed the driver was already waiting. Incredible." },
-                { name: "Thomas Weber", from: "München, DE", text: lang === "PT" ? "Serviço pontual e profissional. O melhor transfer que já usei em Portugal." : "Punctual and professional service. Best transfer I've used in Portugal." },
-                { name: "Marie Dupont", from: "Paris, FR", text: lang === "PT" ? "Reservei às 23h e às 23h02 já tinha confirmação. E o motorista foi impecável." : "I booked at 11pm and at 11:02pm I already had confirmation. And the driver was impeccable." },
+                { name: "Sarah Mitchell", from: "London, UK", text: t.review1 },
+                { name: "Thomas Weber", from: "München, DE", text: t.review2 },
+                { name: "Marie Dupont", from: "Paris, FR", text: t.review3 },
               ].map((r, i) => (
                 <Reveal key={i} delay={i * 0.1}>
                   <p className="text-[#E5E5E5] text-sm leading-relaxed italic">&ldquo;{r.text}&rdquo;</p>
@@ -601,7 +611,7 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  GUARANTEE                                                  */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section id="guarantee" className="py-28 md:py-40 px-6">
+        <section id="guarantee" className="py-16 md:py-24 px-6">
           <div className="max-w-3xl mx-auto text-center">
             <Reveal>
               <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{t.guaranteeBadge}</p>
@@ -616,10 +626,10 @@ export default function LandingPage() {
             <Reveal delay={0.2}>
               <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-8">
                 {[
-                  { l: lang === "PT" ? "Preço fixo" : "Fixed price" },
-                  { l: lang === "PT" ? "Sempre pontual" : "Always on time" },
-                  { l: lang === "PT" ? "Cancelamento grátis" : "Free cancellation" },
-                  { l: lang === "PT" ? "Voo monitorizado" : "Flight tracked" },
+                  { l: t.badgePrice },
+                  { l: t.badgePunctual },
+                  { l: t.badgeCancel },
+                  { l: t.badgeFlight },
                 ].map((b, i) => (
                   <div key={i} className="text-center">
                     <div className="text-[#F5C518] text-lg mb-1">✓</div>

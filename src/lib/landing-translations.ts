@@ -55,6 +55,44 @@ export interface LandingTranslations {
   // Footer
   footer: string;
 
+  // Partners carousel
+  partnersLabel: string;
+  partnersSub: string;
+
+  // Section labels
+  labelTech: string;
+  techTitle: string;
+  labelProblem: string;
+  labelFleet: string;
+  labelHow: string;
+  labelWhyUs: string;
+  labelReviews: string;
+
+  // Steps
+  step1Title: string;
+  step1Desc: string;
+  step2Title: string;
+  step2Desc: string;
+  step3Title: string;
+  step3Desc: string;
+
+  // Stats strip
+  statClients: string;
+  statPunctuality: string;
+  statWait: string;
+  statSupport: string;
+
+  // Reviews
+  review1: string;
+  review2: string;
+  review3: string;
+
+  // Guarantee badges
+  badgePrice: string;
+  badgePunctual: string;
+  badgeCancel: string;
+  badgeFlight: string;
+
   // Nav
   navHow: string;
   navWhy: string;
@@ -130,6 +168,44 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     // Footer
     footer: '© 2025 HUB Transfer. Tecnologia que garante.',
 
+    // Partners carousel
+    partnersLabel: 'ATERRAMOS COM AS MELHORES',
+    partnersSub: 'De Lisboa ao mundo, monitorizamos voos de +15 companhias aéreas em tempo real.',
+
+    // Section labels
+    labelTech: 'Tecnologia',
+    techTitle: 'Sincronização aérea a cada 30 segundos.',
+    labelProblem: 'O problema',
+    labelFleet: 'A frota',
+    labelHow: 'Como funciona',
+    labelWhyUs: 'Porquê nós',
+    labelReviews: 'Avaliações',
+
+    // Steps
+    step1Title: 'Reserve em 2 minutos',
+    step1Desc: 'Informe o seu voo e destino. Nós tratamos do resto.',
+    step2Title: 'Monitoramos o seu voo',
+    step2Desc: 'O nosso sistema acompanha o seu voo em tempo real. Atrasos? Já sabemos.',
+    step3Title: 'Motorista à sua espera',
+    step3Desc: 'Desembarca e o seu motorista já está lá. Sem filas. Sem stress.',
+
+    // Stats strip
+    statClients: 'Clientes satisfeitos',
+    statPunctuality: 'Pontualidade',
+    statWait: 'Tempo de espera',
+    statSupport: 'Suporte disponível',
+
+    // Reviews
+    review1: 'O meu voo atrasou 3 horas e quando desembarquei o motorista já estava à minha espera. Incrível.',
+    review2: 'Serviço pontual e profissional. O melhor transfer que já usei em Portugal.',
+    review3: 'Reservei às 23h e às 23h02 já tinha confirmação. E o motorista foi impecável.',
+
+    // Guarantee badges
+    badgePrice: 'Preço fixo',
+    badgePunctual: 'Sempre pontual',
+    badgeCancel: 'Cancelamento grátis',
+    badgeFlight: 'Voo monitorizado',
+
     // Nav
     navHow: 'Como Funciona',
     navWhy: 'Porquê Nós',
@@ -203,6 +279,44 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Footer
     footer: '© 2025 HUB Transfer. Technology that guarantees.',
+
+    // Partners carousel
+    partnersLabel: 'WE LAND WITH THE BEST',
+    partnersSub: 'From Lisbon to the world, we monitor flights from 15+ airlines in real time.',
+
+    // Section labels
+    labelTech: 'Technology',
+    techTitle: 'Flight sync every 30 seconds.',
+    labelProblem: 'The problem',
+    labelFleet: 'The fleet',
+    labelHow: 'How it works',
+    labelWhyUs: 'Why us',
+    labelReviews: 'Reviews',
+
+    // Steps
+    step1Title: 'Book in 2 minutes',
+    step1Desc: 'Enter your flight and destination. We handle the rest.',
+    step2Title: 'We track your flight',
+    step2Desc: 'Our system follows your flight in real-time. Delays? We already know.',
+    step3Title: 'Driver waiting for you',
+    step3Desc: 'You land and your driver is already there. No queues. No stress.',
+
+    // Stats strip
+    statClients: 'Happy clients',
+    statPunctuality: 'Punctuality',
+    statWait: 'Wait time',
+    statSupport: 'Support available',
+
+    // Reviews
+    review1: 'My flight was delayed 3 hours and when I landed the driver was already waiting. Incredible.',
+    review2: 'Punctual and professional service. The best transfer I have used in Portugal.',
+    review3: 'I booked at 11pm and by 11:02pm I had confirmation. The driver was impeccable.',
+
+    // Guarantee badges
+    badgePrice: 'Fixed price',
+    badgePunctual: 'Always on time',
+    badgeCancel: 'Free cancellation',
+    badgeFlight: 'Flight tracked',
 
     // Nav
     navHow: 'How It Works',
@@ -278,6 +392,44 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     // Footer
     footer: '© 2025 HUB Transfer. Tecnología que garantiza.',
 
+    // Partners carousel
+    partnersLabel: 'ATERRIZAMOS CON LAS MEJORES',
+    partnersSub: 'De Lisboa al mundo, monitorizamos vuelos de +15 aerolíneas en tiempo real.',
+
+    // Section labels
+    labelTech: 'Tecnología',
+    techTitle: 'Sincronización aérea cada 30 segundos.',
+    labelProblem: 'El problema',
+    labelFleet: 'La flota',
+    labelHow: 'Cómo funciona',
+    labelWhyUs: 'Por qué nosotros',
+    labelReviews: 'Opiniones',
+
+    // Steps
+    step1Title: 'Reserva en 2 minutos',
+    step1Desc: 'Indica tu vuelo y destino. Nosotros nos encargamos del resto.',
+    step2Title: 'Monitorizamos tu vuelo',
+    step2Desc: 'Nuestro sistema sigue tu vuelo en tiempo real. ¿Retrasos? Ya lo sabemos.',
+    step3Title: 'Conductor esperándote',
+    step3Desc: 'Aterrizas y tu conductor ya está ahí. Sin colas. Sin estrés.',
+
+    // Stats strip
+    statClients: 'Clientes satisfechos',
+    statPunctuality: 'Puntualidad',
+    statWait: 'Tiempo de espera',
+    statSupport: 'Soporte disponible',
+
+    // Reviews
+    review1: 'Mi vuelo se retrasó 3 horas y cuando desembarqué el conductor ya me esperaba. Increíble.',
+    review2: 'Servicio puntual y profesional. El mejor transfer que he usado en Portugal.',
+    review3: 'Reservé a las 23h y a las 23h02 ya tenía confirmación. El conductor fue impecable.',
+
+    // Guarantee badges
+    badgePrice: 'Precio fijo',
+    badgePunctual: 'Siempre puntual',
+    badgeCancel: 'Cancelación gratis',
+    badgeFlight: 'Vuelo monitorizado',
+
     // Nav
     navHow: 'Cómo Funciona',
     navWhy: 'Por Qué Nosotros',
@@ -352,6 +504,44 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     // Footer
     footer: '© 2025 HUB Transfer. Technologie qui garantit.',
 
+    // Partners carousel
+    partnersLabel: 'NOUS ATTERRISSONS AVEC LES MEILLEURES',
+    partnersSub: 'De Lisbonne au monde entier, nous surveillons les vols de +15 compagnies aériennes en temps réel.',
+
+    // Section labels
+    labelTech: 'Technologie',
+    techTitle: 'Synchronisation aérienne toutes les 30 secondes.',
+    labelProblem: 'Le problème',
+    labelFleet: 'La flotte',
+    labelHow: 'Comment ça marche',
+    labelWhyUs: 'Pourquoi nous',
+    labelReviews: 'Avis',
+
+    // Steps
+    step1Title: 'Réservez en 2 minutes',
+    step1Desc: 'Indiquez votre vol et destination. Nous nous occupons du reste.',
+    step2Title: 'Nous suivons votre vol',
+    step2Desc: 'Notre système suit votre vol en temps réel. Retard ? Nous le savons déjà.',
+    step3Title: 'Chauffeur à votre arrivée',
+    step3Desc: 'Vous atterrissez et votre chauffeur est déjà là. Sans file. Sans stress.',
+
+    // Stats strip
+    statClients: 'Clients satisfaits',
+    statPunctuality: 'Ponctualité',
+    statWait: "Temps d'attente",
+    statSupport: 'Support disponible',
+
+    // Reviews
+    review1: "Mon vol a eu 3 heures de retard et à l'atterrissage le chauffeur était déjà là. Incroyable.",
+    review2: 'Service ponctuel et professionnel. Le meilleur transfert que j\'ai utilisé au Portugal.',
+    review3: "J'ai réservé à 23h et à 23h02 j'avais déjà la confirmation. Le chauffeur était impeccable.",
+
+    // Guarantee badges
+    badgePrice: 'Prix fixe',
+    badgePunctual: 'Toujours ponctuel',
+    badgeCancel: 'Annulation gratuite',
+    badgeFlight: 'Vol surveillé',
+
     // Nav
     navHow: 'Comment Ça Marche',
     navWhy: 'Pourquoi Nous',
@@ -425,6 +615,44 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Footer
     footer: '© 2025 HUB Transfer. Tecnologia che garantisce.',
+
+    // Partners carousel
+    partnersLabel: 'ATTERRIAMO CON LE MIGLIORI',
+    partnersSub: 'Da Lisbona al mondo, monitoriamo i voli di oltre 15 compagnie aeree in tempo reale.',
+
+    // Section labels
+    labelTech: 'Tecnologia',
+    techTitle: 'Sincronizzazione aerea ogni 30 secondi.',
+    labelProblem: 'Il problema',
+    labelFleet: 'La flotta',
+    labelHow: 'Come funziona',
+    labelWhyUs: 'Perché noi',
+    labelReviews: 'Recensioni',
+
+    // Steps
+    step1Title: 'Prenota in 2 minuti',
+    step1Desc: 'Inserisci il tuo volo e la destinazione. Ci pensiamo noi.',
+    step2Title: 'Monitoriamo il tuo volo',
+    step2Desc: 'Il nostro sistema segue il tuo volo in tempo reale. Ritardi? Lo sappiamo già.',
+    step3Title: 'Autista ad aspettarti',
+    step3Desc: 'Atterri e il tuo autista è già lì. Senza code. Senza stress.',
+
+    // Stats strip
+    statClients: 'Clienti soddisfatti',
+    statPunctuality: 'Puntualità',
+    statWait: 'Tempo di attesa',
+    statSupport: 'Supporto disponibile',
+
+    // Reviews
+    review1: 'Il mio volo ha avuto 3 ore di ritardo e quando sono sbarcato il conducente era già lì. Incredibile.',
+    review2: 'Servizio puntuale e professionale. Il miglior transfer che abbia usato in Portogallo.',
+    review3: 'Ho prenotato alle 23 e alle 23:02 avevo già la conferma. L\'autista era impeccabile.',
+
+    // Guarantee badges
+    badgePrice: 'Prezzo fisso',
+    badgePunctual: 'Sempre puntuale',
+    badgeCancel: 'Cancellazione gratuita',
+    badgeFlight: 'Volo monitorato',
 
     // Nav
     navHow: 'Come Funziona',
