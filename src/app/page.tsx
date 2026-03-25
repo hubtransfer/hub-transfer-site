@@ -150,84 +150,109 @@ function RadarIllustration() {
 }
 const WA_URL = `https://wa.me/${COMPANY.whatsapp.replace(/\+/g, "")}`;
 
-/* ─── Signature: clip-path reveal with cursor ─── */
+/* ─── Signature: SVG path pen-drawing "HUB Transfer" ─── */
 function SignatureAnimation() {
-  const ref = useRef<HTMLDivElement>(null);
+  const pathRef = useRef<SVGPathElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(false);
-  const [done, setDone] = useState(false);
+  const [len, setLen] = useState(0);
+  const [filled, setFilled] = useState(false);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+    const path = pathRef.current;
+    const container = containerRef.current;
+    if (!path || !container) return;
+    const totalLen = path.getTotalLength();
+    setLen(totalLen);
+    path.style.strokeDasharray = `${totalLen}`;
+    path.style.strokeDashoffset = `${totalLen}`;
+
     const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting && !active) { setActive(true); setTimeout(() => setDone(true), 2800); } },
-      { threshold: 0.5 },
+      ([e]) => {
+        if (e.isIntersecting && !active) {
+          setActive(true);
+          setTimeout(() => setFilled(true), 3200);
+        }
+      },
+      { threshold: 0.4 },
     );
-    obs.observe(el);
+    obs.observe(container);
     return () => obs.disconnect();
   }, [active]);
 
+  /* Hand-traced continuous cursive path for "HUB Transfer"
+     Each letter flows into the next — pen never lifts. */
+  const sigPath =
+    // H
+    "M 12 40 L 12 12 L 12 26 C 16 26, 24 26, 28 26 L 28 12 L 28 40 " +
+    // U (connected from H)
+    "M 28 40 C 28 42, 30 40, 34 14 C 34 14, 34 38, 42 38 C 48 38, 48 14, 48 14 " +
+    // B (connected)
+    "M 48 14 L 48 40 L 48 12 C 48 12, 62 12, 62 22 C 62 26, 48 26, 48 26 C 48 26, 64 26, 64 34 C 64 42, 48 40, 48 40 " +
+    // space + T
+    "M 72 14 L 84 14 M 78 14 L 78 40 " +
+    // r
+    "M 84 24 L 84 40 M 84 28 C 86 24, 90 22, 94 24 " +
+    // a
+    "M 106 24 C 100 24, 96 28, 96 32 C 96 36, 100 40, 106 40 C 106 40, 106 24, 106 24 L 106 40 " +
+    // n
+    "M 110 24 L 110 40 M 110 28 C 112 24, 118 22, 120 28 L 120 40 " +
+    // s
+    "M 132 26 C 130 24, 124 24, 124 28 C 124 32, 132 32, 132 36 C 132 40, 126 40, 124 38 " +
+    // f
+    "M 140 10 C 138 10, 136 14, 136 18 L 136 40 M 132 22 L 140 22 " +
+    // e
+    "M 144 32 L 154 32 C 154 26, 148 22, 144 26 C 140 30, 144 40, 154 38 " +
+    // r
+    "M 158 24 L 158 40 M 158 28 C 160 24, 164 22, 168 24";
+
   return (
-    <div ref={ref} className="flex flex-col items-center">
-      {/* Decorative lines + text container */}
-      <div className="flex items-center gap-4">
+    <div ref={containerRef} className="flex flex-col items-center">
+      <div className="flex items-center gap-3">
         {/* Left line */}
-        <div className="h-px bg-[#F5C518]/30 transition-all duration-700" style={{ width: active ? 40 : 0 }} />
+        <div className="h-px bg-[#F5C518]/30 transition-all duration-700" style={{ width: active ? 32 : 0 }} />
 
-        {/* Text with clip reveal */}
-        <div className="relative">
-          {/* The text — always rendered but clipped */}
-          <div
-            className="overflow-hidden"
+        {/* SVG signature */}
+        <svg viewBox="0 0 180 52" className="w-64 md:w-80 h-auto overflow-visible">
+          <path
+            ref={pathRef}
+            d={sigPath}
+            fill="none"
+            stroke="#F5C518"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
             style={{
-              width: active ? "100%" : "0%",
-              transition: "width 2.5s cubic-bezier(0.25, 0.1, 0.25, 1)",
+              strokeDasharray: len || 2000,
+              strokeDashoffset: active ? 0 : len || 2000,
+              transition: active ? "stroke-dashoffset 3s ease-in-out" : "none",
             }}
-          >
-            <span
-              className="whitespace-nowrap text-[#F5C518] text-3xl md:text-5xl"
-              style={{
-                fontFamily: "var(--font-cursive), 'Dancing Script', cursive",
-                fontWeight: 700,
-                display: "inline-block",
-              }}
-            >
-              HUB Transfer
-            </span>
-          </div>
-
-          {/* Cursor / pen line that moves with the reveal */}
-          {active && !done && (
-            <span
-              className="absolute top-1 bottom-1 w-0.5 bg-[#F5C518]"
-              style={{
-                right: 0,
-                animation: "cursorBlink 0.6s ease-in-out infinite",
-              }}
-            />
-          )}
-        </div>
+          />
+          {/* Fill overlay — same path but with fill, fades in after stroke */}
+          <path
+            d={sigPath}
+            fill="none"
+            stroke="#F5C518"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{
+              opacity: filled ? 1 : 0,
+              filter: "drop-shadow(0 0 4px rgba(245,197,24,0.3))",
+              transition: "opacity 0.5s ease-in",
+            }}
+          />
+        </svg>
 
         {/* Right line */}
-        <div
-          className="h-px bg-[#F5C518]/30 transition-all duration-700"
-          style={{ width: done ? 40 : 0, transitionDelay: "0.2s" }}
-        />
+        <div className="h-px bg-[#F5C518]/30 transition-all duration-700" style={{ width: filled ? 32 : 0, transitionDelay: "0.2s" }} />
       </div>
 
       {/* Underline flourish */}
       <div
-        className="h-px bg-gradient-to-r from-transparent via-[#F5C518]/20 to-transparent mx-auto mt-3 transition-all duration-1000"
-        style={{ width: done ? 280 : 0, transitionDelay: "0.3s" }}
+        className="h-px bg-gradient-to-r from-transparent via-[#F5C518]/25 to-transparent mx-auto mt-4 transition-all duration-1000"
+        style={{ width: filled ? 260 : 0, transitionDelay: "0.3s" }}
       />
-
-      {/* Inline cursor blink keyframe */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes cursorBlink {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0; }
-        }
-      `}} />
     </div>
   );
 }
@@ -586,8 +611,8 @@ export default function LandingPage() {
               {[...Array(2)].flatMap(() => [
                 "tap", "emirates", "british-airways", "lufthansa", "air-france", "klm", "iberia", "swiss", "turkish-airlines", "qatar", "mercedes", "bmw", "marriott", "air-europa", "royal-air-maroc", "aer-lingus", "air-canada", "jet2",
               ]).map((logo, i) => (
-                <div key={i} className="flex-shrink-0 w-24 h-14 md:w-36 md:h-18 flex items-center justify-center opacity-40 hover:opacity-100 active:opacity-100 transition-all duration-300 cursor-pointer group">
-                  <img src={`/logos/${logo}.png`} alt="" className="max-w-full max-h-full object-contain grayscale group-hover:grayscale-0 group-active:grayscale-0 transition-all duration-300" loading="lazy" />
+                <div key={i} className="flex-shrink-0 w-24 h-14 md:w-36 md:h-18 flex items-center justify-center opacity-40 hover:opacity-100 active:opacity-100 transition-opacity duration-300 cursor-pointer group">
+                  <img src={`/logos/${logo}.png`} alt="" className="max-w-full max-h-full object-contain grayscale group-hover:grayscale-0 group-active:grayscale-0 transition-[filter] duration-300" loading="lazy" />
                 </div>
               ))}
             </div>
