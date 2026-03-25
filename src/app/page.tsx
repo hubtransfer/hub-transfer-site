@@ -10,88 +10,132 @@ import { getLandingT, type LandingLang } from "@/lib/landing-translations";
 
 const LANGS: LandingLang[] = ["PT", "EN", "ES", "FR", "IT"];
 
-/* ─── Flight Radar SVG — rotating sweep with blips ─── */
+/* ─── ATC Flight Radar — rotating sweep, moving planes, coordinates ─── */
 function RadarIllustration() {
   return (
-    <div className="relative w-full aspect-square max-w-[340px] mx-auto select-none">
-      <svg viewBox="0 0 200 200" className="w-full h-full">
+    <div className="relative w-[420px] aspect-square select-none">
+      {/* LIVE indicator */}
+      <div className="absolute top-2 right-3 flex items-center gap-1.5 z-10">
+        <span className="w-1.5 h-1.5 rounded-full bg-[#F5C518]" style={{ animation: "livePulse 2s ease-in-out infinite" }} />
+        <span className="text-[#F5C518] text-[9px] tracking-[0.15em] uppercase" style={{ fontFamily: "var(--font-mono)" }}>LIVE</span>
+      </div>
+
+      <svg viewBox="0 0 240 240" className="w-full h-full">
         <defs>
-          {/* Sweep gradient — the fading trail behind the arm */}
-          <linearGradient id="sweepGrad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#F5C518" stopOpacity="0" />
-            <stop offset="100%" stopColor="#F5C518" stopOpacity="0.15" />
-          </linearGradient>
-          {/* Blip glow */}
-          <radialGradient id="blipGlow">
-            <stop offset="0%" stopColor="#F5C518" stopOpacity="0.6" />
+          <radialGradient id="sweepCone">
+            <stop offset="0%" stopColor="#F5C518" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="#F5C518" stopOpacity="0" />
+          </radialGradient>
+          <radialGradient id="blipG">
+            <stop offset="0%" stopColor="#F5C518" stopOpacity="0.7" />
             <stop offset="100%" stopColor="#F5C518" stopOpacity="0" />
           </radialGradient>
         </defs>
 
-        {/* Concentric rings */}
-        <circle cx="100" cy="100" r="85" fill="none" stroke="#F5C518" strokeWidth="0.4" opacity="0.12" />
-        <circle cx="100" cy="100" r="62" fill="none" stroke="#F5C518" strokeWidth="0.3" opacity="0.08" />
-        <circle cx="100" cy="100" r="40" fill="none" stroke="#F5C518" strokeWidth="0.3" opacity="0.08" />
-        <circle cx="100" cy="100" r="18" fill="none" stroke="#F5C518" strokeWidth="0.3" opacity="0.06" />
+        {/* ── Concentric rings ── */}
+        <circle cx="120" cy="120" r="100" fill="none" stroke="#F5C518" strokeWidth="0.5" opacity="0.35" />
+        <circle cx="120" cy="120" r="75"  fill="none" stroke="#F5C518" strokeWidth="0.4" opacity="0.25" />
+        <circle cx="120" cy="120" r="50"  fill="none" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
+        <circle cx="120" cy="120" r="25"  fill="none" stroke="#F5C518" strokeWidth="0.3" opacity="0.15" />
 
-        {/* Cross-hair axes */}
-        <line x1="15" y1="100" x2="185" y2="100" stroke="#F5C518" strokeWidth="0.3" opacity="0.06" />
-        <line x1="100" y1="15" x2="100" y2="185" stroke="#F5C518" strokeWidth="0.3" opacity="0.06" />
+        {/* ── Crosshair ── */}
+        <line x1="20" y1="120" x2="220" y2="120" stroke="#F5C518" strokeWidth="0.3" opacity="0.12" />
+        <line x1="120" y1="20" x2="120" y2="220" stroke="#F5C518" strokeWidth="0.3" opacity="0.12" />
 
-        {/* Tick marks at cardinal points */}
-        {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((a) => {
-          const r1 = (a * Math.PI) / 180;
-          return (
-            <line key={a}
-              x1={100 + Math.cos(r1) * 83} y1={100 + Math.sin(r1) * 83}
-              x2={100 + Math.cos(r1) * 87} y2={100 + Math.sin(r1) * 87}
-              stroke="#F5C518" strokeWidth="0.5" opacity="0.15"
-            />
-          );
+        {/* ── Tick marks every 30° ── */}
+        {[0,30,60,90,120,150,180,210,240,270,300,330].map((a) => {
+          const r = (a * Math.PI) / 180;
+          const major = a % 90 === 0;
+          return <line key={a}
+            x1={120 + Math.cos(r) * 97} y1={120 + Math.sin(r) * 97}
+            x2={120 + Math.cos(r) * (major ? 104 : 102)} y2={120 + Math.sin(r) * (major ? 104 : 102)}
+            stroke="#F5C518" strokeWidth={major ? "0.7" : "0.4"} opacity={major ? "0.4" : "0.2"}
+          />;
         })}
 
-        {/* ── Rotating sweep arm + trail ── */}
-        <g style={{ transformOrigin: "100px 100px", animation: "radarSpin 4s linear infinite" }}>
-          {/* Trail (cone shape) */}
-          <path d="M 100 100 L 185 100 A 85 85 0 0 0 170 55 Z" fill="url(#sweepGrad)" opacity="0.8" />
-          {/* Arm line */}
-          <line x1="100" y1="100" x2="185" y2="100" stroke="#F5C518" strokeWidth="0.8" opacity="0.5" />
+        {/* ── Coordinates — aviation style ── */}
+        <text x="120" y="14"  textAnchor="middle" fill="#F5C518" opacity="0.5" fontSize="5.5" style={{ fontFamily: "var(--font-mono)" }}>N</text>
+        <text x="120" y="234" textAnchor="middle" fill="#F5C518" opacity="0.5" fontSize="5.5" style={{ fontFamily: "var(--font-mono)" }}>S</text>
+        <text x="10"  y="122" textAnchor="middle" fill="#F5C518" opacity="0.5" fontSize="5.5" style={{ fontFamily: "var(--font-mono)" }}>W</text>
+        <text x="232" y="122" textAnchor="middle" fill="#F5C518" opacity="0.5" fontSize="5.5" style={{ fontFamily: "var(--font-mono)" }}>E</text>
+        <text x="22"  y="28"  fill="#F5C518" opacity="0.35" fontSize="4.5" style={{ fontFamily: "var(--font-mono)" }}>38.7°N</text>
+        <text x="185" y="232" fill="#F5C518" opacity="0.35" fontSize="4.5" style={{ fontFamily: "var(--font-mono)" }}>9.1°W</text>
+
+        {/* ── Center: LIS ── */}
+        <circle cx="120" cy="120" r="3" fill="#F5C518" opacity="0.3" />
+        <circle cx="120" cy="120" r="1.2" fill="#F5C518" opacity="0.7" />
+        <text x="120" y="130" textAnchor="middle" fill="#F5C518" opacity="0.6" fontSize="5" fontWeight="bold" style={{ fontFamily: "var(--font-mono)" }}>LIS</text>
+
+        {/* ═══ Rotating sweep arm + trail ═══ */}
+        <g style={{ transformOrigin: "120px 120px", animation: "radarSpin 4s linear infinite" }}>
+          <path d="M 120 120 L 220 120 A 100 100 0 0 0 203 68 Z" fill="url(#sweepCone)" />
+          <line x1="120" y1="120" x2="220" y2="120" stroke="#F5C518" strokeWidth="1" opacity="0.6" />
         </g>
 
-        {/* ── Flight blips (pulsing dots) ── */}
-        {/* Blip 1 — top-right, outer ring */}
-        <circle cx="145" cy="55" r="5" fill="url(#blipGlow)" style={{ animation: "radarBlip 2s ease-in-out infinite" }} />
-        <circle cx="145" cy="55" r="2" fill="#F5C518" opacity="0.8" style={{ animation: "radarBlip 2s ease-in-out infinite" }} />
+        {/* ═══ Flight blips — planes with trails ═══ */}
 
-        {/* Blip 2 — left, mid ring */}
-        <circle cx="55" cy="80" r="4" fill="url(#blipGlow)" style={{ animation: "radarBlip 2.5s ease-in-out infinite 0.8s" }} />
-        <circle cx="55" cy="80" r="1.5" fill="#F5C518" opacity="0.7" style={{ animation: "radarBlip 2.5s ease-in-out infinite 0.8s" }} />
+        {/* TP1923 — outer ring, top-right, moving slowly */}
+        <g style={{ animation: "planeMove1 20s linear infinite" }}>
+          <line x1="168" y1="58" x2="160" y2="50" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" strokeDasharray="2 2" />
+          <circle cx="172" cy="62" r="6" fill="url(#blipG)" style={{ animation: "radarBlip 2s ease-in-out infinite" }} />
+          <text x="172" y="64" textAnchor="middle" fill="#F5C518" opacity="0.9" fontSize="8" style={{ animation: "radarBlip 2s ease-in-out infinite" }}>✈</text>
+          <text x="183" y="58" fill="#F5C518" opacity="0.4" fontSize="3.8" style={{ fontFamily: "var(--font-mono)" }}>TP1923</text>
+        </g>
 
-        {/* Blip 3 — bottom, outer with plane icon */}
-        <circle cx="120" cy="145" r="4" fill="url(#blipGlow)" style={{ animation: "radarBlip 3s ease-in-out infinite 1.5s" }} />
-        <circle cx="120" cy="145" r="1.5" fill="#F5C518" opacity="0.7" style={{ animation: "radarBlip 3s ease-in-out infinite 1.5s" }} />
-        <text x="128" y="143" fill="#F5C518" opacity="0.5" fontSize="7" style={{ animation: "radarBlip 3s ease-in-out infinite 1.5s" }}>✈</text>
+        {/* LH1168 — left side, mid ring */}
+        <g style={{ animation: "planeMove2 25s linear infinite" }}>
+          <line x1="48" y1="88" x2="40" y2="83" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" strokeDasharray="2 2" />
+          <circle cx="52" cy="92" r="5" fill="url(#blipG)" style={{ animation: "radarBlip 2.5s ease-in-out infinite 0.6s" }} />
+          <text x="52" y="94" textAnchor="middle" fill="#F5C518" opacity="0.8" fontSize="7" style={{ animation: "radarBlip 2.5s ease-in-out infinite 0.6s" }}>✈</text>
+          <text x="63" y="88" fill="#F5C518" opacity="0.35" fontSize="3.5" style={{ fontFamily: "var(--font-mono)" }}>LH1168</text>
+        </g>
 
-        {/* Blip 4 — inner ring */}
-        <circle cx="80" cy="118" r="3" fill="url(#blipGlow)" style={{ animation: "radarBlip 2.2s ease-in-out infinite 0.4s" }} />
-        <circle cx="80" cy="118" r="1.2" fill="#F5C518" opacity="0.6" style={{ animation: "radarBlip 2.2s ease-in-out infinite 0.4s" }} />
+        {/* BA502 — bottom outer, large (closer) */}
+        <g style={{ animation: "planeMove3 18s linear infinite" }}>
+          <line x1="143" y1="175" x2="138" y2="168" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" strokeDasharray="2 2" />
+          <circle cx="148" cy="180" r="7" fill="url(#blipG)" style={{ animation: "radarBlip 1.8s ease-in-out infinite 1.2s" }} />
+          <text x="148" y="183" textAnchor="middle" fill="#F5C518" opacity="0.9" fontSize="10" style={{ animation: "radarBlip 1.8s ease-in-out infinite 1.2s" }}>✈</text>
+          <text x="162" y="177" fill="#F5C518" opacity="0.4" fontSize="3.8" style={{ fontFamily: "var(--font-mono)" }}>BA502</text>
+        </g>
 
-        {/* Center dot */}
-        <circle cx="100" cy="100" r="2.5" fill="#F5C518" opacity="0.25" />
-        <circle cx="100" cy="100" r="1" fill="#F5C518" opacity="0.5" />
+        {/* FR3341 — top-left, small (far away) */}
+        <g>
+          <circle cx="62" cy="55" r="4" fill="url(#blipG)" style={{ animation: "radarBlip 3s ease-in-out infinite 0.3s" }} />
+          <text x="62" y="57" textAnchor="middle" fill="#F5C518" opacity="0.6" fontSize="5.5" style={{ animation: "radarBlip 3s ease-in-out infinite 0.3s" }}>✈</text>
+        </g>
+
+        {/* EK191 — right mid, medium */}
+        <g style={{ animation: "planeMove4 22s linear infinite" }}>
+          <line x1="190" y1="133" x2="185" y2="128" stroke="#F5C518" strokeWidth="0.3" opacity="0.15" strokeDasharray="1.5 2" />
+          <circle cx="193" cy="138" r="5" fill="url(#blipG)" style={{ animation: "radarBlip 2.2s ease-in-out infinite 1.8s" }} />
+          <text x="193" y="140" textAnchor="middle" fill="#F5C518" opacity="0.8" fontSize="7" style={{ animation: "radarBlip 2.2s ease-in-out infinite 1.8s" }}>✈</text>
+        </g>
+
+        {/* AF1025 — inner ring, approaching */}
+        <g style={{ animation: "planeMove5 30s linear infinite" }}>
+          <circle cx="100" cy="80" r="5" fill="url(#blipG)" style={{ animation: "radarBlip 2s ease-in-out infinite 2.5s" }} />
+          <text x="100" y="82" textAnchor="middle" fill="#F5C518" opacity="0.85" fontSize="7" style={{ animation: "radarBlip 2s ease-in-out infinite 2.5s" }}>✈</text>
+          <text x="111" y="77" fill="#F5C518" opacity="0.35" fontSize="3.5" style={{ fontFamily: "var(--font-mono)" }}>AF1025</text>
+        </g>
+
+        {/* KL1693 — bottom-left */}
+        <g>
+          <line x1="72" y1="165" x2="68" y2="158" stroke="#F5C518" strokeWidth="0.3" opacity="0.15" strokeDasharray="1.5 2" />
+          <circle cx="75" cy="170" r="4.5" fill="url(#blipG)" style={{ animation: "radarBlip 2.8s ease-in-out infinite 0.9s" }} />
+          <text x="75" y="172" textAnchor="middle" fill="#F5C518" opacity="0.7" fontSize="6" style={{ animation: "radarBlip 2.8s ease-in-out infinite 0.9s" }}>✈</text>
+        </g>
       </svg>
 
-      {/* Data readout below radar */}
-      <div className="absolute -bottom-8 left-0 right-0 text-center space-y-0.5">
-        <p className="text-[#F5C518]/40 text-[10px] tracking-[0.2em] uppercase" style={{ fontFamily: "var(--font-mono)" }}>
+      {/* Data readout */}
+      <div className="absolute -bottom-10 left-0 right-0 text-center space-y-1">
+        <p className="text-[#F5C518] text-[10px] tracking-[0.2em] uppercase opacity-80" style={{ fontFamily: "var(--font-mono)" }}>
           MONITORING ACTIVE
         </p>
-        <p className="text-[#F5C518]/25 text-[9px] tracking-[0.15em] uppercase" style={{ fontFamily: "var(--font-mono)" }}>
+        <p className="text-[#F5C518] text-[9px] tracking-[0.15em] uppercase opacity-60" style={{ fontFamily: "var(--font-mono)" }}>
           SYNC EVERY 30s
         </p>
       </div>
 
-      {/* CSS animations via style tag */}
       <style>{`
         @keyframes radarSpin {
           from { transform: rotate(0deg); }
@@ -100,6 +144,35 @@ function RadarIllustration() {
         @keyframes radarBlip {
           0%, 100% { opacity: 0.3; }
           50% { opacity: 1; }
+        }
+        @keyframes livePulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
+        }
+        @keyframes planeMove1 {
+          0%   { transform: translate(0, 0); }
+          50%  { transform: translate(-8px, 6px); }
+          100% { transform: translate(0, 0); }
+        }
+        @keyframes planeMove2 {
+          0%   { transform: translate(0, 0); }
+          50%  { transform: translate(10px, -4px); }
+          100% { transform: translate(0, 0); }
+        }
+        @keyframes planeMove3 {
+          0%   { transform: translate(0, 0); }
+          50%  { transform: translate(-6px, -10px); }
+          100% { transform: translate(0, 0); }
+        }
+        @keyframes planeMove4 {
+          0%   { transform: translate(0, 0); }
+          50%  { transform: translate(-10px, 5px); }
+          100% { transform: translate(0, 0); }
+        }
+        @keyframes planeMove5 {
+          0%   { transform: translate(0, 0); }
+          50%  { transform: translate(7px, 8px); }
+          100% { transform: translate(0, 0); }
         }
       `}</style>
     </div>
@@ -365,8 +438,8 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         <section id="how" className="py-28 md:py-40 px-6">
           <div className="max-w-6xl mx-auto">
-            {/* Title + Binoculars */}
-            <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
+            {/* Title + Radar */}
+            <div className="grid lg:grid-cols-[1fr_auto] gap-6 items-center mb-20">
               <Reveal>
                 <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{lang === "PT" ? "Como funciona" : "How it works"}</p>
                 <h2 className="text-3xl md:text-5xl font-bold leading-tight" style={{ fontFamily: "var(--font-display)" }}>
