@@ -6,7 +6,7 @@ import { Menu, X, Phone, Mail, MapPin, Facebook, Instagram, ExternalLink, ArrowR
 import Script from "next/script";
 import { COMPANY } from "@/lib/constants";
 import { getLandingT, type LandingLang } from "@/lib/landing-translations";
-import ThemeToggle, { useTheme } from "@/components/ThemeToggle";
+// import ThemeToggle, { useTheme } from "@/components/ThemeToggle";
 
 const LANGS: LandingLang[] = ["PT", "EN", "ES", "FR", "IT"];
 const WA_URL = `https://wa.me/${COMPANY.whatsapp.replace(/\+/g, "")}`;
@@ -32,9 +32,7 @@ export default function LandingPage() {
   const [lang, setLang] = useState<LandingLang>("PT");
   const [menuOpen, setMenuOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const { theme, toggle: toggleTheme } = useTheme();
   const t = getLandingT(lang);
-  const isDark = theme === "dark";
 
   /* ── Scroll lock when drawer open ── */
   useEffect(() => {
@@ -141,8 +139,6 @@ export default function LandingPage() {
             </div>
 
             <div className="hidden md:flex items-center gap-4">
-              {/* Theme toggle */}
-              <ThemeToggle theme={theme} onToggle={toggleTheme} />
               {/* Lang */}
               <div className="flex gap-1">
                 {LANGS.map((l) => (
