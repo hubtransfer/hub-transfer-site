@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useDriverStore } from "@/hooks/useDriverStore";
 import DriverTripCard from "@/components/driver/DriverTripCard";
 import DriverNameplate from "@/components/driver/DriverNameplate";
+import { SkeletonList } from "@/components/trips/SkeletonCard";
 import {
   detectTipo,
   calcDriverPrice,
@@ -339,11 +340,13 @@ export default function DriverTripsPage() {
           </p>
         </div>
         <div className="flex items-center gap-3 flex-shrink-0">
-          {store.isLoading && (
-            <span className="text-xs text-[#F5C518]/60 animate-pulse">
-              sync...
-            </span>
-          )}
+          {store.isLoading ? (
+            <span className="text-xs text-[#F5C518]/60 animate-pulse font-mono">A sincronizar...</span>
+          ) : store.isFromCache ? (
+            <span className="text-xs text-[#D4D4D4] font-mono">Cache &middot; {store.cacheAge}</span>
+          ) : store.lastSyncTime ? (
+            <span className="text-xs text-[#10b981] font-mono">Sincronizado &#10003;</span>
+          ) : null}
           <span className="text-sm text-white/50 tabular-nums font-mono">
             {clock}
           </span>
@@ -431,15 +434,18 @@ export default function DriverTripsPage() {
 
       {/* ── TRIP CARDS ── */}
       <div className="px-4 pb-8 space-y-3">
-        {driverTrips.length === 0 ? (
+        {driverTrips.length === 0 && store.isLoading ? (
+          <SkeletonList count={3} />
+        ) : driverTrips.length === 0 ? (
           <div className="text-center py-20">
             <div className="text-5xl mb-4 opacity-30">&#128661;</div>
-            <p className="text-white/40 text-sm font-mono">
+            <p className="text-[#E5E5E5] text-sm font-mono">
               Nenhuma viagem para hoje
             </p>
-            <p className="text-white/20 text-xs mt-1 font-mono">
-              Puxa para baixo para actualizar
-            </p>
+            <button type="button" onClick={() => store.syncViagens()}
+              className="mt-3 text-[#F5C518] text-xs font-mono underline underline-offset-2 cursor-pointer">
+              Sincronizar
+            </button>
           </div>
         ) : (
           <>

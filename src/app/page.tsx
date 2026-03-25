@@ -12,20 +12,20 @@ const LANGS: LandingLang[] = ["PT", "EN", "ES", "FR", "IT"];
 
 /* ─── ATC Flight Radar — all animations via CSS classes, zero JS ─── */
 function RadarIllustration() {
-  /* Fixed plane positions: x/y as SVG coords in 240x240 viewBox */
-  const planes = [
+  /* Fixed plane positions — first 5 shown on mobile, all 8 on desktop */
+  const allPlanes = [
     { cx: 80,  cy: 70,  code: "TP1923", sz: 14, moveCls: "radar-move-1", blipCls: "radar-blip-1", trail: true },
     { cx: 150, cy: 60,  code: "AF1025", sz: 12, moveCls: "radar-move-2", blipCls: "radar-blip-2", trail: true },
     { cx: 170, cy: 110, code: "BA502",  sz: 16, moveCls: "radar-move-3", blipCls: "radar-blip-3", trail: true },
     { cx: 60,  cy: 140, code: "LH1148", sz: 11, moveCls: "radar-move-4", blipCls: "radar-blip-4", trail: true },
     { cx: 130, cy: 160, code: "EK191",  sz: 13, moveCls: "radar-move-5", blipCls: "radar-blip-5", trail: false },
-    { cx: 100, cy: 90,  code: "FR8832", sz: 12, moveCls: "",             blipCls: "radar-blip-6", trail: false },
-    { cx: 180, cy: 150, code: "QR345",  sz: 14, moveCls: "radar-move-7", blipCls: "radar-blip-7", trail: true },
-    { cx: 50,  cy: 100, code: "IB3102", sz: 11, moveCls: "",             blipCls: "radar-blip-8", trail: true },
-  ];
+    { cx: 100, cy: 90,  code: "FR8832", sz: 12, moveCls: "",             blipCls: "radar-blip-6", trail: false, desktopOnly: true },
+    { cx: 180, cy: 150, code: "QR345",  sz: 14, moveCls: "radar-move-7", blipCls: "radar-blip-7", trail: true, desktopOnly: true },
+    { cx: 50,  cy: 100, code: "IB3102", sz: 11, moveCls: "",             blipCls: "radar-blip-8", trail: true, desktopOnly: true },
+  ] as const;
 
   return (
-    <div className="relative w-[420px] aspect-square select-none">
+    <div className="relative w-[260px] md:w-[320px] lg:w-[420px] aspect-square select-none mx-auto">
       {/* LIVE indicator */}
       <div className="absolute top-2 right-3 flex items-center gap-1.5 z-10">
         <span className="w-1.5 h-1.5 rounded-full bg-[#F5C518] radar-live" />
@@ -87,9 +87,9 @@ function RadarIllustration() {
           <line x1="120" y1="120" x2="220" y2="120" stroke="#F5C518" strokeWidth="1" opacity="0.6" />
         </g>
 
-        {/* 8 flight blips — fixed SVG coords, CSS class animations */}
-        {planes.map((p, i) => (
-          <g key={i} className={p.moveCls}>
+        {/* Flight blips — 5 on mobile, 8 on desktop */}
+        {allPlanes.map((p, i) => (
+          <g key={i} className={`${p.moveCls} ${"desktopOnly" in p && p.desktopOnly ? "hidden lg:block" : ""}`}>
             {p.trail && (
               <line x1={p.cx - 8} y1={p.cy - 8} x2={p.cx} y2={p.cy}
                 stroke="#F5C518" strokeWidth="0.4" opacity="0.2" strokeDasharray="2 2" />
@@ -108,11 +108,11 @@ function RadarIllustration() {
       </svg>
 
       {/* Data readout */}
-      <div className="absolute -bottom-10 left-0 right-0 text-center space-y-1">
-        <p className="text-[#F5C518] text-[10px] tracking-[0.2em] uppercase opacity-80 font-mono">
+      <div className="absolute -bottom-8 lg:-bottom-10 left-0 right-0 text-center space-y-0.5 lg:space-y-1">
+        <p className="text-[#F5C518] text-[8px] lg:text-[10px] tracking-[0.2em] uppercase opacity-80 font-mono">
           MONITORING ACTIVE
         </p>
-        <p className="text-[#F5C518] text-[9px] tracking-[0.15em] uppercase opacity-60 font-mono">
+        <p className="text-[#F5C518] text-[7px] lg:text-[9px] tracking-[0.15em] uppercase opacity-60 font-mono">
           SYNC EVERY 30s
         </p>
       </div>
@@ -407,8 +407,12 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         <section id="how" className="py-28 md:py-40 px-6">
           <div className="max-w-6xl mx-auto">
-            <div className="grid lg:grid-cols-[1fr_auto] gap-6 items-center">
-              <Reveal>
+            <div className="flex flex-col lg:grid lg:grid-cols-[1fr_auto] gap-8 lg:gap-6 items-center">
+              {/* Radar — above text on mobile, right side on desktop */}
+              <Reveal delay={0.1} className="lg:order-2 mb-4 lg:mb-0">
+                <RadarIllustration />
+              </Reveal>
+              <Reveal className="lg:order-1">
                 <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{lang === "PT" ? "Tecnologia" : "Technology"}</p>
                 <h2 className="text-3xl md:text-5xl font-bold leading-tight mb-6" style={{ fontFamily: "var(--font-display)" }}>
                   {lang === "PT" ? "Sincronização aérea a cada 30 segundos." : "Flight sync every 30 seconds."}
@@ -422,9 +426,6 @@ export default function LandingPage() {
                     </div>
                   ))}
                 </div>
-              </Reveal>
-              <Reveal delay={0.2} className="hidden lg:block">
-                <RadarIllustration />
               </Reveal>
             </div>
           </div>
