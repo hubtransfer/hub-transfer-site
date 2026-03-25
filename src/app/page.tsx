@@ -75,58 +75,45 @@ function RadarIllustration() {
           <line x1="120" y1="120" x2="220" y2="120" stroke="#F5C518" strokeWidth="1" opacity="0.6" />
         </g>
 
-        {/* ═══ Flight blips — planes with trails ═══ */}
-
-        {/* TP1923 — outer ring, top-right, moving slowly */}
-        <g style={{ animation: "planeMove1 20s linear infinite" }}>
-          <line x1="168" y1="58" x2="160" y2="50" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" strokeDasharray="2 2" />
-          <circle cx="172" cy="62" r="6" fill="url(#blipG)" style={{ animation: "radarBlip 2s ease-in-out infinite" }} />
-          <text x="172" y="64" textAnchor="middle" fill="#F5C518" opacity="0.9" fontSize="8" style={{ animation: "radarBlip 2s ease-in-out infinite" }}>✈</text>
-          <text x="183" y="58" fill="#F5C518" opacity="0.4" fontSize="3.8" style={{ fontFamily: "var(--font-mono)" }}>TP1923</text>
-        </g>
-
-        {/* LH1168 — left side, mid ring */}
-        <g style={{ animation: "planeMove2 25s linear infinite" }}>
-          <line x1="48" y1="88" x2="40" y2="83" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" strokeDasharray="2 2" />
-          <circle cx="52" cy="92" r="5" fill="url(#blipG)" style={{ animation: "radarBlip 2.5s ease-in-out infinite 0.6s" }} />
-          <text x="52" y="94" textAnchor="middle" fill="#F5C518" opacity="0.8" fontSize="7" style={{ animation: "radarBlip 2.5s ease-in-out infinite 0.6s" }}>✈</text>
-          <text x="63" y="88" fill="#F5C518" opacity="0.35" fontSize="3.5" style={{ fontFamily: "var(--font-mono)" }}>LH1168</text>
-        </g>
-
-        {/* BA502 — bottom outer, large (closer) */}
-        <g style={{ animation: "planeMove3 18s linear infinite" }}>
-          <line x1="143" y1="175" x2="138" y2="168" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" strokeDasharray="2 2" />
-          <circle cx="148" cy="180" r="7" fill="url(#blipG)" style={{ animation: "radarBlip 1.8s ease-in-out infinite 1.2s" }} />
-          <text x="148" y="183" textAnchor="middle" fill="#F5C518" opacity="0.9" fontSize="10" style={{ animation: "radarBlip 1.8s ease-in-out infinite 1.2s" }}>✈</text>
-          <text x="162" y="177" fill="#F5C518" opacity="0.4" fontSize="3.8" style={{ fontFamily: "var(--font-mono)" }}>BA502</text>
-        </g>
-
-        {/* FR3341 — top-left, small (far away) */}
-        <g>
-          <circle cx="62" cy="55" r="4" fill="url(#blipG)" style={{ animation: "radarBlip 3s ease-in-out infinite 0.3s" }} />
-          <text x="62" y="57" textAnchor="middle" fill="#F5C518" opacity="0.6" fontSize="5.5" style={{ animation: "radarBlip 3s ease-in-out infinite 0.3s" }}>✈</text>
-        </g>
-
-        {/* EK191 — right mid, medium */}
-        <g style={{ animation: "planeMove4 22s linear infinite" }}>
-          <line x1="190" y1="133" x2="185" y2="128" stroke="#F5C518" strokeWidth="0.3" opacity="0.15" strokeDasharray="1.5 2" />
-          <circle cx="193" cy="138" r="5" fill="url(#blipG)" style={{ animation: "radarBlip 2.2s ease-in-out infinite 1.8s" }} />
-          <text x="193" y="140" textAnchor="middle" fill="#F5C518" opacity="0.8" fontSize="7" style={{ animation: "radarBlip 2.2s ease-in-out infinite 1.8s" }}>✈</text>
-        </g>
-
-        {/* AF1025 — inner ring, approaching */}
-        <g style={{ animation: "planeMove5 30s linear infinite" }}>
-          <circle cx="100" cy="80" r="5" fill="url(#blipG)" style={{ animation: "radarBlip 2s ease-in-out infinite 2.5s" }} />
-          <text x="100" y="82" textAnchor="middle" fill="#F5C518" opacity="0.85" fontSize="7" style={{ animation: "radarBlip 2s ease-in-out infinite 2.5s" }}>✈</text>
-          <text x="111" y="77" fill="#F5C518" opacity="0.35" fontSize="3.5" style={{ fontFamily: "var(--font-mono)" }}>AF1025</text>
-        </g>
-
-        {/* KL1693 — bottom-left */}
-        <g>
-          <line x1="72" y1="165" x2="68" y2="158" stroke="#F5C518" strokeWidth="0.3" opacity="0.15" strokeDasharray="1.5 2" />
-          <circle cx="75" cy="170" r="4.5" fill="url(#blipG)" style={{ animation: "radarBlip 2.8s ease-in-out infinite 0.9s" }} />
-          <text x="75" y="172" textAnchor="middle" fill="#F5C518" opacity="0.7" fontSize="6" style={{ animation: "radarBlip 2.8s ease-in-out infinite 0.9s" }}>✈</text>
-        </g>
+        {/* ═══ Flight blips — 8 planes, fixed positions ═══ */}
+        {[
+          { x: 30, y: 25, code: "TP1923", sz: 14, move: "planeMove1 20s linear infinite", blip: "radarBlip 2s ease-in-out infinite", trail: true },
+          { x: 65, y: 20, code: "AF1025", sz: 12, move: "planeMove5 28s linear infinite", blip: "radarBlip 2.4s ease-in-out infinite 0.5s", trail: true },
+          { x: 75, y: 45, code: "BA502",  sz: 16, move: "planeMove3 18s linear infinite", blip: "radarBlip 1.8s ease-in-out infinite 1.2s", trail: true },
+          { x: 20, y: 60, code: "LH1148", sz: 11, move: "planeMove2 25s linear infinite", blip: "radarBlip 2.6s ease-in-out infinite 0.8s", trail: true },
+          { x: 55, y: 70, code: "EK191",  sz: 13, move: "planeMove4 22s linear infinite", blip: "radarBlip 2.2s ease-in-out infinite 1.8s", trail: false },
+          { x: 40, y: 35, code: "FR8832", sz: 12, move: "",                                blip: "radarBlip 3s ease-in-out infinite 0.3s",   trail: false },
+          { x: 80, y: 65, code: "QR345",  sz: 14, move: "planeMove1 24s linear infinite",  blip: "radarBlip 2s ease-in-out infinite 2.5s",   trail: true },
+          { x: 15, y: 40, code: "IB3102", sz: 11, move: "",                                blip: "radarBlip 2.8s ease-in-out infinite 0.9s", trail: true },
+        ].map((p, i) => {
+          // Convert percentage (0-100) to SVG coords (20-220 within 240 viewBox)
+          const cx = 20 + (p.x / 100) * 200;
+          const cy = 20 + (p.y / 100) * 200;
+          const r = p.sz * 0.35;
+          return (
+            <g key={i} style={p.move ? { animation: p.move } : undefined}>
+              {/* Flight trail */}
+              {p.trail && (
+                <line x1={cx - 8} y1={cy - 8} x2={cx} y2={cy}
+                  stroke="#F5C518" strokeWidth="0.4" opacity="0.2" strokeDasharray="2 2" />
+              )}
+              {/* Glow */}
+              <circle cx={cx} cy={cy} r={r + 2} fill="url(#blipG)" style={{ animation: p.blip }} />
+              {/* Plane icon */}
+              <text x={cx} y={cy + p.sz * 0.15} textAnchor="middle"
+                fill="#F5C518" opacity="0.9" fontSize={p.sz}
+                style={{ animation: p.blip }}>
+                ✈
+              </text>
+              {/* Callsign label */}
+              <text x={cx + r + 4} y={cy - 3}
+                fill="#F5C518" opacity="0.4" fontSize="3.8"
+                style={{ fontFamily: "var(--font-mono)" }}>
+                {p.code}
+              </text>
+            </g>
+          );
+        })}
       </svg>
 
       {/* Data readout */}
