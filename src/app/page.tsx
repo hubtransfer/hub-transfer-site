@@ -116,6 +116,34 @@ function RadarIllustration() {
           SYNC EVERY 30s
         </p>
       </div>
+
+      {/* Inline keyframes — immune to Tailwind purging */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .radar-sweep{transform-origin:120px 120px;animation:_rspin 4s linear infinite}
+        .radar-live{animation:_rpulse 2s ease-in-out infinite}
+        .radar-blip-1{animation:_rblink 2s ease-in-out infinite}
+        .radar-blip-2{animation:_rblink 2.4s ease-in-out infinite .5s}
+        .radar-blip-3{animation:_rblink 1.8s ease-in-out infinite 1.2s}
+        .radar-blip-4{animation:_rblink 2.6s ease-in-out infinite .8s}
+        .radar-blip-5{animation:_rblink 2.2s ease-in-out infinite 1.8s}
+        .radar-blip-6{animation:_rblink 3s ease-in-out infinite .3s}
+        .radar-blip-7{animation:_rblink 2s ease-in-out infinite 2.5s}
+        .radar-blip-8{animation:_rblink 2.8s ease-in-out infinite .9s}
+        .radar-move-1{animation:_rmv1 20s linear infinite}
+        .radar-move-2{animation:_rmv2 28s linear infinite}
+        .radar-move-3{animation:_rmv3 18s linear infinite}
+        .radar-move-4{animation:_rmv4 25s linear infinite}
+        .radar-move-5{animation:_rmv5 22s linear infinite}
+        .radar-move-7{animation:_rmv1 24s linear infinite}
+        @keyframes _rspin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+        @keyframes _rpulse{0%,100%{opacity:1}50%{opacity:.3}}
+        @keyframes _rblink{0%,100%{opacity:.3}50%{opacity:1}}
+        @keyframes _rmv1{0%{transform:translate(0,0)}50%{transform:translate(-8px,6px)}100%{transform:translate(0,0)}}
+        @keyframes _rmv2{0%{transform:translate(0,0)}50%{transform:translate(7px,8px)}100%{transform:translate(0,0)}}
+        @keyframes _rmv3{0%{transform:translate(0,0)}50%{transform:translate(-6px,-10px)}100%{transform:translate(0,0)}}
+        @keyframes _rmv4{0%{transform:translate(0,0)}50%{transform:translate(10px,-4px)}100%{transform:translate(0,0)}}
+        @keyframes _rmv5{0%{transform:translate(0,0)}50%{transform:translate(-10px,5px)}100%{transform:translate(0,0)}}
+      `}} />
     </div>
   );
 }
