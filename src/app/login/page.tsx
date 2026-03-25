@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 /* ─── Route map: password → destination ─── */
 const ROUTES: Record<string, { path: string; role: string }> = {
@@ -74,19 +75,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center space-y-3">
           <a href="/" className="inline-block">
-            <h1
-              className="text-4xl font-black tracking-wider"
-              style={{
-                fontFamily: "var(--font-display), serif",
-                background:
-                  "linear-gradient(135deg, #F5C518, #FFD700, #F5C518)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >
-              HUB TRANSFER
-            </h1>
+            <Image src="/images/logo.png" alt="HUB Transfer" width={200} height={56} className="h-14 w-auto mx-auto" priority />
           </a>
           <p className="text-sm text-white/30 tracking-[0.2em] uppercase">
             Área Reservada

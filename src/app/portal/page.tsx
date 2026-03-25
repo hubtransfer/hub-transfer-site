@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useCallback } from "react";
+import Image from "next/image";
 import { useTransferStore } from "@/hooks/useTransferStore";
 import TransferForm from "@/components/portal/TransferForm";
 import TransferTable from "@/components/portal/TransferTable";
@@ -59,9 +60,7 @@ export default function PortalPage() {
       {/* Header */}
       <header className="bg-gradient-to-br from-hub-black-card to-hub-black border-b border-hub-gold/10">
         <div className="max-w-[1400px] mx-auto px-4 py-8 text-center">
-          <h1 className="font-display text-4xl md:text-5xl font-bold tracking-tight mb-2">
-            <span className="text-gradient-gold">HUB Transfer</span>
-          </h1>
+          <Image src="/images/logo.png" alt="HUB Transfer" width={200} height={56} className="h-14 w-auto mx-auto mb-2" priority />
           <p className="text-hub-gray-400 text-lg font-body tracking-wide">
             Sistema de Gestão de Transfers
           </p>

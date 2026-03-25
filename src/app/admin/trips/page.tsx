@@ -211,9 +211,7 @@ export default function TripsPage() {
       {/* ─── TOP BAR ─── */}
       <header className="fixed top-0 left-0 right-0 h-12 bg-hub-black-card border-b border-hub-gold/10 z-50 flex items-center justify-between px-4">
         {/* Logo */}
-        <span className="text-lg font-black tracking-widest bg-gradient-to-r from-hub-gold to-yellow-400 bg-clip-text text-transparent">
-          HUB OPS
-        </span>
+        <img src="/images/logo.png" alt="HUB Transfer" className="h-8 w-auto" />
 
         {/* Clock + Badges */}
         <div className="flex items-center gap-3">

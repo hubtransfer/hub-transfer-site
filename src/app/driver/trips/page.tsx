@@ -227,19 +227,7 @@ export default function DriverTripsPage() {
         <div className="w-full max-w-sm space-y-8">
           {/* Brand */}
           <div className="text-center space-y-2">
-            <h1
-              className="text-4xl font-black tracking-wider"
-              style={{
-                fontFamily: "var(--font-display), serif",
-                background:
-                  "linear-gradient(135deg, #F5C518, #FFD700, #F5C518)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >
-              HUB TRANSFER
-            </h1>
+            <img src="/images/logo.png" alt="HUB Transfer" className="h-14 w-auto mx-auto" />
             <p className="text-sm text-white/40 tracking-widest uppercase">
               Motorista
             </p>
@@ -335,9 +323,7 @@ export default function DriverTripsPage() {
           >
             {store.driverName}
           </button>
-          <p className="text-[10px] text-white/30 tracking-wider font-mono">
-            HUB Transfer
-          </p>
+          <img src="/images/logo.png" alt="HUB Transfer" className="h-5 w-auto opacity-50 mt-0.5" />
         </div>
         <div className="flex items-center gap-3 flex-shrink-0">
           {store.isLoading ? (

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Phone, Mail, MapPin, Facebook, Instagram, ExternalLink, ArrowRight, ChevronDown } from "lucide-react";
 import Script from "next/script";
+import Image from "next/image";
 import { COMPANY } from "@/lib/constants";
 import { getLandingT, type LandingLang } from "@/lib/landing-translations";
 // import ThemeToggle, { useTheme } from "@/components/ThemeToggle";
@@ -259,8 +260,8 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "bg-background/90 backdrop-blur-md" : "bg-transparent"}`}>
           <div className="max-w-7xl mx-auto px-6 lg:px-12 h-16 flex items-center justify-between">
-            <a href="#" className="text-xl font-bold tracking-wide" style={{ fontFamily: "var(--font-display)", color: "#F5C518" }}>
-              HUB Transfer
+            <a href="#" className="flex-shrink-0">
+              <Image src="/images/logo.png" alt="HUB Transfer" width={140} height={40} className="h-10 w-auto" priority />
             </a>
 
             {/* Desktop links */}
@@ -446,8 +447,8 @@ export default function LandingPage() {
             </Reveal>
             <Reveal delay={0.2} className="order-1 lg:order-2">
               <div className="relative">
-                <img src="/images/hub_dobra2_dor.jpg" alt="" className="w-full h-[400px] lg:h-[560px] object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
+                <img src="/images/pessoas.png" alt="Passageiros no aeroporto de Lisboa" className="w-full h-[400px] lg:h-[560px] object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-black/10" />
               </div>
             </Reveal>
           </div>
@@ -460,7 +461,7 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 lg:gap-0 items-center">
             <Reveal>
               <div className="relative">
-                <img src="/images/hub_dobra4_carro.jpg" alt="" className="w-full h-[400px] lg:h-[560px] object-cover" />
+                <img src="/images/mercedes.png" alt="Mercedes S-Class HUB Transfer em Lisboa" className="w-full h-[400px] lg:h-[560px] object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-l from-black/40 to-transparent" />
               </div>
             </Reveal>
@@ -529,7 +530,7 @@ export default function LandingPage() {
             </Reveal>
             <Reveal delay={0.2}>
               <div className="relative">
-                <img src="/images/hub_dobra3_algoritmo.jpg" alt="" className="w-full h-[400px] lg:h-[520px] object-cover" />
+                <img src="/images/app.png" alt="Aplicação HUB Transfer com vista de Lisboa" className="w-full h-[400px] lg:h-[520px] object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent" />
               </div>
             </Reveal>
@@ -646,7 +647,7 @@ export default function LandingPage() {
         <footer className="border-t border-white/5 py-16 md:py-20 px-6">
           <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
             <div>
-              <div className="text-lg font-bold mb-3" style={{ fontFamily: "var(--font-display)", color: "#F5C518" }}>HUB Transfer</div>
+              <Image src="/images/logo.png" alt="HUB Transfer" width={160} height={50} className="h-12 w-auto mb-3" />
               <p className="text-[#E5E5E5] text-xs leading-relaxed">Transfer and Tourism</p>
               <div className="flex gap-3 mt-4">
                 <a href="https://www.facebook.com/hubtransfer" target="_blank" rel="noopener noreferrer" className="text-[#E5E5E5] hover:text-white/80 transition-colors"><Facebook className="w-4 h-4" /></a>
