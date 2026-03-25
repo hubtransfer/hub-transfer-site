@@ -39,7 +39,9 @@
       "Bash(unzip -o manus-original/HUB_TRANSFER_ASSETS.zip -d public/)",
       "Bash(gh auth:*)",
       "Bash(winget install:*)",
-      "Bash(git remote:*)"
+      "Bash(git remote:*)",
+      "Bash(— monitorizamos:*)",
+      "Bash(excelência.\" \\(and translations\\):*)"
     ]
   }
 }
