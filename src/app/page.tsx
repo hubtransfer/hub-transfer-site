@@ -416,7 +416,7 @@ export default function LandingPage() {
                 <RadarIllustration />
               </Reveal>
               <Reveal className="lg:order-1">
-                <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{t.labelTech}</p>
+                <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelTech}</p>
                 <h2 className="text-3xl md:text-5xl font-bold leading-tight mb-6" style={{ fontFamily: "var(--font-display)" }}>
                   {t.techTitle}
                 </h2>
@@ -440,7 +440,7 @@ export default function LandingPage() {
         <section className="py-16 md:py-24">
           <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 lg:gap-0 items-center">
             <Reveal className="order-2 lg:order-1 lg:pr-20">
-              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{t.labelProblem}</p>
+              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelProblem}</p>
               <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-6" style={{ fontFamily: "var(--font-display)" }}>
                 {t.painTitle}
               </h2>
@@ -468,7 +468,7 @@ export default function LandingPage() {
               </div>
             </Reveal>
             <Reveal delay={0.2} className="lg:pl-20">
-              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{t.labelFleet}</p>
+              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelFleet}</p>
               <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-6" style={{ fontFamily: "var(--font-display)" }}>
                 {t.fleetTitle}
               </h2>
@@ -492,7 +492,7 @@ export default function LandingPage() {
           {/* Title + subtitle */}
           <div className="max-w-6xl mx-auto px-6 text-center mb-8">
             <Reveal>
-              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-3">{t.partnersLabel}</p>
+              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-3">{t.partnersLabel}</p>
               <p className="text-[#B0B0B0] text-sm max-w-xl mx-auto">{t.partnersSub}</p>
             </Reveal>
           </div>
@@ -518,7 +518,7 @@ export default function LandingPage() {
         <section className="py-16 md:py-24 px-6">
           <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-0 items-center">
             <Reveal className="lg:pr-20">
-              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{t.labelHow}</p>
+              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelHow}</p>
               <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-10" style={{ fontFamily: "var(--font-display)" }}>
                 {t.algoTitle}
               </h2>
@@ -553,7 +553,7 @@ export default function LandingPage() {
         <section id="why" className="py-16 md:py-24 px-6">
           <div className="max-w-5xl mx-auto">
             <Reveal>
-              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{t.labelWhyUs}</p>
+              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelWhyUs}</p>
               <h2 className="text-3xl md:text-5xl font-bold leading-tight max-w-lg" style={{ fontFamily: "var(--font-display)" }}>
                 {t.whyTitle}
               </h2>
@@ -588,7 +588,7 @@ export default function LandingPage() {
         <section className="py-16 md:py-24 px-6 border-t border-white/5">
           <div className="max-w-5xl mx-auto">
             <Reveal>
-              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{t.labelReviews}</p>
+              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelReviews}</p>
             </Reveal>
             <div className="mt-12 grid md:grid-cols-3 gap-12">
               {[
@@ -614,7 +614,7 @@ export default function LandingPage() {
         <section id="guarantee" className="py-16 md:py-24 px-6">
           <div className="max-w-3xl mx-auto text-center">
             <Reveal>
-              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{t.guaranteeBadge}</p>
+              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.guaranteeBadge}</p>
               <h2 className="text-3xl md:text-5xl font-bold leading-tight" style={{ fontFamily: "var(--font-display)" }}>
                 {t.guaranteeTitle}
               </h2>
