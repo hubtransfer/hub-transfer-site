@@ -132,7 +132,7 @@ export default function LandingPage() {
                 { label: t.navWhy, id: "why" },
                 { label: t.navGuarantee, id: "guarantee" },
               ].map((l) => (
-                <button key={l.id} onClick={() => scrollTo(l.id)} className="text-[13px] text-white/50 hover:text-white transition-colors tracking-wide uppercase cursor-pointer">
+                <button key={l.id} onClick={() => scrollTo(l.id)} className="text-[13px] text-[#E5E5E5] hover:text-white transition-colors tracking-wide uppercase cursor-pointer">
                   {l.label}
                 </button>
               ))}
@@ -155,7 +155,7 @@ export default function LandingPage() {
             </div>
 
             {/* Mobile hamburger */}
-            <button className="md:hidden text-white/60 cursor-pointer" onClick={() => setMenuOpen(!menuOpen)}>
+            <button className="md:hidden text-[#E5E5E5] cursor-pointer" onClick={() => setMenuOpen(!menuOpen)}>
               {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
@@ -166,7 +166,7 @@ export default function LandingPage() {
               <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="md:hidden bg-background/95 backdrop-blur-md border-t border-foreground/5 overflow-hidden">
                 <div className="px-6 py-6 space-y-4">
                   {[{ label: t.navHow, id: "how" }, { label: t.navWhy, id: "why" }, { label: t.navGuarantee, id: "guarantee" }].map((l) => (
-                    <button key={l.id} onClick={() => scrollTo(l.id)} className="block text-white/50 text-sm tracking-wide uppercase cursor-pointer">{l.label}</button>
+                    <button key={l.id} onClick={() => scrollTo(l.id)} className="block text-[#E5E5E5] text-sm tracking-wide uppercase cursor-pointer">{l.label}</button>
                   ))}
                   <div className="flex gap-1 pt-2">
                     {LANGS.map((l) => (
@@ -215,7 +215,7 @@ export default function LandingPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: showHighlight ? 1 : 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="mt-8 text-white/50 text-base md:text-lg leading-relaxed max-w-xl mx-auto font-light"
+              className="mt-8 text-white/90 text-base md:text-lg leading-relaxed max-w-xl mx-auto"
             >
               {t.subheadline}
             </motion.p>
@@ -231,7 +231,7 @@ export default function LandingPage() {
                 {t.ctaBook}
                 <ArrowRight className="w-4 h-4" />
               </button>
-              <p className="mt-4 text-white/60 text-xs tracking-wide">{t.ctaSupport}</p>
+              <p className="mt-4 text-[#E5E5E5] text-xs tracking-wide">{t.ctaSupport}</p>
             </motion.div>
           </div>
 
@@ -258,7 +258,7 @@ export default function LandingPage() {
             ].map((s, i) => (
               <Reveal key={i} delay={i * 0.1} className="text-center">
                 <div className="text-2xl md:text-3xl font-bold text-[#F5C518] tracking-tight" style={{ fontFamily: "var(--font-mono)" }}>{s.n}</div>
-                <div className="text-white/60 text-xs tracking-wider uppercase mt-1">{s.l}</div>
+                <div className="text-[#E5E5E5] text-xs tracking-wider uppercase mt-1">{s.l}</div>
               </Reveal>
             ))}
           </div>
@@ -285,7 +285,7 @@ export default function LandingPage() {
                 <Reveal key={i} delay={i * 0.15}>
                   <div className="text-[#F5C518]/30 text-6xl font-bold leading-none mb-6" style={{ fontFamily: "var(--font-mono)" }}>{s.step}</div>
                   <h3 className="text-lg font-semibold text-white mb-3">{s.title}</h3>
-                  <p className="text-[#D4D4D4] text-sm leading-relaxed">{s.desc}</p>
+                  <p className="text-[#E5E5E5] text-sm leading-relaxed">{s.desc}</p>
                 </Reveal>
               ))}
             </div>
@@ -302,7 +302,7 @@ export default function LandingPage() {
               <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-6" style={{ fontFamily: "var(--font-display)" }}>
                 {t.painTitle}
               </h2>
-              <p className="text-[#D4D4D4] text-base leading-relaxed mb-6">{t.painDesc}</p>
+              <p className="text-[#E5E5E5] text-base leading-relaxed mb-6">{t.painDesc}</p>
               <p className="text-[#F5C518] text-sm font-medium">{t.painSubtext}</p>
             </Reveal>
             <Reveal delay={0.2} className="order-1 lg:order-2">
@@ -330,12 +330,12 @@ export default function LandingPage() {
               <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-6" style={{ fontFamily: "var(--font-display)" }}>
                 {t.fleetTitle}
               </h2>
-              <p className="text-[#D4D4D4] text-base leading-relaxed mb-8">{t.fleetDesc}</p>
+              <p className="text-[#E5E5E5] text-base leading-relaxed mb-8">{t.fleetDesc}</p>
               <div className="space-y-4">
                 {[t.fleetFeature1, t.fleetFeature2, t.fleetFeature3].map((f, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <div className="w-px h-4 bg-[#F5C518]" />
-                    <span className="text-white/70 text-sm">{f}</span>
+                    <span className="text-[#E5E5E5] text-sm">{f}</span>
                   </div>
                 ))}
               </div>
@@ -372,12 +372,12 @@ export default function LandingPage() {
               <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-6" style={{ fontFamily: "var(--font-display)" }}>
                 {lang === "PT" ? "Sincronização aérea a cada 30 segundos." : "Flight sync every 30 seconds."}
               </h2>
-              <p className="text-[#D4D4D4] text-base leading-relaxed mb-8">{t.algoDesc}</p>
+              <p className="text-[#E5E5E5] text-base leading-relaxed mb-8">{t.algoDesc}</p>
               <div className="space-y-5">
                 {[t.algoFeature1, t.algoFeature2, t.algoFeature3].map((f, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <div className="w-px h-4 bg-[#F5C518]" />
-                    <span className="text-white/70 text-sm">{f}</span>
+                    <span className="text-[#E5E5E5] text-sm">{f}</span>
                   </div>
                 ))}
               </div>
@@ -417,7 +417,7 @@ export default function LandingPage() {
                     </div>
                     <div>
                       <h3 className="text-base font-semibold text-white mb-2">{r.title}</h3>
-                      <p className="text-white/60 text-sm leading-relaxed">{r.desc}</p>
+                      <p className="text-[#E5E5E5] text-sm leading-relaxed">{r.desc}</p>
                     </div>
                   </div>
                 </Reveal>
@@ -441,10 +441,10 @@ export default function LandingPage() {
                 { name: "Marie Dupont", from: "Paris, FR", text: lang === "PT" ? "Reservei às 23h e às 23h02 já tinha confirmação. E o motorista foi impecável." : "I booked at 11pm and at 11:02pm I already had confirmation. And the driver was impeccable." },
               ].map((r, i) => (
                 <Reveal key={i} delay={i * 0.1}>
-                  <p className="text-white/50 text-sm leading-relaxed italic">&ldquo;{r.text}&rdquo;</p>
+                  <p className="text-[#E5E5E5] text-sm leading-relaxed italic">&ldquo;{r.text}&rdquo;</p>
                   <div className="mt-5">
                     <p className="text-white text-sm font-medium">{r.name}</p>
-                    <p className="text-white/50 text-xs">{r.from}</p>
+                    <p className="text-[#E5E5E5] text-xs">{r.from}</p>
                   </div>
                 </Reveal>
               ))}
@@ -462,7 +462,7 @@ export default function LandingPage() {
               <h2 className="text-3xl md:text-5xl font-bold leading-tight" style={{ fontFamily: "var(--font-display)" }}>
                 {t.guaranteeTitle}
               </h2>
-              <p className="mt-6 text-[#D4D4D4] text-base md:text-lg leading-relaxed max-w-xl mx-auto">
+              <p className="mt-6 text-[#E5E5E5] text-base md:text-lg leading-relaxed max-w-xl mx-auto">
                 {t.guaranteeDesc}
               </p>
             </Reveal>
@@ -477,7 +477,7 @@ export default function LandingPage() {
                 ].map((b, i) => (
                   <div key={i} className="text-center">
                     <div className="text-[#F5C518] text-lg mb-1">✓</div>
-                    <p className="text-white/50 text-xs tracking-wide">{b.l}</p>
+                    <p className="text-[#E5E5E5] text-xs tracking-wide">{b.l}</p>
                   </div>
                 ))}
               </div>
@@ -502,28 +502,28 @@ export default function LandingPage() {
           <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
             <div>
               <div className="text-lg font-bold mb-3" style={{ fontFamily: "var(--font-display)", color: "#F5C518" }}>HUB Transfer</div>
-              <p className="text-white/50 text-xs leading-relaxed">Transfer and Tourism</p>
+              <p className="text-[#E5E5E5] text-xs leading-relaxed">Transfer and Tourism</p>
               <div className="flex gap-3 mt-4">
-                <a href="https://www.facebook.com/hubtransfer" target="_blank" rel="noopener noreferrer" className="text-white/50 hover:text-white/80 transition-colors"><Facebook className="w-4 h-4" /></a>
-                <a href="https://www.instagram.com/hubtransfer" target="_blank" rel="noopener noreferrer" className="text-white/50 hover:text-white/80 transition-colors"><Instagram className="w-4 h-4" /></a>
+                <a href="https://www.facebook.com/hubtransfer" target="_blank" rel="noopener noreferrer" className="text-[#E5E5E5] hover:text-white/80 transition-colors"><Facebook className="w-4 h-4" /></a>
+                <a href="https://www.instagram.com/hubtransfer" target="_blank" rel="noopener noreferrer" className="text-[#E5E5E5] hover:text-white/80 transition-colors"><Instagram className="w-4 h-4" /></a>
               </div>
             </div>
             <div>
-              <p className="text-white/50 text-xs tracking-wider uppercase mb-4">{lang === "PT" ? "Contacto" : "Contact"}</p>
-              <div className="space-y-2 text-white/60 text-xs">
-                <a href={WA_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-white/60 transition-colors"><Phone className="w-3 h-3" />{COMPANY.whatsappFormatted}</a>
-                <a href={`mailto:${COMPANY.email}`} className="flex items-center gap-2 hover:text-white/60 transition-colors"><Mail className="w-3 h-3" />{COMPANY.email}</a>
+              <p className="text-[#E5E5E5] text-xs tracking-wider uppercase mb-4">{lang === "PT" ? "Contacto" : "Contact"}</p>
+              <div className="space-y-2 text-[#E5E5E5] text-xs">
+                <a href={WA_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#E5E5E5] transition-colors"><Phone className="w-3 h-3" />{COMPANY.whatsappFormatted}</a>
+                <a href={`mailto:${COMPANY.email}`} className="flex items-center gap-2 hover:text-[#E5E5E5] transition-colors"><Mail className="w-3 h-3" />{COMPANY.email}</a>
                 <div className="flex items-center gap-2"><MapPin className="w-3 h-3" />{COMPANY.location}</div>
               </div>
             </div>
             <div>
-              <p className="text-white/50 text-xs tracking-wider uppercase mb-4">{lang === "PT" ? "Parceiros" : "Partners"}</p>
-              <a href="/login" className="text-white/60 text-xs hover:text-[#F5C518] transition-colors flex items-center gap-1.5">
+              <p className="text-[#E5E5E5] text-xs tracking-wider uppercase mb-4">{lang === "PT" ? "Parceiros" : "Partners"}</p>
+              <a href="/login" className="text-[#E5E5E5] text-xs hover:text-[#F5C518] transition-colors flex items-center gap-1.5">
                 <ExternalLink className="w-3 h-3" />{lang === "PT" ? "Área Reservada" : "Reserved Area"}
               </a>
             </div>
             <div className="md:text-right">
-              <p className="text-white/15 text-xs leading-relaxed">© 2026 Jornadas e Possibilidades,<br />Unipessoal Lda</p>
+              <p className="text-[#999] text-xs leading-relaxed">© 2026 Jornadas e Possibilidades,<br />Unipessoal Lda</p>
             </div>
           </div>
         </footer>
@@ -577,7 +577,7 @@ export default function LandingPage() {
                     <h3 className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)" }}>
                       {lang === "PT" ? "Reserve o seu transfer" : "Book your transfer"}
                     </h3>
-                    <button onClick={() => setDrawerOpen(false)} className="text-white/60 hover:text-white transition-colors cursor-pointer">
+                    <button onClick={() => setDrawerOpen(false)} className="text-[#E5E5E5] hover:text-white transition-colors cursor-pointer">
                       <X className="w-5 h-5" />
                     </button>
                   </div>
@@ -585,10 +585,10 @@ export default function LandingPage() {
                   <div className="space-y-4">
                     {/* Origin */}
                     <div>
-                      <label className="text-white/60 text-xs tracking-wider uppercase block mb-1.5">📍 {lang === "PT" ? "Origem" : "From"}</label>
+                      <label className="text-[#E5E5E5] text-xs tracking-wider uppercase block mb-1.5">📍 {lang === "PT" ? "Origem" : "From"}</label>
                       <div className="flex gap-2 mb-1.5">
                         <button type="button" onClick={() => setBOrigin("Aeroporto de Lisboa (LIS), Lisboa, Portugal")}
-                          className={`text-xs px-3 py-1.5 border transition-colors cursor-pointer ${bOrigin.includes("Aeroporto") ? "border-[#F5C518]/40 text-[#F5C518]" : "border-white/10 text-white/60 hover:text-white/80"}`}>
+                          className={`text-xs px-3 py-1.5 border transition-colors cursor-pointer ${bOrigin.includes("Aeroporto") ? "border-[#F5C518]/40 text-[#F5C518]" : "border-white/10 text-[#E5E5E5] hover:text-white/80"}`}>
                           Aeroporto de Lisboa
                         </button>
                       </div>
@@ -599,7 +599,7 @@ export default function LandingPage() {
 
                     {/* Destination */}
                     <div>
-                      <label className="text-white/60 text-xs tracking-wider uppercase block mb-1.5">🏁 {lang === "PT" ? "Destino" : "To"}</label>
+                      <label className="text-[#E5E5E5] text-xs tracking-wider uppercase block mb-1.5">🏁 {lang === "PT" ? "Destino" : "To"}</label>
                       <div className="flex gap-2 mb-1.5 flex-wrap">
                         {[
                           { l: "Aeroporto", v: "Aeroporto de Lisboa (LIS), Lisboa, Portugal" },
@@ -607,7 +607,7 @@ export default function LandingPage() {
                           { l: "Sintra", v: "Sintra, Portugal" },
                         ].map((q) => (
                           <button key={q.l} type="button" onClick={() => setBDest(q.v)}
-                            className={`text-xs px-3 py-1.5 border transition-colors cursor-pointer ${bDest === q.v ? "border-[#F5C518]/40 text-[#F5C518]" : "border-white/10 text-white/60 hover:text-white/80"}`}>
+                            className={`text-xs px-3 py-1.5 border transition-colors cursor-pointer ${bDest === q.v ? "border-[#F5C518]/40 text-[#F5C518]" : "border-white/10 text-[#E5E5E5] hover:text-white/80"}`}>
                             {q.l}
                           </button>
                         ))}
@@ -620,16 +620,16 @@ export default function LandingPage() {
                     {/* Date + Pax */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="text-white/60 text-xs tracking-wider uppercase block mb-1.5">{lang === "PT" ? "Data" : "Date"}</label>
+                        <label className="text-[#E5E5E5] text-xs tracking-wider uppercase block mb-1.5">{lang === "PT" ? "Data" : "Date"}</label>
                         <input type="date" value={bDate} onChange={(e) => setBDate(e.target.value)}
                           className="w-full h-11 bg-white/5 border-b border-white/10 px-0 text-white text-sm focus:outline-none focus:border-[#F5C518]/40 [color-scheme:dark] transition-colors" />
                       </div>
                       <div>
-                        <label className="text-white/60 text-xs tracking-wider uppercase block mb-1.5">{lang === "PT" ? "Passageiros" : "Passengers"}</label>
+                        <label className="text-[#E5E5E5] text-xs tracking-wider uppercase block mb-1.5">{lang === "PT" ? "Passageiros" : "Passengers"}</label>
                         <div className="flex gap-1">
                           {[1, 2, 3, 4, 5, 6].map((n) => (
                             <button key={n} type="button" onClick={() => setBPax(n)}
-                              className={`flex-1 h-11 text-sm font-medium transition-colors cursor-pointer ${bPax === n ? "bg-[#F5C518] text-black" : "bg-white/5 text-white/60 hover:text-white/80"}`}>
+                              className={`flex-1 h-11 text-sm font-medium transition-colors cursor-pointer ${bPax === n ? "bg-[#F5C518] text-black" : "bg-white/5 text-[#E5E5E5] hover:text-white/80"}`}>
                               {n}
                             </button>
                           ))}
@@ -639,7 +639,7 @@ export default function LandingPage() {
 
                     {/* Phone */}
                     <div>
-                      <label className="text-white/60 text-xs tracking-wider uppercase block mb-1.5">WhatsApp</label>
+                      <label className="text-[#E5E5E5] text-xs tracking-wider uppercase block mb-1.5">WhatsApp</label>
                       <input type="tel" value={bPhone} onChange={(e) => setBPhone(e.target.value)}
                         className="w-full h-11 bg-white/5 border-b border-white/10 px-0 text-white text-sm placeholder-white/20 focus:outline-none focus:border-[#F5C518]/40 transition-colors" />
                     </div>
@@ -650,11 +650,11 @@ export default function LandingPage() {
                         className="flex justify-center gap-10 py-3">
                         <div className="text-center">
                           <div className="text-[#F5C518] text-xl font-bold" style={{ fontFamily: "var(--font-mono)" }}>{routeInfo.distance}</div>
-                          <div className="text-white/50 text-xs mt-0.5">{lang === "PT" ? "Distância" : "Distance"}</div>
+                          <div className="text-[#E5E5E5] text-xs mt-0.5">{lang === "PT" ? "Distância" : "Distance"}</div>
                         </div>
                         <div className="text-center">
                           <div className="text-[#F5C518] text-xl font-bold" style={{ fontFamily: "var(--font-mono)" }}>~{routeInfo.duration}</div>
-                          <div className="text-white/50 text-xs mt-0.5">{lang === "PT" ? "Tempo" : "Time"}</div>
+                          <div className="text-[#E5E5E5] text-xs mt-0.5">{lang === "PT" ? "Tempo" : "Time"}</div>
                         </div>
                       </motion.div>
                     )}
@@ -665,7 +665,7 @@ export default function LandingPage() {
                       {lang === "PT" ? "Solicitar orçamento" : "Request quote"}
                       <ArrowRight className="w-4 h-4" />
                     </a>
-                    <p className="text-center text-white/50 text-xs">{lang === "PT" ? "Resposta em menos de 5 minutos" : "Response in under 5 minutes"}</p>
+                    <p className="text-center text-[#E5E5E5] text-xs">{lang === "PT" ? "Resposta em menos de 5 minutos" : "Response in under 5 minutes"}</p>
                   </div>
                 </div>
               </motion.div>
