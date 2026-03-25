@@ -169,8 +169,8 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     footer: '© 2025 HUB Transfer. Tecnologia que garante.',
 
     // Partners carousel
-    partnersLabel: 'ATERRAMOS COM AS MELHORES',
-    partnersSub: 'De Lisboa ao mundo, monitorizamos voos de +15 companhias aéreas em tempo real.',
+    partnersLabel: 'QUEM VOA E QUEM FICA, CONFIA NA HUB',
+    partnersSub: 'De hotéis em Lisboa a companhias aéreas internacionais — monitorizamos voos, coordenamos transfers e entregamos excelência.',
 
     // Section labels
     labelTech: 'Tecnologia',
@@ -281,8 +281,8 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     footer: '© 2025 HUB Transfer. Technology that guarantees.',
 
     // Partners carousel
-    partnersLabel: 'WE LAND WITH THE BEST',
-    partnersSub: 'From Lisbon to the world, we monitor flights from 15+ airlines in real time.',
+    partnersLabel: 'THOSE WHO FLY AND THOSE WHO STAY, TRUST THE HUB',
+    partnersSub: 'From Lisbon hotels to international airlines — we monitor flights, coordinate transfers and deliver excellence.',
 
     // Section labels
     labelTech: 'Technology',
@@ -393,8 +393,8 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     footer: '© 2025 HUB Transfer. Tecnología que garantiza.',
 
     // Partners carousel
-    partnersLabel: 'ATERRIZAMOS CON LAS MEJORES',
-    partnersSub: 'De Lisboa al mundo, monitorizamos vuelos de +15 aerolíneas en tiempo real.',
+    partnersLabel: 'QUIEN VUELA Y QUIEN SE QUEDA, CONFÍA EN HUB',
+    partnersSub: 'De hoteles en Lisboa a aerolíneas internacionales — monitorizamos vuelos, coordinamos transfers y entregamos excelencia.',
 
     // Section labels
     labelTech: 'Tecnología',
@@ -505,8 +505,8 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     footer: '© 2025 HUB Transfer. Technologie qui garantit.',
 
     // Partners carousel
-    partnersLabel: 'NOUS ATTERRISSONS AVEC LES MEILLEURES',
-    partnersSub: 'De Lisbonne au monde entier, nous surveillons les vols de +15 compagnies aériennes en temps réel.',
+    partnersLabel: 'CEUX QUI VOLENT ET CEUX QUI RESTENT FONT CONFIANCE À HUB',
+    partnersSub: 'Des hôtels de Lisbonne aux compagnies aériennes internationales — nous surveillons les vols, coordonnons les transferts et offrons l\'excellence.',
 
     // Section labels
     labelTech: 'Technologie',
@@ -617,8 +617,8 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     footer: '© 2025 HUB Transfer. Tecnologia che garantisce.',
 
     // Partners carousel
-    partnersLabel: 'ATTERRIAMO CON LE MIGLIORI',
-    partnersSub: 'Da Lisbona al mondo, monitoriamo i voli di oltre 15 compagnie aeree in tempo reale.',
+    partnersLabel: 'CHI VOLA E CHI RESTA, SI AFFIDA A HUB',
+    partnersSub: 'Dagli hotel di Lisbona alle compagnie aeree internazionali — monitoriamo i voli, coordiniamo i transfer e garantiamo eccellenza.',
 
     // Section labels
     labelTech: 'Tecnologia',
