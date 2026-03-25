@@ -434,35 +434,29 @@ export default function LandingPage() {
         </section>
 
         {/* ═══════════════════════════════════════════════════════════ */}
-        {/*  HOW IT WORKS — 3 steps                                    */}
+        {/*  TECHNOLOGY — Radar + sync description                     */}
         {/* ═══════════════════════════════════════════════════════════ */}
         <section id="how" className="py-28 md:py-40 px-6">
           <div className="max-w-6xl mx-auto">
-            {/* Title + Radar */}
-            <div className="grid lg:grid-cols-[1fr_auto] gap-6 items-center mb-20">
+            <div className="grid lg:grid-cols-[1fr_auto] gap-6 items-center">
               <Reveal>
-                <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{lang === "PT" ? "Como funciona" : "How it works"}</p>
-                <h2 className="text-3xl md:text-5xl font-bold leading-tight" style={{ fontFamily: "var(--font-display)" }}>
-                  {t.algoTitle || (lang === "PT" ? "Não é mágica. É monitoramento." : "Not magic. Monitoring.")}
+                <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{lang === "PT" ? "Tecnologia" : "Technology"}</p>
+                <h2 className="text-3xl md:text-5xl font-bold leading-tight mb-6" style={{ fontFamily: "var(--font-display)" }}>
+                  {lang === "PT" ? "Sincronização aérea a cada 30 segundos." : "Flight sync every 30 seconds."}
                 </h2>
+                <p className="text-[#E5E5E5] text-base leading-relaxed mb-8 max-w-lg">{t.algoDesc}</p>
+                <div className="space-y-5">
+                  {[t.algoFeature1, t.algoFeature2, t.algoFeature3].map((f, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <div className="w-px h-4 bg-[#F5C518]" />
+                      <span className="text-[#E5E5E5] text-sm">{f}</span>
+                    </div>
+                  ))}
+                </div>
               </Reveal>
               <Reveal delay={0.2} className="hidden lg:block">
                 <RadarIllustration />
               </Reveal>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-16 md:gap-12">
-              {[
-                { step: "01", title: lang === "PT" ? "Reserve em 2 minutos" : "Book in 2 minutes", desc: lang === "PT" ? "Informe o seu voo e destino. Nós tratamos do resto." : "Enter your flight and destination. We handle the rest." },
-                { step: "02", title: lang === "PT" ? "Monitoramos o seu voo" : "We track your flight", desc: lang === "PT" ? "O nosso sistema acompanha o seu voo em tempo real. Atrasos? Já sabemos." : "Our system follows your flight in real-time. Delays? We already know." },
-                { step: "03", title: lang === "PT" ? "Motorista à sua espera" : "Driver waiting for you", desc: lang === "PT" ? "Desembarca e o seu motorista já está lá. Sem filas. Sem stress." : "You land and your driver is already there. No queues. No stress." },
-              ].map((s, i) => (
-                <Reveal key={i} delay={i * 0.15}>
-                  <div className="text-[#F5C518]/30 text-6xl font-bold leading-none mb-6" style={{ fontFamily: "var(--font-mono)" }}>{s.step}</div>
-                  <h3 className="text-lg font-semibold text-white mb-3">{s.title}</h3>
-                  <p className="text-[#E5E5E5] text-sm leading-relaxed">{s.desc}</p>
-                </Reveal>
-              ))}
             </div>
           </div>
         </section>
@@ -538,21 +532,27 @@ export default function LandingPage() {
         </section>
 
         {/* ═══════════════════════════════════════════════════════════ */}
-        {/*  TECHNOLOGY — Algorithm visual                             */}
+        {/*  HOW IT WORKS — 3 steps + image                            */}
         {/* ═══════════════════════════════════════════════════════════ */}
         <section className="py-28 md:py-40 px-6">
           <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-0 items-center">
             <Reveal className="lg:pr-20">
-              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{lang === "PT" ? "Tecnologia" : "Technology"}</p>
-              <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-6" style={{ fontFamily: "var(--font-display)" }}>
-                {lang === "PT" ? "Sincronização aérea a cada 30 segundos." : "Flight sync every 30 seconds."}
+              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase mb-4">{lang === "PT" ? "Como funciona" : "How it works"}</p>
+              <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-10" style={{ fontFamily: "var(--font-display)" }}>
+                {t.algoTitle || (lang === "PT" ? "Não é mágica. É monitoramento." : "Not magic. Monitoring.")}
               </h2>
-              <p className="text-[#E5E5E5] text-base leading-relaxed mb-8">{t.algoDesc}</p>
-              <div className="space-y-5">
-                {[t.algoFeature1, t.algoFeature2, t.algoFeature3].map((f, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <div className="w-px h-4 bg-[#F5C518]" />
-                    <span className="text-[#E5E5E5] text-sm">{f}</span>
+              <div className="space-y-10">
+                {[
+                  { step: "01", title: lang === "PT" ? "Reserve em 2 minutos" : "Book in 2 minutes", desc: lang === "PT" ? "Informe o seu voo e destino. Nós tratamos do resto." : "Enter your flight and destination. We handle the rest." },
+                  { step: "02", title: lang === "PT" ? "Monitoramos o seu voo" : "We track your flight", desc: lang === "PT" ? "O nosso sistema acompanha o seu voo em tempo real. Atrasos? Já sabemos." : "Our system follows your flight in real-time. Delays? We already know." },
+                  { step: "03", title: lang === "PT" ? "Motorista à sua espera" : "Driver waiting for you", desc: lang === "PT" ? "Desembarca e o seu motorista já está lá. Sem filas. Sem stress." : "You land and your driver is already there. No queues. No stress." },
+                ].map((s, i) => (
+                  <div key={i} className="flex gap-5">
+                    <div className="text-[#F5C518]/25 text-4xl font-bold leading-none flex-shrink-0 w-12" style={{ fontFamily: "var(--font-mono)" }}>{s.step}</div>
+                    <div>
+                      <h3 className="text-base font-semibold text-white mb-1.5">{s.title}</h3>
+                      <p className="text-[#E5E5E5] text-sm leading-relaxed">{s.desc}</p>
+                    </div>
                   </div>
                 ))}
               </div>
