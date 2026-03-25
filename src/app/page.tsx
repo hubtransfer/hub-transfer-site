@@ -10,118 +10,98 @@ import { getLandingT, type LandingLang } from "@/lib/landing-translations";
 
 const LANGS: LandingLang[] = ["PT", "EN", "ES", "FR", "IT"];
 
-/* ─── Binoculars SVG with cursor-following light beam ─── */
-function BinocularsIllustration() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [beam, setBeam] = useState({ x: 50, y: 50, active: false });
-
-  const handleMove = useCallback((e: React.MouseEvent) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    setBeam({ x, y, active: true });
-  }, []);
-
-  const handleLeave = useCallback(() => {
-    setBeam((b) => ({ ...b, active: false }));
-  }, []);
-
+/* ─── Flight Radar SVG — rotating sweep with blips ─── */
+function RadarIllustration() {
   return (
-    <div
-      ref={containerRef}
-      onMouseMove={handleMove}
-      onMouseLeave={handleLeave}
-      className="relative w-full aspect-square max-w-[380px] mx-auto cursor-crosshair select-none"
-    >
-      {/* Light beam that follows cursor */}
-      <div
-        className="absolute inset-0 pointer-events-none transition-opacity duration-500 rounded-full"
-        style={{
-          opacity: beam.active ? 1 : 0,
-          background: `radial-gradient(circle 90px at ${beam.x}% ${beam.y}%, rgba(245,197,24,0.12) 0%, rgba(245,197,24,0.04) 40%, transparent 70%)`,
-        }}
-      />
-
-      {/* SVG Binoculars */}
-      <svg viewBox="0 0 200 200" fill="none" className="w-full h-full" strokeLinecap="round" strokeLinejoin="round">
-        {/* Subtle grid background */}
+    <div className="relative w-full aspect-square max-w-[340px] mx-auto select-none">
+      <svg viewBox="0 0 200 200" className="w-full h-full">
         <defs>
-          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(245,197,24,0.04)" strokeWidth="0.5" />
-          </pattern>
-          <radialGradient id="lensGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#F5C518" stopOpacity="0.15" />
+          {/* Sweep gradient — the fading trail behind the arm */}
+          <linearGradient id="sweepGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#F5C518" stopOpacity="0" />
+            <stop offset="100%" stopColor="#F5C518" stopOpacity="0.15" />
+          </linearGradient>
+          {/* Blip glow */}
+          <radialGradient id="blipGlow">
+            <stop offset="0%" stopColor="#F5C518" stopOpacity="0.6" />
             <stop offset="100%" stopColor="#F5C518" stopOpacity="0" />
           </radialGradient>
         </defs>
-        <rect width="200" height="200" fill="url(#grid)" />
 
-        {/* Left lens — outer ring */}
-        <circle cx="70" cy="100" r="38" stroke="#F5C518" strokeWidth="1.2" opacity="0.3" />
-        <circle cx="70" cy="100" r="32" stroke="#F5C518" strokeWidth="0.6" opacity="0.15" />
-        {/* Left lens — inner glow */}
-        <circle cx="70" cy="100" r="28" fill="url(#lensGlow)" />
-        {/* Left lens — crosshair */}
-        <line x1="70" y1="78" x2="70" y2="122" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
-        <line x1="48" y1="100" x2="92" y2="100" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
+        {/* Concentric rings */}
+        <circle cx="100" cy="100" r="85" fill="none" stroke="#F5C518" strokeWidth="0.4" opacity="0.12" />
+        <circle cx="100" cy="100" r="62" fill="none" stroke="#F5C518" strokeWidth="0.3" opacity="0.08" />
+        <circle cx="100" cy="100" r="40" fill="none" stroke="#F5C518" strokeWidth="0.3" opacity="0.08" />
+        <circle cx="100" cy="100" r="18" fill="none" stroke="#F5C518" strokeWidth="0.3" opacity="0.06" />
 
-        {/* Right lens — outer ring */}
-        <circle cx="130" cy="100" r="38" stroke="#F5C518" strokeWidth="1.2" opacity="0.3" />
-        <circle cx="130" cy="100" r="32" stroke="#F5C518" strokeWidth="0.6" opacity="0.15" />
-        {/* Right lens — inner glow */}
-        <circle cx="130" cy="100" r="28" fill="url(#lensGlow)" />
-        {/* Right lens — crosshair */}
-        <line x1="130" y1="78" x2="130" y2="122" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
-        <line x1="108" y1="100" x2="152" y2="100" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
+        {/* Cross-hair axes */}
+        <line x1="15" y1="100" x2="185" y2="100" stroke="#F5C518" strokeWidth="0.3" opacity="0.06" />
+        <line x1="100" y1="15" x2="100" y2="185" stroke="#F5C518" strokeWidth="0.3" opacity="0.06" />
 
-        {/* Bridge connecting lenses */}
-        <path d="M 92 95 C 96 88, 104 88, 108 95" stroke="#F5C518" strokeWidth="1" opacity="0.3" fill="none" />
-        <path d="M 92 105 C 96 112, 104 112, 108 105" stroke="#F5C518" strokeWidth="1" opacity="0.3" fill="none" />
-
-        {/* Focus ring details — left */}
-        <path d="M 38 85 L 32 80" stroke="#F5C518" strokeWidth="0.8" opacity="0.2" />
-        <path d="M 38 115 L 32 120" stroke="#F5C518" strokeWidth="0.8" opacity="0.2" />
-        {/* Focus ring details — right */}
-        <path d="M 162 85 L 168 80" stroke="#F5C518" strokeWidth="0.8" opacity="0.2" />
-        <path d="M 162 115 L 168 120" stroke="#F5C518" strokeWidth="0.8" opacity="0.2" />
-
-        {/* Measurement marks around left lens */}
-        {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => {
-          const rad = (angle * Math.PI) / 180;
-          const x1 = 70 + Math.cos(rad) * 42;
-          const y1 = 100 + Math.sin(rad) * 42;
-          const x2 = 70 + Math.cos(rad) * 45;
-          const y2 = 100 + Math.sin(rad) * 45;
-          return <line key={`l${angle}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#F5C518" strokeWidth="0.5" opacity="0.15" />;
-        })}
-        {/* Measurement marks around right lens */}
-        {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => {
-          const rad = (angle * Math.PI) / 180;
-          const x1 = 130 + Math.cos(rad) * 42;
-          const y1 = 100 + Math.sin(rad) * 42;
-          const x2 = 130 + Math.cos(rad) * 45;
-          const y2 = 100 + Math.sin(rad) * 45;
-          return <line key={`r${angle}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#F5C518" strokeWidth="0.5" opacity="0.15" />;
+        {/* Tick marks at cardinal points */}
+        {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((a) => {
+          const r1 = (a * Math.PI) / 180;
+          return (
+            <line key={a}
+              x1={100 + Math.cos(r1) * 83} y1={100 + Math.sin(r1) * 83}
+              x2={100 + Math.cos(r1) * 87} y2={100 + Math.sin(r1) * 87}
+              stroke="#F5C518" strokeWidth="0.5" opacity="0.15"
+            />
+          );
         })}
 
-        {/* Scan lines emanating from lenses (observation beams) */}
-        <line x1="70" y1="62" x2="55" y2="35" stroke="#F5C518" strokeWidth="0.4" opacity="0.1" strokeDasharray="3 3" />
-        <line x1="70" y1="62" x2="85" y2="35" stroke="#F5C518" strokeWidth="0.4" opacity="0.1" strokeDasharray="3 3" />
-        <line x1="130" y1="62" x2="115" y2="35" stroke="#F5C518" strokeWidth="0.4" opacity="0.1" strokeDasharray="3 3" />
-        <line x1="130" y1="62" x2="145" y2="35" stroke="#F5C518" strokeWidth="0.4" opacity="0.1" strokeDasharray="3 3" />
+        {/* ── Rotating sweep arm + trail ── */}
+        <g style={{ transformOrigin: "100px 100px", animation: "radarSpin 4s linear infinite" }}>
+          {/* Trail (cone shape) */}
+          <path d="M 100 100 L 185 100 A 85 85 0 0 0 170 55 Z" fill="url(#sweepGrad)" opacity="0.8" />
+          {/* Arm line */}
+          <line x1="100" y1="100" x2="185" y2="100" stroke="#F5C518" strokeWidth="0.8" opacity="0.5" />
+        </g>
 
-        {/* Tiny plane silhouette in the "observed" area */}
-        <text x="100" y="30" textAnchor="middle" fill="#F5C518" opacity="0.12" fontSize="14">✈</text>
+        {/* ── Flight blips (pulsing dots) ── */}
+        {/* Blip 1 — top-right, outer ring */}
+        <circle cx="145" cy="55" r="5" fill="url(#blipGlow)" style={{ animation: "radarBlip 2s ease-in-out infinite" }} />
+        <circle cx="145" cy="55" r="2" fill="#F5C518" opacity="0.8" style={{ animation: "radarBlip 2s ease-in-out infinite" }} />
 
-        {/* Data readout text */}
-        <text x="100" y="170" textAnchor="middle" fill="#F5C518" opacity="0.15" fontSize="5" fontFamily="var(--font-mono)" letterSpacing="0.15em">
-          MONITORING ACTIVE
-        </text>
-        <text x="100" y="180" textAnchor="middle" fill="#F5C518" opacity="0.1" fontSize="4" fontFamily="var(--font-mono)" letterSpacing="0.1em">
-          SYNC EVERY 30s
-        </text>
+        {/* Blip 2 — left, mid ring */}
+        <circle cx="55" cy="80" r="4" fill="url(#blipGlow)" style={{ animation: "radarBlip 2.5s ease-in-out infinite 0.8s" }} />
+        <circle cx="55" cy="80" r="1.5" fill="#F5C518" opacity="0.7" style={{ animation: "radarBlip 2.5s ease-in-out infinite 0.8s" }} />
+
+        {/* Blip 3 — bottom, outer with plane icon */}
+        <circle cx="120" cy="145" r="4" fill="url(#blipGlow)" style={{ animation: "radarBlip 3s ease-in-out infinite 1.5s" }} />
+        <circle cx="120" cy="145" r="1.5" fill="#F5C518" opacity="0.7" style={{ animation: "radarBlip 3s ease-in-out infinite 1.5s" }} />
+        <text x="128" y="143" fill="#F5C518" opacity="0.5" fontSize="7" style={{ animation: "radarBlip 3s ease-in-out infinite 1.5s" }}>✈</text>
+
+        {/* Blip 4 — inner ring */}
+        <circle cx="80" cy="118" r="3" fill="url(#blipGlow)" style={{ animation: "radarBlip 2.2s ease-in-out infinite 0.4s" }} />
+        <circle cx="80" cy="118" r="1.2" fill="#F5C518" opacity="0.6" style={{ animation: "radarBlip 2.2s ease-in-out infinite 0.4s" }} />
+
+        {/* Center dot */}
+        <circle cx="100" cy="100" r="2.5" fill="#F5C518" opacity="0.25" />
+        <circle cx="100" cy="100" r="1" fill="#F5C518" opacity="0.5" />
       </svg>
+
+      {/* Data readout below radar */}
+      <div className="absolute -bottom-8 left-0 right-0 text-center space-y-0.5">
+        <p className="text-[#F5C518]/40 text-[10px] tracking-[0.2em] uppercase" style={{ fontFamily: "var(--font-mono)" }}>
+          MONITORING ACTIVE
+        </p>
+        <p className="text-[#F5C518]/25 text-[9px] tracking-[0.15em] uppercase" style={{ fontFamily: "var(--font-mono)" }}>
+          SYNC EVERY 30s
+        </p>
+      </div>
+
+      {/* CSS animations via style tag */}
+      <style>{`
+        @keyframes radarSpin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes radarBlip {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 }
@@ -394,7 +374,7 @@ export default function LandingPage() {
                 </h2>
               </Reveal>
               <Reveal delay={0.2} className="hidden lg:block">
-                <BinocularsIllustration />
+                <RadarIllustration />
               </Reveal>
             </div>
 
