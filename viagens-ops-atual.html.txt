@@ -1,0 +1,1960 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>HUB Transfer · Operations</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07090f;--surface:#0f1320;--surface2:#141929;--surface3:#1a2035;--border:#1d2840;--border2:#242f4a;
+  --chegada:#f59e0b;--chegada-dim:rgba(245,158,11,.12);--chegada-glow:rgba(245,158,11,.3);
+  --recolha:#10b981;--recolha-dim:rgba(16,185,129,.12);--recolha-glow:rgba(16,185,129,.3);
+  --tour:#a855f7;--tour-dim:rgba(168,85,247,.12);--tour-glow:rgba(168,85,247,.3);
+  --text:#dde4f0;--text-dim:#8294b0;--text-muted:#2d3a52;
+  --accent:#3b82f6;--accent-dim:rgba(59,130,246,.14);
+  --danger:#ef4444;--warn:#f59e0b;--wpp:#25d366;
+  --side-w:180px;
+  --mono:'Space Mono',monospace;--sans:'Syne',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex;flex-direction:column}
+
+/* ── TOPBAR ── */
+.topbar{height:52px;min-height:52px;border-bottom:1px solid var(--border);background:rgba(7,9,15,.98);backdrop-filter:blur(20px);display:flex;align-items:center;padding:0 1.25rem;gap:1rem;z-index:200;position:relative}
+.logo{display:flex;align-items:center;gap:.6rem;text-decoration:none}
+.logo-mark{width:30px;height:30px;background:linear-gradient(135deg,#f59e0b 0%,#3b82f6 100%);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0}
+.logo-text{font-size:.8rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--text)}
+.logo-sub{font-family:var(--mono);font-size:.46rem;color:var(--text-dim);letter-spacing:.14em;text-transform:uppercase}
+.topbar-mid{flex:1;display:flex;align-items:center;justify-content:center}
+.clock-pill{display:flex;align-items:center;gap:.65rem;padding:.3rem .85rem;background:var(--surface2);border:1px solid var(--border);border-radius:20px}
+.clock-val{font-family:var(--mono);font-size:.75rem;color:var(--chegada);letter-spacing:.05em}
+.clock-date{font-family:var(--mono);font-size:.52rem;color:var(--text-dim);letter-spacing:.04em}
+.topbar-r{display:flex;align-items:center;gap:.65rem;margin-left:auto}
+.pulse{width:7px;height:7px;border-radius:50%;background:var(--recolha);animation:pulse 2s infinite;flex-shrink:0}
+.badge-count{display:flex;align-items:center;gap:.35rem;padding:.22rem .55rem;background:var(--surface2);border:1px solid var(--border);border-radius:4px;font-family:var(--mono);font-size:.55rem;color:var(--text-dim)}
+.badge-count .nc{color:var(--chegada);font-weight:700}
+.badge-count .nr{color:var(--recolha);font-weight:700}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 var(--recolha-glow)}50%{box-shadow:0 0 0 5px transparent}}
+
+/* ── LAYOUT ── */
+.layout{flex:1;display:flex;overflow:hidden;position:relative}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--side-w);min-width:var(--side-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;z-index:100}
+.sidebar::-webkit-scrollbar{width:0}
+.sb-section{padding:.6rem .5rem .35rem}
+.sb-label{font-family:var(--mono);font-size:.48rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);padding:.35rem .7rem .2rem;display:block}
+.sb-btn{width:100%;display:flex;align-items:center;gap:.6rem;padding:.55rem .75rem;border-radius:6px;border:none;background:transparent;color:var(--text-dim);font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;cursor:pointer;transition:all .15s;text-align:left;position:relative;white-space:nowrap}
+.sb-btn:hover{background:var(--surface2);color:var(--text)}
+.sb-btn.active{background:var(--surface3);color:var(--text);border:1px solid var(--border2)}
+.sb-btn .sb-ico{font-size:.85rem;flex-shrink:0;width:18px;text-align:center}
+.sb-btn .sb-n{font-family:var(--mono);font-size:.52rem;padding:.1rem .35rem;border-radius:10px;background:var(--surface3);color:var(--text-dim);margin-left:auto;min-width:20px;text-align:center}
+.sb-btn.active .sb-n{background:var(--accent-dim);color:var(--accent)}
+.sb-btn.tab-chegada.active{border-color:var(--chegada-glow);background:var(--chegada-dim)}
+.sb-btn.tab-chegada.active .sb-n{background:var(--chegada-dim);color:var(--chegada)}
+.sb-btn.tab-chegada.active{color:var(--chegada)}
+.sb-btn.tab-recolha.active{border-color:var(--recolha-glow);background:var(--recolha-dim)}
+.sb-btn.tab-recolha.active .sb-n{background:var(--recolha-dim);color:var(--recolha)}
+.sb-btn.tab-recolha.active{color:var(--recolha)}
+.sb-btn.tab-past.active{border-color:var(--border2);color:var(--text-dim)}
+.sb-divider{height:1px;background:var(--border);margin:.35rem .5rem}
+/* Paste btn in sidebar */
+.sb-paste-btn{margin:.5rem .5rem 0;width:calc(100% - 1rem);padding:.55rem .75rem;border-radius:6px;border:1px dashed var(--border2);background:transparent;color:var(--text-dim);font-family:var(--mono);font-size:.6rem;letter-spacing:.06em;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:.5rem;text-align:left}
+.sb-paste-btn:hover{border-color:var(--accent);background:var(--accent-dim);color:var(--text)}
+.sb-paste-loading{border-color:var(--chegada);background:var(--chegada-dim);color:var(--chegada);pointer-events:none}
+/* HUB Central status */
+.sb-hub-status{display:flex;align-items:center;gap:.45rem;padding:.35rem .75rem;font-family:var(--mono);font-size:.58rem;color:var(--text-dim)}
+.hub-dot{font-size:.7rem;transition:color .3s}
+.hub-dot.online{color:var(--recolha);animation:pulse 2s infinite}
+.hub-dot.offline{color:var(--danger)}
+.hub-dot.loading{color:var(--chegada);animation:spin .8s linear infinite}
+.sb-hub-info{padding:.2rem .75rem .35rem;font-family:var(--mono);font-size:.52rem;color:var(--text-muted);line-height:1.7}
+.sb-hub-info span{display:block}
+.sb-hub-info .hi-count{color:var(--recolha);font-weight:700}
+.sb-sync-btn{width:calc(100% - 1rem);margin:.1rem .5rem;padding:.42rem .75rem;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--text-dim);font-family:var(--mono);font-size:.58rem;letter-spacing:.07em;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:.45rem;text-align:left}
+.sb-sync-btn:hover{border-color:var(--accent);background:var(--accent-dim);color:var(--accent)}
+.sb-sync-btn.syncing{pointer-events:none;opacity:.6}
+/* Driver list in sidebar (optional mini-view) */
+.sb-drv-list{padding:0 .5rem .4rem;display:flex;flex-direction:column;gap:2px}
+.sb-drv-item{display:flex;align-items:center;gap:.4rem;padding:.28rem .5rem;border-radius:4px;font-family:var(--mono);font-size:.55rem;color:var(--text-dim);background:transparent;border:none;cursor:default}
+.sb-drv-dot{width:6px;height:6px;border-radius:50%;background:var(--recolha);flex-shrink:0}
+
+/* ── URL CONFIG VIAGENS (sidebar) ── */
+.sb-viagens-cfg{display:none;flex-direction:column;gap:.28rem;margin:.15rem .5rem .35rem;padding:.5rem .6rem;background:var(--chegada-dim);border:1px solid var(--chegada-glow);border-radius:5px}
+.sb-viagens-cfg.show{display:flex}
+.sb-cfg-lbl{font-family:var(--mono);font-size:.47rem;color:var(--chegada);letter-spacing:.09em;text-transform:uppercase}
+.sb-cfg-inp{padding:.28rem .45rem;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--mono);font-size:.48rem;outline:none;width:100%}
+.sb-cfg-inp:focus{border-color:var(--chegada)}
+.sb-cfg-save{padding:.3rem;border-radius:3px;border:none;background:var(--chegada);color:#000;font-family:var(--mono);font-size:.52rem;font-weight:700;cursor:pointer;width:100%;letter-spacing:.06em}
+
+/* ── DIA VIEW ── */
+.dia-wrap{padding:.6rem 1.25rem 2rem;display:flex;flex-direction:column;gap:.5rem}
+.dia-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;flex-shrink:0}
+.dia-stat{padding:.6rem .4rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;text-align:center}
+.dia-stat-n{font-family:var(--mono);font-size:1.4rem;font-weight:700;line-height:1}
+.dia-stat-l{font-family:var(--mono);font-size:.46rem;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+.dia-stat.s-c .dia-stat-n{color:var(--chegada)}
+.dia-stat.s-tour .dia-stat-n{color:#a855f7}
+.dia-stat.s-t .dia-stat-n{color:var(--accent)}
+.dia-sync-bar{display:flex;align-items:center;gap:.45rem;padding:.5rem .75rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;flex-shrink:0}
+.dia-sync-info{flex:1;font-family:var(--mono);font-size:.53rem;color:var(--text-dim);line-height:1.7}
+.dia-sync-info strong{color:var(--text)}
+.dia-sync-btn{padding:.3rem .65rem;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text-dim);font-family:var(--mono);font-size:.55rem;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.dia-sync-btn:hover{border-color:var(--chegada);color:var(--chegada);background:var(--chegada-dim)}
+.dia-sync-btn.syncing{opacity:.45;pointer-events:none}
+.dia-section-lbl{font-family:var(--mono);font-size:.52rem;color:var(--text-muted);letter-spacing:.14em;text-transform:uppercase;padding:.5rem 0 .25rem;border-bottom:1px solid var(--border);margin-bottom:.2rem}
+.dia-timeline{display:flex;flex-direction:column;gap:.5rem}
+.dia-empty{text-align:center;padding:2.5rem 1rem;color:var(--text-muted);font-family:var(--mono);font-size:.62rem;line-height:2.2}
+
+/* Card do Dia */
+.dc{border-radius:8px;overflow:hidden;border:1px solid var(--border);background:var(--surface);animation:cardIn .25s ease both;transition:border-color .15s}
+.dc:hover{border-color:var(--border2)}
+.dc.dc-chegada{border-left:3px solid var(--chegada)}
+.dc.dc-recolha{border-left:3px solid var(--recolha)}
+.dc.dc-tour{border-left:3px solid #a855f7}
+.dc-tour .dc-hora{color:#a855f7}
+.dc-top{display:grid;grid-template-columns:64px 1fr auto;min-height:72px}
+.dc-time{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.5rem .25rem;border-right:1px solid var(--border);background:var(--surface2);gap:2px}
+.dc-h{font-family:var(--mono);font-size:1.05rem;font-weight:700;line-height:1;letter-spacing:.01em}
+.dc-chegada .dc-h{color:var(--chegada)}
+.dc-recolha .dc-h{color:var(--recolha)}
+.dc-type{font-family:var(--mono);font-size:.52rem;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase}
+.dc-main{padding:.55rem .75rem;display:flex;flex-direction:column;gap:.22rem;min-width:0}
+.dc-client{font-size:.88rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.dc-route{font-family:var(--mono);font-size:.54rem;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:.3rem}
+.dc-flight-badge{display:inline-flex;align-items:center;gap:.2rem;font-family:var(--mono);font-size:.5rem;padding:.08rem .35rem;border-radius:3px;background:var(--accent-dim);border:1px solid rgba(59,130,246,.3);color:#60a5fa;white-space:nowrap;flex-shrink:0}
+.dc-tags{display:flex;align-items:center;gap:.25rem;flex-wrap:wrap;margin-top:.05rem}
+.dc-tag{font-family:var(--mono);font-size:.48rem;padding:.08rem .3rem;border-radius:3px;background:var(--surface2);border:1px solid var(--border);color:var(--text-dim);white-space:nowrap}
+.dc-drv{font-family:var(--mono);font-size:.48rem;padding:.08rem .3rem;border-radius:3px;background:var(--recolha-dim);border:1px solid var(--recolha-glow);color:var(--recolha);white-space:nowrap}
+.dc-nodrv{font-family:var(--mono);font-size:.48rem;padding:.08rem .3rem;border-radius:3px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#f87171;white-space:nowrap}
+.dc-actions{display:flex;flex-direction:column;gap:.25rem;padding:.5rem .6rem;justify-content:center;flex-shrink:0;border-left:1px solid var(--border)}
+.dc-act{display:inline-flex;align-items:center;justify-content:center;gap:.22rem;padding:.3rem .52rem;border-radius:4px;font-family:var(--mono);font-size:.52rem;font-weight:700;letter-spacing:.06em;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;text-decoration:none}
+.dc-act.nav{background:rgba(66,133,244,.1);border:1px solid rgba(66,133,244,.3);color:#4285f4}
+.dc-act.nav:hover{background:rgba(66,133,244,.22)}
+.dc-act.wz{background:rgba(53,197,240,.1);border:1px solid rgba(53,197,240,.3);color:#35c5f0}
+.dc-act.wz:hover{background:rgba(53,197,240,.22)}
+.dc-act.wpp{background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.28);color:var(--wpp)}
+.dc-act.wpp:hover{background:rgba(37,211,102,.2)}
+.dc-act.dispatch{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--chegada)}
+.dc-act.dispatch:hover{background:rgba(245,158,11,.22)}
+.dc-bottom{border-top:1px solid var(--border);padding:.38rem .75rem;display:flex;align-items:center;gap:.5rem;background:var(--surface2);flex-wrap:wrap}
+.dc-addr{font-family:var(--mono);font-size:.5rem;color:var(--text-muted);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dc-nav-links{display:flex;gap:.28rem;flex-shrink:0}
+/* ── MAIN CONTENT ── */
+.content{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.content::-webkit-scrollbar-track{background:transparent}
+
+/* ── CONTENT HEADER ── */
+.content-hdr{padding:.85rem 1.25rem .65rem;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:.85rem;flex-shrink:0;position:sticky;top:0;z-index:50}
+.view-title{font-size:1rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.view-sub{font-family:var(--mono);font-size:.55rem;color:var(--text-dim);letter-spacing:.08em;margin-top:1px}
+.hdr-filters{display:flex;align-items:center;gap:.4rem;margin-left:auto;flex-wrap:wrap}
+.fchip{padding:.28rem .6rem;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text-dim);font-family:var(--mono);font-size:.58rem;letter-spacing:.07em;cursor:pointer;transition:all .15s;text-transform:uppercase;white-space:nowrap}
+.fchip:hover{border-color:var(--border2);color:var(--text)}
+.fchip.on-c{border-color:var(--chegada-glow);color:var(--chegada);background:var(--chegada-dim)}
+.fchip.on-r{border-color:var(--recolha-glow);color:var(--recolha);background:var(--recolha-dim)}
+.fchip.on-a{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+
+/* ── PASTE ZONE (inline in content) ── */
+.pzone{margin:1rem 1.25rem .25rem;border:2px dashed var(--border);border-radius:10px;background:var(--surface);transition:all .2s;overflow:hidden}
+.pzone:hover{border-color:var(--accent)}
+.pzone.loading{border-color:var(--chegada);pointer-events:none}
+.pzone-inner{display:flex;align-items:center;gap:1rem;padding:.9rem 1.1rem;cursor:pointer}
+.pzone:hover .pzone-inner{background:var(--accent-dim)}
+.pzone.loading .pzone-inner{background:var(--chegada-dim)}
+.pz-ico{font-size:1.5rem;flex-shrink:0;line-height:1}
+.pzone.loading .pz-ico{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pz-txt{flex:1;min-width:0}
+.pz-title{font-family:var(--mono);font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text);margin-bottom:.18rem}
+.pz-hint{font-family:var(--mono);font-size:.56rem;color:var(--text-dim);line-height:1.6}
+.pz-kbd{display:inline;background:var(--surface2);border:1px solid var(--border);border-radius:3px;padding:.06rem .36rem;font-family:var(--mono);font-size:.56rem;color:var(--text)}
+.pz-upload-btn{display:none;padding:.42rem .8rem;background:var(--accent);border:none;border-radius:5px;color:#fff;font-family:var(--mono);font-size:.6rem;font-weight:700;letter-spacing:.07em;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.pz-preview{width:52px;height:38px;object-fit:cover;border-radius:5px;border:1px solid var(--border);flex-shrink:0;display:none}
+.pz-status{font-family:var(--mono);font-size:.58rem;color:var(--chegada);flex-shrink:0;max-width:140px;text-align:right}
+.pz-bar{height:2px;background:var(--border)}
+.pz-bar-fill{height:100%;background:linear-gradient(90deg,var(--chegada),var(--accent));width:0%;transition:width .3s;border-radius:1px}
+
+/* ── CARDS ── */
+.cards-wrap{padding:.75rem 1.25rem 2rem;display:flex;flex-direction:column;gap:.75rem}
+.card{border-radius:9px;overflow:hidden;border:1px solid var(--border);background:var(--surface);animation:cardIn .3s ease both}
+.card:hover{border-color:var(--border2)}
+@keyframes cardIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.card.chegada{border-left:3px solid var(--chegada)}
+.card.recolha{border-left:3px solid var(--recolha)}
+.card.past-card{opacity:.55}
+.card.past-card:hover{opacity:.8}
+
+/* Card header */
+.chdr{display:flex;align-items:center;gap:.65rem;padding:.7rem .95rem;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.type-badge{padding:.2rem .5rem;border-radius:3px;font-family:var(--mono);font-size:.55rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;white-space:nowrap;flex-shrink:0}
+.type-badge.chegada{background:var(--chegada-dim);color:var(--chegada);border:1px solid var(--chegada-glow)}
+.type-badge.recolha{background:var(--recolha-dim);color:var(--recolha);border:1px solid var(--recolha-glow)}
+.cname{font-size:.9rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.pbadge{padding:.16rem .45rem;border-radius:3px;font-family:var(--mono);font-size:.52rem;letter-spacing:.09em;color:var(--text-dim);background:var(--surface2);border:1px solid var(--border);white-space:nowrap;flex-shrink:0}
+.ordnum{font-family:var(--mono);font-size:.55rem;color:var(--text-muted);white-space:nowrap;flex-shrink:0}
+/* Talixo-style action buttons */
+.hdr-actions{display:flex;gap:.35rem;align-items:center;flex-shrink:0;margin-left:auto;flex-wrap:wrap}
+.tali-btn{display:inline-flex;align-items:center;gap:.28rem;padding:.28rem .6rem;border-radius:4px;font-family:var(--mono);font-size:.55rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border:none;transition:all .15s;white-space:nowrap}
+.tali-btn:active{transform:scale(.97)}
+.tali-btn.dispatch{background:#22c55e;color:#000}
+.tali-btn.dispatch:hover{background:#16a34a}
+.tali-btn.done{background:#3b82f6;color:#fff}
+.tali-btn.done:hover{background:#2563eb}
+.tali-btn.cancel{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.3)}
+.tali-btn.cancel:hover{background:rgba(239,68,68,.2)}
+.tali-btn.restore{background:var(--surface2);color:var(--text-dim);border:1px solid var(--border)}
+.tali-btn.restore:hover{border-color:var(--accent);color:var(--accent)}
+/* Past card — done time badge */
+.done-time{font-family:var(--mono);font-size:.52rem;color:var(--recolha);padding:.18rem .45rem;background:var(--recolha-dim);border:1px solid var(--recolha-glow);border-radius:3px;white-space:nowrap;flex-shrink:0}
+
+/* Card body */
+.cbody{display:grid;grid-template-columns:1fr 1fr}
+
+/* Flight panel */
+.fp{padding:.95rem;border-right:1px solid var(--border)}
+.fn-row{display:flex;align-items:center;gap:.55rem;margin-bottom:.7rem;flex-wrap:wrap}
+.fnum{font-family:var(--mono);font-size:1.05rem;font-weight:700;color:var(--text);text-decoration:none;transition:color .15s}
+.fnum:hover{color:var(--chegada)}
+.fst{padding:.14rem .42rem;border-radius:3px;font-family:var(--mono);font-size:.53rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+.fst.scheduled{background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.3)}
+.fst.on-time{background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.3)}
+.fst.delayed{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3)}
+.fst.landed{background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.3)}
+.fst.boarding{background:rgba(168,85,247,.15);color:#c084fc;border:1px solid rgba(168,85,247,.3)}
+.fdate{margin-left:auto;font-family:var(--mono);font-size:.52rem;color:var(--text-dim);white-space:nowrap}
+/* Route */
+.route{display:flex;align-items:center;margin:.1rem 0 .6rem}
+.apt{text-align:center;flex-shrink:0}
+.apt-code{font-family:var(--mono);font-size:1.25rem;font-weight:700;letter-spacing:.03em;line-height:1}
+.apt-city{font-family:var(--mono);font-size:.49rem;color:var(--text-dim);letter-spacing:.07em;text-transform:uppercase;margin-top:1px}
+.card.chegada .apt-code:last-of-type{color:var(--chegada)}
+.rline{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 .55rem}
+.rdur{font-family:var(--mono);font-size:.49rem;color:var(--text-dim);margin-bottom:3px}
+.rtrack{width:100%;height:2px;background:var(--border);border-radius:1px;position:relative;display:flex;align-items:center}
+.rprog{height:100%;border-radius:1px}
+.card.chegada .rprog{background:linear-gradient(90deg,var(--chegada),transparent)}
+.plane-ico{position:absolute;font-size:.75rem;transform:translateX(-50%);color:var(--chegada)}
+.ftimes{display:flex;justify-content:space-between}
+.tbl{}
+.tlbl{font-family:var(--mono);font-size:.48rem;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase}
+.tval{font-family:var(--mono);font-size:.85rem;font-weight:700;letter-spacing:.03em;line-height:1.2}
+.tval.stk{color:var(--danger);text-decoration:line-through;opacity:.5;font-size:.68rem}
+.tval.dnew{color:var(--danger)}
+.tterm{font-family:var(--mono);font-size:.49rem;color:var(--text-dim);margin-top:1px}
+
+/* Pickup panel */
+.pp{padding:.95rem;border-right:1px solid var(--border)}
+.pp-time{font-family:var(--mono);font-size:2rem;font-weight:700;color:var(--recolha);letter-spacing:.02em;line-height:1;margin-bottom:.15rem}
+.pp-date{font-family:var(--mono);font-size:.58rem;color:var(--text-dim);letter-spacing:.06em;margin-bottom:.65rem}
+.pp-row{display:flex;align-items:flex-start;gap:.45rem;margin-bottom:.42rem}
+.pp-ico{font-size:.8rem;flex-shrink:0;margin-top:1px}
+.pp-lbl{font-family:var(--mono);font-size:.48rem;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1px}
+.pp-val{font-family:var(--mono);font-size:.67rem;color:var(--text);line-height:1.4}
+
+/* Nav links */
+.nav-section{margin-top:.55rem}
+.nav-lbl{font-family:var(--mono);font-size:.47rem;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.22rem}
+.nav-links{display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:.35rem}
+.nav-btn{display:inline-flex;align-items:center;gap:.28rem;padding:.24rem .52rem;border-radius:3px;font-family:var(--mono);font-size:.54rem;font-weight:700;letter-spacing:.06em;text-decoration:none;border:1px solid;transition:all .15s;white-space:nowrap}
+.nav-btn.gm{border-color:rgba(66,133,244,.4);background:rgba(66,133,244,.08);color:#4285f4}
+.nav-btn.gm:hover{background:rgba(66,133,244,.18)}
+.nav-btn.wz{border-color:rgba(53,197,240,.4);background:rgba(53,197,240,.08);color:#35c5f0}
+.nav-btn.wz:hover{background:rgba(53,197,240,.18)}
+.nav-addr{font-family:var(--mono);font-size:.5rem;color:var(--text-muted);line-height:1.5;margin-top:2px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+
+/* Dispatch panel */
+.dp{padding:.95rem;display:flex;flex-direction:column;gap:.58rem}
+.dp-lbl{font-family:var(--mono);font-size:.52rem;color:var(--text-dim);letter-spacing:.13em;text-transform:uppercase;margin-bottom:.15rem}
+.sel-row{display:flex;gap:.42rem}
+.hsel{flex:1;min-width:0;padding:.38rem .58rem;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:.62rem;cursor:pointer;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5' fill='none'%3E%3Cpath stroke='%23566480' stroke-width='1.4' d='M1 1l3.5 3.5L8 1'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .5rem center;padding-right:1.6rem;transition:border-color .15s}
+.hsel:focus{border-color:var(--accent)}
+.hsel option{background:#141929}
+.ntarea{width:100%;padding:.38rem .55rem;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text-dim);font-family:var(--mono);font-size:.6rem;resize:none;outline:none;transition:border-color .15s;height:42px;line-height:1.5}
+.ntarea:focus{border-color:var(--accent);color:var(--text)}
+.ntarea::placeholder{color:var(--text-muted)}
+.btn-tmpl{width:100%;padding:.52rem 1rem;border-radius:5px;border:none;cursor:pointer;font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:.38rem;transition:all .17s}
+.btn-tmpl.cb{background:var(--chegada);color:#000}
+.btn-tmpl.rb{background:var(--recolha);color:#000}
+.btn-tmpl:hover{opacity:.87}
+.btn-tmpl:active{transform:scale(.98)}
+.btn-wpp{display:flex;align-items:center;justify-content:center;gap:.3rem;padding:.35rem .7rem;border-radius:4px;background:rgba(37,211,102,.09);border:1px solid rgba(37,211,102,.25);color:var(--wpp);font-family:var(--mono);font-size:.58rem;text-decoration:none;transition:all .15s}
+.btn-wpp:hover{background:rgba(37,211,102,.18);border-color:rgba(37,211,102,.4)}
+
+/* ── DIA VIEW — CARDS DO DIA ── */
+.dia-wrap{padding:.6rem 1.25rem 2rem;display:flex;flex-direction:column;gap:.5rem}
+.dia-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem}
+.dia-stat{padding:.6rem .4rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;text-align:center}
+.dia-stat-n{font-family:var(--mono);font-size:1.4rem;font-weight:700;line-height:1}
+.dia-stat-l{font-family:var(--mono);font-size:.46rem;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+.dia-stat.s-c .dia-stat-n{color:var(--chegada)}
+.dia-stat.s-tour .dia-stat-n{color:#a855f7}
+.dia-stat.s-t .dia-stat-n{color:var(--accent)}
+.dia-sync-bar{display:flex;align-items:center;gap:.45rem;padding:.5rem .75rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px}
+.dia-sync-info{flex:1;font-family:var(--mono);font-size:.53rem;color:var(--text-dim);line-height:1.7}
+.dia-sync-info strong{color:var(--text)}
+.dia-sync-btn{padding:.3rem .65rem;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text-dim);font-family:var(--mono);font-size:.55rem;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.dia-sync-btn:hover{border-color:var(--chegada);color:var(--chegada);background:var(--chegada-dim)}
+.dia-sync-btn.syncing{opacity:.45;pointer-events:none}
+.dia-section-lbl{font-family:var(--mono);font-size:.52rem;color:var(--text-muted);letter-spacing:.14em;text-transform:uppercase;padding:.5rem 0 .25rem;border-bottom:1px solid var(--border);margin-bottom:.2rem}
+.dia-timeline{display:flex;flex-direction:column;gap:.55rem}
+.dia-empty{text-align:center;padding:2.5rem 1rem;color:var(--text-muted);font-family:var(--mono);font-size:.62rem;line-height:2.2}
+.dc{border-radius:9px;overflow:hidden;border:1px solid var(--border);background:var(--surface);animation:cardIn .25s ease both;transition:border-color .15s}
+.dc:hover{border-color:var(--border2)}
+.dc.dc-chegada{border-left:3px solid var(--chegada)}
+.dc.dc-recolha{border-left:3px solid var(--recolha)}
+.dc.dc-tour{border-left:3px solid #a855f7}
+.dc-tour .dc-hora{color:#a855f7}
+.dc-row1{display:grid;grid-template-columns:68px 1fr auto;border-bottom:1px solid var(--border)}
+.dc-timebox{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.55rem .2rem;border-right:1px solid var(--border);background:var(--surface2);gap:1px;flex-shrink:0}
+.dc-hora{font-family:var(--mono);font-size:1.3rem;font-weight:700;line-height:1;letter-spacing:.01em}
+.dc-chegada .dc-hora{color:var(--chegada)}
+.dc-recolha .dc-hora{color:var(--recolha)}
+.dc-tipo-lbl{font-family:var(--mono);font-size:.42rem;color:var(--text-muted);letter-spacing:.07em;text-transform:uppercase;margin-top:1px}
+.dc-info{padding:.5rem .7rem;display:flex;flex-direction:column;gap:.18rem;min-width:0}
+.dc-client-name{font-size:1.05rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.dc-tags-row{display:flex;align-items:center;gap:.25rem;flex-wrap:wrap}
+.dc-tag{font-family:var(--mono);font-size:.48rem;padding:.07rem .3rem;border-radius:3px;background:var(--surface2);border:1px solid var(--border);color:var(--text-dim);white-space:nowrap}
+.dc-drv-tag{font-family:var(--mono);font-size:.55rem;padding:.1rem .35rem;border-radius:3px;background:var(--recolha-dim);border:1px solid var(--recolha-glow);color:var(--recolha);white-space:nowrap}
+.dc-nodrv-tag{font-family:var(--mono);font-size:.55rem;padding:.1rem .35rem;border-radius:3px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#f87171;white-space:nowrap}
+.dc-flight-tag{font-family:var(--mono);font-size:.55rem;padding:.1rem .35rem;border-radius:3px;background:var(--accent-dim);border:1px solid rgba(59,130,246,.3);color:#60a5fa;white-space:nowrap;text-decoration:none;cursor:pointer;transition:opacity .15s}
+.dc-flight-tag:hover{opacity:.75;border-color:rgba(59,130,246,.6)}
+.dc-navbtns{display:flex;flex-direction:column;gap:.22rem;padding:.5rem .55rem;justify-content:center;border-left:1px solid var(--border);flex-shrink:0}
+.dc-flight{padding:.45rem .75rem;border-bottom:1px solid var(--border);background:rgba(245,158,11,.04)}
+.dc-frow{display:flex;align-items:center;gap:.4rem}
+.dc-fapt{text-align:center;flex-shrink:0}
+.dc-fcode{font-family:var(--mono);font-size:1.1rem;font-weight:700;letter-spacing:.03em;line-height:1}
+.dc-fcity{font-family:var(--mono);font-size:.44rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.07em;margin-top:1px}
+.dc-fline{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px}
+.dc-fnum{font-family:var(--mono);font-size:.48rem;color:var(--chegada);letter-spacing:.06em}
+.dc-ftrack{width:100%;height:2px;background:var(--border);border-radius:1px;position:relative;display:flex;align-items:center}
+.dc-fprog{height:100%;width:60%;background:linear-gradient(90deg,var(--chegada),transparent);border-radius:1px}
+.dc-fplane{position:absolute;left:58%;font-size:.75rem;transform:translateX(-50%);color:var(--chegada)}
+.dc-ftimes{display:flex;justify-content:space-between;margin-top:.15rem}
+.dc-ftime{font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--text)}
+.dc-fterm{font-family:var(--mono);font-size:.44rem;color:var(--text-dim)}
+.dc-addrs{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border)}
+.dc-addr-block{padding:.38rem .7rem;display:flex;flex-direction:column;gap:2px}
+.dc-addr-block:first-child{border-right:1px solid var(--border)}
+.dc-addr-lbl{font-family:var(--mono);font-size:.44rem;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase}
+.dc-addr-val{font-family:var(--mono);font-size:.5rem;color:var(--text-dim);margin-bottom:.18rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dc-addr-btns{display:flex;gap:.25rem}
+.dc-addr-btn{font-family:var(--mono);font-size:.46rem;padding:.12rem .35rem;border-radius:3px;text-decoration:none;transition:all .15s;white-space:nowrap}
+.dc-addr-btn.gm{background:rgba(66,133,244,.1);border:1px solid rgba(66,133,244,.25);color:#4285f4}
+.dc-addr-btn.gm:hover{background:rgba(66,133,244,.2)}
+.dc-addr-btn.wz{background:rgba(53,197,240,.1);border:1px solid rgba(53,197,240,.25);color:#35c5f0}
+.dc-addr-btn.wz:hover{background:rgba(53,197,240,.2)}
+.dc-loc-name{font-family:var(--sans);font-size:.65rem;font-weight:700;color:var(--text);margin-bottom:.1rem}
+.dc-loc-addr{font-family:var(--mono);font-size:.52rem;color:var(--text-dim);margin-bottom:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dc-fnum-link{text-decoration:none;color:var(--chegada);transition:opacity .15s}
+.dc-fnum-link:hover{opacity:.7}
+
+/* ── Indicador origem/país do voo ── */
+.dc-origin-hint{display:flex;align-items:center;gap:.3rem;padding:.18rem .55rem;border-radius:4px;font-family:var(--mono);font-size:.52rem;letter-spacing:.04em;margin-top:.25rem;width:fit-content;margin-left:auto;margin-right:auto}
+.dc-origin-hint.eu{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);color:#60a5fa}
+.dc-origin-hint.inter{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:var(--chegada)}
+.dc-origin-hint.long{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#f87171}
+
+/* ── Bloco visual RECOLHA: rota A→B ── */
+.dc-route-block{padding:.6rem .85rem;border-bottom:1px solid var(--border);background:rgba(16,185,129,.04)}
+.dc-route-visual{display:flex;align-items:stretch;gap:.65rem}
+.dc-route-dots{display:flex;flex-direction:column;align-items:center;gap:0;padding:.15rem 0;flex-shrink:0;width:16px}
+.dc-route-dot-a{width:10px;height:10px;border-radius:50%;background:var(--recolha);flex-shrink:0}
+.dc-route-line{flex:1;width:2px;background:linear-gradient(180deg,var(--recolha),var(--recolha-glow));margin:3px auto}
+.dc-route-dot-b{width:10px;height:10px;border-radius:3px;background:var(--accent);flex-shrink:0}
+.dc-route-addrs{flex:1;display:flex;flex-direction:column;gap:.4rem}
+.dc-route-addr{display:flex;flex-direction:column;gap:2px}
+.dc-route-lbl{font-family:var(--mono);font-size:.52rem;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase}
+.dc-route-val{font-family:var(--mono);font-size:.62rem;color:var(--text);line-height:1.3}
+.dc-route-btns{display:flex;gap:.25rem;margin-top:.15rem}
+.dc-route-btn{font-family:var(--mono);font-size:.52rem;padding:.15rem .42rem;border-radius:3px;text-decoration:none;transition:all .15s;white-space:nowrap}
+.dc-route-btn.gm{background:rgba(66,133,244,.1);border:1px solid rgba(66,133,244,.25);color:#4285f4}
+.dc-route-btn.wz{background:rgba(53,197,240,.1);border:1px solid rgba(53,197,240,.25);color:#35c5f0}
+
+/* ── Bloco visual TOUR ── */
+.dc-tour-block{padding:.6rem .85rem;border-bottom:1px solid var(--border);background:rgba(168,85,247,.04)}
+.dc-tour-visual{display:flex;align-items:center;gap:.65rem}
+.dc-tour-icon{font-size:1.4rem;flex-shrink:0}
+.dc-tour-info{flex:1;display:flex;flex-direction:column;gap:.2rem}
+.dc-tour-lbl{font-family:var(--mono);font-size:.52rem;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase}
+.dc-tour-val{font-family:var(--mono);font-size:.62rem;color:var(--text);line-height:1.3}
+.dc-bottom{display:flex;align-items:center;gap:.4rem;padding:.4rem .7rem;background:var(--surface2);flex-wrap:wrap}
+.dc-drv-sel{flex:1;min-width:120px;padding:.3rem .5rem;background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:.58rem;cursor:pointer;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5' fill='none'%3E%3Cpath stroke='%23566480' stroke-width='1.4' d='M1 1l3.5 3.5L8 1'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .4rem center;padding-right:1.4rem;transition:border-color .15s}
+.dc-drv-sel:focus{border-color:var(--recolha)}
+.dc-drv-sel option{background:#141929}
+.dc-act{display:inline-flex;align-items:center;justify-content:center;gap:.22rem;padding:.3rem .58rem;border-radius:4px;font-family:var(--mono);font-size:.52rem;font-weight:700;letter-spacing:.06em;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;text-decoration:none;flex-shrink:0}
+.dc-act.wpp-c{background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.28);color:var(--wpp)}
+.dc-act.wpp-c:hover{background:rgba(37,211,102,.2)}
+.dc-act.tmpl{background:var(--chegada-dim);border:1px solid var(--chegada-glow);color:var(--chegada)}
+.dc-act.tmpl:hover{background:rgba(245,158,11,.2)}
+.dc-act.dis{opacity:.3;pointer-events:none}
+.dc-phone{font-family:var(--mono);font-size:.55rem;padding:.1rem .4rem;border-radius:3px;background:var(--surface);border:1px solid var(--border);color:var(--text-dim);cursor:pointer;transition:all .15s;white-space:nowrap}
+.dc-phone:hover{border-color:var(--accent);color:var(--text)}
+.dc-act.sms{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.28);color:var(--accent);text-decoration:none;flex:0}
+/* ── Dar Baixa ── */
+.dc-act.done{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.28);color:var(--recolha)}
+.dc-act.done:hover{background:rgba(16,185,129,.2)}
+.dc-act.done.loading{opacity:.5;pointer-events:none}
+.dc.dc-done{opacity:.4;border-left-color:var(--text-muted)!important}
+.dc.dc-done:hover{opacity:.65}
+/* ── Preço motorista ── */
+.dc-price{font-family:var(--mono);font-size:.58rem;font-weight:700;padding:.12rem .5rem;border-radius:4px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:var(--recolha);white-space:nowrap}
+/* ── Date Picker ── */
+.dia-date-bar{display:flex;align-items:center;gap:.4rem;flex-shrink:0}
+.dia-date-btn{padding:.32rem .6rem;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--text-dim);font-family:var(--mono);font-size:.58rem;cursor:pointer;transition:all .15s;white-space:nowrap}
+.dia-date-btn:hover{border-color:var(--chegada);color:var(--chegada);background:var(--chegada-dim)}
+.dia-date-btn.active{border-color:var(--chegada);color:var(--chegada);background:var(--chegada-dim)}
+.dia-date-input{padding:.3rem .5rem;border-radius:5px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:var(--mono);font-size:.58rem;cursor:pointer;outline:none;color-scheme:dark}
+.dia-date-input:focus{border-color:var(--chegada)}
+.dia-drv-filter{padding:.3rem .5rem;border-radius:5px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:var(--mono);font-size:.58rem;cursor:pointer;outline:none;color-scheme:dark;min-width:140px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5' fill='none'%3E%3Cpath stroke='%23566480' stroke-width='1.4' d='M1 1l3.5 3.5L8 1'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .4rem center;padding-right:1.4rem}
+.dia-drv-filter:focus{border-color:var(--recolha)}
+.dia-drv-filter option{background:#141929}
+/* ── Resumo de pagamento ── */
+.dia-pay-summary{display:flex;align-items:center;gap:.6rem;padding:.5rem .8rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px;flex-wrap:wrap}
+.dia-pay-item{font-family:var(--mono);font-size:.58rem;color:var(--text-dim)}
+.dia-pay-total{font-family:var(--mono);font-size:.7rem;font-weight:700;color:var(--recolha);margin-left:auto}
+.dc-navbtn{display:inline-flex;align-items:center;gap:.22rem;padding:.28rem .52rem;border-radius:4px;font-family:var(--mono);font-size:.52rem;font-weight:700;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;text-decoration:none;flex-shrink:0}
+.dc-navbtn.gm{background:rgba(66,133,244,.1);border:1px solid rgba(66,133,244,.3);color:#4285f4}
+.dc-navbtn.gm:hover{background:rgba(66,133,244,.2)}
+.dc-navbtn.wz{background:rgba(53,197,240,.1);border:1px solid rgba(53,197,240,.3);color:#35c5f0}
+.dc-navbtn.wz:hover{background:rgba(53,197,240,.2)}
+  
+/* ── EMPTY ── */
+/* ── PLACA NOME CLIENTE (fullscreen) ── */
+.nameplate{position:fixed;inset:0;z-index:9999;background:#0a0a0a;display:none;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
+.nameplate.open{display:flex}
+.nameplate-logo{font-family:var(--mono);font-size:.7rem;letter-spacing:.25em;text-transform:uppercase;color:rgba(245,158,11,.4);margin-bottom:.5rem}
+.nameplate-name{font-family:var(--sans);font-weight:800;color:#f59e0b;text-align:center;text-transform:uppercase;letter-spacing:.06em;line-height:1.1;word-break:break-word;max-width:95vw}
+.nameplate-hint{position:absolute;bottom:1.2rem;font-family:var(--mono);font-size:.55rem;color:rgba(255,255,255,.15);letter-spacing:.1em}
+@media(orientation:portrait){.nameplate-rotate{display:flex;align-items:center;gap:.4rem;margin-top:1rem;font-family:var(--mono);font-size:.55rem;color:rgba(255,255,255,.2)}.nameplate-rotate .rot-ico{display:inline-block;animation:rotH 2s ease-in-out infinite}@keyframes rotH{0%,100%{transform:rotate(0)}50%{transform:rotate(90deg)}}}
+@media(orientation:landscape){.nameplate-rotate{display:none}}
+
+.empty{text-align:center;padding:2.5rem 2rem 3rem;color:var(--text-dim);flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.empty-ico{font-size:2rem;margin-bottom:.6rem;opacity:.5}
+.empty-txt{font-family:var(--mono);font-size:.65rem;color:var(--text-muted);letter-spacing:.08em;line-height:1.9}
+
+/* ── MODALS ── */
+.mov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.86);backdrop-filter:blur(8px);z-index:1000;align-items:center;justify-content:center;padding:.75rem}
+.mov.open{display:flex}
+.modal{background:var(--surface2);border:1px solid var(--border);border-radius:11px;width:100%;max-width:500px;overflow:hidden;animation:mIn .18s ease;max-height:92vh;display:flex;flex-direction:column}
+.modal.wide{max-width:620px}
+@keyframes mIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+.mhdr{padding:.8rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.mtitle{font-family:var(--mono);font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim)}
+.mx{width:24px;height:24px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;transition:all .15s}
+.mx:hover{border-color:var(--text-dim);color:var(--text)}
+.mbody{padding:1rem;overflow-y:auto;flex:1}
+.mftr{padding:.8rem 1rem;border-top:1px solid var(--border);display:flex;gap:.45rem;flex-shrink:0}
+.mbtn{flex:1;padding:.52rem;border-radius:5px;border:none;cursor:pointer;font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:.35rem;transition:all .14s;text-decoration:none}
+.mbtn.sec{background:var(--surface);border:1px solid var(--border);color:var(--text)}
+.mbtn.sec:hover{border-color:var(--border2)}
+.mbtn.wpp{background:#25d366;color:#000}
+.mbtn.wpp:hover{background:#22c55e}
+.mbtn.pri{background:var(--accent);color:#fff}
+.mbtn.pri:hover{background:#2563eb}
+/* Template */
+.tbadge{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .55rem;border-radius:3px;font-family:var(--mono);font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;margin-bottom:.75rem}
+.ttxt{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:.8rem;font-family:var(--mono);font-size:.67rem;line-height:1.75;color:var(--text);white-space:pre-wrap;word-break:break-word;max-height:240px;overflow-y:auto}
+/* Review form */
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.rf{display:flex;flex-direction:column;gap:.13rem}
+.rf label{font-family:var(--mono);font-size:.5rem;color:var(--text-dim);letter-spacing:.12em;text-transform:uppercase}
+.rf input,.rf select{padding:.34rem .55rem;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:.65rem;outline:none;transition:border-color .15s;width:100%}
+.rf input:focus,.rf select:focus{border-color:var(--accent)}
+.rf select option{background:#141929}
+.rf.full{grid-column:1/-1}
+.rthumb{width:100%;max-height:68px;object-fit:cover;border-radius:5px;border:1px solid var(--border);margin-bottom:.6rem;display:none}
+.ai-tag{display:inline-flex;align-items:center;gap:.28rem;padding:.16rem .48rem;border-radius:3px;background:rgba(59,130,246,.14);border:1px solid rgba(59,130,246,.28);color:#60a5fa;font-family:var(--mono);font-size:.52rem;letter-spacing:.1em;margin-bottom:.6rem}
+
+/* ── MOBILE ── */
+.sb-mobile-bar{display:none;height:48px;border-top:1px solid var(--border);background:var(--surface);flex-shrink:0;overflow-x:auto;flex-direction:row;align-items:stretch;z-index:150}
+.sb-mobile-bar::-webkit-scrollbar{height:0}
+.mb-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.18rem;padding:0 .85rem;border:none;background:transparent;color:var(--text-muted);font-family:var(--mono);font-size:.46rem;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:all .15s;border-top:2px solid transparent;min-width:60px}
+.mb-btn:hover{color:var(--text-dim)}
+.mb-btn.active{color:var(--accent);border-top-color:var(--accent)}
+.mb-btn.active.tab-chegada{color:var(--chegada);border-top-color:var(--chegada)}
+.mb-btn.active.tab-recolha{color:var(--recolha);border-top-color:var(--recolha)}
+.mb-btn .mb-ico{font-size:1.1rem}
+.mb-btn .mb-n{font-family:var(--mono);font-size:.42rem;padding:.07rem .28rem;background:var(--surface2);border-radius:8px;min-width:16px;text-align:center}
+
+@media(max-width:720px){
+  :root{--side-w:0px}
+  .sidebar{display:none}
+  .sb-mobile-bar{display:flex}
+  .topbar-mid{display:none}
+  .pzone-inner{padding:.75rem .9rem;gap:.65rem}
+  .pz-title{font-size:.62rem}
+  .pz-hint{display:none}
+  .pz-upload-btn{display:flex}
+  .content-hdr{padding:.7rem 1rem .55rem}
+  .cards-wrap{padding:.6rem .85rem 1.5rem}
+  .cbody{grid-template-columns:1fr}
+  .fp,.pp{border-right:none;border-bottom:1px solid var(--border)}
+  .ordnum,.pbadge{display:none}
+  .rgrid{grid-template-columns:1fr}
+  .rf.full{grid-column:1}
+  .pp-time{font-size:1.6rem}
+  .pzone{margin:.75rem .85rem .25rem}
+  .hdr-filters{display:none}
+}
+@media(max-width:440px){
+  .topbar{padding:0 .85rem}
+  .logo-sub{display:none}
+  .topbar-r .badge-count{display:none}
+}
+</style>
+</head>
+<body>
+
+<script>
+/* ─── CONFIG ─── */
+
+// URL do Web App da HUB Central (Google Apps Script)
+const HUB_CENTRAL_URL = 'https://script.google.com/macros/s/AKfycbwwr4_wjibbZgVEDD7JC0VSYce7C8iIvSmJFSbDHO_IX1L5KHSagOxkJZOL0ya746Uicw/exec';
+
+// URL para sincronizar VIAGENS da HUB Central (pode ser o mesmo ou diferente)
+let HUB_VIAGENS_URL = localStorage.getItem('hub_viagens_url') || HUB_CENTRAL_URL;
+let HUB_VIAGENS = [];   // viagens do dia carregadas da HUB Central
+
+// Motoristas em memória — carregados da HUB Central no arranque
+let DRIVERS = [];
+
+// Fallback local caso a HUB Central esteja inacessível
+const DRIVERS_FALLBACK = [
+  {name:'Marco', phone:'351912000001', viatura:''},
+  {name:'João',  phone:'351912000002', viatura:''},
+  {name:'Paulo', phone:'351912000003', viatura:''},
+  {name:'Carlos',phone:'351912000004', viatura:''},
+  {name:'Rui',   phone:'351912000005', viatura:''},
+];
+
+const PLATFORMS=['Talixo','Empire Lisbon','Empire Marques','WT Driver'];
+
+function detectTipo(origin,flight){
+  const o=String(origin||'').toLowerCase();
+  const isApt=o.includes('aeroporto')||o.includes('airport')||o.includes('humberto delgado')||o.includes('portela')||o.includes('lis)');
+  const hasF=!!(flight&&String(flight).trim()&&String(flight).trim()!=='.');
+  if(isApt&&hasF)return'CHEGADA';
+  if(!isApt)return'RECOLHA';
+  return'TOUR';
+}
+
+/* ═══ IATA: região, país, e hub por prefixo da companhia ═══ */
+/* ═══ BASE DE AEROPORTOS MUNDIAL — classificação operacional para tempo de saída em LIS ═══
+ * sch     = Schengen (sem passaporte) → ~15-25min
+ * uk      = Reino Unido (Brexit, controlo passaportes) → ~40-60min
+ * eur     = Europa não-Schengen (Roménia, Bulgária, Turquia, Irlanda, Balcãs) → ~30-45min
+ * na      = América do Norte (EUA, Canadá) → ~45-60min
+ * africa  = África → ~45-60min
+ * mideast = Médio Oriente / Golfo → ~45-60min
+ * latam   = América Latina (exceto Brasil) → ~50-75min
+ * brazil  = Brasil (voo longo + muitos passageiros) → ~60-90min
+ * asia    = Ásia / Oceania → ~60-90min
+ */
+const IATA_DATA={
+/* ── SCHENGEN (sem passaporte em LIS) ── */
+FRA:{r:'sch',c:'🇩🇪 Frankfurt, Alemanha'},MUC:{r:'sch',c:'🇩🇪 Munique, Alemanha'},BER:{r:'sch',c:'🇩🇪 Berlim, Alemanha'},HAM:{r:'sch',c:'🇩🇪 Hamburgo, Alemanha'},DUS:{r:'sch',c:'🇩🇪 Düsseldorf, Alemanha'},STR:{r:'sch',c:'🇩🇪 Stuttgart, Alemanha'},CGN:{r:'sch',c:'🇩🇪 Colónia, Alemanha'},NUE:{r:'sch',c:'🇩🇪 Nuremberga, Alemanha'},LEJ:{r:'sch',c:'🇩🇪 Leipzig, Alemanha'},HAJ:{r:'sch',c:'🇩🇪 Hanôver, Alemanha'},BRE:{r:'sch',c:'🇩🇪 Bremen, Alemanha'},DTM:{r:'sch',c:'🇩🇪 Dortmund, Alemanha'},FKB:{r:'sch',c:'🇩🇪 Karlsruhe, Alemanha'},HHN:{r:'sch',c:'🇩🇪 Hahn, Alemanha'},PAD:{r:'sch',c:'🇩🇪 Paderborn, Alemanha'},
+CDG:{r:'sch',c:'🇫🇷 Paris CDG, França'},ORY:{r:'sch',c:'🇫🇷 Paris Orly, França'},NCE:{r:'sch',c:'🇫🇷 Nice, França'},LYS:{r:'sch',c:'🇫🇷 Lyon, França'},MRS:{r:'sch',c:'🇫🇷 Marselha, França'},TLS:{r:'sch',c:'🇫🇷 Toulouse, França'},BOD:{r:'sch',c:'🇫🇷 Bordeaux, França'},NTE:{r:'sch',c:'🇫🇷 Nantes, França'},LIL:{r:'sch',c:'🇫🇷 Lille, França'},BVA:{r:'sch',c:'🇫🇷 Beauvais, França'},MPL:{r:'sch',c:'🇫🇷 Montpellier, França'},RNS:{r:'sch',c:'🇫🇷 Rennes, França'},ETZ:{r:'sch',c:'🇫🇷 Metz, França'},SXB:{r:'sch',c:'🇫🇷 Estrasburgo, França'},BIQ:{r:'sch',c:'🇫🇷 Biarritz, França'},
+AMS:{r:'sch',c:'🇳🇱 Amesterdão, Holanda'},EIN:{r:'sch',c:'🇳🇱 Eindhoven, Holanda'},RTM:{r:'sch',c:'🇳🇱 Roterdão, Holanda'},MST:{r:'sch',c:'🇳🇱 Maastricht, Holanda'},GRQ:{r:'sch',c:'🇳🇱 Groningen, Holanda'},
+BCN:{r:'sch',c:'🇪🇸 Barcelona, Espanha'},MAD:{r:'sch',c:'🇪🇸 Madrid, Espanha'},AGP:{r:'sch',c:'🇪🇸 Málaga, Espanha'},VLC:{r:'sch',c:'🇪🇸 Valência, Espanha'},SVQ:{r:'sch',c:'🇪🇸 Sevilha, Espanha'},PMI:{r:'sch',c:'🇪🇸 Palma Maiorca, Espanha'},IBZ:{r:'sch',c:'🇪🇸 Ibiza, Espanha'},TFS:{r:'sch',c:'🇪🇸 Tenerife Sul, Espanha'},LPA:{r:'sch',c:'🇪🇸 Gran Canária, Espanha'},ACE:{r:'sch',c:'🇪🇸 Lanzarote, Espanha'},FUE:{r:'sch',c:'🇪🇸 Fuerteventura, Espanha'},ALC:{r:'sch',c:'🇪🇸 Alicante, Espanha'},BIO:{r:'sch',c:'🇪🇸 Bilbau, Espanha'},SCQ:{r:'sch',c:'🇪🇸 Santiago Compostela, Espanha'},VGO:{r:'sch',c:'🇪🇸 Vigo, Espanha'},GRX:{r:'sch',c:'🇪🇸 Granada, Espanha'},REU:{r:'sch',c:'🇪🇸 Reus, Espanha'},GRO:{r:'sch',c:'🇪🇸 Girona, Espanha'},XRY:{r:'sch',c:'🇪🇸 Jerez, Espanha'},OVD:{r:'sch',c:'🇪🇸 Astúrias, Espanha'},SDR:{r:'sch',c:'🇪🇸 Santander, Espanha'},ZAZ:{r:'sch',c:'🇪🇸 Saragoça, Espanha'},
+FCO:{r:'sch',c:'🇮🇹 Roma Fiumicino, Itália'},MXP:{r:'sch',c:'🇮🇹 Milão Malpensa, Itália'},BGY:{r:'sch',c:'🇮🇹 Milão Bérgamo, Itália'},VCE:{r:'sch',c:'🇮🇹 Veneza, Itália'},NAP:{r:'sch',c:'🇮🇹 Nápoles, Itália'},BLQ:{r:'sch',c:'🇮🇹 Bolonha, Itália'},PSA:{r:'sch',c:'🇮🇹 Pisa, Itália'},FLR:{r:'sch',c:'🇮🇹 Florença, Itália'},CTA:{r:'sch',c:'🇮🇹 Catânia, Itália'},PMO:{r:'sch',c:'🇮🇹 Palermo, Itália'},BRI:{r:'sch',c:'🇮🇹 Bari, Itália'},TRN:{r:'sch',c:'🇮🇹 Turim, Itália'},CIA:{r:'sch',c:'🇮🇹 Roma Ciampino, Itália'},GOA:{r:'sch',c:'🇮🇹 Génova, Itália'},TSF:{r:'sch',c:'🇮🇹 Treviso, Itália'},VRN:{r:'sch',c:'🇮🇹 Verona, Itália'},CAG:{r:'sch',c:'🇮🇹 Cagliari, Itália'},OLB:{r:'sch',c:'🇮🇹 Olbia, Itália'},SUF:{r:'sch',c:'🇮🇹 Lamezia, Itália'},
+ZRH:{r:'sch',c:'🇨🇭 Zurique, Suíça'},GVA:{r:'sch',c:'🇨🇭 Genebra, Suíça'},BSL:{r:'sch',c:'🇨🇭 Basileia, Suíça'},
+VIE:{r:'sch',c:'🇦🇹 Viena, Áustria'},SZG:{r:'sch',c:'🇦🇹 Salzburgo, Áustria'},INN:{r:'sch',c:'🇦🇹 Innsbruck, Áustria'},GRZ:{r:'sch',c:'🇦🇹 Graz, Áustria'},
+BRU:{r:'sch',c:'🇧🇪 Bruxelas, Bélgica'},CRL:{r:'sch',c:'🇧🇪 Charleroi, Bélgica'},ANR:{r:'sch',c:'🇧🇪 Antuérpia, Bélgica'},
+LUX:{r:'sch',c:'🇱🇺 Luxemburgo'},
+CPH:{r:'sch',c:'🇩🇰 Copenhaga, Dinamarca'},BLL:{r:'sch',c:'🇩🇰 Billund, Dinamarca'},AAL:{r:'sch',c:'🇩🇰 Aalborg, Dinamarca'},
+OSL:{r:'sch',c:'🇳🇴 Oslo, Noruega'},BGO:{r:'sch',c:'🇳🇴 Bergen, Noruega'},SVG:{r:'sch',c:'🇳🇴 Stavanger, Noruega'},TRD:{r:'sch',c:'🇳🇴 Trondheim, Noruega'},TOS:{r:'sch',c:'🇳🇴 Tromsø, Noruega'},
+ARN:{r:'sch',c:'🇸🇪 Estocolmo, Suécia'},GOT:{r:'sch',c:'🇸🇪 Gotemburgo, Suécia'},MMX:{r:'sch',c:'🇸🇪 Malmö, Suécia'},
+HEL:{r:'sch',c:'🇫🇮 Helsínquia, Finlândia'},TMP:{r:'sch',c:'🇫🇮 Tampere, Finlândia'},TKU:{r:'sch',c:'🇫🇮 Turku, Finlândia'},
+WAW:{r:'sch',c:'🇵🇱 Varsóvia, Polónia'},KRK:{r:'sch',c:'🇵🇱 Cracóvia, Polónia'},GDN:{r:'sch',c:'🇵🇱 Gdansk, Polónia'},WRO:{r:'sch',c:'🇵🇱 Breslávia, Polónia'},POZ:{r:'sch',c:'🇵🇱 Poznan, Polónia'},KTW:{r:'sch',c:'🇵🇱 Katowice, Polónia'},WMI:{r:'sch',c:'🇵🇱 Varsóvia Modlin, Polónia'},RZE:{r:'sch',c:'🇵🇱 Rzeszów, Polónia'},
+PRG:{r:'sch',c:'🇨🇿 Praga, Chéquia'},BRQ:{r:'sch',c:'🇨🇿 Brno, Chéquia'},
+BUD:{r:'sch',c:'🇭🇺 Budapeste, Hungria'},DEB:{r:'sch',c:'🇭🇺 Debrecen, Hungria'},
+ATH:{r:'sch',c:'🇬🇷 Atenas, Grécia'},SKG:{r:'sch',c:'🇬🇷 Tessalónica, Grécia'},HER:{r:'sch',c:'🇬🇷 Heraclião Creta, Grécia'},CHQ:{r:'sch',c:'🇬🇷 Chania Creta, Grécia'},RHO:{r:'sch',c:'🇬🇷 Rodes, Grécia'},CFU:{r:'sch',c:'🇬🇷 Corfu, Grécia'},JMK:{r:'sch',c:'🇬🇷 Mykonos, Grécia'},JTR:{r:'sch',c:'🇬🇷 Santorini, Grécia'},KGS:{r:'sch',c:'🇬🇷 Kos, Grécia'},ZTH:{r:'sch',c:'🇬🇷 Zakynthos, Grécia'},
+RIX:{r:'sch',c:'🇱🇻 Riga, Letónia'},TLL:{r:'sch',c:'🇪🇪 Tallin, Estónia'},VNO:{r:'sch',c:'🇱🇹 Vilnius, Lituânia'},KUN:{r:'sch',c:'🇱🇹 Kaunas, Lituânia'},
+LJU:{r:'sch',c:'🇸🇮 Liubliana, Eslovénia'},BTS:{r:'sch',c:'🇸🇰 Bratislava, Eslováquia'},
+MLT:{r:'sch',c:'🇲🇹 Malta'},MLA:{r:'sch',c:'🇲🇹 Malta'},
+KEF:{r:'sch',c:'🇮🇸 Reiquiavique, Islândia'},
+OPO:{r:'sch',c:'🇵🇹 Porto, Portugal'},FAO:{r:'sch',c:'🇵🇹 Faro, Portugal'},FNC:{r:'sch',c:'🇵🇹 Madeira, Portugal'},PDL:{r:'sch',c:'🇵🇹 Açores, Portugal'},TER:{r:'sch',c:'🇵🇹 Terceira, Portugal'},HOR:{r:'sch',c:'🇵🇹 Horta, Portugal'},
+ZAG:{r:'sch',c:'🇭🇷 Zagreb, Croácia'},DBV:{r:'sch',c:'🇭🇷 Dubrovnik, Croácia'},SPU:{r:'sch',c:'🇭🇷 Split, Croácia'},PUY:{r:'sch',c:'🇭🇷 Pula, Croácia'},ZAD:{r:'sch',c:'🇭🇷 Zadar, Croácia'},
+
+/* ── REINO UNIDO (Brexit — controlo passaportes, fila longa) ── */
+LHR:{r:'uk',c:'🇬🇧 Londres Heathrow, Reino Unido'},LGW:{r:'uk',c:'🇬🇧 Londres Gatwick, Reino Unido'},STN:{r:'uk',c:'🇬🇧 Londres Stansted, Reino Unido'},LTN:{r:'uk',c:'🇬🇧 Londres Luton, Reino Unido'},LCY:{r:'uk',c:'🇬🇧 Londres City, Reino Unido'},SEN:{r:'uk',c:'🇬🇧 Londres Southend, Reino Unido'},
+MAN:{r:'uk',c:'🇬🇧 Manchester, Reino Unido'},BHX:{r:'uk',c:'🇬🇧 Birmingham, Reino Unido'},EDI:{r:'uk',c:'🇬🇧 Edimburgo, Reino Unido'},GLA:{r:'uk',c:'🇬🇧 Glasgow, Reino Unido'},BFS:{r:'uk',c:'🇬🇧 Belfast, Reino Unido'},BRS:{r:'uk',c:'🇬🇧 Bristol, Reino Unido'},LPL:{r:'uk',c:'🇬🇧 Liverpool, Reino Unido'},NCL:{r:'uk',c:'🇬🇧 Newcastle, Reino Unido'},LBA:{r:'uk',c:'🇬🇧 Leeds, Reino Unido'},ABZ:{r:'uk',c:'🇬🇧 Aberdeen, Reino Unido'},EMA:{r:'uk',c:'🇬🇧 East Midlands, Reino Unido'},CWL:{r:'uk',c:'🇬🇧 Cardiff, Reino Unido'},BOH:{r:'uk',c:'🇬🇧 Bournemouth, Reino Unido'},EXT:{r:'uk',c:'🇬🇧 Exeter, Reino Unido'},JER:{r:'uk',c:'🇬🇧 Jersey, Reino Unido'},
+
+/* ── EUROPA NÃO-SCHENGEN (controlo passaportes, mas voo curto) ── */
+DUB:{r:'eur',c:'🇮🇪 Dublin, Irlanda'},SNN:{r:'eur',c:'🇮🇪 Shannon, Irlanda'},ORK:{r:'eur',c:'🇮🇪 Cork, Irlanda'},KNO:{r:'eur',c:'🇮🇪 Knock, Irlanda'},
+IST:{r:'eur',c:'🇹🇷 Istambul, Turquia'},SAW:{r:'eur',c:'🇹🇷 Istambul Sabiha, Turquia'},AYT:{r:'eur',c:'🇹🇷 Antalya, Turquia'},ESB:{r:'eur',c:'🇹🇷 Ancara, Turquia'},ADB:{r:'eur',c:'🇹🇷 Izmir, Turquia'},DLM:{r:'eur',c:'🇹🇷 Dalaman, Turquia'},BJV:{r:'eur',c:'🇹🇷 Bodrum, Turquia'},TZX:{r:'eur',c:'🇹🇷 Trabzon, Turquia'},
+OTP:{r:'eur',c:'🇷🇴 Bucareste, Roménia'},CLJ:{r:'eur',c:'🇷🇴 Cluj, Roménia'},TSR:{r:'eur',c:'🇷🇴 Timisoara, Roménia'},IAS:{r:'eur',c:'🇷🇴 Iasi, Roménia'},SBZ:{r:'eur',c:'🇷🇴 Sibiu, Roménia'},
+SOF:{r:'eur',c:'🇧🇬 Sófia, Bulgária'},VAR:{r:'eur',c:'🇧🇬 Varna, Bulgária'},BOJ:{r:'eur',c:'🇧🇬 Burgas, Bulgária'},
+BEG:{r:'eur',c:'🇷🇸 Belgrado, Sérvia'},INI:{r:'eur',c:'🇷🇸 Nis, Sérvia'},
+SKP:{r:'eur',c:'🇲🇰 Skopje, Macedónia'},TIA:{r:'eur',c:'🇦🇱 Tirana, Albânia'},SJJ:{r:'eur',c:'🇧🇦 Sarajevo, Bósnia'},TGD:{r:'eur',c:'🇲🇪 Podgorica, Montenegro'},TIV:{r:'eur',c:'🇲🇪 Tivat, Montenegro'},PRN:{r:'eur',c:'🇽🇰 Pristina, Kosovo'},
+KIV:{r:'eur',c:'🇲🇩 Chisinau, Moldávia'},LCA:{r:'eur',c:'🇨🇾 Larnaca, Chipre'},PFO:{r:'eur',c:'🇨🇾 Paphos, Chipre'},
+KBP:{r:'eur',c:'🇺🇦 Kiev, Ucrânia'},SVO:{r:'eur',c:'🇷🇺 Moscovo, Rússia'},LED:{r:'eur',c:'🇷🇺 São Petersburgo, Rússia'},
+GEO:{r:'eur',c:'🇬🇪 Tbilisi, Geórgia'},EVN:{r:'eur',c:'🇦🇲 Erevan, Arménia'},
+
+/* ── NORTE DE ÁFRICA ── */
+CMN:{r:'africa',c:'🇲🇦 Casablanca, Marrocos'},RAK:{r:'africa',c:'🇲🇦 Marraquexe, Marrocos'},FEZ:{r:'africa',c:'🇲🇦 Fez, Marrocos'},TNG:{r:'africa',c:'🇲🇦 Tânger, Marrocos'},AGA:{r:'africa',c:'🇲🇦 Agadir, Marrocos'},NDR:{r:'africa',c:'🇲🇦 Nador, Marrocos'},OUD:{r:'africa',c:'🇲🇦 Oujda, Marrocos'},
+ALG:{r:'africa',c:'🇩🇿 Argel, Argélia'},ORN:{r:'africa',c:'🇩🇿 Orão, Argélia'},
+TUN:{r:'africa',c:'🇹🇳 Tunis, Tunísia'},DJE:{r:'africa',c:'🇹🇳 Djerba, Tunísia'},
+CAI:{r:'africa',c:'🇪🇬 Cairo, Egito'},HRG:{r:'africa',c:'🇪🇬 Hurghada, Egito'},SSH:{r:'africa',c:'🇪🇬 Sharm el-Sheikh, Egito'},LXR:{r:'africa',c:'🇪🇬 Luxor, Egito'},
+TIP:{r:'africa',c:'🇱🇾 Trípoli, Líbia'},
+
+/* ── ÁFRICA SUBSAARIANA ── */
+LAD:{r:'africa',c:'🇦🇴 Luanda, Angola'},MPM:{r:'africa',c:'🇲🇿 Maputo, Moçambique'},LOS:{r:'africa',c:'🇳🇬 Lagos, Nigéria'},ABV:{r:'africa',c:'🇳🇬 Abuja, Nigéria'},ACC:{r:'africa',c:'🇬🇭 Acra, Gana'},DKR:{r:'africa',c:'🇸🇳 Dacar, Senegal'},NBO:{r:'africa',c:'🇰🇪 Nairobi, Quénia'},ADD:{r:'africa',c:'🇪🇹 Addis Abeba, Etiópia'},JNB:{r:'africa',c:'🇿🇦 Joanesburgo, África do Sul'},CPT:{r:'africa',c:'🇿🇦 Cidade do Cabo, África do Sul'},DUR:{r:'africa',c:'🇿🇦 Durban, África do Sul'},DSS:{r:'africa',c:'🇸🇳 Dacar Blaise, Senegal'},ABJ:{r:'africa',c:'🇨🇮 Abidjan, Costa do Marfim'},RAI:{r:'africa',c:'🇨🇻 Praia, Cabo Verde'},SID:{r:'africa',c:'🇨🇻 Sal, Cabo Verde'},BVC:{r:'africa',c:'🇨🇻 Boa Vista, Cabo Verde'},LUN:{r:'africa',c:'🇿🇲 Lusaka, Zâmbia'},DAR:{r:'africa',c:'🇹🇿 Dar es Salaam, Tanzânia'},EBB:{r:'africa',c:'🇺🇬 Entebbe, Uganda'},KGL:{r:'africa',c:'🇷🇼 Kigali, Ruanda'},LFW:{r:'africa',c:'🇹🇬 Lomé, Togo'},OXB:{r:'africa',c:'🇬🇼 Bissau, Guiné-Bissau'},SSG:{r:'africa',c:'🇬🇶 Malabo, Guiné Equatorial'},FNA:{r:'africa',c:'🇸🇱 Freetown, Serra Leoa'},BKO:{r:'africa',c:'🇲🇱 Bamako, Mali'},
+
+/* ── MÉDIO ORIENTE / GOLFO ── */
+TLV:{r:'mideast',c:'🇮🇱 Tel Aviv, Israel'},DXB:{r:'mideast',c:'🇦🇪 Dubai, Emirados'},AUH:{r:'mideast',c:'🇦🇪 Abu Dhabi, Emirados'},DOH:{r:'mideast',c:'🇶🇦 Doha, Qatar'},RUH:{r:'mideast',c:'🇸🇦 Riade, Arábia Saudita'},JED:{r:'mideast',c:'🇸🇦 Jeddah, Arábia Saudita'},BAH:{r:'mideast',c:'🇧🇭 Bahrein'},MCT:{r:'mideast',c:'🇴🇲 Mascate, Omã'},KWI:{r:'mideast',c:'🇰🇼 Kuwait'},AMM:{r:'mideast',c:'🇯🇴 Amã, Jordânia'},BEY:{r:'mideast',c:'🇱🇧 Beirute, Líbano'},IKA:{r:'mideast',c:'🇮🇷 Teerão, Irão'},BGW:{r:'mideast',c:'🇮🇶 Bagdade, Iraque'},
+
+/* ── AMÉRICA DO NORTE (EUA + Canadá) ── */
+JFK:{r:'na',c:'🇺🇸 Nova Iorque JFK, EUA'},EWR:{r:'na',c:'🇺🇸 Newark, EUA'},LGA:{r:'na',c:'🇺🇸 Nova Iorque LaGuardia, EUA'},BOS:{r:'na',c:'🇺🇸 Boston, EUA'},IAD:{r:'na',c:'🇺🇸 Washington Dulles, EUA'},DCA:{r:'na',c:'🇺🇸 Washington Reagan, EUA'},MIA:{r:'na',c:'🇺🇸 Miami, EUA'},FLL:{r:'na',c:'🇺🇸 Fort Lauderdale, EUA'},ORD:{r:'na',c:'🇺🇸 Chicago, EUA'},LAX:{r:'na',c:'🇺🇸 Los Angeles, EUA'},SFO:{r:'na',c:'🇺🇸 São Francisco, EUA'},ATL:{r:'na',c:'🇺🇸 Atlanta, EUA'},DFW:{r:'na',c:'🇺🇸 Dallas, EUA'},DEN:{r:'na',c:'🇺🇸 Denver, EUA'},SEA:{r:'na',c:'🇺🇸 Seattle, EUA'},PHL:{r:'na',c:'🇺🇸 Filadélfia, EUA'},CLT:{r:'na',c:'🇺🇸 Charlotte, EUA'},PHX:{r:'na',c:'🇺🇸 Phoenix, EUA'},IAH:{r:'na',c:'🇺🇸 Houston, EUA'},MSP:{r:'na',c:'🇺🇸 Minneapolis, EUA'},DTW:{r:'na',c:'🇺🇸 Detroit, EUA'},MCO:{r:'na',c:'🇺🇸 Orlando, EUA'},TPA:{r:'na',c:'🇺🇸 Tampa, EUA'},SAN:{r:'na',c:'🇺🇸 San Diego, EUA'},LAS:{r:'na',c:'🇺🇸 Las Vegas, EUA'},HNL:{r:'na',c:'🇺🇸 Honolulu, EUA'},
+YYZ:{r:'na',c:'🇨🇦 Toronto, Canadá'},YUL:{r:'na',c:'🇨🇦 Montreal, Canadá'},YVR:{r:'na',c:'🇨🇦 Vancouver, Canadá'},YOW:{r:'na',c:'🇨🇦 Ottawa, Canadá'},YHZ:{r:'na',c:'🇨🇦 Halifax, Canadá'},YEG:{r:'na',c:'🇨🇦 Edmonton, Canadá'},YYC:{r:'na',c:'🇨🇦 Calgary, Canadá'},
+
+/* ── BRASIL (voo longo + muitos passageiros + fila enorme) ── */
+GRU:{r:'brazil',c:'🇧🇷 São Paulo Guarulhos'},VCP:{r:'brazil',c:'🇧🇷 Campinas Viracopos'},CGH:{r:'brazil',c:'🇧🇷 São Paulo Congonhas'},GIG:{r:'brazil',c:'🇧🇷 Rio de Janeiro Galeão'},SDU:{r:'brazil',c:'🇧🇷 Rio Santos Dumont'},CNF:{r:'brazil',c:'🇧🇷 Belo Horizonte Confins'},PLU:{r:'brazil',c:'🇧🇷 BH Pampulha'},BSB:{r:'brazil',c:'🇧🇷 Brasília'},SSA:{r:'brazil',c:'🇧🇷 Salvador'},REC:{r:'brazil',c:'🇧🇷 Recife'},FOR:{r:'brazil',c:'🇧🇷 Fortaleza'},POA:{r:'brazil',c:'🇧🇷 Porto Alegre'},CWB:{r:'brazil',c:'🇧🇷 Curitiba'},BEL:{r:'brazil',c:'🇧🇷 Belém'},MAO:{r:'brazil',c:'🇧🇷 Manaus'},NAT:{r:'brazil',c:'🇧🇷 Natal'},MCZ:{r:'brazil',c:'🇧🇷 Maceió'},AJU:{r:'brazil',c:'🇧🇷 Aracaju'},SLZ:{r:'brazil',c:'🇧🇷 São Luís'},THE:{r:'brazil',c:'🇧🇷 Teresina'},CGB:{r:'brazil',c:'🇧🇷 Cuiabá'},CGR:{r:'brazil',c:'🇧🇷 Campo Grande'},GYN:{r:'brazil',c:'🇧🇷 Goiânia'},VIX:{r:'brazil',c:'🇧🇷 Vitória'},FLN:{r:'brazil',c:'🇧🇷 Florianópolis'},JPA:{r:'brazil',c:'🇧🇷 João Pessoa'},IGU:{r:'brazil',c:'🇧🇷 Foz do Iguaçu'},
+
+/* ── AMÉRICA LATINA (exceto Brasil) ── */
+EZE:{r:'latam',c:'🇦🇷 Buenos Aires, Argentina'},AEP:{r:'latam',c:'🇦🇷 Buenos Aires Aeroparque'},COR:{r:'latam',c:'🇦🇷 Córdoba, Argentina'},MDZ:{r:'latam',c:'🇦🇷 Mendoza, Argentina'},
+SCL:{r:'latam',c:'🇨🇱 Santiago, Chile'},LIM:{r:'latam',c:'🇵🇪 Lima, Peru'},MVD:{r:'latam',c:'🇺🇾 Montevidéu, Uruguai'},ASU:{r:'latam',c:'🇵🇾 Assunção, Paraguai'},
+BOG:{r:'latam',c:'🇨🇴 Bogotá, Colômbia'},MDE:{r:'latam',c:'🇨🇴 Medellín, Colômbia'},CTG:{r:'latam',c:'🇨🇴 Cartagena, Colômbia'},
+MEX:{r:'latam',c:'🇲🇽 Cidade do México'},CUN:{r:'latam',c:'🇲🇽 Cancún, México'},GDL:{r:'latam',c:'🇲🇽 Guadalajara, México'},
+PTY:{r:'latam',c:'🇵🇦 Cidade do Panamá'},SJO:{r:'latam',c:'🇨🇷 San José, Costa Rica'},HAV:{r:'latam',c:'🇨🇺 Havana, Cuba'},SDQ:{r:'latam',c:'🇩🇴 Santo Domingo, Rep. Dominicana'},PUJ:{r:'latam',c:'🇩🇴 Punta Cana, Rep. Dominicana'},GUA:{r:'latam',c:'🇬🇹 Guatemala'},SAL:{r:'latam',c:'🇸🇻 San Salvador'},UIO:{r:'latam',c:'🇪🇨 Quito, Equador'},GYE:{r:'latam',c:'🇪🇨 Guayaquil, Equador'},CCS:{r:'latam',c:'🇻🇪 Caracas, Venezuela'},LPB:{r:'latam',c:'🇧🇴 La Paz, Bolívia'},
+
+/* ── ÁSIA / OCEANIA ── */
+PEK:{r:'asia',c:'🇨🇳 Pequim, China'},PVG:{r:'asia',c:'🇨🇳 Xangai, China'},CAN:{r:'asia',c:'🇨🇳 Guangzhou, China'},CTU:{r:'asia',c:'🇨🇳 Chengdu, China'},SZX:{r:'asia',c:'🇨🇳 Shenzhen, China'},
+HKG:{r:'asia',c:'🇭🇰 Hong Kong'},TPE:{r:'asia',c:'🇹🇼 Taipei, Taiwan'},
+NRT:{r:'asia',c:'🇯🇵 Tóquio Narita, Japão'},HND:{r:'asia',c:'🇯🇵 Tóquio Haneda, Japão'},KIX:{r:'asia',c:'🇯🇵 Osaka, Japão'},
+ICN:{r:'asia',c:'🇰🇷 Seul Incheon, Coreia do Sul'},
+SIN:{r:'asia',c:'🇸🇬 Singapura'},KUL:{r:'asia',c:'🇲🇾 Kuala Lumpur, Malásia'},BKK:{r:'asia',c:'🇹🇭 Banguecoque, Tailândia'},HKT:{r:'asia',c:'🇹🇭 Phuket, Tailândia'},
+DEL:{r:'asia',c:'🇮🇳 Nova Delhi, Índia'},BOM:{r:'asia',c:'🇮🇳 Mumbai, Índia'},BLR:{r:'asia',c:'🇮🇳 Bangalore, Índia'},MAA:{r:'asia',c:'🇮🇳 Chennai, Índia'},CCU:{r:'asia',c:'🇮🇳 Calcutá, Índia'},HYD:{r:'asia',c:'🇮🇳 Hyderabad, Índia'},
+CMB:{r:'asia',c:'🇱🇰 Colombo, Sri Lanka'},DAC:{r:'asia',c:'🇧🇩 Daca, Bangladesh'},KTM:{r:'asia',c:'🇳🇵 Katmandu, Nepal'},
+SGN:{r:'asia',c:'🇻🇳 Ho Chi Minh, Vietname'},HAN:{r:'asia',c:'🇻🇳 Hanói, Vietname'},MNL:{r:'asia',c:'🇵🇭 Manila, Filipinas'},CGK:{r:'asia',c:'🇮🇩 Jacarta, Indonésia'},DPS:{r:'asia',c:'🇮🇩 Bali, Indonésia'},RGN:{r:'asia',c:'🇲🇲 Yangon, Myanmar'},PNH:{r:'asia',c:'🇰🇭 Phnom Penh, Camboja'},
+TAS:{r:'asia',c:'🇺🇿 Tashkent, Uzbequistão'},ALA:{r:'asia',c:'🇰🇿 Almaty, Cazaquistão'},
+SYD:{r:'asia',c:'🇦🇺 Sydney, Austrália'},MEL:{r:'asia',c:'🇦🇺 Melbourne, Austrália'},BNE:{r:'asia',c:'🇦🇺 Brisbane, Austrália'},PER:{r:'asia',c:'🇦🇺 Perth, Austrália'},
+AKL:{r:'asia',c:'🇳🇿 Auckland, Nova Zelândia'},WLG:{r:'asia',c:'🇳🇿 Wellington, Nova Zelândia'},CHC:{r:'asia',c:'🇳🇿 Christchurch, Nova Zelândia'}
+};
+
+/* Prefixos de companhia → hub principal (para resolver o "???") */
+const AIRLINE_HUB={TP:'LIS',NI:'LIS',FR:'DUB',U2:'LGW',W6:'BUD',W4:'BUD',LH:'FRA',LX:'ZRH',OS:'VIE',SN:'BRU',AF:'CDG',KL:'AMS',BA:'LHR',IB:'MAD',VY:'BCN',AZ:'FCO',EW:'CGN',DE:'FRA',TK:'IST',PC:'SAW',EK:'DXB',QR:'DOH',EY:'AUH',SV:'RUH',LA:'SCL',JJ:'GRU',G3:'GRU',AD:'GRU',AA:'DFW',DL:'ATL',UA:'EWR',AC:'YYZ',WS:'YYC',SU:'SVO',SK:'CPH',AY:'HEL',DY:'OSL',LO:'WAW',OK:'PRG',RO:'OTP',BT:'RIX',TO:'ORY',DT:'LAD',S4:'RAI',AT:'CMN',TU:'TUN',MS:'CAI',ET:'ADD',SA:'JNB',KQ:'NBO',TM:'MPM',QF:'SYD',NZ:'AKL',SQ:'SIN',TG:'BKK',MH:'KUL',CX:'HKG',NH:'NRT',JL:'NRT',KE:'ICN',OZ:'ICN',AI:'DEL',CA:'PEK',MU:'PVG',CZ:'CAN',EI:'DUB',AV:'BOG',AM:'MEX',CM:'PTY',AR:'EZE',UX:'MAD',QS:'PRG',LS:'MAN',BY:'MAN',TOM:'MAN',MT:'LGW',ZB:'LTN'};
+
+function getIataInfo(iata){if(!iata)return null;return IATA_DATA[iata.toUpperCase()]||null;}
+function guessDepAirport(flight){
+  if(!flight)return null;
+  const code=String(flight).replace(/\s/g,'');
+  /* Tentar 2 letras primeiro, depois 3 (Ryanair FR, TAP TP, TUI BY, etc) */
+  const m2=code.match(/^([A-Z]{2})\d/);
+  if(m2 && AIRLINE_HUB[m2[1]]) return AIRLINE_HUB[m2[1]];
+  const m3=code.match(/^([A-Z]{3})\d/);
+  if(m3 && AIRLINE_HUB[m3[1]]) return AIRLINE_HUB[m3[1]];
+  return null;
+}
+function regionLabel(r){
+  if(r==='sch')     return{text:'Schengen · Sem passaporte · ~15-25min',cls:'eu'};
+  if(r==='uk')      return{text:'Reino Unido · Controlo passaportes · ~40-60min',cls:'inter'};
+  if(r==='eur')     return{text:'Europa não-Schengen · Controlo passaportes · ~30-45min',cls:'inter'};
+  if(r==='na')      return{text:'América do Norte · Controlo + voo longo · ~45-60min',cls:'inter'};
+  if(r==='africa')  return{text:'África · ~45-60min',cls:'inter'};
+  if(r==='mideast') return{text:'Médio Oriente · ~45-60min',cls:'inter'};
+  if(r==='latam')   return{text:'América Latina · ~50-75min',cls:'long'};
+  if(r==='brazil')  return{text:'Brasil · Voo longo + muitos passageiros · ~60-90min',cls:'long'};
+  if(r==='asia')    return{text:'Ásia / Oceania · Voo muito longo · ~60-90min',cls:'long'};
+  return null;
+}
+function calcFlightProgress(depTime, arrTime){
+  /* Estima progresso do voo: 0-100 baseado na hora actual vs dep/arr */
+  if(!depTime||!arrTime)return 50; /* fallback centro */
+  const now = new Date();
+  const hNow = now.getHours()*60 + now.getMinutes();
+  const parseTm = (t)=>{const m=String(t).match(/(\d{1,2}):(\d{2})/); return m?parseInt(m[1])*60+parseInt(m[2]):null;};
+  const dM=parseTm(depTime), aM=parseTm(arrTime);
+  if(dM===null||aM===null)return 50;
+  const dur = aM > dM ? aM-dM : (aM+1440)-dM; /* handle overnight */
+  if(dur<=0)return 50;
+  const elapsed = hNow >= dM ? hNow-dM : (hNow+1440)-dM;
+  if(elapsed<0)return 5; /* ainda não partiu */
+  if(elapsed>=dur)return 95; /* já aterrou */
+  return Math.round((elapsed/dur)*90)+5;
+}
+const TEMPLATES={
+  CHEGADA:{
+    PT:(m,c)=>`Oi, ${c}! 👋 Aqui é o ${m}, da HUB Transfer.\nBem-vindo(a) a Portugal! 🇵🇹 Espero que o voo tenha sido tranquilo.\nVou te ajudar a sair do aeroporto sem stress.\n\nEstou enviando a foto abaixo para facilitar chegar no nosso ponto de encontro.\n\nPor favor, me avisa quando:\n1️⃣ Passar pelo controle de passaportes\n2️⃣ Estiver com as malas na mão\n\nTe vejo em breve! Se precisar de algo, pode me enviar uma mensagem. 👍`,
+    EN:(m,c)=>`Hi ${c}! 👋 I'm ${m}, from HUB Transfer.\nWelcome to Portugal! 🇵🇹 I hope you had a pleasant flight.\nI'm here to make your arrival stress-free.\n\nI'm sending the photo below to help you find our meeting point.\n\nPlease let me know when:\n1️⃣ You pass through passport control\n2️⃣ You have your luggage ready\n\nSee you soon! If you need anything, just send me a message. 👍`,
+    ES:(m,c)=>`¡Hola, ${c}! 👋 Soy ${m}, de HUB Transfer.\n¡Bienvenido(a) a Portugal! 🇵🇹 Espero que el vuelo haya sido tranquilo.\nTe ayudaré a salir del aeropuerto sin estrés.\n\nTe envío la foto abajo para facilitar que llegues a nuestro punto de encuentro.\n\nPor favor, avísame cuando:\n1️⃣ Pases el control de pasaportes\n2️⃣ Tengas tus maletas contigo\n\n¡Te veo pronto! Si necesitas algo, puedes enviarme un mensaje. 👍`,
+    FR:(m,c)=>`Bonjour ${c} ! 👋 C'est ${m}, de HUB Transfer.\nBienvenue au Portugal ! 🇵🇹 J'espère que vous avez fait un bon vol.\nJe vais vous aider à quitter l'aéroport sans stress.\n\nJe vous envoie la photo ci-dessous pour vous aider à trouver notre point de rencontre.\n\nMerci de me prévenir quand :\n1️⃣ Vous passez le contrôle des passeports\n2️⃣ Vous avez récupéré vos bagages\n\nÀ très vite ! Si vous avez besoin de quelque chose, envoyez-moi un message. 👍`,
+    IT:(m,c)=>`Ciao ${c}! 👋 Sono ${m}, di HUB Transfer.\nBenvenuto(a) in Portogallo! 🇵🇹 Spero che il volo sia stato tranquillo.\nTi aiuterò a uscire dall'aeroporto senza stress.\n\nTi invio la foto qui sotto per aiutarti a trovare il nostro punto di incontro.\n\nPer favore, avvisami quando:\n1️⃣ Passi il controllo passaporti\n2️⃣ Hai preso i bagagli\n\nCi vediamo presto! Se hai bisogno di qualcosa, mandami un messaggio. 👍`,
+    DE:(m,c)=>`Hallo ${c}! 👋 Ich bin ${m}, von HUB Transfer.\nWillkommen in Portugal! 🇵🇹 Ich hoffe, Sie hatten einen angenehmen Flug.\nIch helfe Ihnen, den Flughafen stressfrei zu verlassen.\n\nIch schicke Ihnen das Foto unten, um Ihnen zu helfen, unseren Treffpunkt zu finden.\n\nBitte geben Sie mir Bescheid, wenn:\n1️⃣ Sie durch die Passkontrolle gehen\n2️⃣ Sie Ihr Gepäck haben\n\nBis gleich! Wenn Sie etwas brauchen, schicken Sie mir einfach eine Nachricht. 👍`,
+  },
+  RECOLHA:{
+    PT:(m,c,o,h)=>`Olá, ${c}! 👋 Aqui é o ${m}, da HUB Transfer.\nSou o motorista responsável pelo seu transfer de hoje.\n\n📍 Estarei em *${o||'sua morada'}* no horário combinado: *${h||'—'}*\n\nQuando eu chegar, vou te avisar por aqui! 😊\n\nSe precisar de algo ou houver qualquer alteração, me avise por aqui. 👍`,
+    EN:(m,c,o,h)=>`Hello, ${c}! 👋 I'm ${m}, from HUB Transfer.\nI'm the driver for your transfer today.\n\n📍 I'll be at *${o||'your address'}* at the scheduled time: *${h||'—'}*\n\nI'll let you know when I arrive! 😊\n\nIf you need anything or there are any changes, just message me here. 👍`,
+    ES:(m,c,o,h)=>`¡Hola, ${c}! 👋 Soy ${m}, de HUB Transfer.\nSoy el conductor de su transfer de hoy.\n\n📍 Estaré en *${o||'su dirección'}* a la hora acordada: *${h||'—'}*\n\n¡Te avisaré cuando llegue! 😊\n\nSi necesita algo o hay algún cambio, escríbame por aquí. 👍`,
+    FR:(m,c,o,h)=>`Bonjour ${c} ! 👋 C'est ${m}, de HUB Transfer.\nJe suis le chauffeur pour votre transfert aujourd'hui.\n\n📍 Je serai à *${o||'votre adresse'}* à l'heure prévue : *${h||'—'}*\n\nJe vous préviendrai quand j'arriverai ! 😊\n\nSi vous avez besoin de quoi que ce soit, envoyez-moi un message ici. 👍`,
+    IT:(m,c,o,h)=>`Ciao ${c}! 👋 Sono ${m}, di HUB Transfer.\nSono l'autista per il tuo transfer di oggi.\n\n📍 Sarò a *${o||'il tuo indirizzo'}* all'orario previsto: *${h||'—'}*\n\nTi avviserò quando arrivo! 😊\n\nSe hai bisogno di qualcosa o ci sono cambiamenti, scrivimi qui. 👍`,
+    DE:(m,c,o,h)=>`Hallo ${c}! 👋 Ich bin ${m}, von HUB Transfer.\nIch bin der Fahrer für Ihren Transfer heute.\n\n📍 Ich werde um *${h||'—'}* an *${o||'Ihrer Adresse'}* sein.\n\nIch gebe Ihnen Bescheid, wenn ich ankomme! 😊\n\nWenn Sie etwas brauchen, schreiben Sie mir hier. 👍`,
+  },
+  TOUR:{
+    PT:(m,c,o,h)=>`Olá, ${c}! 👋 Aqui é o ${m}, da HUB Transfer.\nEstou confirmando o seu transfer de hoje.\n\n📍 Estarei em *${o||'sua morada'}* às *${h||'—'}*\n\nQualquer dúvida, é só me enviar uma mensagem aqui. 😊 👍`,
+    EN:(m,c,o,h)=>`Hello, ${c}! 👋 I'm ${m}, from HUB Transfer.\nConfirming your transfer for today.\n\n📍 I'll be at *${o||'your address'}* at *${h||'—'}*\n\nFeel free to message me here if you need anything. 😊 👍`,
+    ES:(m,c,o,h)=>`¡Hola, ${c}! 👋 Soy ${m}, de HUB Transfer.\nConfirmando su transfer para hoy.\n\n📍 Estaré en *${o||'su dirección'}* a las *${h||'—'}*\n\nPuede escribirme aquí si necesita algo. 😊 👍`,
+    FR:(m,c,o,h)=>`Bonjour ${c} ! 👋 C'est ${m}, de HUB Transfer.\nJe confirme votre transfert pour aujourd'hui.\n\n📍 Je serai à *${o||'votre adresse'}* à *${h||'—'}*\n\nN'hésitez pas à m'écrire si vous avez besoin de quoi que ce soit. 😊 👍`,
+    IT:(m,c,o,h)=>`Ciao ${c}! 👋 Sono ${m}, di HUB Transfer.\nConferma del tuo transfer per oggi.\n\n📍 Sarò a *${o||'il tuo indirizzo'}* alle *${h||'—'}*\n\nScrivimi qui se hai bisogno di qualcosa. 😊 👍`,
+    DE:(m,c,o,h)=>`Hallo ${c}! 👋 Ich bin ${m}, von HUB Transfer.\nIch bestätige Ihren Transfer für heute.\n\n📍 Ich werde um *${h||'—'}* an *${o||'Ihrer Adresse'}* sein.\n\nSchreiben Sie mir hier, wenn Sie etwas brauchen. 😊 👍`,
+  },
+};
+let SERVICES={current:[],past:[],cancelled:[]};
+let nextId=1;
+let currentTab='current';  // current | chegadas | recolhas | past | cancelled
+let subFilter='all';       // all | CHEGADA | RECOLHA  (for current)
+let modalDrvPhone='';
+
+/* ── Data selecionada (default: hoje) ── */
+let SELECTED_DATE = ''; /* vazio = hoje */
+let SELECTED_DRIVER = ''; /* vazio = todos */
+function todayStr(){ return new Date().toLocaleDateString('pt-PT',{timeZone:'Europe/Lisbon',day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'/'); }
+function dateToParam(d){ /* DD/MM/YYYY → DD/MM/YYYY para o GAS */ return d || todayStr(); }
+function dateToISO(ddmmyyyy){ const p=ddmmyyyy.split('/');return `${p[2]}-${p[1]}-${p[0]}`; }
+function isoToDate(iso){ const p=iso.split('-');return `${p[2]}/${p[1]}/${p[0]}`; }
+
+/* ── Preço por viagem para motorista ── */
+function calcDriverPrice(platform){
+  const p = String(platform||'').toLowerCase().trim();
+  if(p.includes('talixo') || p.includes('world transfer') || p.includes('wt driver') || p.includes('wt ') || p==='wt') return 9;
+  return 10;
+}
+</script>
+
+<!-- ── TOPBAR ── -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-mark">✈</div>
+    <div>
+      <div class="logo-text">HUB Transfer</div>
+      <div class="logo-sub">Operations</div>
+    </div>
+  </div>
+  <div class="topbar-mid">
+    <div class="clock-pill">
+      <div>
+        <div class="clock-val" id="clock">--:--:--</div>
+        <div class="clock-date" id="clockD">Lisboa</div>
+      </div>
+    </div>
+  </div>
+  <div class="topbar-r">
+    <div class="badge-count">▼<span class="nc" id="nc">0</span>&nbsp;·&nbsp;▲<span class="nr" id="nr">0</span></div>
+    <div class="pulse"></div>
+  </div>
+</div>
+
+<!-- ── MAIN LAYOUT ── -->
+<div class="layout">
+
+  <!-- ── SIDEBAR ── -->
+  <nav class="sidebar">
+    <div class="sb-section">
+      <span class="sb-label">Activas</span>
+      <button class="sb-btn active" id="sb-current"  onclick="switchTab('current',this)">
+        <span class="sb-ico">⚡</span> Current <span class="sb-n" id="sbn-current">0</span>
+      </button>
+      <button class="sb-btn tab-chegada" id="sb-chegadas" onclick="switchTab('chegadas',this)">
+        <span class="sb-ico">▼</span> Chegadas <span class="sb-n" id="sbn-chegadas">0</span>
+      </button>
+      <button class="sb-btn tab-recolha" id="sb-recolhas" onclick="switchTab('recolhas',this)">
+        <span class="sb-ico">▲</span> Recolhas <span class="sb-n" id="sbn-recolhas">0</span>
+      </button>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="sb-section">
+      <span class="sb-label">Viagens Hoje</span>
+      <button class="sb-btn" id="sb-dia" onclick="switchTab('dia',this)">
+        <span class="sb-ico">🗓</span> Hoje <span class="sb-n" id="sbn-dia">0</span>
+      </button>
+      <div class="sb-hub-status" id="sbViagensStatus">
+        <span class="hub-dot" id="viagensDot">○</span>
+        <span id="viagensStatusTxt">Não ligado</span>
+      </div>
+      <button class="sb-sync-btn" id="sbViagensSync" onclick="syncViagens(true)" title="Sincronizar viagens de hoje">
+        <span id="sbViagensIco">🔄</span> Sync Viagens
+      </button>
+      <button class="sb-sync-btn" onclick="toggleViagensCfg()" title="Configurar URL do Web App">
+        <span>⚙️</span> URL Config
+      </button>
+      <div class="sb-viagens-cfg" id="sbViagensCfg">
+        <span class="sb-cfg-lbl">URL do Web App GAS</span>
+        <input class="sb-cfg-inp" id="sbCfgInp" type="text" placeholder="https://script.google.com/macros/s/..."/>
+        <button class="sb-cfg-save" onclick="saveViagensCfg()">✔ Guardar & Sincronizar</button>
+      </div>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="sb-section">
+      <span class="sb-label">HUB Central</span>
+      <button class="sb-btn tab-past" id="sb-past" onclick="switchTab('past',this)">
+        <span class="sb-ico">🏁</span> Past <span class="sb-n" id="sbn-past">0</span>
+      </button>
+      <button class="sb-btn" id="sb-cancelled" onclick="switchTab('cancelled',this)">
+        <span class="sb-ico">✕</span> Cancelled <span class="sb-n" id="sbn-cancelled">0</span>
+      </button>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="sb-section">
+      <span class="sb-label">HUB Central</span>
+      <div class="sb-hub-status" id="sbHubStatus">
+        <span class="hub-dot" id="hubDot">○</span>
+        <span id="hubStatusTxt">A ligar...</span>
+      </div>
+      <div class="sb-hub-info" id="sbHubInfo" style="display:none"></div>
+      <button class="sb-sync-btn" id="sbSyncBtn" onclick="syncDrivers(true)" title="Recarregar motoristas da HUB Central">
+        <span id="sbSyncIco">🔄</span> Sincronizar
+      </button>
+    </div>
+    <div class="sb-divider"></div>
+    <!-- Paste button in sidebar -->
+    <button class="sb-paste-btn" id="sbPasteBtn" onclick="document.getElementById('imgFileInput').click();event.stopPropagation()" title="Carregar print para IA preencher">
+      <span id="sbPasteIco">📋</span>
+      <span id="sbPasteTxt">Colar / Carregar Print</span>
+    </button>
+  </nav>
+
+  <!-- ── CONTENT ── -->
+  <div class="content" id="content">
+    <!-- Content header -->
+    <div class="content-hdr">
+      <div>
+        <div class="view-title" id="viewTitle">Current</div>
+        <div class="view-sub" id="viewSub">Viagens activas de hoje</div>
+      </div>
+      <div class="hdr-filters" id="hdrFilters">
+        <button class="fchip on-a" id="fc-all"     onclick="setSubFilter('all',this)">Todos</button>
+        <button class="fchip"      id="fc-chegada" onclick="setSubFilter('CHEGADA',this)">▼ Chegadas</button>
+        <button class="fchip"      id="fc-recolha" onclick="setSubFilter('RECOLHA',this)">▲ Recolhas</button>
+      </div>
+    </div>
+
+    <!-- Paste zone -->
+    <div class="pzone" id="pzone">
+      <div class="pzone-inner" onclick="pasteZoneClick()">
+        <div class="pz-ico" id="pzIco">📋</div>
+        <div class="pz-txt">
+          <div class="pz-title">Ctrl+V · Preenchimento por IA</div>
+          <div class="pz-hint">
+            <span class="pz-kbd">Win+Shift+S</span> → <span class="pz-kbd">Ctrl+C</span> → <span class="pz-kbd">Ctrl+V</span> &nbsp;|&nbsp; Ou arrasta a imagem aqui
+          </div>
+        </div>
+        <button class="pz-upload-btn" onclick="event.stopPropagation();document.getElementById('imgFileInput').click()">📷 Imagem</button>
+        <img class="pz-preview" id="pzPreview"/>
+        <div class="pz-status" id="pzStatus"></div>
+      </div>
+      <div class="pz-bar"><div class="pz-bar-fill" id="pzBarFill"></div></div>
+    </div>
+
+    <!-- Cards -->
+    <div class="cards-wrap" id="cardsWrap"></div>
+  </div>
+</div>
+
+<!-- ── MOBILE BOTTOM BAR ── -->
+<div class="sb-mobile-bar" id="mobileBar">
+  <button class="mb-btn" id="mb-dia" onclick="switchTab('dia',null,'mb-dia')">
+    <span class="mb-ico">🗓</span><span>Hoje</span><span class="mb-n" id="mbn-dia">0</span>
+  </button>
+  <button class="mb-btn active" id="mb-current"  onclick="switchTab('current',null,'mb-current')">
+    <span class="mb-ico">⚡</span><span>Current</span><span class="mb-n mb-nc" id="mbn-current">0</span>
+  </button>
+  <button class="mb-btn tab-chegada" id="mb-chegadas" onclick="switchTab('chegadas',null,'mb-chegadas')">
+    <span class="mb-ico">▼</span><span>Chegadas</span><span class="mb-n" id="mbn-chegadas">0</span>
+  </button>
+  <button class="mb-btn tab-recolha" id="mb-recolhas" onclick="switchTab('recolhas',null,'mb-recolhas')">
+    <span class="mb-ico">▲</span><span>Recolhas</span><span class="mb-n" id="mbn-recolhas">0</span>
+  </button>
+  <button class="mb-btn tab-past" id="mb-past" onclick="switchTab('past',null,'mb-past')">
+    <span class="mb-ico">🏁</span><span>Past</span><span class="mb-n" id="mbn-past">0</span>
+  </button>
+  <button class="mb-btn" id="mb-cancelled" onclick="switchTab('cancelled',null,'mb-cancelled')">
+    <span class="mb-ico">✕</span><span>Cancelled</span><span class="mb-n" id="mbn-cancelled">0</span>
+  </button>
+</div>
+
+<!-- Input file oculto -->
+<input type="file" id="imgFileInput" accept="image/*" capture="environment" style="display:none" onchange="handleFileInput(this)">
+
+<!-- ══════ MODAL: REVISÃO IA ══════ -->
+<div class="mov" id="revMov">
+  <div class="modal wide" onclick="event.stopPropagation()">
+    <div class="mhdr">
+      <span class="mtitle">✦ IA Extraiu os Dados — Confirmar</span>
+      <button class="mx" onclick="closeRev()">×</button>
+    </div>
+    <div class="mbody">
+      <div class="ai-tag">✦ Extraído por IA · Revise e corrija se necessário</div>
+      <img class="rthumb" id="rvThumb"/>
+      <div class="rgrid">
+        <div class="rf"><label>Tipo</label>
+          <select id="rv_type"><option value="CHEGADA">▼ CHEGADA — Aeroporto → Hotel</option><option value="RECOLHA">▲ RECOLHA — Hotel → Aeroporto</option></select></div>
+        <div class="rf"><label>Plataforma</label>
+          <select id="rv_plat"><option>Talixo</option><option>Empire Lisbon</option><option>Empire Marques</option><option>WT Driver</option></select></div>
+        <div class="rf"><label>Nome do Cliente</label><input id="rv_client" type="text" placeholder="James Gilna"/></div>
+        <div class="rf"><label>Telefone (DDI sem +)</label><input id="rv_phone" type="text" placeholder="447918203494"/></div>
+        <div class="rf"><label>📍 Ponto A — Origem</label><input id="rv_origin" type="text" placeholder="Memoria Lisboa, R. da Madalena 179, Lisboa"/></div>
+        <div class="rf"><label>🏁 Ponto B — Destino</label><input id="rv_dest" type="text" placeholder="Lisbon Airport (LIS), Alameda das Comunidades"/></div>
+        <div class="rf"><label>Hora Pickup</label><input id="rv_picktime" type="text" placeholder="13:00"/></div>
+        <div class="rf"><label>Data (DD/MM/AAAA)</label><input id="rv_date" type="text" placeholder="05/03/2026"/></div>
+        <div class="rf"><label>Número do Voo</label><input id="rv_flight" type="text" placeholder="LH1168 (se aplicável)"/></div>
+        <div class="rf"><label>Status Voo</label>
+          <select id="rv_status"><option value="scheduled">Agendado</option><option value="on-time">No Horário</option><option value="boarding">Embarcando</option><option value="delayed">Atrasado</option><option value="landed">Aterrou</option></select></div>
+        <div class="rf"><label>Aeroporto Origem (IATA)</label><input id="rv_depApt" type="text" placeholder="FRA" maxlength="4" style="text-transform:uppercase"/></div>
+        <div class="rf"><label>Cidade Origem</label><input id="rv_depCity" type="text" placeholder="Frankfurt"/></div>
+        <div class="rf"><label>Hora Partida Voo</label><input id="rv_depTime" type="text" placeholder="10:30"/></div>
+        <div class="rf"><label>Terminal Origem</label><input id="rv_depTerm" type="text" placeholder="T1 · A30"/></div>
+        <div class="rf"><label>Aeroporto Destino (IATA)</label><input id="rv_arrApt" type="text" placeholder="LIS" maxlength="4" style="text-transform:uppercase"/></div>
+        <div class="rf"><label>Cidade Destino</label><input id="rv_arrCity" type="text" placeholder="Lisboa"/></div>
+        <div class="rf"><label>Hora Chegada Voo</label><input id="rv_arrTime" type="text" placeholder="12:50"/></div>
+        <div class="rf"><label>Terminal Destino</label><input id="rv_arrTerm" type="text" placeholder="T1"/></div>
+        <div class="rf"><label>Idioma</label>
+          <select id="rv_lang"><option value="EN">EN · English</option><option value="PT">PT · Português</option><option value="ES">ES · Español</option><option value="FR">FR · Français</option><option value="IT">IT · Italiano</option><option value="DE">DE · Deutsch</option></select></div>
+        <div class="rf"><label>Pax · Bagagens</label><input id="rv_pax" type="text" placeholder="2 pax · 3 bagagens"/></div>
+        <div class="rf full"><label>Notas</label><input id="rv_notes" type="text" placeholder="Quarto 204, observações..."/></div>
+      </div>
+    </div>
+    <div class="mftr">
+      <button class="mbtn sec" onclick="closeRev()" style="flex:.4">Cancelar</button>
+      <button class="mbtn pri" onclick="confirmRev()">✦ Confirmar e Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ MODAL: TEMPLATE ══════ -->
+<div class="mov" id="tmplMov" onclick="closeTmpl(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="mhdr">
+      <span class="mtitle" id="tmplTitle">Template · Motorista</span>
+      <button class="mx" onclick="closeTmpl()">×</button>
+    </div>
+    <div class="mbody">
+      <div id="tmplBadge"></div>
+      <div class="ttxt" id="tmplText"></div>
+    </div>
+    <div class="mftr">
+      <button class="mbtn sec" onclick="copyTmpl()">📋 Copiar</button>
+      <a class="mbtn wpp" id="tmplWppLink" href="#" target="_blank">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.853L0 24l6.335-1.509A11.965 11.965 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.79 9.79 0 01-5.034-1.389l-.36-.214-3.733.889.934-3.639-.235-.374A9.794 9.794 0 012.182 12c0-5.424 4.394-9.818 9.818-9.818 5.424 0 9.818 4.394 9.818 9.818 0 5.424-4.394 9.818-9.818 9.818z"/></svg>
+        Enviar WhatsApp
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─── CLOCK ─── */
+function tick(){
+  const n=new Date(),o={timeZone:'Europe/Lisbon'};
+  document.getElementById('clock').textContent=n.toLocaleString('pt-PT',{...o,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const d=n.toLocaleString('pt-PT',{...o,weekday:'short',day:'2-digit',month:'short'});
+  document.getElementById('clockD').textContent=d.charAt(0).toUpperCase()+d.slice(1);
+}
+setInterval(tick,1000);tick();
+
+/* ─── HELPERS ─── */
+function gv(id){return document.getElementById(id)?.value||'';}
+function mapUrl(a){return`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(a)}`;}
+function wazeUrl(a){return`https://waze.com/ul?q=${encodeURIComponent(a)}&navigate=yes`;}
+function navHtml(label,addr){
+  if(!addr||!addr.trim())return'';
+  return`<div class="nav-section"><div class="nav-lbl">${label}</div><div class="nav-links"><a class="nav-btn gm" href="${mapUrl(addr)}" target="_blank"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Maps</a><a class="nav-btn wz" href="${wazeUrl(addr)}" target="_blank"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M20.54 6.63C19.08 4.04 16.45 2.36 13.5 2.04c-3.31-.36-6.46 1.08-8.32 3.72C3.32 8.4 3 11.36 4.06 14.1c.28.75.74 1.58 1.4 2.48l.14.2c.94 1.34 1.52 2.76 1.52 2.76l.2.46H9.5l.18-.46c.08-.18.16-.36.26-.52.28-.44.7-.82 1.18-1.04.42-.2.88-.3 1.38-.3.5 0 .96.1 1.38.3.48.22.9.6 1.18 1.04.1.16.18.34.26.52l.18.46h2.18l.2-.46s.58-1.42 1.52-2.76l.14-.2c.66-.9 1.12-1.73 1.4-2.48 1.06-2.74.74-5.7-.82-8.47z"/></svg>Waze</a></div><div class="nav-addr">${addr}</div></div>`;
+}
+const ST={scheduled:{l:'Agendado',c:'scheduled'},'on-time':{l:'No Horário',c:'on-time'},delayed:{l:'Atrasado',c:'delayed'},boarding:{l:'Embarcando',c:'boarding'},landed:{l:'Aterrou ✓',c:'landed'}};
+const WPP_ICO=`<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.853L0 24l6.335-1.509A11.965 11.965 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.79 9.79 0 01-5.034-1.389l-.36-.214-3.733.889.934-3.639-.235-.374A9.794 9.794 0 012.182 12c0-5.424 4.394-9.818 9.818-9.818 5.424 0 9.818 4.394 9.818 9.818 0 5.424-4.394 9.818-9.818 9.818z"/></svg>`;
+
+/* ─── BUILD CARD ─── */
+function buildCard(s,list,isPast,isCancelled){
+  const tc=s.type.toLowerCase();
+  const st=ST[s.status]||ST.scheduled;
+  const prog=Math.max(0,Math.min(100,s.progressPct||0));
+  const dOpts=DRIVERS.map(d=>`<option value="${d.name}"${s.assignedDriver===d.name?' selected':''}>${d.name}</option>`).join('');
+  const plOpts=PLATFORMS.map(x=>`<option${x===s.platform?' selected':''}>${x}</option>`).join('');
+  const dl=s.delayMinutes||0;
+  const ord=`#${String(list.indexOf(s)+1).padStart(2,'0')}`;
+
+  /* Time display */
+  const depH=dl>0?`<div class="tval stk">${s.depTime}</div>`:`<div class="tval">${s.depTime||'—'}</div>`;
+  let arrH;
+  if(dl>0){const[h,m]=(s.arrTime||'0:0').split(':').map(Number);const nm=(m+dl)%60,nh=h+Math.floor((m+dl)/60);arrH=`<div class="tval stk">${s.arrTime}</div><div class="tval dnew">${String(nh).padStart(2,'0')}:${String(nm).padStart(2,'0')} +${dl}m</div>`;}
+  else arrH=`<div class="tval">${s.arrTime||'—'}</div>`;
+
+  /* Action buttons — Talixo-inspired */
+  let actionBtns='';
+  if(!isPast&&!isCancelled){
+    actionBtns=`
+      <button class="tali-btn dispatch" onclick="openTmpl(${s.id})" title="Enviar template ao motorista">⚡ Dispatch</button>
+      <button class="tali-btn done"     onclick="markDone(${s.id})"  title="Marcar como concluída">🏁 Concluir</button>
+      <button class="tali-btn cancel"   onclick="markCancelled(${s.id})" title="Cancelar viagem">✕</button>`;
+  } else if(isPast){
+    actionBtns=`
+      <span class="done-time">✓ ${s.doneAt||''}</span>
+      <button class="tali-btn restore"  onclick="restoreService(${s.id},'past')" title="Restaurar para activas">↩ Restaurar</button>
+      <button class="tali-btn cancel"   onclick="removeService(${s.id},'past')">✕</button>`;
+  } else {
+    actionBtns=`
+      <span class="done-time" style="color:var(--danger);border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.08)">✕ Cancelada</span>
+      <button class="tali-btn restore"  onclick="restoreService(${s.id},'cancelled')">↩ Restaurar</button>
+      <button class="tali-btn cancel"   onclick="removeService(${s.id},'cancelled')">✕</button>`;
+  }
+
+  /* Left panel */
+  const leftPanel = s.type==='CHEGADA' ? `
+    <div class="fp">
+      <div class="fn-row">
+        <a class="fnum" href="https://www.google.com/search?q=${encodeURIComponent(s.flightNumber||'voo')}" target="_blank">${s.flightNumber||'—'}</a>
+        <span class="fst ${st.c}">${st.l}</span>
+        ${dl>0?`<span class="fst delayed">+${dl}m</span>`:''}
+        <span class="fdate">${s.flightDate||''}</span>
+      </div>
+      <div class="route">
+        <div class="apt"><div class="apt-code">${s.depAirport||'???'}</div><div class="apt-city">${s.depCity||''}</div></div>
+        <div class="rline">
+          <div class="rdur">${s.duration||''}</div>
+          <div class="rtrack"><div class="rprog" style="width:${prog}%"></div><span class="plane-ico" style="left:${prog}%">✈</span></div>
+        </div>
+        <div class="apt"><div class="apt-code">${s.arrAirport||'???'}</div><div class="apt-city">${s.arrCity||''}</div></div>
+      </div>
+      <div class="ftimes">
+        <div class="tbl"><div class="tlbl">Partida</div>${depH}<div class="tterm">${s.depTerminal||''}</div></div>
+        <div class="tbl" style="text-align:right"><div class="tlbl">Chegada</div>${arrH}<div class="tterm">${s.arrTerminal||''}</div></div>
+      </div>
+      ${navHtml('📍 Ponto A — Origem',s.origin||'')}
+      ${navHtml('🏁 Ponto B — Destino',s.destination||'')}
+    </div>` :
+  `<div class="pp">
+      <div class="pp-time">${s.pickupTime||s.depTime||'—'}</div>
+      <div class="pp-date">${s.flightDate||''}</div>
+      ${s.pax?`<div class="pp-row"><div class="pp-ico">👥</div><div><div class="pp-lbl">Pax · Bagagens</div><div class="pp-val">${s.pax}</div></div></div>`:''}
+      ${navHtml('📍 Ponto A — Recolha',s.origin||'')}
+      ${navHtml('🏁 Ponto B — Destino',s.destination||'')}
+    </div>`;
+
+  return `
+<div class="card ${tc}${isPast?' past-card':''}" id="card-${s.id}" style="animation-delay:${list.indexOf(s)*45}ms">
+  <div class="chdr">
+    <span class="type-badge ${tc}">${s.type==='CHEGADA'?'▼ Chegada':'▲ Recolha'}</span>
+    <span class="cname">👤 ${s.client}</span>
+    <span class="pbadge">${s.platform}</span>
+    <span class="ordnum">${ord}</span>
+    <div class="hdr-actions">${actionBtns}</div>
+  </div>
+  <div class="cbody">
+    ${leftPanel}
+    <div class="dp">
+      <div>
+        <div class="dp-lbl">Motorista</div>
+        <div class="sel-row">
+          <select class="hsel" id="drv-${s.id}" onchange="setDriverFor(${s.id},this.value)">
+            <option value="">— Selecionar —</option>${dOpts}
+          </select>
+          <select class="hsel" id="plat-${s.id}" style="max-width:116px" onchange="setPlatFor(${s.id},this.value)">
+            ${plOpts}
+          </select>
+        </div>
+      </div>
+      <div>
+        <div class="dp-lbl">Notas</div>
+        <textarea class="ntarea" placeholder="Quarto, bagagens...">${s.notes||''}</textarea>
+      </div>
+      <button class="btn-tmpl ${tc==='chegada'?'cb':'rb'}" onclick="openTmpl(${s.id})">${s.type==='CHEGADA'?'✈ Template Chegada':'🚗 Template Recolha'}</button>
+      <a class="btn-wpp" href="https://wa.me/${(s.clientPhone||'').replace(/\D/g,'')}" target="_blank">
+        ${WPP_ICO} WhatsApp Cliente
+      </a>
+    </div>
+  </div>
+</div>`;
+}
+
+/* ─── COUNTS ─── */
+function updateCounts(){
+  const cur=SERVICES.current;
+  const nc=cur.filter(s=>s.type==='CHEGADA').length;
+  const nr=cur.filter(s=>s.type==='RECOLHA').length;
+  const np=SERVICES.past.length;
+  const nca=SERVICES.cancelled.length;
+  document.getElementById('nc').textContent=nc;
+  document.getElementById('nr').textContent=nr;
+  // sidebar
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  set('sbn-current', cur.length);
+  set('sbn-chegadas',nc);
+  set('sbn-recolhas',nr);
+  set('sbn-past',    np);
+  set('sbn-cancelled',nca);
+  set('sbn-dia',     HUB_VIAGENS.length);
+  // mobile
+  set('mbn-current', cur.length);
+  set('mbn-chegadas',nc);
+  set('mbn-recolhas',nr);
+  set('mbn-past',    np);
+  set('mbn-cancelled',nca);
+  set('mbn-dia',     HUB_VIAGENS.length);
+}
+
+/* ─── RENDER ─── */
+const TAB_INFO={
+  current:  {title:'Current',  sub:'Viagens activas de hoje',     showPaste:true,  showFilter:true},
+  chegadas: {title:'Chegadas', sub:'Aeroporto → Hotel',           showPaste:true,  showFilter:false},
+  recolhas: {title:'Recolhas', sub:'Hotel → Aeroporto',           showPaste:true,  showFilter:false},
+  past:     {title:'Past',     sub:'Viagens concluídas',          showPaste:false, showFilter:false},
+  cancelled:{title:'Cancelled',sub:'Viagens canceladas',          showPaste:false, showFilter:false},
+  dia:      {title:'Hoje',     sub:'Plano do Dia — HUB Central',  showPaste:false, showFilter:false},
+};
+
+function renderAll(){
+  updateCounts();
+  const info=TAB_INFO[currentTab];
+  document.getElementById('viewTitle').textContent=info.title;
+  document.getElementById('viewSub').textContent=info.sub;
+  document.getElementById('pzone').style.display=info.showPaste?'block':'none';
+  document.getElementById('hdrFilters').style.display=info.showFilter?'flex':'none';
+
+  // Tab especial: Dia (renderiza o plano do dia em vez de cards normais)
+  if(currentTab==='dia'){
+    renderDia();
+    return;
+  }
+
+  let list;
+  if(currentTab==='current') list=SERVICES.current;
+  else if(currentTab==='chegadas') list=SERVICES.current.filter(s=>s.type==='CHEGADA');
+  else if(currentTab==='recolhas') list=SERVICES.current.filter(s=>s.type==='RECOLHA');
+  else if(currentTab==='past') list=SERVICES.past;
+  else list=SERVICES.cancelled;
+
+  const wrap=document.getElementById('cardsWrap');
+  const isPast=currentTab==='past';
+  const isCancelled=currentTab==='cancelled';
+
+  if(!list.length){
+    const msgs={
+      current: 'Nenhuma viagem activa.<br>Cola um print do Talixo com <strong>Ctrl+V</strong>.',
+      chegadas:'Nenhuma chegada activa.',
+      recolhas:'Nenhuma recolha activa.',
+      past:    'Nenhuma viagem concluída ainda.<br>Usa o botão <strong>🏁 Concluir</strong> nos cards activos.',
+      cancelled:'Nenhuma viagem cancelada.',
+    };
+    wrap.innerHTML=`<div class="empty"><div class="empty-ico">${isPast?'🏁':isCancelled?'✕':'✈'}</div><div class="empty-txt">${msgs[currentTab]}</div></div>`;
+    return;
+  }
+
+  const srcList = (isPast||isCancelled) ? list : SERVICES.current;
+  wrap.innerHTML=list.map(s=>buildCard(s,srcList,isPast,isCancelled)).join('');
+}
+
+/* ─── TAB SWITCHING ─── */
+function switchTab(tab, sbEl, mbId){
+  currentTab=tab;
+  // sidebar active
+  document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('active'));
+  if(sbEl) sbEl.classList.add('active');
+  else {const e=document.getElementById('sb-'+tab);if(e)e.classList.add('active');}
+  // mobile active
+  document.querySelectorAll('.mb-btn').forEach(b=>b.classList.remove('active'));
+  const mbEl=document.getElementById(mbId||'mb-'+tab);if(mbEl)mbEl.classList.add('active');
+  renderAll();
+  document.getElementById('content').scrollTop=0;
+}
+
+function setSubFilter(f,btn){
+  subFilter=f;
+  document.querySelectorAll('.fchip').forEach(b=>{b.className='fchip';});
+  btn.className='fchip on-'+(f==='all'?'a':f==='CHEGADA'?'c':'r');
+  // Redirect to sub-tab if specific filter
+  if(f==='CHEGADA') switchTab('chegadas',document.getElementById('sb-chegadas'));
+  else if(f==='RECOLHA') switchTab('recolhas',document.getElementById('sb-recolhas'));
+  else switchTab('current',document.getElementById('sb-current'));
+}
+
+/* ─── SERVICE ACTIONS ─── */
+function setDriverFor(id,val){const s=allServices().find(x=>x.id===id);if(s)s.assignedDriver=val;}
+function setPlatFor(id,val){const s=allServices().find(x=>x.id===id);if(s)s.platform=val;}
+function allServices(){return[...SERVICES.current,...SERVICES.past,...SERVICES.cancelled];}
+
+function addService(d){
+  const s={id:nextId++,type:d.type||'CHEGADA',client:d.client||'Cliente',clientPhone:d.clientPhone||'',platform:d.platform||'Talixo',origin:d.origin||'',destination:d.destination||'',pickupTime:d.pickupTime||d.depTime||'',flightNumber:d.flightNumber||'',flightDate:d.flightDate||'',depAirport:(d.depAirport||'').toUpperCase(),depCity:d.depCity||'',depTime:d.depTime||'',depTerminal:d.depTerminal||'',arrAirport:(d.arrAirport||'').toUpperCase(),arrCity:d.arrCity||'',arrTime:d.arrTime||'',arrTerminal:d.arrTerminal||'',duration:d.duration||'',status:d.status||'scheduled',delayMinutes:0,progressPct:0,language:d.language||'EN',pax:d.pax||'',notes:d.notes||'',assignedDriver:''};
+  SERVICES.current.push(s);
+  // Switch to current tab and show
+  switchTab('current',document.getElementById('sb-current'));
+  setTimeout(()=>{const el=document.getElementById('card-'+s.id);el&&el.scrollIntoView({behavior:'smooth',block:'nearest'});},200);
+}
+
+function markDone(id){
+  const i=SERVICES.current.findIndex(s=>s.id===id);
+  if(i===-1)return;
+  const s=SERVICES.current.splice(i,1)[0];
+  s.doneAt=new Date().toLocaleString('pt-PT',{timeZone:'Europe/Lisbon',hour:'2-digit',minute:'2-digit'});
+  SERVICES.past.unshift(s);
+  renderAll();
+}
+function markCancelled(id){
+  if(!confirm('Cancelar esta viagem?'))return;
+  const i=SERVICES.current.findIndex(s=>s.id===id);
+  if(i===-1)return;
+  SERVICES.cancelled.unshift(SERVICES.current.splice(i,1)[0]);
+  renderAll();
+}
+function restoreService(id,from){
+  const arr=SERVICES[from];
+  const i=arr.findIndex(s=>s.id===id);
+  if(i===-1)return;
+  SERVICES.current.push(arr.splice(i,1)[0]);
+  switchTab('current',document.getElementById('sb-current'));
+}
+function removeService(id,from){
+  if(!confirm('Eliminar permanentemente?'))return;
+  SERVICES[from]=SERVICES[from].filter(s=>s.id!==id);
+  renderAll();
+}
+
+/* ─── TEMPLATE MODAL ─── */
+function openTmpl(id){
+  const s=allServices().find(x=>x.id===id);if(!s)return;
+  const dEl=document.getElementById('drv-'+id);
+  const drv=dEl?dEl.value:'';
+  if(!drv){alert('⚠️ Seleciona um motorista primeiro!');dEl&&dEl.focus();return;}
+  const lang=s.language||'EN';
+  const fn=TEMPLATES[s.type]?.[lang]||TEMPLATES[s.type]?.EN;
+  const txt=fn?fn(drv,s.client):'Template não disponível.';
+  const dObj=DRIVERS.find(d=>d.name===drv);
+  modalDrvPhone=dObj?dObj.phone:'';
+  const tc=s.type.toLowerCase();
+  document.getElementById('tmplTitle').textContent=`Template · ${drv} → ${s.client}`;
+  document.getElementById('tmplBadge').innerHTML=`<span class="tbadge" style="background:var(--${tc}-dim);color:var(--${tc});border:1px solid var(--${tc}-glow)">${s.type==='CHEGADA'?'▼ Chegada':'▲ Recolha'}</span>`;
+  document.getElementById('tmplText').textContent=txt;
+  const wl=document.getElementById('tmplWppLink');
+  if(modalDrvPhone){wl.href=`https://wa.me/${modalDrvPhone.replace(/\D/g,'')}?text=${encodeURIComponent(txt)}`;wl.style.opacity='1';wl.style.pointerEvents='auto';}
+  else{wl.href='#';wl.style.opacity='.35';wl.style.pointerEvents='none';}
+  document.getElementById('tmplMov').classList.add('open');
+}
+function closeTmpl(e){if(!e||e.target===document.getElementById('tmplMov'))document.getElementById('tmplMov').classList.remove('open');}
+function copyTmpl(){navigator.clipboard.writeText(document.getElementById('tmplText').textContent).then(()=>{const b=document.querySelector('.mbtn.sec'),o=b.innerHTML;b.innerHTML='✅ Copiado!';setTimeout(()=>b.innerHTML=o,2e3);});}
+
+/* ─── REVIEW MODAL ─── */
+function openRev(data,imgUrl){
+  const s=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v||'';};
+  s('rv_type',data.type||'RECOLHA');s('rv_plat',data.platform||'Talixo');
+  s('rv_client',data.client);s('rv_phone',data.clientPhone);
+  s('rv_origin',data.origin);s('rv_dest',data.destination);
+  s('rv_picktime',data.pickupTime||data.depTime);s('rv_date',data.flightDate);
+  s('rv_flight',data.flightNumber);s('rv_status',data.status||'scheduled');
+  s('rv_depApt',data.depAirport);s('rv_depCity',data.depCity);
+  s('rv_depTime',data.depTime);s('rv_depTerm',data.depTerminal);
+  s('rv_arrApt',data.arrAirport);s('rv_arrCity',data.arrCity);
+  s('rv_arrTime',data.arrTime);s('rv_arrTerm',data.arrTerminal);
+  s('rv_lang',data.language||'EN');s('rv_pax',data.pax);s('rv_notes',data.notes);
+  const th=document.getElementById('rvThumb');
+  if(imgUrl){th.src=imgUrl;th.style.display='block';}else th.style.display='none';
+  document.getElementById('revMov').classList.add('open');
+}
+function closeRev(){document.getElementById('revMov').classList.remove('open');resetPaste();}
+function confirmRev(){
+  addService({type:gv('rv_type'),platform:gv('rv_plat'),client:gv('rv_client'),clientPhone:gv('rv_phone'),origin:gv('rv_origin'),destination:gv('rv_dest'),pickupTime:gv('rv_picktime'),flightDate:gv('rv_date'),flightNumber:gv('rv_flight'),status:gv('rv_status'),depAirport:gv('rv_depApt').toUpperCase(),depCity:gv('rv_depCity'),depTime:gv('rv_depTime'),depTerminal:gv('rv_depTerm'),arrAirport:gv('rv_arrApt').toUpperCase(),arrCity:gv('rv_arrCity'),arrTime:gv('rv_arrTime'),arrTerminal:gv('rv_arrTerm'),language:gv('rv_lang'),pax:gv('rv_pax'),notes:gv('rv_notes')});
+  closeRev();
+}
+
+/* ─── PASTE / AI ─── */
+function resetPaste(){
+  const z=document.getElementById('pzone');
+  z.classList.remove('loading');
+  document.getElementById('pzIco').textContent='📋';
+  document.getElementById('pzStatus').textContent='';
+  document.getElementById('pzBarFill').style.width='0';
+  const pr=document.getElementById('pzPreview');pr.src='';pr.style.display='none';
+  // sidebar btn
+  document.getElementById('sbPasteBtn').classList.remove('sb-paste-loading');
+  document.getElementById('sbPasteIco').textContent='📋';
+  document.getElementById('sbPasteTxt').textContent='Colar / Carregar Print';
+}
+function setLoading(){
+  document.getElementById('pzone').classList.add('loading');
+  document.getElementById('pzIco').textContent='⏳';
+  document.getElementById('pzStatus').textContent='IA a ler...';
+  document.getElementById('pzBarFill').style.width='35%';
+  document.getElementById('sbPasteBtn').classList.add('sb-paste-loading');
+  document.getElementById('sbPasteIco').textContent='⏳';
+  document.getElementById('sbPasteTxt').textContent='A processar...';
+}
+function pasteZoneClick(){document.body.focus();}
+
+async function handleImageBlob(blob){
+  setLoading();
+  const reader=new FileReader();
+  const dataUrl=await new Promise(r=>{reader.onload=e=>r(e.target.result);reader.readAsDataURL(blob);});
+  const b64=dataUrl.split(',')[1];
+  const mime=blob.type||'image/png';
+  const pr=document.getElementById('pzPreview');pr.src=dataUrl;pr.style.display='block';
+  document.getElementById('pzBarFill').style.width='60%';
+
+  const prompt=`És um assistente especializado em extracção de dados para HUB Transfer (Lisboa, Portugal).
+
+Analisa esta imagem (print do Talixo ou sistema similar) e extrai TODOS os dados visíveis.
+
+REGRAS CRÍTICAS:
+- RECOLHA = Hotel/Morada → Aeroporto (cliente vai apanhar voo; "LIS" aparece como DESTINO/ponto B)
+- CHEGADA = Aeroporto → Hotel/Morada (cliente vem de avião; "LIS" aparece como ORIGEM/ponto A)
+- "origin" = endereço COMPLETO do Ponto A (ex: "Memoria Lisboa FLH Hotels, R. da Madalena 179, 1100-619 Lisboa, Portugal")
+- "destination" = endereço COMPLETO do Ponto B (ex: "Lisbon Airport (LIS), Alameda das Comunidades Portuguesas, 1700-111 Lisboa")
+- "pickupTime" = hora do job/pickup (ex: "13:00"), NÃO a hora do voo
+- Telefone: DDI completo sem espaços/hífens (ex: +44 791 820 3494 → 447918203494)
+- Nomes de hotéis NÃO são o cliente (Memoria Lisboa, FLH Hotels, Empire, Sana, Figueira etc)
+- Idioma por DDI: +44=EN, +33=FR, +49=DE, +34=ES, +39=IT, +351=PT, outros=EN
+- platform: se vires "talixo.com" → "Talixo"
+- pax: ex "2 pax · 3 bagagens" (visível como ícones de pessoa e mala no Talixo)
+- Campos não visíveis → string vazia ""
+
+Responde APENAS JSON puro sem markdown, sem texto extra:
+{"type":"RECOLHA","platform":"Talixo","client":"James Gilna","clientPhone":"447918203494","origin":"Memoria Lisboa FLH Hotels, R. da Madalena 179, 1100-619 Lisboa, Portugal","destination":"Lisbon Airport (LIS), Alameda das Comunidades Portuguesas, 1700-111 Lisboa, Portugal","pickupTime":"13:00","flightDate":"05/03/2026","flightNumber":"","depAirport":"","depCity":"","depTime":"","depTerminal":"","arrAirport":"LIS","arrCity":"Lisboa","arrTime":"","arrTerminal":"","language":"EN","status":"scheduled","pax":"2 pax · 3 bagagens","notes":""}`;
+
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:900,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mime,data:b64}},{type:'text',text:prompt}]}]})});
+    if(!resp.ok){const e=await resp.json();throw new Error(e.error?.message||'Erro API '+resp.status);}
+    const result=await resp.json();
+    const raw=result.content?.[0]?.text||'{}';
+    let parsed;
+    try{parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());}catch{throw new Error('JSON inválido da IA');}
+    document.getElementById('pzBarFill').style.width='100%';
+    document.getElementById('pzone').classList.remove('loading');
+    document.getElementById('pzIco').textContent='✦';
+    document.getElementById('pzStatus').textContent=`✦ ${parsed.client||'?'} · ${parsed.type||'?'}`;
+    document.getElementById('sbPasteIco').textContent='✦';
+    document.getElementById('sbPasteTxt').textContent=`${parsed.client||'?'}`;
+    document.getElementById('sbPasteBtn').classList.remove('sb-paste-loading');
+    openRev(parsed,dataUrl);
+  }catch(err){
+    console.error(err);
+    document.getElementById('pzone').classList.remove('loading');
+    document.getElementById('pzIco').textContent='⚠️';
+    document.getElementById('pzStatus').textContent=err.message;
+    setTimeout(()=>{resetPaste();alert('Não foi possível ler automaticamente.\nFormulário abre para preenchimento manual.');openRev({},dataUrl);},900);
+  }
+}
+
+async function handleFileInput(inp){
+  const f=inp.files[0];
+  if(f&&f.type.startsWith('image/'))await handleImageBlob(f);
+  inp.value='';
+}
+
+// Ctrl+V global
+document.addEventListener('paste',async e=>{
+  const items=e.clipboardData?.items;if(!items)return;
+  for(const item of items){
+    if(item.type.startsWith('image/')){e.preventDefault();await handleImageBlob(item.getAsFile());return;}
+  }
+});
+
+// Drag & drop
+const pz=document.getElementById('pzone');
+pz.addEventListener('dragover',e=>{e.preventDefault();pz.style.borderColor='var(--accent)';});
+pz.addEventListener('dragleave',()=>pz.style.borderColor='');
+pz.addEventListener('drop',async e=>{e.preventDefault();pz.style.borderColor='';const f=e.dataTransfer?.files[0];if(f&&f.type.startsWith('image/'))await handleImageBlob(f);});
+
+// ESC
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    closeTmpl({target:document.getElementById('tmplMov')});
+    closeRev();
+  }
+});
+
+/* ─── RENDER DIA — PLANO DO DIA ─── */
+function renderDia(){
+  const wrap = document.getElementById('cardsWrap');
+  document.getElementById('pzone').style.display = 'none';
+  document.getElementById('hdrFilters').style.display = 'none';
+
+  const displayDate = SELECTED_DATE || todayStr();
+  const isToday = displayDate === todayStr();
+  const listAll = HUB_VIAGENS;
+  const list = SELECTED_DRIVER
+    ? listAll.filter(v => (v.driver||'').toLowerCase().trim() === SELECTED_DRIVER.toLowerCase().trim())
+    : listAll;
+  const nc    = list.filter(v=>detectTipo(v.origin,v.flight)==='CHEGADA').length;
+  const nt    = list.filter(v=>detectTipo(v.origin,v.flight)==='TOUR').length;
+  const nr    = list.filter(v=>detectTipo(v.origin,v.flight)==='RECOLHA').length;
+  const activas = list.filter(v=>!v.concluida);
+  const concluidas = list.filter(v=>v.concluida);
+  const semMotorista = list.filter(v=>!v.driver).length;
+
+  /* Calcular pagamentos */
+  let totalPay = 0;
+  list.forEach(v=>{ if(v.driver) totalPay += calcDriverPrice(v.platform); });
+
+  // Status bar de sync
+  const urlOk = !!HUB_VIAGENS_URL;
+  const lastSync = localStorage.getItem('hub_viagens_last_sync') || '—';
+
+  let html = `<div class="dia-wrap">`;
+
+  html += `<div class="dia-stats">
+    <div class="dia-stat s-t"><div class="dia-stat-n">${list.length}</div><div class="dia-stat-l">Total</div></div>
+    <div class="dia-stat s-c"><div class="dia-stat-n">${nc}</div><div class="dia-stat-l">Chegadas</div></div>
+    <div class="dia-stat s-r"><div class="dia-stat-n">${nr}</div><div class="dia-stat-l">Recolhas</div></div>
+    ${nt>0?`<div class="dia-stat s-tour"><div class="dia-stat-n">${nt}</div><div class="dia-stat-l">Tours</div></div>`:''}
+  </div>`;
+
+  /* ── Date Picker ── */
+  const isoDate = SELECTED_DATE ? dateToISO(SELECTED_DATE) : new Date().toISOString().slice(0,10);
+  const yesterday = new Date(Date.now()-86400000).toLocaleDateString('pt-PT',{timeZone:'Europe/Lisbon',day:'2-digit',month:'2-digit',year:'numeric'});
+  const tomorrow  = new Date(Date.now()+86400000).toLocaleDateString('pt-PT',{timeZone:'Europe/Lisbon',day:'2-digit',month:'2-digit',year:'numeric'});
+  html += `<div class="dia-date-bar">
+    <button class="dia-date-btn" onclick="loadDate('${yesterday}')">◀ Ontem</button>
+    <button class="dia-date-btn ${isToday?'active':''}" onclick="loadDate('')">📅 Hoje</button>
+    <button class="dia-date-btn" onclick="loadDate('${tomorrow}')">Amanhã ▶</button>
+    <input type="date" class="dia-date-input" value="${isoDate}" onchange="loadDate(isoToDate(this.value))">
+    <select class="dia-drv-filter" onchange="filterDriver(this.value)">
+      <option value="">👥 Todos os motoristas</option>
+      ${getDriverOptions()}
+    </select>
+  </div>`;
+
+  // Sync bar
+  html += `<div class="dia-sync-bar">
+    <div class="dia-sync-info">
+      <strong>${displayDate}</strong>${!isToday?' · 📆 Histórico':''}${SELECTED_DRIVER?' · 🚗 '+SELECTED_DRIVER:''} · ${urlOk ? 'Ligado ao HUB Central' : '⚠️ URL não configurado'}<br>
+      ${list.length ? `${list.length}${SELECTED_DRIVER?' de '+listAll.length:''} viagens · Último sync: ${lastSync}` : urlOk ? 'Clica em Sincronizar' : 'Configura o URL na sidebar'}
+      ${semMotorista > 0 ? ` · <span style="color:var(--danger)">${semMotorista} sem motorista</span>` : ''}
+    </div>
+    <button class="dia-sync-btn" id="diaSyncBtn" onclick="syncViagens(true)">🔄 Sincronizar</button>
+  </div>`;
+
+  if (!list.length) {
+    html += `<div class="dia-empty">📋 Nenhuma viagem carregada para hoje.<br>
+      ${urlOk ? 'Clica em <strong>Sincronizar</strong> para carregar da HUB Central.' : 'Configura o URL do Web App na sidebar → ⚙️ URL Config.'}</div>`;
+    html += `</div>`;
+    wrap.innerHTML = html;
+    return;
+  }
+
+  // Viagens ordenadas cronologicamente (sem agrupamento por tipo)
+
+function buildDiaCard(v){
+    const tipo = detectTipo(v.origin, v.flight) || v.type || 'RECOLHA';
+    const isC  = tipo === 'CHEGADA';
+    const isT  = tipo === 'TOUR';
+    const isR  = tipo === 'RECOLHA';
+    const tc   = isC ? 'dc-chegada' : isT ? 'dc-tour' : 'dc-recolha';
+    const icoLbl = isC ? '✈ CHEGADA' : isT ? '🧭 TOUR' : '🚗 RECOLHA';
+
+    let hora = '—:—';
+    if(v.pickupTime){
+      const m = String(v.pickupTime).match(/(\d{1,2}):(\d{2})/);
+      hora = m ? `${m[1].padStart(2,'0')}:${m[2]}` : String(v.pickupTime).slice(0,5);
+    }
+    const origem  = v.origin || '—';
+    const destino = v.destination || '—';
+    const locO = splitLocation(origem);
+    const locD = splitLocation(destino);
+    const paxTag  = v.pax  ? `<span class="dc-tag">👤 ${v.pax}</span>`  : '';
+    const bagsTag = v.bags ? `<span class="dc-tag">🧳 ${v.bags}</span>` : '';
+    const fltTag  = v.flight ? `<a class="dc-flight-tag" href="https://www.google.com/search?q=${encodeURIComponent(v.flight)}" target="_blank">✈ ${v.flight} ↗</a>` : '';
+    const drvTag  = v.driver
+      ? `<span class="dc-drv-tag">🚗 ${v.driver}</span>`
+      : `<span class="dc-nodrv-tag">⚠️ Sem motorista</span>`;
+    /* Idioma resolvido: GAS field → DDI → fallback EN */
+    const _resolvedLang = resolveLanguage(v.language, v.phone);
+    const langFlags = {PT:'🇵🇹',EN:'🇬🇧',FR:'🇫🇷',ES:'🇪🇸',IT:'🇮🇹',DE:'🇩🇪'};
+    const langTag = `<span class="dc-tag">${langFlags[_resolvedLang]||'🌐'} ${_resolvedLang}</span>`;
+    const navAddr = isC ? destino : origem;
+    const gmUrl   = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(navAddr)}`;
+    const wzUrl   = `https://waze.com/ul?q=${encodeURIComponent(navAddr)}&navigate=yes`;
+
+    let middleHtml = '';
+
+    if(isC && v.flight){
+      /* ── CHEGADA: Bloco de voo com aeroporto real + país + barra progresso ── */
+      let dep = (v.depAirport||v.depIata||'').toUpperCase();
+      if(!dep||dep==='???') dep = guessDepAirport(v.flight) || '???';
+      const arr   = (v.arrAirport||v.arrIata||'LIS').toUpperCase();
+      const depC  = v.depCity || '';
+      const arrC  = v.arrCity || 'Lisboa';
+      const depT  = v.depTime || '—:—';
+      const arrT  = v.arrTime || '—:—';
+      const depTm = v.depTerminal ? `T${v.depTerminal}` : '';
+      const arrTm = v.arrTerminal ? `T${v.arrTerminal}` : '';
+      /* Info do aeroporto de origem */
+      const depInfo = getIataInfo(dep);
+      const depCountry = depInfo ? depInfo.c : (depC || '');
+      const region = depInfo ? depInfo.r : null;
+      const rlabel = regionLabel(region);
+      const hintHtml = rlabel
+        ? `<div class="dc-origin-hint ${rlabel.cls}">${depCountry} · ${rlabel.text}</div>`
+        : depCountry ? `<div class="dc-origin-hint eu">${depCountry}</div>` : '';
+      /* Barra de progresso real */
+      const progress = calcFlightProgress(depT, arrT);
+      middleHtml = `
+      <div class="dc-flight">
+        <div class="dc-frow">
+          <div class="dc-fapt"><div class="dc-fcode">${dep}</div><div class="dc-fcity">${depCountry}</div></div>
+          <div class="dc-fline">
+            <a class="dc-fnum dc-fnum-link" href="https://www.google.com/search?q=${encodeURIComponent(v.flight)}" target="_blank">${v.flight} ↗</a>
+            <div class="dc-ftrack"><div class="dc-fprog" style="width:${progress}%"></div><span class="dc-fplane" style="left:${progress}%">✈</span></div>
+            <div class="dc-ftimes">
+              <div><div class="dc-ftime">${depT}</div><div class="dc-fterm">${depTm}</div></div>
+              <div style="text-align:right"><div class="dc-ftime">${arrT}</div><div class="dc-fterm">${arrTm}</div></div>
+            </div>
+            ${hintHtml}
+          </div>
+          <div class="dc-fapt"><div class="dc-fcode" style="color:var(--chegada)">${arr}</div><div class="dc-fcity">${arrC}</div></div>
+        </div>
+      </div>
+      <div class="dc-addrs">
+        <div class="dc-addr-block">
+          <div class="dc-addr-lbl">✈ Aeroporto</div>${locO.name?`<div class="dc-loc-name">${locO.name}</div>`:''}<div class="dc-loc-addr">📍 ${locO.addr}</div>
+          <div class="dc-addr-btns"><a class="dc-addr-btn gm" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locO.addr)}" target="_blank">🗺 Maps</a><a class="dc-addr-btn wz" href="https://waze.com/ul?q=${encodeURIComponent(locO.addr)}&navigate=yes" target="_blank">🔷 Waze</a></div>
+        </div>
+        <div class="dc-addr-block">
+          <div class="dc-addr-lbl">📍 Hotel / Destino</div>${locD.name?`<div class="dc-loc-name">${locD.name}</div>`:''}<div class="dc-loc-addr">📍 ${locD.addr}</div>
+          <div class="dc-addr-btns"><a class="dc-addr-btn gm" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locD.addr)}" target="_blank">🗺 Maps</a><a class="dc-addr-btn wz" href="https://waze.com/ul?q=${encodeURIComponent(locD.addr)}&navigate=yes" target="_blank">🔷 Waze</a></div>
+        </div>
+      </div>`;
+    } else if(isR){
+      /* ── RECOLHA: Rota visual A→B ── */
+      middleHtml = `
+      <div class="dc-route-block">
+        <div class="dc-route-visual">
+          <div class="dc-route-dots"><div class="dc-route-dot-a"></div><div class="dc-route-line"></div><div class="dc-route-dot-b"></div></div>
+          <div class="dc-route-addrs">
+            <div class="dc-route-addr">
+              <div class="dc-route-lbl">📍 Recolha</div>${locO.name?`<div class="dc-loc-name">${locO.name}</div>`:''}<div class="dc-route-val">${locO.addr}</div>
+              <div class="dc-route-btns"><a class="dc-route-btn gm" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locO.addr)}" target="_blank">🗺 Maps</a><a class="dc-route-btn wz" href="https://waze.com/ul?q=${encodeURIComponent(locO.addr)}&navigate=yes" target="_blank">🔷 Waze</a></div>
+            </div>
+            <div class="dc-route-addr">
+              <div class="dc-route-lbl">✈ Destino</div>${locD.name?`<div class="dc-loc-name">${locD.name}</div>`:''}<div class="dc-route-val">${locD.addr}</div>
+              <div class="dc-route-btns"><a class="dc-route-btn gm" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locD.addr)}" target="_blank">🗺 Maps</a><a class="dc-route-btn wz" href="https://waze.com/ul?q=${encodeURIComponent(locD.addr)}&navigate=yes" target="_blank">🔷 Waze</a></div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    } else {
+      /* ── TOUR: Bússola ── */
+      middleHtml = `
+      <div class="dc-tour-block">
+        <div class="dc-tour-visual">
+          <div class="dc-tour-icon">🧭</div>
+          <div class="dc-tour-info">
+            <div class="dc-tour-lbl">📍 Ponto de encontro</div>${locO.name?`<div class="dc-loc-name">${locO.name}</div>`:''}<div class="dc-tour-val">${locO.addr}</div>
+            <div class="dc-route-btns" style="margin-top:.2rem"><a class="dc-route-btn gm" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locO.addr)}" target="_blank">🗺 Maps</a><a class="dc-route-btn wz" href="https://waze.com/ul?q=${encodeURIComponent(locO.addr)}&navigate=yes" target="_blank">🔷 Waze</a></div>
+            ${destino!=='—'?`<div class="dc-tour-lbl" style="margin-top:.3rem">🏁 Destino</div>${locD.name?`<div class="dc-loc-name">${locD.name}</div>`:''}<div class="dc-tour-val">${locD.addr}</div>
+            <div class="dc-route-btns" style="margin-top:.2rem"><a class="dc-route-btn gm" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locD.addr)}" target="_blank">🗺 Maps</a><a class="dc-route-btn wz" href="https://waze.com/ul?q=${encodeURIComponent(locD.addr)}&navigate=yes" target="_blank">🔷 Waze</a></div>`:''}
+          </div>
+        </div>
+      </div>`;
+    }
+
+    const cardId  = v.id || (v.client||'x').replace(/\W/g,'');
+    const drvOpts = DRIVERS.map(d=>
+      `<option value="${d.name}"${v.driver===d.name?' selected':''}>${d.name}${d.viatura?' · '+d.viatura:''}</option>`
+    ).join('');
+    const wppCUrl = v.phone ? `https://wa.me/${v.phone.replace(/\D/g,'')}` : '#';
+    const wppCCls = v.phone ? '' : ' dis';
+
+    const isDone = v.concluida || v.status === 'CONCLUIDA' || v.status === 'FINALIZOU';
+    const doneClass = isDone ? ' dc-done' : '';
+    const priceVal = v.driver ? calcDriverPrice(v.platform) : 0;
+    const priceTag = v.driver ? `<span class="dc-price">€${priceVal}</span>` : '';
+
+    return `<div class="dc ${tc}${doneClass}" id="dcard-${cardId}">
+      <div class="dc-row1">
+        <div class="dc-timebox"><div class="dc-hora">${hora}</div><div class="dc-tipo-lbl">${icoLbl}</div></div>
+        <div class="dc-info"><div class="dc-client-name" onclick="showNameplate('${(v.client||'').replace(/'/g,"\\'")}')" style="cursor:pointer">${v.client||'—'}</div><div class="dc-tags-row">${drvTag}${fltTag}${langTag}${paxTag}${bagsTag}${priceTag}</div></div>
+        <div class="dc-navbtns"><a class="dc-navbtn gm" href="${gmUrl}" target="_blank">🗺 Maps</a><a class="dc-navbtn wz" href="${wzUrl}" target="_blank">🔷 Waze</a></div>
+      </div>
+      ${middleHtml}
+      <div class="dc-bottom">
+        <select class="dc-drv-sel" id="dcdrv-${cardId}" onchange="diaSetDriver(this,'${cardId}')"><option value="">— Atribuir motorista —</option>${drvOpts}</select>
+        ${v.phone ? `<span class="dc-phone" onclick="navigator.clipboard.writeText('+${v.phone.replace(/\D/g,'')}').then(()=>this.textContent='✅ Copiado!');setTimeout(()=>this.textContent='📞 +${v.phone.replace(/\D/g,'')}',2000)" title="Clica para copiar">📞 +${v.phone.replace(/\D/g,'')}</span>` : ''}
+        <button class="dc-act wpp-c${wppCCls}" onclick="diaClientMsg('${cardId}','${tipo}','${(v.client||'').replace(/'/g,"\\'")}','${_resolvedLang}','${(v.origin||'').replace(/'/g,"\\'")}','${hora}','${(v.phone||'').replace(/\D/g,'')}')">${WPP_ICO} Cliente</button>
+        ${v.phone ? `<button class="dc-act sms" onclick="diaSmsMsg('${cardId}','${tipo}','${(v.client||'').replace(/'/g,"\\'")}','${_resolvedLang}','${(v.origin||'').replace(/'/g,"\\'")}','${hora}','${(v.phone||'').replace(/\D/g,'')}')">💬 SMS</button>` : ''}
+        <button class="dc-act tmpl" onclick="diaDispatch('${cardId}','${tipo}','${(v.client||'').replace(/'/g,"\\'")}','${_resolvedLang}','${(v.origin||'').replace(/'/g,"\\'")}','${hora}')">⚡ Motorista</button>
+        ${isDone ? `<span class="dc-act done" style="pointer-events:none">✅ Concluída</span>` : `<button class="dc-act done" id="done-${cardId}" onclick="darBaixa('${v.id||''}','${v.rowIndex||''}','${cardId}')">✅ Dar Baixa</button>`}
+      </div>
+    </div>`;
+  }
+
+  /* ── Resumo pagamento motoristas ── */
+  if(list.length && list.some(v=>v.driver)){
+    const drivers = {};
+    list.forEach(v=>{
+      if(!v.driver) return;
+      if(!drivers[v.driver]) drivers[v.driver] = {count:0, total:0};
+      drivers[v.driver].count++;
+      drivers[v.driver].total += calcDriverPrice(v.platform);
+    });
+    html += `<div class="dia-pay-summary">`;
+    Object.keys(drivers).sort().forEach(d=>{
+      html += `<span class="dia-pay-item">${d}: ${drivers[d].count}× = <strong>€${drivers[d].total}</strong></span>`;
+    });
+    html += `<span class="dia-pay-total">Total: €${totalPay}</span></div>`;
+  }
+
+  /* ═══ TIMELINE CRONOLÓGICA — tudo misturado por hora ═══ */
+  const allSorted = [...list].sort((a,b)=>{
+    const ph = (t)=>{const m=String(t||'99:99').match(/(\d{1,2}):(\d{2})/);return m?parseInt(m[1])*60+parseInt(m[2]):9999;};
+    return ph(a.pickupTime)-ph(b.pickupTime);
+  });
+  html += `<div class="dia-timeline">${allSorted.map(buildDiaCard).join('')}</div>`;
+
+  html += `</div>`;
+  wrap.innerHTML = html;
+}
+
+/* ─── DIA VIEW — ACÇÕES ─── */
+const _diaDriverMap = {};
+function diaSetDriver(sel, cardId){
+  _diaDriverMap[cardId] = sel.value;
+  const card = document.getElementById('dcard-'+cardId);
+  if(!card) return;
+  const tag = card.querySelector('.dc-drv-tag, .dc-nodrv-tag');
+  if(tag){
+    if(sel.value){ tag.className='dc-drv-tag'; tag.textContent='🚗 '+sel.value; }
+    else         { tag.className='dc-nodrv-tag'; tag.textContent='⚠️ Sem motorista'; }
+  }
+}
+function diaDispatch(cardId, type, client, lang, origin, hora){
+  const sel = document.getElementById('dcdrv-'+cardId);
+  const drv = (sel ? sel.value : '') || _diaDriverMap[cardId] || '';
+  if(!drv){ alert('⚠️ Seleciona um motorista primeiro!'); sel&&sel.focus(); return; }
+  const drvObj = DRIVERS.find(d=>d.name===drv);
+  if(!drvObj?.phone){ alert('⚠️ ' + drv + ' não tem número na HUB Central.'); return; }
+  const resolvedLang = resolveLanguage(lang);
+  const horaClean = cleanHora(hora);
+  const fn = TEMPLATES[type]?.[resolvedLang] || TEMPLATES[type]?.EN || TEMPLATES[type]?.PT;
+  if(!fn){ alert('Template não encontrado para tipo: ' + type); return; }
+  const txt = fn(drv, client, origin, horaClean);
+  window.open(`https://wa.me/${drvObj.phone.replace(/\D/g,'')}?text=${encodeURIComponent(txt)}`, '_blank');
+}
+
+/* ─── CLIENTE MSG — Envia template ao CLIENTE com nome do motorista seleccionado ─── */
+function diaClientMsg(cardId, type, client, lang, origin, hora, clientPhone){
+  if(!clientPhone){ alert('⚠️ Este cliente não tem número de telefone.'); return; }
+  const sel = document.getElementById('dcdrv-'+cardId);
+  const drv = (sel ? sel.value : '') || _diaDriverMap[cardId] || '';
+  if(!drv){ alert('⚠️ Seleciona um motorista primeiro para enviar a mensagem ao cliente.'); sel&&sel.focus(); return; }
+  const resolvedLang = resolveLanguage(lang);
+  const horaClean = cleanHora(hora);
+  const fn = TEMPLATES[type]?.[resolvedLang] || TEMPLATES[type]?.EN || TEMPLATES[type]?.PT;
+  if(!fn){ alert('Template não encontrado para tipo: ' + type); return; }
+  const txt = fn(drv, client, origin, horaClean);
+  window.open(`https://wa.me/${clientPhone}?text=${encodeURIComponent(txt)}`, '_blank');
+}
+
+/* ─── HORA LIMPA — Extrai HH:MM de qualquer formato ─── */
+/* ─── SMS MSG — Mesmo template mas abre SMS em vez de WhatsApp ─── */
+function diaSmsMsg(cardId, type, client, lang, origin, hora, clientPhone){
+  if(!clientPhone){ alert('⚠️ Este cliente não tem número de telefone.'); return; }
+  const sel = document.getElementById('dcdrv-'+cardId);
+  const drv = (sel ? sel.value : '') || _diaDriverMap[cardId] || '';
+  if(!drv){ alert('⚠️ Seleciona um motorista primeiro.'); sel&&sel.focus(); return; }
+  const resolvedLang = resolveLanguage(lang);
+  const horaClean = cleanHora(hora);
+  const fn = TEMPLATES[type]?.[resolvedLang] || TEMPLATES[type]?.EN || TEMPLATES[type]?.PT;
+  if(!fn) return;
+  const txt = fn(drv, client, origin, horaClean);
+  /* sms:NUMBER?&body=TEXT funciona em iOS e Android */
+  window.open(`sms:${clientPhone}?&body=${encodeURIComponent(txt)}`, '_self');
+}
+
+/* ─── SEPARAR NOME DO ESTABELECIMENTO DO ENDEREÇO ─── */
+function splitLocation(raw){
+  if(!raw || raw==='—') return {name:'',addr:raw||'—',full:raw||'—'};
+  const s = String(raw).trim();
+  const parts = s.split(',').map(p=>p.trim());
+  if(parts.length < 2) return {name:'',addr:s,full:s};
+  const first = parts[0].toLowerCase();
+  /* Detectar se o primeiro segmento é um nome de estabelecimento */
+  const keywords = ['hotel','hostel','residencial','aparthotel','guest house','guesthouse',
+    'pension','pousada','albergue','resort','villa','palace','palácio','suites','lodge',
+    'inn','b&b','bed and','airbnb','flat','apartment','apartamento','residence','residência',
+    'aeroporto','airport','terminal','humberto delgado','portela',
+    'epic sana','sana','turim','ibis','novotel','mercure','marriott','hilton','sheraton',
+    'radisson','holiday inn','best western','accor','melia','meliã','pestana','altis',
+    'tivoli','vip','jupiter','dom pedro','corinthia','intercontinental','four seasons',
+    'ritz','sofitel','crowne','hyatt','lux','inspira','memmo','bairro alto','the vintage',
+    'lisbon','lisboa','heritage','rossio','marquês','marques','empire','gota',
+    'escola','museu','museum','estação','station','praça','plaza','centro','center',
+    'parque','park','jardim','garden','castelo','castle','palacio','miradouro',
+    'restaurante','restaurant','café','cafe','bar','clube','club','igreja','church'];
+  const hasKeyword = keywords.some(k => first.includes(k));
+  /* Se começa com número (ex: "Rua X 123") provavelmente é endereço directo */
+  const startsWithNumber = /^\d/.test(parts[0]);
+  /* Se tem "Rua","Av.","R.","Alameda","Travessa","Largo","Praça" no início é endereço */
+  const streetPrefixes = /^(rua|r\.|av\.|av |avenida|alameda|travessa|tv\.|largo|praça|pc\.|estrada|calçada|beco|campo|cais)/i;
+  const isStreet = streetPrefixes.test(parts[0]);
+  if(hasKeyword && !startsWithNumber && !isStreet){
+    const nome = parts[0];
+    const endereco = parts.slice(1).join(', ');
+    return {name:nome, addr:endereco, full:s};
+  }
+  return {name:'', addr:s, full:s};
+}
+
+function cleanHora(h){
+  if(!h) return '—:—';
+  const s = String(h);
+  /* Tentar extrair HH:MM de qualquer formato (Date obj, string, etc) */
+  const m = s.match(/(\d{1,2}):(\d{2})/);
+  if(m) return m[1].padStart(2,'0') + ':' + m[2];
+  /* Se veio como Date object stringified, tentar parsear */
+  try{
+    const d = new Date(s);
+    if(!isNaN(d.getTime())){
+      return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+    }
+  }catch(e){}
+  return s.slice(0,5) || '—:—';
+}
+
+/* ─── DETECÇÃO DE IDIOMA RIGOROSA — baseada no DDI do telefone ─── */
+const DDI_LANG = {
+  '351':'PT','55':'PT',  /* Portugal, Brasil */
+  '34':'ES','54':'ES','56':'ES','57':'ES','58':'ES','51':'ES','52':'ES','53':'ES','591':'ES','593':'ES','595':'ES','598':'ES','502':'ES','503':'ES','504':'ES','505':'ES','506':'ES','507':'ES','809':'ES',
+  '33':'FR','32':'FR','41':'FR','352':'FR','221':'FR','212':'FR','213':'FR','216':'FR','225':'FR','237':'FR','228':'FR','229':'FR','223':'FR','224':'FR','227':'FR','235':'FR','242':'FR','243':'FR','245':'FR','261':'FR','269':'FR',
+  '39':'IT','378':'IT','379':'IT',
+  '49':'DE','43':'DE','41':'DE',
+  '31':'NL','32':'NL',
+  '44':'EN','1':'EN','61':'EN','64':'EN','27':'EN','353':'EN','356':'EN','350':'EN','233':'EN','234':'EN','254':'EN','256':'EN','255':'EN','260':'EN','263':'EN','265':'EN',
+  '7':'RU','380':'RU',
+  '81':'JA','86':'ZH','82':'KO',
+  '90':'TR','966':'AR','971':'AR','974':'AR','973':'AR','968':'AR','965':'AR','962':'AR','961':'AR','972':'HE',
+  '91':'HI','92':'UR','94':'SI','977':'NE',
+  '66':'TH','84':'VI','63':'TL','60':'MS','65':'EN','62':'ID',
+  '351':'PT','244':'PT','258':'PT','245':'PT','238':'PT','239':'PT',
+};
+function detectLangFromPhone(phone){
+  if(!phone) return null;
+  const p = String(phone).replace(/\D/g,'');
+  /* Tentar 3 dígitos, depois 2, depois 1 */
+  if(DDI_LANG[p.slice(0,3)]) return DDI_LANG[p.slice(0,3)];
+  if(DDI_LANG[p.slice(0,2)]) return DDI_LANG[p.slice(0,2)];
+  if(DDI_LANG[p.slice(0,1)]) return DDI_LANG[p.slice(0,1)];
+  return null;
+}
+function resolveLanguage(lang, phone){
+  /* 1. Se o GAS enviou idioma válido (PT, EN, FR, ES, IT, DE), usar */
+  const valid = ['PT','EN','ES','FR','IT','DE'];
+  const upper = String(lang||'').toUpperCase().trim();
+  if(upper && valid.includes(upper)) return upper;
+  /* 2. Se só veio as 2 primeiras letras de algo mais longo, normalizar */
+  if(upper.length >= 2 && valid.includes(upper.slice(0,2))) return upper.slice(0,2);
+  /* 3. Tentar detectar pelo DDI do telefone */
+  const fromPhone = detectLangFromPhone(phone);
+  if(fromPhone && valid.includes(fromPhone)) return fromPhone;
+  /* 4. Fallback EN */
+  return 'EN';
+}
+
+/* ─── DAR BAIXA — Marcar viagem como concluída ─── */
+async function darBaixa(id, rowIndex, cardId){
+  if(!confirm('Confirmar conclusão desta viagem?')) return;
+  const btn = document.getElementById('done-'+cardId);
+  if(btn){ btn.classList.add('loading'); btn.textContent='⏳...'; }
+  try{
+    const url = HUB_VIAGENS_URL + '?action=completar&id=' + encodeURIComponent(id) + '&row=' + (rowIndex||'') + '&t=' + Date.now();
+    const resp = await fetch(url, {redirect:'follow'});
+    const data = await resp.json();
+    if(data.success){
+      if(btn){ btn.textContent='✅ Concluída'; btn.style.pointerEvents='none'; }
+      const card = document.getElementById('dcard-'+cardId);
+      if(card) card.classList.add('dc-done');
+      /* Actualizar localmente */
+      const v = HUB_VIAGENS.find(x=>(x.id||'')==id);
+      if(v){ v.concluida = true; v.status = 'CONCLUIDA'; }
+    } else {
+      alert('⚠️ Erro: ' + (data.error||'Não foi possível dar baixa'));
+      if(btn){ btn.classList.remove('loading'); btn.textContent='✅ Dar Baixa'; }
+    }
+  }catch(err){
+    alert('⚠️ Erro de rede: ' + err.message);
+    if(btn){ btn.classList.remove('loading'); btn.textContent='✅ Dar Baixa'; }
+  }
+}
+
+/* ─── LOAD DATE — Carregar viagens de outra data ─── */
+function loadDate(dateStr){
+  SELECTED_DATE = dateStr; /* vazio = hoje */
+  SELECTED_DRIVER = ''; /* reset filtro motorista ao mudar data */
+  syncViagens(true);
+}
+
+/* ─── FILTRO MOTORISTA ─── */
+function filterDriver(name){
+  SELECTED_DRIVER = name;
+  renderDia();
+}
+function getDriverOptions(){
+  const drivers = {};
+  HUB_VIAGENS.forEach(function(v){ if(v.driver) drivers[v.driver] = (drivers[v.driver]||0) + 1; });
+  return Object.keys(drivers).sort().map(function(d){
+    return '<option value="'+d+'"'+(SELECTED_DRIVER===d?' selected':'')+'>'+d+' ('+drivers[d]+')</option>';
+  }).join('');
+}
+
+  /* ─── SYNC VIAGENS — HUB CENTRAL ─── */
+function toggleViagensCfg(){
+  const cfg = document.getElementById('sbViagensCfg');
+  cfg.classList.toggle('show');
+  if(cfg.classList.contains('show')){
+    const inp = document.getElementById('sbCfgInp');
+    inp.value = HUB_VIAGENS_URL;
+    inp.focus();
+  }
+}
+
+function saveViagensCfg(){
+  const url = document.getElementById('sbCfgInp').value.trim();
+  if(!url){ alert('Cola o URL do Web App do Google Apps Script.'); return; }
+  HUB_VIAGENS_URL = url;
+  localStorage.setItem('hub_viagens_url', url);
+  document.getElementById('sbViagensCfg').classList.remove('show');
+  syncViagens(true);
+}
+
+function setViagensStatus(state, msg){
+  const dot    = document.getElementById('viagensDot');
+  const txt    = document.getElementById('viagensStatusTxt');
+  const btn    = document.getElementById('sbViagensSync');
+  const diaBtn = document.getElementById('diaSyncBtn');
+  if(dot){ dot.className='hub-dot '+state; dot.textContent=state==='online'?'●':state==='offline'?'●':'○'; }
+  if(txt) txt.textContent = msg;
+  if(btn) btn.classList.toggle('syncing', state==='loading');
+  if(diaBtn) diaBtn.classList.toggle('syncing', state==='loading');
+  document.getElementById('sbViagensIco').textContent = state==='loading'?'⏳':'🔄';
+}
+
+async function syncViagens(manual){
+  if(!HUB_VIAGENS_URL){ setViagensStatus('offline','URL não configurado'); if(currentTab==='dia')renderDia(); return; }
+  setViagensStatus('loading','A sincronizar...');
+  try{
+    let url = HUB_VIAGENS_URL + '?action=viagens&t=' + Date.now();
+    if(SELECTED_DATE) url += '&data=' + encodeURIComponent(SELECTED_DATE);
+    const resp = await fetch(url, {redirect:'follow'});
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    if(data.error) throw new Error(data.error);
+    const list = Array.isArray(data) ? data : (data.viagens || []);
+    HUB_VIAGENS = list;
+    const ts = new Date().toLocaleString('pt-PT',{timeZone:'Europe/Lisbon',hour:'2-digit',minute:'2-digit'});
+    localStorage.setItem('hub_viagens_last_sync', ts);
+    const dateLabel = SELECTED_DATE || todayStr();
+    setViagensStatus('online', `${list.length} viagens · ${dateLabel} · ${ts}`);
+    updateCounts();
+    if(manual){
+      const btn = document.getElementById('sbViagensSync');
+      if(btn){ const prev=btn.innerHTML; btn.innerHTML='<span>✅</span> OK!'; setTimeout(()=>btn.innerHTML=prev,2000); }
+    }
+  }catch(err){
+    console.warn('Viagens sync failed:', err.message);
+    setViagensStatus('offline','Erro: '+err.message.slice(0,30));
+  }
+  if(currentTab==='dia') renderDia();
+}
+
+/* ─── SYNC MOTORISTAS — HUB CENTRAL ─── */
+function setHubStatus(state, msg, extra){
+  const dot=document.getElementById('hubDot');
+  const txt=document.getElementById('hubStatusTxt');
+  const info=document.getElementById('sbHubInfo');
+  const syncBtn=document.getElementById('sbSyncBtn');
+  dot.className='hub-dot '+state;
+  dot.textContent=state==='online'?'●':state==='offline'?'●':'○';
+  txt.textContent=msg;
+  if(extra){
+    info.style.display='block';
+    info.innerHTML=extra;
+  } else {
+    info.style.display='none';
+  }
+  if(syncBtn) syncBtn.classList.toggle('syncing', state==='loading');
+  document.getElementById('sbSyncIco').textContent=state==='loading'?'⏳':'🔄';
+}
+
+async function syncDrivers(manual){
+  setHubStatus('loading','A sincronizar...');
+  try{
+    const url=HUB_CENTRAL_URL+'?action=motoristas&t='+Date.now();
+    const resp=await fetch(url,{redirect:'follow'});
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const data=await resp.json();
+    const list=Array.isArray(data)?data:(data.motoristas||data.drivers||[]);
+    if(!list.length && data.error) throw new Error(data.error);
+    if(list.length===0){
+      DRIVERS=DRIVERS_FALLBACK;
+      setHubStatus('offline','Sem motoristas na aba',`<span>Aba vazia — a usar lista local</span>`);
+    } else {
+      DRIVERS=list.map(d=>({
+        name:   String(d.name||d.nome||d.NOME||d.motorista||'').trim(),
+        phone:  String(d.phone||d.telefone||d.tel||d.TELEFONE||'').replace(/[\s\-\+\(\)]/g,''),
+        viatura:String(d.viatura||d.car||d.vehicle||'').trim(),
+      })).filter(d=>d.name);
+      const ts=new Date().toLocaleString('pt-PT',{timeZone:'Europe/Lisbon',hour:'2-digit',minute:'2-digit'});
+      setHubStatus('online','HUB Central · Ligada',
+        `<span class="hi-count">✦ ${DRIVERS.length} motoristas</span>`+
+        `<span>Sync: ${ts}</span>`+
+        DRIVERS.map(d=>`<span style="color:var(--text-dim)">· ${d.name}${d.viatura?' ('+d.viatura+')':''}</span>`).join('')
+      );
+      if(manual){
+        const btn=document.getElementById('sbSyncBtn');
+        const prev=btn.innerHTML;
+        btn.innerHTML='<span>✅</span> Actualizado!';
+        setTimeout(()=>btn.innerHTML=prev,2000);
+      }
+    }
+  }catch(err){
+    console.warn('HUB Central sync failed:',err.message);
+    DRIVERS=DRIVERS_FALLBACK;
+    setHubStatus('offline','Offline — lista local',
+      `<span style="color:var(--danger);font-size:.48rem">${err.message}</span>`+
+      `<span>A usar ${DRIVERS_FALLBACK.length} motoristas locais</span>`
+    );
+  }
+  renderAll();
+}
+
+/* ═══ PLACA NOME CLIENTE — fullscreen ═══ */
+function showNameplate(name){
+  let ov = document.getElementById('nameplate');
+  if(!ov){
+    ov = document.createElement('div');
+    ov.id = 'nameplate';
+    ov.className = 'nameplate';
+    ov.innerHTML = `
+      <div class="nameplate-logo">HUB TRANSFER</div>
+      <div class="nameplate-name" id="npName"></div>
+      <div class="nameplate-rotate"><span class="rot-ico">📱</span> Deita o telemóvel para placa maior</div>
+      <div class="nameplate-hint">toca para fechar</div>
+    `;
+    ov.onclick = ()=>{ ov.classList.remove('open'); document.body.style.overflow=''; };
+    document.body.appendChild(ov);
+  }
+  const el = document.getElementById('npName');
+  el.textContent = name;
+  let sz = 18;
+  el.style.fontSize = sz + 'vw';
+  ov.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  requestAnimationFrame(()=>{
+    const maxW = window.innerWidth * 0.92;
+    const maxH = window.innerHeight * 0.55;
+    while((el.scrollWidth > maxW || el.scrollHeight > maxH) && sz > 3){
+      sz -= 0.5;
+      el.style.fontSize = sz + 'vw';
+    }
+  });
+}
+
+// ─── INIT ───
+renderAll();
+syncDrivers(false);
+const _cfgInp = document.getElementById('sbCfgInp');
+if(_cfgInp) _cfgInp.value = HUB_VIAGENS_URL;
+if(HUB_VIAGENS_URL) syncViagens(false);
+</script>
+</body>
+</html>
