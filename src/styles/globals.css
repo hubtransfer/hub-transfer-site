@@ -105,6 +105,45 @@
   50% { opacity: 0.85; }
 }
 
+/* ─── Radar Animations ─── */
+@keyframes radarSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes radarBlip {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+@keyframes planeMove1 {
+  0%   { transform: translate(0, 0); }
+  50%  { transform: translate(-8px, 6px); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes planeMove2 {
+  0%   { transform: translate(0, 0); }
+  50%  { transform: translate(10px, -4px); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes planeMove3 {
+  0%   { transform: translate(0, 0); }
+  50%  { transform: translate(-6px, -10px); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes planeMove4 {
+  0%   { transform: translate(0, 0); }
+  50%  { transform: translate(-10px, 5px); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes planeMove5 {
+  0%   { transform: translate(0, 0); }
+  50%  { transform: translate(7px, 8px); }
+  100% { transform: translate(0, 0); }
+}
+
 /* ─── Base Styles ─── */
 @layer base {
   * {

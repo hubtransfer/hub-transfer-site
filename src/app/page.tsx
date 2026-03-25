@@ -12,6 +12,9 @@ const LANGS: LandingLang[] = ["PT", "EN", "ES", "FR", "IT"];
 
 /* ─── ATC Flight Radar — rotating sweep, moving planes, coordinates ─── */
 function RadarIllustration() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return <div className="w-[420px] aspect-square" />;
   return (
     <div className="relative w-[420px] aspect-square select-none">
       {/* LIVE indicator */}
@@ -136,45 +139,7 @@ function RadarIllustration() {
         </p>
       </div>
 
-      <style>{`
-        @keyframes radarSpin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        @keyframes radarBlip {
-          0%, 100% { opacity: 0.3; }
-          50% { opacity: 1; }
-        }
-        @keyframes livePulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.3; }
-        }
-        @keyframes planeMove1 {
-          0%   { transform: translate(0, 0); }
-          50%  { transform: translate(-8px, 6px); }
-          100% { transform: translate(0, 0); }
-        }
-        @keyframes planeMove2 {
-          0%   { transform: translate(0, 0); }
-          50%  { transform: translate(10px, -4px); }
-          100% { transform: translate(0, 0); }
-        }
-        @keyframes planeMove3 {
-          0%   { transform: translate(0, 0); }
-          50%  { transform: translate(-6px, -10px); }
-          100% { transform: translate(0, 0); }
-        }
-        @keyframes planeMove4 {
-          0%   { transform: translate(0, 0); }
-          50%  { transform: translate(-10px, 5px); }
-          100% { transform: translate(0, 0); }
-        }
-        @keyframes planeMove5 {
-          0%   { transform: translate(0, 0); }
-          50%  { transform: translate(7px, 8px); }
-          100% { transform: translate(0, 0); }
-        }
-      `}</style>
+      {/* Keyframes in globals.css */}
     </div>
   );
 }
