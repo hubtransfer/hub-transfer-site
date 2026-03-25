@@ -150,6 +150,102 @@ function RadarIllustration() {
 }
 const WA_URL = `https://wa.me/${COMPANY.whatsapp.replace(/\+/g, "")}`;
 
+/* ─── Handwritten signature that draws itself ─── */
+function SignatureAnimation() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<SVGTextElement>(null);
+  const [drawing, setDrawing] = useState(false);
+  const [pathLen, setPathLen] = useState(0);
+  const [filled, setFilled] = useState(false);
+
+  useEffect(() => {
+    const el = textRef.current;
+    const container = containerRef.current;
+    if (!el || !container) return;
+
+    // Measure the real stroke length
+    const len = el.getComputedTextLength() * 2.5; // multiply for stroke coverage
+    setPathLen(len);
+
+    // IntersectionObserver to trigger animation when visible
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !drawing) {
+          setDrawing(true);
+          // After stroke finishes, fade in fill
+          setTimeout(() => setFilled(true), 2600);
+        }
+      },
+      { threshold: 0.5 },
+    );
+    obs.observe(container);
+    return () => obs.disconnect();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <div ref={containerRef} className="flex justify-center">
+      <svg viewBox="0 0 420 90" className="w-72 md:w-[400px] h-auto overflow-visible">
+        {/* Decorative start line */}
+        <line
+          x1="5" y1="60" x2="50" y2="60"
+          stroke="#F5C518" strokeWidth="1.5" strokeLinecap="round"
+          style={{
+            strokeDasharray: 45,
+            strokeDashoffset: drawing ? 0 : 45,
+            transition: "stroke-dashoffset 0.8s ease-out",
+            opacity: 0.4,
+          }}
+        />
+        {/* The handwritten text */}
+        <text
+          ref={textRef}
+          x="58"
+          y="64"
+          style={{
+            fontFamily: "var(--font-cursive), 'Dancing Script', cursive",
+            fontSize: "48px",
+            fontWeight: 700,
+            stroke: "#F5C518",
+            strokeWidth: drawing ? "1.5px" : "0",
+            fill: filled ? "#F5C518" : "transparent",
+            strokeDasharray: pathLen || 800,
+            strokeDashoffset: drawing ? 0 : pathLen || 800,
+            transition: `stroke-dashoffset 2.5s ease-out, fill 0.5s ease-in ${filled ? "0s" : "9s"}, stroke-width 0.5s ease-in ${filled ? "0s" : "9s"}`,
+            letterSpacing: "0.01em",
+          }}
+        >
+          HUB Transfer
+        </text>
+        {/* Decorative end line */}
+        <line
+          x1="370" y1="60" x2="415" y2="60"
+          stroke="#F5C518" strokeWidth="1.5" strokeLinecap="round"
+          style={{
+            strokeDasharray: 45,
+            strokeDashoffset: drawing ? 0 : 45,
+            transition: "stroke-dashoffset 0.8s ease-out 2.2s",
+            opacity: 0.4,
+          }}
+        />
+        {/* Underline flourish */}
+        <path
+          d="M 58 72 Q 150 78, 250 70 T 370 72"
+          fill="none"
+          stroke="#F5C518"
+          strokeWidth="0.8"
+          strokeLinecap="round"
+          style={{
+            strokeDasharray: 350,
+            strokeDashoffset: drawing ? 0 : 350,
+            transition: "stroke-dashoffset 1.5s ease-out 2s",
+            opacity: 0.25,
+          }}
+        />
+      </svg>
+    </div>
+  );
+}
+
 /* ─── Fade-in on scroll ─── */
 function Reveal({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   return (
@@ -558,36 +654,10 @@ export default function LandingPage() {
               </h2>
             </Reveal>
 
-            {/* Animated "HUB Transfer" signature */}
-            <Reveal delay={0.3}>
-              <div className="mt-8 mb-4 flex justify-center">
-                <svg viewBox="0 0 400 80" className="w-72 md:w-96 h-auto overflow-visible">
-                  {/* Decorative line before text */}
-                  <line x1="10" y1="55" x2="60" y2="55" stroke="#F5C518" strokeWidth="1.5" opacity="0.3" strokeLinecap="round" className="signature-path" style={{ strokeDasharray: 50, strokeDashoffset: 50 }} />
-                  {/* "HUB Transfer" in cursive */}
-                  <text
-                    x="70"
-                    y="58"
-                    className="signature-text"
-                    style={{
-                      fontFamily: "var(--font-cursive), 'Dancing Script', cursive",
-                      fontSize: "42px",
-                      fontWeight: 700,
-                      stroke: "#F5C518",
-                      strokeWidth: "1px",
-                      fill: "transparent",
-                      strokeDasharray: 600,
-                      strokeDashoffset: 600,
-                      letterSpacing: "0.02em",
-                    }}
-                  >
-                    HUB Transfer
-                  </text>
-                  {/* Decorative line after text */}
-                  <line x1="340" y1="55" x2="390" y2="55" stroke="#F5C518" strokeWidth="1.5" opacity="0.3" strokeLinecap="round" className="signature-path" style={{ strokeDasharray: 50, strokeDashoffset: 50 }} />
-                </svg>
-              </div>
-            </Reveal>
+            {/* Animated "HUB Transfer" handwritten signature */}
+            <div className="mt-8 mb-4">
+              <SignatureAnimation />
+            </div>
 
             <Reveal delay={0.5}>
               <p className="text-[#888] text-sm">{t.commitSub}</p>
