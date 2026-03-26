@@ -80,7 +80,11 @@ export interface LandingTranslations {
   step3Title: string;
   step3Desc: string;
 
-  // Stats strip
+  // Social proof
+  socialProofText: string;
+  socialProofRating: string;
+
+  // Stats strip (legacy)
   statClients: string;
   statPunctuality: string;
   statWait: string;
@@ -197,6 +201,10 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     step3Title: 'Motorista à sua espera',
     step3Desc: 'Desembarca e o seu motorista já está lá. Sem filas. Sem stress.',
 
+    // Social proof
+    socialProofText: 'passageiros já chegaram a Lisboa sem stress. Você é o próximo.',
+    socialProofRating: 'Avaliação média: 4.9/5',
+
     // Stats strip
     statClients: 'Clientes satisfeitos',
     statPunctuality: 'Pontualidade',
@@ -245,9 +253,9 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     algoTitle: 'HUB Brain: Technology that Guarantees',
     algoDesc:
       'Our system tracks your flight in real-time. If the schedule changes, we handle everything automatically. You land, and we\'re already there waiting.',
-    algoFeature1: 'Real-Time Radar',
-    algoFeature2: 'Update Every 30s',
-    algoFeature3: 'Driver Always Ready',
+    algoFeature1: 'Flight synchronisation every 30 seconds',
+    algoFeature2: 'Driver notified automatically',
+    algoFeature3: 'Zero need for you to send messages',
 
     // Fleet
     fleetTitle: 'We invest every penny of HUB Transfer in technology.',
@@ -313,6 +321,10 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     step3Title: 'Driver waiting for you',
     step3Desc: 'You land and your driver is already there. No queues. No stress.',
 
+    // Social proof
+    socialProofText: 'passengers have already arrived in Lisbon stress-free. You\'re next.',
+    socialProofRating: 'Average rating: 4.9/5',
+
     // Stats strip
     statClients: 'Happy clients',
     statPunctuality: 'Punctuality',
@@ -361,9 +373,9 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     algoTitle: 'Cerebro HUB: Tecnología que Garantiza',
     algoDesc:
       'Nuestro sistema vigila tu vuelo en tiempo real. Si el horario cambia, ajustamos todo automáticamente. Tú aterrizas y nosotros ya estamos ahí.',
-    algoFeature1: 'Radar en Tiempo Real',
-    algoFeature2: 'Actualización Cada 30s',
-    algoFeature3: 'Conductor Siempre Listo',
+    algoFeature1: 'Sincronización aérea cada 30 segundos',
+    algoFeature2: 'Conductor notificado automáticamente',
+    algoFeature3: 'Cero necesidad de enviar mensajes',
 
     // Fleet
     fleetTitle: 'Invertimos cada céntimo de HUB Transfer en tecnología.',
@@ -429,6 +441,10 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     step3Title: 'Conductor esperándote',
     step3Desc: 'Aterrizas y tu conductor ya está ahí. Sin colas. Sin estrés.',
 
+    // Social proof
+    socialProofText: 'pasajeros ya llegaron a Lisboa sin estrés. Tú eres el próximo.',
+    socialProofRating: 'Valoración media: 4.9/5',
+
     // Stats strip
     statClients: 'Clientes satisfechos',
     statPunctuality: 'Puntualidad',
@@ -477,9 +493,9 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     algoTitle: 'Cerveau HUB: Technologie qui Garantit',
     algoDesc:
       "Notre système surveille votre vol en temps réel. Si l'horaire change, on ajuste tout automatiquement. Vous atterrissez, on est déjà là.",
-    algoFeature1: 'Radar en Temps Réel',
-    algoFeature2: 'Mise à Jour Toutes les 30s',
-    algoFeature3: 'Conducteur Toujours Prêt',
+    algoFeature1: 'Synchronisation aérienne toutes les 30 secondes',
+    algoFeature2: 'Chauffeur notifié automatiquement',
+    algoFeature3: 'Aucun besoin d\'envoyer des messages',
 
     // Fleet
     fleetTitle: 'Nous investissons chaque centime de HUB Transfer dans la technologie.',
@@ -545,6 +561,10 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     step3Title: 'Chauffeur à votre arrivée',
     step3Desc: 'Vous atterrissez et votre chauffeur est déjà là. Sans file. Sans stress.',
 
+    // Social proof
+    socialProofText: 'passagers sont déjà arrivés à Lisbonne sans stress. Vous êtes le prochain.',
+    socialProofRating: 'Note moyenne : 4,9/5',
+
     // Stats strip
     statClients: 'Clients satisfaits',
     statPunctuality: 'Ponctualité',
@@ -593,9 +613,9 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     algoTitle: 'Cervello HUB: Tecnologia che Garantisce',
     algoDesc:
       'Il nostro sistema traccia il tuo volo in tempo reale. Se ritardato, il nostro conducente lo sa già. Tu atterri e noi siamo già lì.',
-    algoFeature1: 'Radar in Tempo Reale',
-    algoFeature2: 'Aggiornamento Ogni 30s',
-    algoFeature3: 'Conducente Sempre Pronto',
+    algoFeature1: 'Sincronizzazione aerea ogni 30 secondi',
+    algoFeature2: 'Autista notificato automaticamente',
+    algoFeature3: 'Zero necessità di inviare messaggi',
 
     // Fleet
     fleetTitle: 'Investiamo ogni centesimo di HUB Transfer in tecnologia.',
@@ -660,6 +680,10 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     step2Desc: 'Il nostro sistema segue il tuo volo in tempo reale. Ritardi? Lo sappiamo già.',
     step3Title: 'Autista ad aspettarti',
     step3Desc: 'Atterri e il tuo autista è già lì. Senza code. Senza stress.',
+
+    // Social proof
+    socialProofText: 'passeggeri sono già arrivati a Lisbona senza stress. Il prossimo sei tu.',
+    socialProofRating: 'Valutazione media: 4,9/5',
 
     // Stats strip
     statClients: 'Clienti soddisfatti',

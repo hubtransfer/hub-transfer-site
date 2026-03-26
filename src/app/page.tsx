@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Phone, Mail, MapPin, Facebook, Instagram, ExternalLink, ArrowRight, ChevronDown, Crosshair, Radar, Headphones } from "lucide-react";
+import { Menu, X, Phone, Mail, MapPin, Facebook, Instagram, ExternalLink, ArrowRight, ChevronDown, Crosshair, Radar, Headphones, Radio, BellRing, MessageSquareOff } from "lucide-react";
 import Script from "next/script";
 import Image from "next/image";
 import { COMPANY } from "@/lib/constants";
@@ -485,21 +485,18 @@ export default function LandingPage() {
         </section>
 
         {/* ═══════════════════════════════════════════════════════════ */}
-        {/*  SOCIAL PROOF — Numbers strip                              */}
+        {/*  SOCIAL PROOF — Human + impactful                          */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section id="stats" className="border-y border-[#2A2A2A]">
-          <div className="max-w-6xl mx-auto px-6 py-14 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4">
-            {[
-              { n: "4.387", l: t.statClients },
-              { n: "99.8%", l: t.statPunctuality },
-              { n: "0 min", l: t.statWait },
-              { n: "24/7", l: t.statSupport },
-            ].map((s, i) => (
-              <Reveal key={i} delay={i * 0.1} className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-[#F0D030] tracking-tight" style={{ fontFamily: "var(--font-mono)" }}>{s.n}</div>
-                <div className="text-[#D0D0D0] text-xs tracking-wider uppercase mt-1">{s.l}</div>
-              </Reveal>
-            ))}
+        <section id="stats" className="bg-[#1A1A1A]">
+          <div className="max-w-2xl mx-auto px-6 py-10 md:py-14 text-center">
+            <Reveal>
+              <div className="text-5xl md:text-6xl font-extrabold text-[#F0D030] tracking-tight" style={{ fontFamily: "var(--font-mono)" }}>4.387+</div>
+              <p className="text-lg md:text-xl text-[#D0D0D0] mt-3 leading-relaxed">{t.socialProofText}</p>
+              <div className="flex items-center justify-center gap-2 mt-5">
+                <span className="text-[#F0D030] text-xl tracking-widest">★★★★★</span>
+                <span className="text-[#B0B0B0] text-sm">{t.socialProofRating}</span>
+              </div>
+            </Reveal>
           </div>
         </section>
 
@@ -519,12 +516,23 @@ export default function LandingPage() {
                   {t.techTitle}
                 </h2>
                 <p className="text-[#D0D0D0] text-base leading-relaxed mb-8 max-w-lg">{t.algoDesc}</p>
-                <div className="space-y-5">
-                  {[t.algoFeature1, t.algoFeature2, t.algoFeature3].map((f, i) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <div className="w-px h-4 bg-[#F0D030]" />
-                      <span className="text-[#D0D0D0] text-sm">{f}</span>
-                    </div>
+                <div className="space-y-4">
+                  {[
+                    { icon: <Radio className="w-7 h-7" strokeWidth={1.5} />, text: t.algoFeature1 },
+                    { icon: <BellRing className="w-7 h-7" strokeWidth={1.5} />, text: t.algoFeature2 },
+                    { icon: <MessageSquareOff className="w-7 h-7" strokeWidth={1.5} />, text: t.algoFeature3 },
+                  ].map((f, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 10 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: i * 0.15, ease: "easeOut" }}
+                      className="flex items-center gap-3 group"
+                    >
+                      <div className="text-[#F0D030] group-hover:scale-110 transition-transform duration-200 flex-shrink-0">{f.icon}</div>
+                      <span className="text-[#F5F5F5] text-base font-semibold">{f.text}</span>
+                    </motion.div>
                   ))}
                 </div>
               </Reveal>
