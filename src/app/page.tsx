@@ -150,8 +150,16 @@ function RadarIllustration() {
 }
 const WA_URL = `https://wa.me/${COMPANY.whatsapp.replace(/\+/g, "")}`;
 
-/* ─── Stamp: circular seal with impact animation ─── */
-function StampAnimation() {
+/* ─── Seal image with stamp impact animation ─── */
+const SEAL_MAP: Record<string, string> = {
+  PT: "/images/selo_br.png",
+  EN: "/images/selo_en.png",
+  ES: "/images/selo_es.png",
+  FR: "/images/selo_fr.png",
+  IT: "/images/selo_it.png",
+};
+
+function SealImage({ lang: sealLang }: { lang: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const [stamped, setStamped] = useState(false);
   const [ring, setRing] = useState(false);
@@ -172,70 +180,32 @@ function StampAnimation() {
     return () => obs.disconnect();
   }, [stamped]);
 
+  const src = SEAL_MAP[sealLang] || SEAL_MAP.EN;
+
   return (
-    <div ref={ref} className="flex justify-center">
+    <div ref={ref} className="flex justify-center mt-10">
       <div className="relative">
         {/* Impact ring */}
         {ring && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-[160px] h-[160px] md:w-[220px] md:h-[220px] rounded-full border border-[#F0D030]"
+            <div className="w-[160px] h-[160px] md:w-[220px] md:h-[220px] rounded-full border border-[#F0D030]/40"
               style={{ animation: "stampRing 0.6s ease-out forwards" }} />
           </div>
         )}
 
-        {/* The stamp */}
-        <svg
-          viewBox="0 0 220 220"
-          className="w-[160px] h-[160px] md:w-[220px] md:h-[220px]"
+        {/* Seal image */}
+        <Image
+          src={src}
+          alt="Selo de Garantia HUB Transfer"
+          width={220}
+          height={220}
+          className="w-[160px] h-auto md:w-[220px]"
           style={{
             opacity: stamped ? 1 : 0,
-            transform: stamped ? "scale(1) rotate(-7deg)" : "scale(2.5) rotate(-20deg)",
+            transform: stamped ? "scale(1) rotate(-5deg)" : "scale(2) rotate(-15deg)",
             transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.15s ease-out",
           }}
-        >
-          {/* Subtle ink texture filter */}
-          <defs>
-            <filter id="inkTexture">
-              <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="4" result="noise" />
-              <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.8" />
-            </filter>
-          </defs>
-
-          <g filter="url(#inkTexture)">
-            {/* Outer circle — 3px solid */}
-            <circle cx="110" cy="110" r="102" fill="none" stroke="#F0D030" strokeWidth="3" />
-            {/* Inner circle — 1.5px, 4px gap from outer */}
-            <circle cx="110" cy="110" r="94" fill="none" stroke="#F0D030" strokeWidth="1.5" />
-
-            {/* ── TOP TEXT: "HUB TRANSFER" ──
-                 Arc goes left→right along the top half.
-                 Radius 78 keeps text inside the inner ring. */}
-            <path id="arcTop" d="M 32 110 A 78 78 0 0 1 188 110" fill="none" />
-            <text fill="#F0D030" fontSize="15" fontWeight="700" letterSpacing="4">
-              <textPath href="#arcTop" startOffset="50%" textAnchor="middle"
-                style={{ fontFamily: "var(--font-body)" }}>
-                HUB TRANSFER
-              </textPath>
-            </text>
-
-            {/* ── BOTTOM TEXT: "LISBON · PORTUGAL" ──
-                 KEY: This path goes LEFT→RIGHT along the bottom
-                 by starting at the LEFT side of the bottom and
-                 arcing DOWN then back up to the RIGHT side.
-                 This keeps text upright and readable. */}
-            <path id="arcBot" d="M 42 128 A 74 74 0 0 0 178 128" fill="none" />
-            <text fill="#F0D030" fontSize="11" fontWeight="600" letterSpacing="2.5">
-              <textPath href="#arcBot" startOffset="50%" textAnchor="middle"
-                style={{ fontFamily: "var(--font-body)" }}>
-                LISBON · PORTUGAL
-              </textPath>
-            </text>
-
-            {/* Center separators: ✦ left and right */}
-            <text x="42" y="114" textAnchor="middle" fill="#F0D030" fontSize="10">✦</text>
-            <text x="178" y="114" textAnchor="middle" fill="#F0D030" fontSize="10">✦</text>
-          </g>
-        </svg>
+        />
       </div>
 
       <style dangerouslySetInnerHTML={{ __html: `
@@ -665,28 +635,6 @@ export default function LandingPage() {
         </section>
 
         {/* ═══════════════════════════════════════════════════════════ */}
-        {/*  COMMITMENT — Signature block                              */}
-        {/* ═══════════════════════════════════════════════════════════ */}
-        <section className="py-16 md:py-20 px-6">
-          <div className="max-w-3xl mx-auto text-center">
-            <Reveal>
-              <h2 className="text-2xl md:text-4xl font-bold leading-tight text-white" style={{ fontFamily: "var(--font-display)" }}>
-                {t.commitTitle}
-              </h2>
-            </Reveal>
-
-            {/* Animated "HUB Transfer" handwritten signature */}
-            <div className="mt-8 mb-4">
-              <StampAnimation />
-            </div>
-
-            <Reveal delay={0.5}>
-              <p className="text-[#B0B0B0] text-sm">{t.commitSub}</p>
-            </Reveal>
-          </div>
-        </section>
-
-        {/* ═══════════════════════════════════════════════════════════ */}
         {/*  TESTIMONIALS                                               */}
         {/* ═══════════════════════════════════════════════════════════ */}
         <section className="py-16 md:py-24 px-6 border-t border-[#2A2A2A]">
@@ -715,40 +663,51 @@ export default function LandingPage() {
         </section>
 
         {/* ═══════════════════════════════════════════════════════════ */}
-        {/*  GUARANTEE                                                  */}
+        {/*  GUARANTEE — Unified commitment + seal + badges            */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section id="guarantee" className="py-16 md:py-24 px-6">
+        <section id="guarantee" className="py-16 md:py-24 px-6" style={{ background: "linear-gradient(180deg, #0A0A0A 0%, #111111 50%, #0A0A0A 100%)" }}>
           <div className="max-w-3xl mx-auto text-center">
+            {/* Label */}
             <Reveal>
               <p className="text-[#F0D030] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.guaranteeBadge}</p>
-              <h2 className="text-3xl md:text-5xl font-bold leading-tight" style={{ fontFamily: "var(--font-display)" }}>
-                {t.guaranteeTitle}
+            </Reveal>
+
+            {/* Title */}
+            <Reveal>
+              <h2 className="text-2xl md:text-4xl font-bold leading-tight" style={{ fontFamily: "var(--font-display)" }}>
+                {t.commitTitle}
               </h2>
-              <p className="mt-6 text-[#D0D0D0] text-base md:text-lg leading-relaxed max-w-xl mx-auto">
+            </Reveal>
+
+            {/* Subtitle */}
+            <Reveal delay={0.1}>
+              <p className="mt-5 text-[#D0D0D0] text-base md:text-lg leading-relaxed max-w-xl mx-auto">
                 {t.guaranteeDesc}
               </p>
             </Reveal>
 
+            {/* Designer seal — changes per language */}
             <Reveal delay={0.2}>
-              <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-8">
-                {[
-                  { l: t.badgePrice },
-                  { l: t.badgePunctual },
-                  { l: t.badgeCancel },
-                  { l: t.badgeFlight },
-                ].map((b, i) => (
+              <SealImage lang={lang} />
+            </Reveal>
+
+            {/* 4 checkmarks */}
+            <Reveal delay={0.3}>
+              <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-6">
+                {[t.badgePrice, t.badgePunctual, t.badgeCancel, t.badgeFlight].map((b, i) => (
                   <div key={i} className="text-center">
                     <div className="text-[#F0D030] text-lg mb-1">✓</div>
-                    <p className="text-[#D0D0D0] text-xs tracking-wide">{b.l}</p>
+                    <p className="text-[#D0D0D0] text-xs tracking-wide">{b}</p>
                   </div>
                 ))}
               </div>
             </Reveal>
 
-            <Reveal delay={0.3}>
-              <div className="mt-14">
+            {/* CTA */}
+            <Reveal delay={0.4}>
+              <div className="mt-12">
                 <button onClick={() => setDrawerOpen(true)}
-                  className="inline-flex items-center gap-2 bg-[#F0D030] text-black text-[13px] font-semibold tracking-[0.15em] uppercase px-10 py-4 hover:bg-[#D4B828] transition-colors duration-300 cursor-pointer">
+                  className="inline-flex items-center gap-2 bg-[#F0D030] text-[#0A0A0A] text-[13px] font-semibold tracking-[0.15em] uppercase px-10 py-4 hover:bg-[#D4B828] transition-colors duration-300 cursor-pointer">
                   {t.ctaBook}
                   <ArrowRight className="w-4 h-4" />
                 </button>
