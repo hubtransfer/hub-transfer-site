@@ -135,12 +135,12 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     algoFeature3: 'Zero necessidade de você enviar mensagens',
 
     // Fleet
-    fleetTitle: 'Porque investimos cada cêntimo da HUB Transfer em tecnologia?',
+    fleetTitle: 'Investimos cada cêntimo da HUB Transfer em tecnologia.',
     fleetDesc:
-      'Enquanto muitas empresas gastam fortunas em carros de ostentação, nós decidimos investir em Sincronização Aérea Profunda. Porque entendemos que luxo de verdade não é um banco de couro em um carro que não chega. Luxo mesmo é o seu voo atrasar 4 horas e quando você pisa no saguão de Lisboa, seu motorista está lá.',
-    fleetFeature1: '99.8% de Pontualidade',
-    fleetFeature2: 'Sedans Mercedes e BMW',
-    fleetFeature3: 'Motoristas Profissionais',
+      'Enquanto muitas empresas gastam fortunas em carros de ostentação, nós decidimos investir em Sincronização Aérea Profunda. Porque entendemos que luxo de verdade não é somente um banco de couro em um carro que não chega. Luxo mesmo é o seu voo atrasar 4 horas e quando você pisa no saguão de Lisboa, seu motorista está lá.',
+    fleetFeature1: '96.8% de Pontualidade',
+    fleetFeature2: 'Monitorização de voo em tempo real',
+    fleetFeature3: 'Suporte 24/7',
 
     // Why
     whyTitle: 'Ou apertamos sua mão, ou pagamos a conta.',
@@ -250,12 +250,12 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     algoFeature3: 'Driver Always Ready',
 
     // Fleet
-    fleetTitle: 'Why do we invest every penny of HUB Transfer in technology?',
+    fleetTitle: 'We invest every penny of HUB Transfer in technology.',
     fleetDesc:
-      'While many companies spend fortunes on flashy cars, we chose to invest in Deep Flight Synchronisation. Because we understand that real luxury isn\'t a leather seat in a car that never shows up. Real luxury is your flight being delayed 4 hours and when you step into Lisbon\'s terminal, your driver is already there.',
-    fleetFeature1: '99.8% Punctuality',
-    fleetFeature2: 'Mercedes and BMW Sedans',
-    fleetFeature3: 'Professional Drivers',
+      'While many companies spend fortunes on flashy cars, we chose to invest in Deep Flight Synchronisation. Because we understand that real luxury isn\'t just a leather seat in a car that never shows up. Real luxury is your flight being delayed 4 hours and when you step into Lisbon\'s terminal, your driver is already there.',
+    fleetFeature1: '96.8% Punctuality',
+    fleetFeature2: 'Real-time flight monitoring',
+    fleetFeature3: '24/7 Support',
 
     // Why
     whyTitle: 'Why It Works',
@@ -366,12 +366,12 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     algoFeature3: 'Conductor Siempre Listo',
 
     // Fleet
-    fleetTitle: '¿Por qué invertimos cada céntimo de HUB Transfer en tecnología?',
+    fleetTitle: 'Invertimos cada céntimo de HUB Transfer en tecnología.',
     fleetDesc:
-      'Mientras muchas empresas gastan fortunas en coches de ostentación, nosotros decidimos invertir en Sincronización Aérea Profunda. Porque entendemos que el verdadero lujo no es un asiento de cuero en un coche que no llega. El verdadero lujo es que tu vuelo se retrase 4 horas y cuando pisas el aeropuerto de Lisboa, tu conductor ya está ahí.',
-    fleetFeature1: '99.8% de Puntualidad',
-    fleetFeature2: 'Sedanes Mercedes y BMW',
-    fleetFeature3: 'Conductores Profesionales',
+      'Mientras muchas empresas gastan fortunas en coches de ostentación, nosotros decidimos invertir en Sincronización Aérea Profunda. Porque entendemos que el verdadero lujo no es solo un asiento de cuero en un coche que no llega. El verdadero lujo es que tu vuelo se retrase 4 horas y cuando pisas el aeropuerto de Lisboa, tu conductor ya está ahí.',
+    fleetFeature1: '96.8% de Puntualidad',
+    fleetFeature2: 'Monitorización de vuelo en tiempo real',
+    fleetFeature3: 'Soporte 24/7',
 
     // Why
     whyTitle: 'Por Qué Funciona',
@@ -482,12 +482,12 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     algoFeature3: 'Conducteur Toujours Prêt',
 
     // Fleet
-    fleetTitle: 'Pourquoi investissons-nous chaque centime de HUB Transfer dans la technologie ?',
+    fleetTitle: 'Nous investissons chaque centime de HUB Transfer dans la technologie.',
     fleetDesc:
-      "Alors que beaucoup d'entreprises dépensent des fortunes en voitures de prestige, nous avons choisi d'investir dans la Synchronisation Aérienne Profonde. Car nous savons que le vrai luxe, ce n'est pas un siège en cuir dans une voiture qui n'arrive jamais. Le vrai luxe, c'est quand votre vol a 4 heures de retard et qu'en arrivant à Lisbonne, votre chauffeur est déjà là.",
-    fleetFeature1: '99.8% de Ponctualité',
-    fleetFeature2: 'Berlines Mercedes et BMW',
-    fleetFeature3: 'Conducteurs Professionnels',
+      "Alors que beaucoup d'entreprises dépensent des fortunes en voitures de prestige, nous avons choisi d'investir dans la Synchronisation Aérienne Profonde. Car nous savons que le vrai luxe, ce n'est pas seulement un siège en cuir dans une voiture qui n'arrive jamais. Le vrai luxe, c'est quand votre vol a 4 heures de retard et qu'en arrivant à Lisbonne, votre chauffeur est déjà là.",
+    fleetFeature1: '96.8% de Ponctualité',
+    fleetFeature2: 'Surveillance de vol en temps réel',
+    fleetFeature3: 'Assistance 24h/24',
 
     // Why
     whyTitle: 'Pourquoi Ça Marche',
@@ -598,12 +598,12 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     algoFeature3: 'Conducente Sempre Pronto',
 
     // Fleet
-    fleetTitle: 'Perché investiamo ogni centesimo di HUB Transfer in tecnologia?',
+    fleetTitle: 'Investiamo ogni centesimo di HUB Transfer in tecnologia.',
     fleetDesc:
-      "Mentre molte aziende spendono fortune in auto appariscenti, noi abbiamo scelto di investire nella Sincronizzazione Aerea Profonda. Perché sappiamo che il vero lusso non è un sedile in pelle in un'auto che non arriva mai. Il vero lusso è quando il tuo volo ritarda di 4 ore e appena metti piede a Lisbona, il tuo autista è già lì.",
-    fleetFeature1: '99.8% di Puntualità',
-    fleetFeature2: 'Berline Mercedes e BMW',
-    fleetFeature3: 'Conducenti Professionisti',
+      "Mentre molte aziende spendono fortune in auto appariscenti, noi abbiamo scelto di investire nella Sincronizzazione Aerea Profonda. Perché sappiamo che il vero lusso non è solo un sedile in pelle in un'auto che non arriva mai. Il vero lusso è quando il tuo volo ritarda di 4 ore e appena metti piede a Lisbona, il tuo autista è già lì.",
+    fleetFeature1: '96.8% di Puntualità',
+    fleetFeature2: 'Monitoraggio del volo in tempo reale',
+    fleetFeature3: 'Supporto 24/7',
 
     // Why
     whyTitle: 'Perché Funziona',

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Phone, Mail, MapPin, Facebook, Instagram, ExternalLink, ArrowRight, ChevronDown } from "lucide-react";
+import { Menu, X, Phone, Mail, MapPin, Facebook, Instagram, ExternalLink, ArrowRight, ChevronDown, Crosshair, Radar, Headphones } from "lucide-react";
 import Script from "next/script";
 import Image from "next/image";
 import { COMPANY } from "@/lib/constants";
@@ -572,10 +572,14 @@ export default function LandingPage() {
               </h2>
               <p className="text-[#D0D0D0] text-base leading-relaxed mb-8">{t.fleetDesc}</p>
               <div className="space-y-4">
-                {[t.fleetFeature1, t.fleetFeature2, t.fleetFeature3].map((f, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <div className="w-px h-4 bg-[#F0D030]" />
-                    <span className="text-[#D0D0D0] text-sm">{f}</span>
+                {[
+                  { icon: <Crosshair className="w-7 h-7" strokeWidth={1.5} />, text: t.fleetFeature1 },
+                  { icon: <Radar className="w-7 h-7" strokeWidth={1.5} />, text: t.fleetFeature2 },
+                  { icon: <Headphones className="w-7 h-7" strokeWidth={1.5} />, text: t.fleetFeature3 },
+                ].map((f, i) => (
+                  <div key={i} className="flex items-center gap-3 group">
+                    <div className="text-[#F0D030] group-hover:scale-110 transition-transform duration-200 flex-shrink-0">{f.icon}</div>
+                    <span className="text-[#F5F5F5] text-base font-semibold">{f.text}</span>
                   </div>
                 ))}
               </div>
