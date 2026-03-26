@@ -577,26 +577,41 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         <section className="py-10 md:py-14 border-y border-[#2A2A2A] overflow-hidden">
           {/* Title + subtitle */}
-          <div className="max-w-6xl mx-auto px-6 text-center mb-8">
+          <div className="max-w-6xl mx-auto px-4 md:px-6 text-center mb-8">
             <Reveal>
               <p className="text-[#F0D030] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-3">{t.partnersLabel}</p>
               <p className="text-[#B0B0B0] text-sm max-w-xl mx-auto">{t.partnersSub}</p>
             </Reveal>
           </div>
-          {/* Carousel */}
-          <div className="relative">
-            <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#0A0A0A] to-transparent z-10" />
-            <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#0A0A0A] to-transparent z-10" />
-            <div className="flex animate-[scroll_50s_linear_infinite] gap-12 md:gap-16 items-center w-max">
+          {/* Carousel — click to pause/resume */}
+          <div className="relative" onClick={(e) => {
+            const track = (e.currentTarget.querySelector("[data-carousel]") as HTMLElement);
+            if (track) track.style.animationPlayState = track.style.animationPlayState === "paused" ? "running" : "paused";
+          }}>
+            <div className="absolute left-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-r from-[#0A0A0A] to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-l from-[#0A0A0A] to-transparent z-10 pointer-events-none" />
+            <div data-carousel="" className="flex items-center w-max gap-7 md:gap-12" style={{ animation: "scroll 35s linear infinite" }}>
               {[...Array(2)].flatMap(() => [
                 "tap", "emirates", "british-airways", "lufthansa", "air-france", "klm", "iberia", "swiss", "turkish-airlines", "qatar", "mercedes", "bmw", "marriott", "air-europa", "royal-air-maroc", "aer-lingus", "air-canada", "jet2",
               ]).map((logo, i) => (
-                <div key={i} className="flex-shrink-0 w-24 h-14 md:w-36 md:h-18 flex items-center justify-center opacity-40 hover:opacity-100 active:opacity-100 transition-opacity duration-300 cursor-pointer group">
-                  <img src={`/logos/${logo}.png`} alt="" className="max-w-full max-h-full object-contain grayscale group-hover:grayscale-0 group-active:grayscale-0 transition-[filter] duration-300" loading="lazy" />
+                <div key={i} className="flex-shrink-0 flex items-center justify-center cursor-pointer" style={{ height: "52px", width: "auto" }}>
+                  <img
+                    src={`/logos/${logo}.png`}
+                    alt=""
+                    className="object-contain"
+                    style={{ height: "38px", maxHeight: "38px", width: "auto", transform: "none" }}
+                    loading="lazy"
+                  />
                 </div>
               ))}
             </div>
           </div>
+
+          {/* Lock logo size on all states */}
+          <style dangerouslySetInnerHTML={{ __html: `
+            [data-carousel] img { max-height: 38px !important; transform: none !important; }
+            @media (min-width: 768px) { [data-carousel] img { height: 52px !important; max-height: 52px !important; } }
+          `}} />
         </section>
 
         {/* ═══════════════════════════════════════════════════════════ */}
