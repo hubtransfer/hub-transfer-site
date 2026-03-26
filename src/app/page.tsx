@@ -817,7 +817,7 @@ export default function LandingPage() {
         <div className="h-16 md:hidden" />
 
         {/* ═══════════════════════════════════════════════════════════ */}
-        {/*  BOOKING DRAWER                                             */}
+        {/*  BOOKING MODAL — Premium floating card                     */}
         {/* ═══════════════════════════════════════════════════════════ */}
         <AnimatePresence>
           {drawerOpen && (
@@ -827,117 +827,133 @@ export default function LandingPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
                 onClick={() => setDrawerOpen(false)}
-                className="fixed inset-0 z-50 bg-[#0A0A0A]/80 backdrop-blur-sm"
+                className="fixed inset-0 z-50 bg-black/70 backdrop-blur-[8px]"
               />
 
-              {/* Drawer */}
+              {/* Modal */}
               <motion.div
-                initial={{ y: "100%" }}
-                animate={{ y: 0 }}
-                exit={{ y: "100%" }}
-                transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border rounded-t-2xl max-h-[90vh] overflow-y-auto"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
               >
-                {/* Handle */}
-                <div className="flex justify-center pt-3 pb-1">
-                  <div className="w-10 h-1 rounded-full bg-white/15" />
-                </div>
+                <div
+                  className="relative w-full max-w-[480px] max-h-[85vh] overflow-y-auto rounded-2xl pointer-events-auto select-none"
+                  style={{
+                    backgroundImage: "url(/images/rua.jpg)",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    WebkitTouchCallout: "none",
+                  }}
+                  onContextMenu={(e) => e.preventDefault()}
+                  onDragStart={(e) => e.preventDefault()}
+                >
+                  {/* Dark overlay */}
+                  <div className="absolute inset-0 rounded-2xl" style={{ background: "rgba(10,10,10,0.88)" }} />
 
-                <div className="px-6 pb-8 pt-2">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)" }}>
-                      {lang === "PT" ? "Reserve o seu transfer" : "Book your transfer"}
-                    </h3>
-                    <button onClick={() => setDrawerOpen(false)} className="text-[#D0D0D0] hover:text-white transition-colors cursor-pointer">
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-
-                  <div className="space-y-4">
-                    {/* Origin */}
-                    <div>
-                      <label className="text-[#D0D0D0] text-xs tracking-wider uppercase block mb-1.5">📍 {lang === "PT" ? "Origem" : "From"}</label>
-                      <div className="flex gap-2 mb-1.5">
-                        <button type="button" onClick={() => setBOrigin("Aeroporto de Lisboa (LIS), Lisboa, Portugal")}
-                          className={`text-xs px-3 py-1.5 border transition-colors cursor-pointer ${bOrigin.includes("Aeroporto") ? "border-[#F0D030]/40 text-[#F0D030]" : "border-[#2A2A2A] text-[#D0D0D0] hover:text-white/80"}`}>
-                          Aeroporto de Lisboa
-                        </button>
-                      </div>
-                      <input id="drawerOrigin" type="text" value={bOrigin} onChange={(e) => setBOrigin(e.target.value)}
-                        placeholder={lang === "PT" ? "Endereço..." : "Address..."}
-                        className="w-full h-11 bg-white/5 border-b border-[#2A2A2A] px-0 text-white text-sm placeholder-white/20 focus:outline-none focus:border-[#F0D030]/40 transition-colors" />
+                  {/* Content */}
+                  <div className="relative z-10 p-6">
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-5">
+                      <h3 className="text-xl font-bold text-[#F5F5F5]">
+                        {lang === "PT" ? "Reserve seu transfer" : lang === "ES" ? "Reserve su transfer" : lang === "FR" ? "Réservez votre transfert" : lang === "IT" ? "Prenota il tuo transfer" : "Book your transfer"}
+                      </h3>
+                      <button onClick={() => setDrawerOpen(false)} className="text-[#888] hover:text-[#F5F5F5] transition-colors cursor-pointer">
+                        <X className="w-5 h-5" />
+                      </button>
                     </div>
 
-                    {/* Destination */}
-                    <div>
-                      <label className="text-[#D0D0D0] text-xs tracking-wider uppercase block mb-1.5">🏁 {lang === "PT" ? "Destino" : "To"}</label>
-                      <div className="flex gap-2 mb-1.5 flex-wrap">
-                        {[
-                          { l: "Aeroporto", v: "Aeroporto de Lisboa (LIS), Lisboa, Portugal" },
-                          { l: "Cascais", v: "Cascais, Portugal" },
-                          { l: "Sintra", v: "Sintra, Portugal" },
-                        ].map((q) => (
-                          <button key={q.l} type="button" onClick={() => setBDest(q.v)}
-                            className={`text-xs px-3 py-1.5 border transition-colors cursor-pointer ${bDest === q.v ? "border-[#F0D030]/40 text-[#F0D030]" : "border-[#2A2A2A] text-[#D0D0D0] hover:text-white/80"}`}>
-                            {q.l}
+                    <div className="space-y-3">
+                      {/* Origin */}
+                      <div>
+                        <label className="text-[#F0D030] text-[10px] tracking-wider uppercase block mb-1">{lang === "PT" ? "ORIGEM" : lang === "ES" ? "ORIGEN" : lang === "FR" ? "ORIGINE" : lang === "IT" ? "ORIGINE" : "FROM"}</label>
+                        <div className="flex gap-1.5 mb-1.5">
+                          <button type="button" onClick={() => setBOrigin("Aeroporto de Lisboa (LIS), Lisboa, Portugal")}
+                            className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${bOrigin.includes("Aeroporto") ? "border-[#F0D030]/40 text-[#F0D030] bg-[#F0D030]/10" : "border-white/12 text-[#B0B0B0]"}`}>
+                            Aeroporto de Lisboa
                           </button>
-                        ))}
+                        </div>
+                        <input id="drawerOrigin" type="text" value={bOrigin} onChange={(e) => setBOrigin(e.target.value)}
+                          placeholder={lang === "PT" ? "Endereço..." : "Address..."}
+                          className="w-full h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 text-[#F5F5F5] text-sm placeholder-[#666] focus:outline-none focus:border-[#F0D030] transition-colors" />
                       </div>
-                      <input id="drawerDest" type="text" value={bDest} onChange={(e) => setBDest(e.target.value)}
-                        placeholder={lang === "PT" ? "Endereço..." : "Address..."}
-                        className="w-full h-11 bg-white/5 border-b border-[#2A2A2A] px-0 text-white text-sm placeholder-white/20 focus:outline-none focus:border-[#F0D030]/40 transition-colors" />
-                    </div>
 
-                    {/* Date + Pax */}
-                    <div className="grid grid-cols-2 gap-4">
+                      {/* Destination */}
                       <div>
-                        <label className="text-[#D0D0D0] text-xs tracking-wider uppercase block mb-1.5">{lang === "PT" ? "Data" : "Date"}</label>
-                        <input type="date" value={bDate} onChange={(e) => setBDate(e.target.value)}
-                          className="w-full h-11 bg-white/5 border-b border-[#2A2A2A] px-0 text-white text-sm focus:outline-none focus:border-[#F0D030]/40 [color-scheme:dark] transition-colors" />
-                      </div>
-                      <div>
-                        <label className="text-[#D0D0D0] text-xs tracking-wider uppercase block mb-1.5">{lang === "PT" ? "Passageiros" : "Passengers"}</label>
-                        <div className="flex gap-1">
-                          {[1, 2, 3, 4, 5, 6].map((n) => (
-                            <button key={n} type="button" onClick={() => setBPax(n)}
-                              className={`flex-1 h-11 text-sm font-medium transition-colors cursor-pointer ${bPax === n ? "bg-[#F0D030] text-black" : "bg-white/5 text-[#D0D0D0] hover:text-white/80"}`}>
-                              {n}
+                        <label className="text-[#F0D030] text-[10px] tracking-wider uppercase block mb-1">{lang === "PT" ? "DESTINO" : lang === "ES" ? "DESTINO" : lang === "FR" ? "DESTINATION" : lang === "IT" ? "DESTINAZIONE" : "TO"}</label>
+                        <div className="flex gap-1.5 mb-1.5 flex-wrap">
+                          {[
+                            { l: "Aeroporto", v: "Aeroporto de Lisboa (LIS), Lisboa, Portugal" },
+                            { l: "Cascais", v: "Cascais, Portugal" },
+                            { l: "Sintra", v: "Sintra, Portugal" },
+                          ].map((q) => (
+                            <button key={q.l} type="button" onClick={() => setBDest(q.v)}
+                              className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${bDest === q.v ? "border-[#F0D030]/40 text-[#F0D030] bg-[#F0D030]/10" : "border-white/12 text-[#B0B0B0]"}`}>
+                              {q.l}
                             </button>
                           ))}
                         </div>
+                        <input id="drawerDest" type="text" value={bDest} onChange={(e) => setBDest(e.target.value)}
+                          placeholder={lang === "PT" ? "Endereço..." : "Address..."}
+                          className="w-full h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 text-[#F5F5F5] text-sm placeholder-[#666] focus:outline-none focus:border-[#F0D030] transition-colors" />
                       </div>
-                    </div>
 
-                    {/* Phone */}
-                    <div>
-                      <label className="text-[#D0D0D0] text-xs tracking-wider uppercase block mb-1.5">WhatsApp</label>
-                      <input type="tel" value={bPhone} onChange={(e) => setBPhone(e.target.value)}
-                        className="w-full h-11 bg-white/5 border-b border-[#2A2A2A] px-0 text-white text-sm placeholder-white/20 focus:outline-none focus:border-[#F0D030]/40 transition-colors" />
-                    </div>
-
-                    {/* Route info */}
-                    {routeInfo && (
-                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
-                        className="flex justify-center gap-10 py-3">
-                        <div className="text-center">
-                          <div className="text-[#F0D030] text-xl font-bold" style={{ fontFamily: "var(--font-mono)" }}>{routeInfo.distance}</div>
-                          <div className="text-[#D0D0D0] text-xs mt-0.5">{lang === "PT" ? "Distância" : "Distance"}</div>
+                      {/* Date + Pax — same line */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-[#F0D030] text-[10px] tracking-wider uppercase block mb-1">{lang === "PT" ? "DATA" : lang === "ES" ? "FECHA" : lang === "FR" ? "DATE" : "DATE"}</label>
+                          <input type="date" value={bDate} onChange={(e) => setBDate(e.target.value)}
+                            className="w-full h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 text-[#F5F5F5] text-sm focus:outline-none focus:border-[#F0D030] [color-scheme:dark] transition-colors" />
                         </div>
-                        <div className="text-center">
-                          <div className="text-[#F0D030] text-xl font-bold" style={{ fontFamily: "var(--font-mono)" }}>~{routeInfo.duration}</div>
-                          <div className="text-[#D0D0D0] text-xs mt-0.5">{lang === "PT" ? "Tempo" : "Time"}</div>
+                        <div>
+                          <label className="text-[#F0D030] text-[10px] tracking-wider uppercase block mb-1">{lang === "PT" ? "PAX" : "PAX"}</label>
+                          <div className="flex gap-1">
+                            {[1, 2, 3, 4, 5, 6].map((n) => (
+                              <button key={n} type="button" onClick={() => setBPax(n)}
+                                className={`flex-1 h-[44px] text-sm font-medium rounded-lg transition-colors cursor-pointer ${bPax === n ? "bg-[#F0D030] text-[#0A0A0A]" : "bg-white/[0.06] border border-white/[0.12] text-[#B0B0B0]"}`}>
+                                {n}
+                              </button>
+                            ))}
+                          </div>
                         </div>
-                      </motion.div>
-                    )}
+                      </div>
 
-                    {/* Submit */}
-                    <a href={waBookingUrl()} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 w-full h-12 bg-[#F0D030] text-black text-[13px] font-semibold tracking-[0.12em] uppercase hover:bg-[#D4B828] transition-colors">
-                      {lang === "PT" ? "Solicitar orçamento" : "Request quote"}
-                      <ArrowRight className="w-4 h-4" />
-                    </a>
-                    <p className="text-center text-[#D0D0D0] text-xs">{lang === "PT" ? "Resposta em menos de 5 minutos" : "Response in under 5 minutes"}</p>
+                      {/* Phone */}
+                      <div>
+                        <label className="text-[#F0D030] text-[10px] tracking-wider uppercase block mb-1">WHATSAPP</label>
+                        <input type="tel" value={bPhone} onChange={(e) => setBPhone(e.target.value)}
+                          placeholder="+351 912 345 678"
+                          className="w-full h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 text-[#F5F5F5] text-sm placeholder-[#666] focus:outline-none focus:border-[#F0D030] transition-colors" />
+                      </div>
+
+                      {/* Route info */}
+                      {routeInfo && (
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                          className="flex justify-center gap-8 py-2">
+                          <div className="text-center">
+                            <div className="text-[#F0D030] text-lg font-bold" style={{ fontFamily: "var(--font-mono)" }}>{routeInfo.distance}</div>
+                            <div className="text-[#888] text-[10px]">{lang === "PT" ? "Distância" : "Distance"}</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-[#F0D030] text-lg font-bold" style={{ fontFamily: "var(--font-mono)" }}>~{routeInfo.duration}</div>
+                            <div className="text-[#888] text-[10px]">{lang === "PT" ? "Tempo" : "Time"}</div>
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {/* CTA */}
+                      <a href={waBookingUrl()} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 w-full h-12 bg-[#F0D030] text-[#0A0A0A] text-[13px] font-bold tracking-[0.12em] uppercase rounded-lg hover:bg-[#D4B828] transition-colors">
+                        {lang === "PT" ? "Solicitar orçamento" : lang === "ES" ? "Solicitar presupuesto" : lang === "FR" ? "Demander un devis" : lang === "IT" ? "Richiedi preventivo" : "Request quote"}
+                        <ArrowRight className="w-4 h-4" />
+                      </a>
+                      <p className="text-center text-[#888] text-[11px]">
+                        {lang === "PT" ? "Resposta em menos de 5 minutos" : lang === "ES" ? "Respuesta en menos de 5 minutos" : lang === "FR" ? "Réponse en moins de 5 minutes" : lang === "IT" ? "Risposta in meno di 5 minuti" : "Response in less than 5 minutes"}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </motion.div>
