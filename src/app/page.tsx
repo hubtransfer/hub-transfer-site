@@ -471,14 +471,10 @@ export default function LandingPage() {
         </section>
 
         {/* ═══════════════════════════════════════════════════════════ */}
-        {/*  PAIN — Full-width background image, centered text         */}
+        {/*  PAIN — Centered text, solid dark background                */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section
-          className="relative py-20 md:py-28 px-6"
-          style={{ backgroundImage: "url(/images/pessoas.png)", backgroundSize: "cover", backgroundPosition: "center" }}
-        >
-          <div className="absolute inset-0" style={{ background: "rgba(10,10,10,0.78)" }} />
-          <div className="relative z-10 max-w-[700px] mx-auto text-center">
+        <section className="py-20 md:py-24 px-6" style={{ background: "linear-gradient(180deg, #0A0A0A 0%, #141414 100%)" }}>
+          <div className="max-w-[700px] mx-auto text-center">
             <Reveal>
               <p className="text-[#F0D030] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelProblem}</p>
               <h2 className="text-2xl md:text-4xl font-bold leading-tight mb-6" style={{ fontFamily: "var(--font-display)" }}>
