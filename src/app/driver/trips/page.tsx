@@ -441,6 +441,7 @@ export default function DriverTripsPage() {
                 <DriverTripCard
                   key={vId}
                   viagem={viagem}
+                  driverName={store.driverName}
                   onDarBaixa={store.darBaixa}
                   onShowNameplate={openNameplate}
                 />

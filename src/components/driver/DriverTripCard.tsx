@@ -14,10 +14,8 @@ import {
   getIataInfo,
   getMapUrl,
   getWazeUrl,
-  getWhatsAppUrl,
-  getSmsUrl,
-  TEMPLATES,
 } from "@/lib/trips";
+import { generateDriverWhatsAppURL, generateDriverSmsURL } from "@/lib/driver-templates";
 
 /* ─── Helpers ─── */
 
@@ -90,6 +88,7 @@ interface DriverTripCardProps {
   onDispatch?: (cid: string, type: string, client: string, lang: string, origin: string, hora: string) => void;
   onClientMsg?: (cid: string, type: string, client: string, lang: string, origin: string, hora: string, phone: string) => void;
   onSmsMsg?: (cid: string, type: string, client: string, lang: string, origin: string, hora: string, phone: string) => void;
+  driverName?: string;  // logged-in driver name (driver mode) or selected driver (admin mode)
   mode?: "driver" | "admin";
 }
 
@@ -100,6 +99,7 @@ interface DriverTripCardProps {
 export default function DriverTripCard({
   viagem, drivers, onDarBaixa, onShowNameplate,
   onSetDriver, onDispatch, onClientMsg, onSmsMsg,
+  driverName: driverNameProp,
   mode = "driver",
 }: DriverTripCardProps) {
   /* ─ Tick for countdown refresh ─ */
@@ -417,13 +417,12 @@ export default function DriverTripCard({
                 </button>
               )}
 
-              {/* WhatsApp + SMS — real icons */}
+              {/* WhatsApp + SMS — smart templates */}
               <div className="grid grid-cols-2 gap-2">
                 {viagem.phone && (
                   <button type="button" onClick={() => {
-                    const h = cleanHora(viagem.pickupTime || "");
-                    const fn = TEMPLATES[tipo as "CHEGADA" | "RECOLHA"]?.[lang] || TEMPLATES.RECOLHA?.EN;
-                    if (fn) window.open(getWhatsAppUrl(viagem.phone!, fn(mode === "driver" ? "o motorista" : "", viagem.client, viagem.origin, h)), "_blank");
+                    const drv = driverNameProp || viagem.driver || "o motorista";
+                    window.open(generateDriverWhatsAppURL(viagem, drv), "_blank");
                   }}
                     className="flex items-center justify-center gap-2 h-12 rounded-xl bg-[#25d366]/10 border border-[#25d366]/20 text-[#25d366] font-mono text-sm font-bold active:bg-[#25d366]/20 transition-colors">
                     <WhatsAppIcon /> WhatsApp
@@ -431,9 +430,8 @@ export default function DriverTripCard({
                 )}
                 {viagem.phone && (
                   <button type="button" onClick={() => {
-                    const h = cleanHora(viagem.pickupTime || "");
-                    const fn = TEMPLATES[tipo as "CHEGADA" | "RECOLHA"]?.[lang] || TEMPLATES.RECOLHA?.EN;
-                    if (fn) window.open(getSmsUrl(viagem.phone!, fn(mode === "driver" ? "o motorista" : "", viagem.client, viagem.origin, h)), "_blank");
+                    const drv = driverNameProp || viagem.driver || "o motorista";
+                    window.open(generateDriverSmsURL(viagem, drv), "_blank");
                   }}
                     className="flex items-center justify-center gap-2 h-12 rounded-xl bg-[#3b82f6]/10 border border-[#3b82f6]/20 text-[#3b82f6] font-mono text-sm font-bold active:bg-[#3b82f6]/20 transition-colors">
                     <SmsIcon /> SMS
