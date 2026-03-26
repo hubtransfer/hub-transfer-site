@@ -583,34 +583,58 @@ export default function LandingPage() {
               <p className="text-[#B0B0B0] text-sm max-w-xl mx-auto">{t.partnersSub}</p>
             </Reveal>
           </div>
-          {/* Carousel — click to pause/resume */}
-          <div className="relative" onClick={(e) => {
-            const track = (e.currentTarget.querySelector("[data-carousel]") as HTMLElement);
-            if (track) track.style.animationPlayState = track.style.animationPlayState === "paused" ? "running" : "paused";
-          }}>
+          {/* Carousel — hold to pause, release to resume */}
+          <div
+            className="relative"
+            onTouchStart={(e) => { const t = e.currentTarget.querySelector("[data-carousel]") as HTMLElement; if (t) t.style.animationPlayState = "paused"; }}
+            onTouchEnd={(e) => { const t = e.currentTarget.querySelector("[data-carousel]") as HTMLElement; if (t) t.style.animationPlayState = "running"; }}
+            onMouseDown={(e) => { const t = e.currentTarget.querySelector("[data-carousel]") as HTMLElement; if (t) t.style.animationPlayState = "paused"; }}
+            onMouseUp={(e) => { const t = e.currentTarget.querySelector("[data-carousel]") as HTMLElement; if (t) t.style.animationPlayState = "running"; }}
+            onMouseLeave={(e) => { const t = e.currentTarget.querySelector("[data-carousel]") as HTMLElement; if (t) t.style.animationPlayState = "running"; }}
+          >
             <div className="absolute left-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-r from-[#0A0A0A] to-transparent z-10 pointer-events-none" />
             <div className="absolute right-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-l from-[#0A0A0A] to-transparent z-10 pointer-events-none" />
             <div data-carousel="" className="flex items-center w-max gap-7 md:gap-12" style={{ animation: "scroll 35s linear infinite" }}>
               {[...Array(2)].flatMap(() => [
                 "tap", "emirates", "british-airways", "lufthansa", "air-france", "klm", "iberia", "swiss", "turkish-airlines", "qatar", "mercedes", "bmw", "marriott", "air-europa", "royal-air-maroc", "aer-lingus", "air-canada", "jet2",
               ]).map((logo, i) => (
-                <div key={i} className="flex-shrink-0 flex items-center justify-center cursor-pointer" style={{ height: "52px", width: "auto" }}>
-                  <img
-                    src={`/logos/${logo}.png`}
-                    alt=""
-                    className="object-contain"
-                    style={{ height: "38px", maxHeight: "38px", width: "auto", transform: "none" }}
-                    loading="lazy"
+                <div
+                  key={i}
+                  className="flex-shrink-0 flex items-center justify-center select-none"
+                  style={{ height: "52px", width: "auto", WebkitTouchCallout: "none", userSelect: "none" }}
+                  onContextMenu={(e) => e.preventDefault()}
+                >
+                  <div
+                    className="h-[44px] md:h-[52px] bg-contain bg-center bg-no-repeat"
+                    style={{
+                      backgroundImage: `url(/logos/${logo}.png)`,
+                      width: "80px",
+                      minWidth: "60px",
+                      transform: "none",
+                    }}
+                    role="img"
+                    aria-label={logo}
+                    draggable={false}
+                    onDragStart={(e) => e.preventDefault()}
                   />
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Lock logo size on all states */}
+          {/* Lock size — belt and suspenders */}
           <style dangerouslySetInnerHTML={{ __html: `
-            [data-carousel] img { max-height: 38px !important; transform: none !important; }
-            @media (min-width: 768px) { [data-carousel] img { height: 52px !important; max-height: 52px !important; } }
+            [data-carousel] div[role="img"] {
+              max-height: 44px !important;
+              transform: none !important;
+              pointer-events: none;
+              -webkit-touch-callout: none;
+              -webkit-user-select: none;
+              user-select: none;
+            }
+            @media (min-width: 768px) {
+              [data-carousel] div[role="img"] { max-height: 52px !important; height: 52px !important; width: 100px !important; }
+            }
           `}} />
         </section>
 
