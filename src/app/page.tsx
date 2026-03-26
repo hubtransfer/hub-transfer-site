@@ -471,12 +471,31 @@ export default function LandingPage() {
         </section>
 
         {/* ═══════════════════════════════════════════════════════════ */}
-        {/*  TECHNOLOGY — Radar + sync description                     */}
+        {/*  PAIN — Full-width background image, centered text         */}
+        {/* ═══════════════════════════════════════════════════════════ */}
+        <section
+          className="relative py-20 md:py-28 px-6"
+          style={{ backgroundImage: "url(/images/pessoas.png)", backgroundSize: "cover", backgroundPosition: "center" }}
+        >
+          <div className="absolute inset-0" style={{ background: "rgba(10,10,10,0.78)" }} />
+          <div className="relative z-10 max-w-[700px] mx-auto text-center">
+            <Reveal>
+              <p className="text-[#F0D030] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelProblem}</p>
+              <h2 className="text-2xl md:text-4xl font-bold leading-tight mb-6" style={{ fontFamily: "var(--font-display)" }}>
+                {t.painTitle}
+              </h2>
+              <p className="text-[#D0D0D0] text-base leading-relaxed mb-6 max-w-[600px] mx-auto">{t.painDesc}</p>
+              <p className="text-[#F0D030] text-sm font-semibold">{t.painSubtext}</p>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════ */}
+        {/*  TECHNOLOGY — Radar + sync description (THE SOLUTION)      */}
         {/* ═══════════════════════════════════════════════════════════ */}
         <section id="how" className="py-16 md:py-24 px-6">
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col lg:grid lg:grid-cols-[1fr_auto] gap-8 lg:gap-6 items-center">
-              {/* Radar — above text on mobile, right side on desktop */}
               <Reveal delay={0.1} className="lg:order-2 mb-4 lg:mb-0">
                 <RadarIllustration />
               </Reveal>
@@ -511,35 +530,13 @@ export default function LandingPage() {
         </section>
 
         {/* ═══════════════════════════════════════════════════════════ */}
-        {/*  PAIN — Asymmetric image + text                            */}
-        {/* ═══════════════════════════════════════════════════════════ */}
-        <section className="py-16 md:py-24">
-          <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 lg:gap-0 items-center">
-            <Reveal className="order-2 lg:order-1 lg:pr-20">
-              <p className="text-[#F0D030] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelProblem}</p>
-              <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-6" style={{ fontFamily: "var(--font-display)" }}>
-                {t.painTitle}
-              </h2>
-              <p className="text-[#D0D0D0] text-base leading-relaxed mb-6">{t.painDesc}</p>
-              <p className="text-[#F0D030] text-sm font-medium">{t.painSubtext}</p>
-            </Reveal>
-            <Reveal delay={0.2} className="order-1 lg:order-2">
-              <div className="relative">
-                <img src="/images/pessoas.png" alt="Passageiros no aeroporto de Lisboa" className="w-full h-[400px] lg:h-[560px] object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0A]/60 to-[#0A0A0A]/10" />
-              </div>
-            </Reveal>
-          </div>
-        </section>
-
-        {/* ═══════════════════════════════════════════════════════════ */}
         {/*  WHY US — Image left, text right                            */}
         {/* ═══════════════════════════════════════════════════════════ */}
         <section id="why" className="py-16 md:py-24">
-          <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 lg:gap-0 items-center">
+          <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-[2fr_3fr] gap-10 items-center">
             <Reveal>
               <div className="relative">
-                <img src="/images/mercedes.png" alt="Mercedes S-Class HUB Transfer em Lisboa" className="w-full h-[400px] lg:h-[560px] object-cover" />
+                <img src="/images/mercedes.png" alt="Transfer privado Mercedes S-Class HUB Transfer em Lisboa" className="w-full h-[350px] lg:h-[480px] object-cover rounded-xl" />
                 <div className="absolute inset-0 bg-gradient-to-l from-[#0A0A0A]/40 to-transparent" />
               </div>
             </Reveal>
@@ -573,72 +570,6 @@ export default function LandingPage() {
         </section>
 
         {/* ═══════════════════════════════════════════════════════════ */}
-        {/*  PARTNERS — Discrete scrolling logos                       */}
-        {/* ═══════════════════════════════════════════════════════════ */}
-        <section className="py-10 md:py-14 border-y border-[#2A2A2A] overflow-hidden">
-          {/* Title + subtitle */}
-          <div className="max-w-6xl mx-auto px-4 md:px-6 text-center mb-8">
-            <Reveal>
-              <p className="text-[#F0D030] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-3">{t.partnersLabel}</p>
-              <p className="text-[#B0B0B0] text-sm max-w-xl mx-auto">{t.partnersSub}</p>
-            </Reveal>
-          </div>
-          {/* Carousel — hold to pause, release to resume */}
-          <div
-            className="relative"
-            onTouchStart={(e) => { const t = e.currentTarget.querySelector("[data-carousel]") as HTMLElement; if (t) t.style.animationPlayState = "paused"; }}
-            onTouchEnd={(e) => { const t = e.currentTarget.querySelector("[data-carousel]") as HTMLElement; if (t) t.style.animationPlayState = "running"; }}
-            onMouseDown={(e) => { const t = e.currentTarget.querySelector("[data-carousel]") as HTMLElement; if (t) t.style.animationPlayState = "paused"; }}
-            onMouseUp={(e) => { const t = e.currentTarget.querySelector("[data-carousel]") as HTMLElement; if (t) t.style.animationPlayState = "running"; }}
-            onMouseLeave={(e) => { const t = e.currentTarget.querySelector("[data-carousel]") as HTMLElement; if (t) t.style.animationPlayState = "running"; }}
-          >
-            <div className="absolute left-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-r from-[#0A0A0A] to-transparent z-10 pointer-events-none" />
-            <div className="absolute right-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-l from-[#0A0A0A] to-transparent z-10 pointer-events-none" />
-            <div data-carousel="" className="flex items-center w-max gap-7 md:gap-12" style={{ animation: "scroll 35s linear infinite" }}>
-              {[...Array(2)].flatMap(() => [
-                "tap", "emirates", "british-airways", "lufthansa", "air-france", "klm", "iberia", "swiss", "turkish-airlines", "qatar", "mercedes", "bmw", "marriott", "air-europa", "royal-air-maroc", "aer-lingus", "air-canada", "jet2",
-              ]).map((logo, i) => (
-                <div
-                  key={i}
-                  className="flex-shrink-0 flex items-center justify-center select-none"
-                  style={{ height: "52px", width: "auto", WebkitTouchCallout: "none", userSelect: "none" }}
-                  onContextMenu={(e) => e.preventDefault()}
-                >
-                  <div
-                    className="h-[44px] md:h-[52px] bg-contain bg-center bg-no-repeat"
-                    style={{
-                      backgroundImage: `url(/logos/${logo}.png)`,
-                      width: "80px",
-                      minWidth: "60px",
-                      transform: "none",
-                    }}
-                    role="img"
-                    aria-label={logo}
-                    draggable={false}
-                    onDragStart={(e) => e.preventDefault()}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Lock size — belt and suspenders */}
-          <style dangerouslySetInnerHTML={{ __html: `
-            [data-carousel] div[role="img"] {
-              max-height: 44px !important;
-              transform: none !important;
-              pointer-events: none;
-              -webkit-touch-callout: none;
-              -webkit-user-select: none;
-              user-select: none;
-            }
-            @media (min-width: 768px) {
-              [data-carousel] div[role="img"] { max-height: 52px !important; height: 52px !important; width: 100px !important; }
-            }
-          `}} />
-        </section>
-
-        {/* ═══════════════════════════════════════════════════════════ */}
         {/*  HOW IT WORKS — 3 steps + image                            */}
         {/* ═══════════════════════════════════════════════════════════ */}
         <section className="py-16 md:py-24 px-6">
@@ -666,11 +597,51 @@ export default function LandingPage() {
             </Reveal>
             <Reveal delay={0.2}>
               <div className="relative">
-                <img src="/images/app.png" alt="Aplicação HUB Transfer com vista de Lisboa" className="w-full h-[400px] lg:h-[520px] object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0A]/50 to-transparent" />
+                <img src="/images/app.png" alt="Aplicação HUB Transfer com vista de Lisboa" className="w-full h-[400px] lg:h-[520px] object-cover rounded-xl" />
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#0A0A0A]/50 to-transparent" />
               </div>
             </Reveal>
           </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════ */}
+        {/*  PARTNERS — Scrolling logos                                */}
+        {/* ═══════════════════════════════════════════════════════════ */}
+        <section className="py-10 md:py-14 border-y border-[#2A2A2A] overflow-hidden">
+          <div className="max-w-6xl mx-auto px-4 md:px-6 text-center mb-8">
+            <Reveal>
+              <p className="text-[#F0D030] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-3">{t.partnersLabel}</p>
+              <p className="text-[#B0B0B0] text-sm max-w-xl mx-auto">{t.partnersSub}</p>
+            </Reveal>
+          </div>
+          <div
+            className="relative"
+            onTouchStart={(e) => { const t = e.currentTarget.querySelector("[data-carousel]") as HTMLElement; if (t) t.style.animationPlayState = "paused"; }}
+            onTouchEnd={(e) => { const t = e.currentTarget.querySelector("[data-carousel]") as HTMLElement; if (t) t.style.animationPlayState = "running"; }}
+            onMouseDown={(e) => { const t = e.currentTarget.querySelector("[data-carousel]") as HTMLElement; if (t) t.style.animationPlayState = "paused"; }}
+            onMouseUp={(e) => { const t = e.currentTarget.querySelector("[data-carousel]") as HTMLElement; if (t) t.style.animationPlayState = "running"; }}
+            onMouseLeave={(e) => { const t = e.currentTarget.querySelector("[data-carousel]") as HTMLElement; if (t) t.style.animationPlayState = "running"; }}
+          >
+            <div className="absolute left-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-r from-[#0A0A0A] to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-l from-[#0A0A0A] to-transparent z-10 pointer-events-none" />
+            <div data-carousel="" className="flex items-center w-max gap-7 md:gap-12" style={{ animation: "scroll 35s linear infinite" }}>
+              {[...Array(2)].flatMap(() => [
+                "tap", "emirates", "british-airways", "lufthansa", "air-france", "klm", "iberia", "swiss", "turkish-airlines", "qatar", "mercedes", "bmw", "marriott", "air-europa", "royal-air-maroc", "aer-lingus", "air-canada", "jet2",
+              ]).map((logo, i) => (
+                <div key={i} className="flex-shrink-0 flex items-center justify-center select-none"
+                  style={{ height: "52px", width: "auto", WebkitTouchCallout: "none", userSelect: "none" }}
+                  onContextMenu={(e) => e.preventDefault()}>
+                  <div className="h-[44px] md:h-[52px] bg-contain bg-center bg-no-repeat"
+                    style={{ backgroundImage: `url(/logos/${logo}.png)`, width: "80px", minWidth: "60px", transform: "none" }}
+                    role="img" aria-label={logo} draggable={false} onDragStart={(e) => e.preventDefault()} />
+                </div>
+              ))}
+            </div>
+          </div>
+          <style dangerouslySetInnerHTML={{ __html: `
+            [data-carousel] div[role="img"] { max-height:44px!important; transform:none!important; pointer-events:none; -webkit-touch-callout:none; user-select:none; }
+            @media(min-width:768px){ [data-carousel] div[role="img"]{ max-height:52px!important; height:52px!important; width:100px!important; } }
+          `}} />
         </section>
 
         {/* ═══════════════════════════════════════════════════════════ */}
