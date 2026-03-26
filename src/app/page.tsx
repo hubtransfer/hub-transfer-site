@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Phone, Mail, MapPin, Facebook, Instagram, ExternalLink, ArrowRight, ChevronDown, Crosshair, Radar, Headphones, Radio, BellRing, MessageSquareOff } from "lucide-react";
+import { Menu, X, Phone, Mail, MapPin, Facebook, Instagram, ExternalLink, ArrowRight, ChevronDown, Crosshair, Radar, Headphones, Radio, BellRing, MessageSquareOff, Lock, Clock, ShieldCheck } from "lucide-react";
 import Script from "next/script";
 import Image from "next/image";
 import { COMPANY } from "@/lib/constants";
@@ -730,17 +730,29 @@ export default function LandingPage() {
               <SealImage lang={lang} />
             </Reveal>
 
-            {/* 4 checkmarks */}
-            <Reveal delay={0.3}>
-              <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-6">
-                {[t.badgePrice, t.badgePunctual, t.badgeCancel, t.badgeFlight].map((b, i) => (
-                  <div key={i} className="text-center">
-                    <div className="text-[#F0D030] text-lg mb-1">✓</div>
-                    <p className="text-[#D0D0D0] text-xs tracking-wide">{b}</p>
+            {/* 4 guarantee badges with Lucide icons */}
+            <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-8">
+              {[
+                { icon: <Lock className="w-7 h-7 md:w-9 md:h-9" strokeWidth={1.5} />, text: t.badgePrice },
+                { icon: <Clock className="w-7 h-7 md:w-9 md:h-9" strokeWidth={1.5} />, text: t.badgePunctual },
+                { icon: <ShieldCheck className="w-7 h-7 md:w-9 md:h-9" strokeWidth={1.5} />, text: t.badgeCancel },
+                { icon: <Radar className="w-7 h-7 md:w-9 md:h-9" strokeWidth={1.5} />, text: t.badgeFlight },
+              ].map((b, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.1, ease: "easeOut" }}
+                  className="flex flex-col items-center gap-2 group"
+                >
+                  <div className="text-[#F0D030] opacity-80 group-hover:opacity-100 group-hover:-translate-y-1 transition-all duration-200">
+                    {b.icon}
                   </div>
-                ))}
-              </div>
-            </Reveal>
+                  <p className="text-[#D0D0D0] text-xs md:text-sm font-medium text-center tracking-wide">{b.text}</p>
+                </motion.div>
+              ))}
+            </div>
 
             {/* CTA */}
             <Reveal delay={0.4}>
