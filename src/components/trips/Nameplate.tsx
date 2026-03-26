@@ -75,7 +75,7 @@ export default function Nameplate({ isOpen, name, onClose }: NameplateProps) {
         ref={nameRef}
         className="px-[4vw] text-center leading-tight uppercase break-words"
         style={{
-          color: "#F5C518",
+          color: "#F0D030",
           fontWeight: 900,
           letterSpacing: "0.06em",
           maxWidth: "92vw",

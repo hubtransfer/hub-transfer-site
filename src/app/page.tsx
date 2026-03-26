@@ -29,63 +29,63 @@ function RadarIllustration() {
     <div className="relative w-[260px] md:w-[320px] lg:w-[420px] aspect-square select-none mx-auto">
       {/* LIVE indicator */}
       <div className="absolute top-2 right-3 flex items-center gap-1.5 z-10">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#F5C518] radar-live" />
-        <span className="text-[#F5C518] text-[9px] tracking-[0.15em] uppercase font-mono">LIVE</span>
+        <span className="w-1.5 h-1.5 rounded-full bg-[#F0D030] radar-live" />
+        <span className="text-[#F0D030] text-[9px] tracking-[0.15em] uppercase font-mono">LIVE</span>
       </div>
 
       <svg viewBox="0 0 240 240" className="w-full h-full">
         <defs>
           <radialGradient id="sweepCone">
-            <stop offset="0%" stopColor="#F5C518" stopOpacity="0.25" />
-            <stop offset="100%" stopColor="#F5C518" stopOpacity="0" />
+            <stop offset="0%" stopColor="#F0D030" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="#F0D030" stopOpacity="0" />
           </radialGradient>
           <radialGradient id="blipG">
-            <stop offset="0%" stopColor="#F5C518" stopOpacity="0.7" />
-            <stop offset="100%" stopColor="#F5C518" stopOpacity="0" />
+            <stop offset="0%" stopColor="#F0D030" stopOpacity="0.7" />
+            <stop offset="100%" stopColor="#F0D030" stopOpacity="0" />
           </radialGradient>
         </defs>
 
         {/* Concentric rings */}
-        <circle cx="120" cy="120" r="100" fill="none" stroke="#F5C518" strokeWidth="0.5" opacity="0.35" />
-        <circle cx="120" cy="120" r="75"  fill="none" stroke="#F5C518" strokeWidth="0.4" opacity="0.25" />
-        <circle cx="120" cy="120" r="50"  fill="none" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
-        <circle cx="120" cy="120" r="25"  fill="none" stroke="#F5C518" strokeWidth="0.3" opacity="0.15" />
+        <circle cx="120" cy="120" r="100" fill="none" stroke="#F0D030" strokeWidth="0.5" opacity="0.35" />
+        <circle cx="120" cy="120" r="75"  fill="none" stroke="#F0D030" strokeWidth="0.4" opacity="0.25" />
+        <circle cx="120" cy="120" r="50"  fill="none" stroke="#F0D030" strokeWidth="0.4" opacity="0.2" />
+        <circle cx="120" cy="120" r="25"  fill="none" stroke="#F0D030" strokeWidth="0.3" opacity="0.15" />
 
         {/* Crosshair */}
-        <line x1="20" y1="120" x2="220" y2="120" stroke="#F5C518" strokeWidth="0.3" opacity="0.12" />
-        <line x1="120" y1="20" x2="120" y2="220" stroke="#F5C518" strokeWidth="0.3" opacity="0.12" />
+        <line x1="20" y1="120" x2="220" y2="120" stroke="#F0D030" strokeWidth="0.3" opacity="0.12" />
+        <line x1="120" y1="20" x2="120" y2="220" stroke="#F0D030" strokeWidth="0.3" opacity="0.12" />
 
         {/* Tick marks every 30° — pre-computed fixed positions */}
-        <line x1="217" y1="120" x2="224" y2="120" stroke="#F5C518" strokeWidth="0.7" opacity="0.4" />
-        <line x1="204" y1="71"  x2="207" y2="69"  stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
-        <line x1="169" y1="35"  x2="170" y2="32"  stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
-        <line x1="120" y1="23"  x2="120" y2="16"  stroke="#F5C518" strokeWidth="0.7" opacity="0.4" />
-        <line x1="71"  y1="35"  x2="70"  y2="32"  stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
-        <line x1="36"  y1="71"  x2="33"  y2="69"  stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
-        <line x1="23"  y1="120" x2="16"  y2="120" stroke="#F5C518" strokeWidth="0.7" opacity="0.4" />
-        <line x1="36"  y1="169" x2="33"  y2="171" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
-        <line x1="71"  y1="205" x2="70"  y2="208" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
-        <line x1="120" y1="217" x2="120" y2="224" stroke="#F5C518" strokeWidth="0.7" opacity="0.4" />
-        <line x1="169" y1="205" x2="170" y2="208" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
-        <line x1="204" y1="169" x2="207" y2="171" stroke="#F5C518" strokeWidth="0.4" opacity="0.2" />
+        <line x1="217" y1="120" x2="224" y2="120" stroke="#F0D030" strokeWidth="0.7" opacity="0.4" />
+        <line x1="204" y1="71"  x2="207" y2="69"  stroke="#F0D030" strokeWidth="0.4" opacity="0.2" />
+        <line x1="169" y1="35"  x2="170" y2="32"  stroke="#F0D030" strokeWidth="0.4" opacity="0.2" />
+        <line x1="120" y1="23"  x2="120" y2="16"  stroke="#F0D030" strokeWidth="0.7" opacity="0.4" />
+        <line x1="71"  y1="35"  x2="70"  y2="32"  stroke="#F0D030" strokeWidth="0.4" opacity="0.2" />
+        <line x1="36"  y1="71"  x2="33"  y2="69"  stroke="#F0D030" strokeWidth="0.4" opacity="0.2" />
+        <line x1="23"  y1="120" x2="16"  y2="120" stroke="#F0D030" strokeWidth="0.7" opacity="0.4" />
+        <line x1="36"  y1="169" x2="33"  y2="171" stroke="#F0D030" strokeWidth="0.4" opacity="0.2" />
+        <line x1="71"  y1="205" x2="70"  y2="208" stroke="#F0D030" strokeWidth="0.4" opacity="0.2" />
+        <line x1="120" y1="217" x2="120" y2="224" stroke="#F0D030" strokeWidth="0.7" opacity="0.4" />
+        <line x1="169" y1="205" x2="170" y2="208" stroke="#F0D030" strokeWidth="0.4" opacity="0.2" />
+        <line x1="204" y1="169" x2="207" y2="171" stroke="#F0D030" strokeWidth="0.4" opacity="0.2" />
 
         {/* Cardinal labels + coordinates */}
-        <text x="120" y="14"  textAnchor="middle" fill="#F5C518" opacity="0.5" fontSize="5.5" className="font-mono">N</text>
-        <text x="120" y="234" textAnchor="middle" fill="#F5C518" opacity="0.5" fontSize="5.5" className="font-mono">S</text>
-        <text x="10"  y="122" textAnchor="middle" fill="#F5C518" opacity="0.5" fontSize="5.5" className="font-mono">W</text>
-        <text x="232" y="122" textAnchor="middle" fill="#F5C518" opacity="0.5" fontSize="5.5" className="font-mono">E</text>
-        <text x="22"  y="28"  fill="#F5C518" opacity="0.35" fontSize="4.5" className="font-mono">38.7°N</text>
-        <text x="185" y="232" fill="#F5C518" opacity="0.35" fontSize="4.5" className="font-mono">9.1°W</text>
+        <text x="120" y="14"  textAnchor="middle" fill="#F0D030" opacity="0.5" fontSize="5.5" className="font-mono">N</text>
+        <text x="120" y="234" textAnchor="middle" fill="#F0D030" opacity="0.5" fontSize="5.5" className="font-mono">S</text>
+        <text x="10"  y="122" textAnchor="middle" fill="#F0D030" opacity="0.5" fontSize="5.5" className="font-mono">W</text>
+        <text x="232" y="122" textAnchor="middle" fill="#F0D030" opacity="0.5" fontSize="5.5" className="font-mono">E</text>
+        <text x="22"  y="28"  fill="#F0D030" opacity="0.35" fontSize="4.5" className="font-mono">38.7°N</text>
+        <text x="185" y="232" fill="#F0D030" opacity="0.35" fontSize="4.5" className="font-mono">9.1°W</text>
 
         {/* Center: LIS */}
-        <circle cx="120" cy="120" r="3" fill="#F5C518" opacity="0.3" />
-        <circle cx="120" cy="120" r="1.2" fill="#F5C518" opacity="0.7" />
-        <text x="120" y="130" textAnchor="middle" fill="#F5C518" opacity="0.6" fontSize="5" fontWeight="bold" className="font-mono">LIS</text>
+        <circle cx="120" cy="120" r="3" fill="#F0D030" opacity="0.3" />
+        <circle cx="120" cy="120" r="1.2" fill="#F0D030" opacity="0.7" />
+        <text x="120" y="130" textAnchor="middle" fill="#F0D030" opacity="0.6" fontSize="5" fontWeight="bold" className="font-mono">LIS</text>
 
         {/* Rotating sweep arm + trail — CSS class only */}
         <g className="radar-sweep">
           <path d="M 120 120 L 220 120 A 100 100 0 0 0 203 68 Z" fill="url(#sweepCone)" />
-          <line x1="120" y1="120" x2="220" y2="120" stroke="#F5C518" strokeWidth="1" opacity="0.6" />
+          <line x1="120" y1="120" x2="220" y2="120" stroke="#F0D030" strokeWidth="1" opacity="0.6" />
         </g>
 
         {/* Flight blips — 5 on mobile, 8 on desktop */}
@@ -93,15 +93,15 @@ function RadarIllustration() {
           <g key={i} className={`${p.moveCls} ${"desktopOnly" in p && p.desktopOnly ? "hidden lg:block" : ""}`}>
             {p.trail && (
               <line x1={p.cx - 8} y1={p.cy - 8} x2={p.cx} y2={p.cy}
-                stroke="#F5C518" strokeWidth="0.4" opacity="0.2" strokeDasharray="2 2" />
+                stroke="#F0D030" strokeWidth="0.4" opacity="0.2" strokeDasharray="2 2" />
             )}
             <circle cx={p.cx} cy={p.cy} r={p.sz * 0.35 + 2} fill="url(#blipG)" className={p.blipCls} />
             <text x={p.cx} y={p.cy + p.sz * 0.15} textAnchor="middle"
-              fill="#F5C518" opacity="0.9" fontSize={p.sz} className={p.blipCls}>
+              fill="#F0D030" opacity="0.9" fontSize={p.sz} className={p.blipCls}>
               ✈
             </text>
             <text x={p.cx + p.sz * 0.35 + 4} y={p.cy - 3}
-              fill="#F5C518" opacity="0.4" fontSize="3.8" className="font-mono">
+              fill="#F0D030" opacity="0.4" fontSize="3.8" className="font-mono">
               {p.code}
             </text>
           </g>
@@ -110,10 +110,10 @@ function RadarIllustration() {
 
       {/* Data readout */}
       <div className="absolute -bottom-8 lg:-bottom-10 left-0 right-0 text-center space-y-0.5 lg:space-y-1">
-        <p className="text-[#F5C518] text-[8px] lg:text-[10px] tracking-[0.2em] uppercase opacity-80 font-mono">
+        <p className="text-[#F0D030] text-[8px] lg:text-[10px] tracking-[0.2em] uppercase opacity-80 font-mono">
           MONITORING ACTIVE
         </p>
-        <p className="text-[#F5C518] text-[7px] lg:text-[9px] tracking-[0.15em] uppercase opacity-60 font-mono">
+        <p className="text-[#F0D030] text-[7px] lg:text-[9px] tracking-[0.15em] uppercase opacity-60 font-mono">
           SYNC EVERY 30s
         </p>
       </div>
@@ -178,7 +178,7 @@ function StampAnimation() {
         {/* Impact ring */}
         {ring && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-[160px] h-[160px] md:w-[220px] md:h-[220px] rounded-full border border-[#F5C518]"
+            <div className="w-[160px] h-[160px] md:w-[220px] md:h-[220px] rounded-full border border-[#F0D030]"
               style={{ animation: "stampRing 0.6s ease-out forwards" }} />
           </div>
         )}
@@ -203,15 +203,15 @@ function StampAnimation() {
 
           <g filter="url(#inkTexture)">
             {/* Outer circle — 3px solid */}
-            <circle cx="110" cy="110" r="102" fill="none" stroke="#F5C518" strokeWidth="3" />
+            <circle cx="110" cy="110" r="102" fill="none" stroke="#F0D030" strokeWidth="3" />
             {/* Inner circle — 1.5px, 4px gap from outer */}
-            <circle cx="110" cy="110" r="94" fill="none" stroke="#F5C518" strokeWidth="1.5" />
+            <circle cx="110" cy="110" r="94" fill="none" stroke="#F0D030" strokeWidth="1.5" />
 
             {/* ── TOP TEXT: "HUB TRANSFER" ──
                  Arc goes left→right along the top half.
                  Radius 78 keeps text inside the inner ring. */}
             <path id="arcTop" d="M 32 110 A 78 78 0 0 1 188 110" fill="none" />
-            <text fill="#F5C518" fontSize="15" fontWeight="700" letterSpacing="4">
+            <text fill="#F0D030" fontSize="15" fontWeight="700" letterSpacing="4">
               <textPath href="#arcTop" startOffset="50%" textAnchor="middle"
                 style={{ fontFamily: "var(--font-body)" }}>
                 HUB TRANSFER
@@ -224,7 +224,7 @@ function StampAnimation() {
                  arcing DOWN then back up to the RIGHT side.
                  This keeps text upright and readable. */}
             <path id="arcBot" d="M 42 128 A 74 74 0 0 0 178 128" fill="none" />
-            <text fill="#F5C518" fontSize="11" fontWeight="600" letterSpacing="2.5">
+            <text fill="#F0D030" fontSize="11" fontWeight="600" letterSpacing="2.5">
               <textPath href="#arcBot" startOffset="50%" textAnchor="middle"
                 style={{ fontFamily: "var(--font-body)" }}>
                 LISBON · PORTUGAL
@@ -232,8 +232,8 @@ function StampAnimation() {
             </text>
 
             {/* Center separators: ✦ left and right */}
-            <text x="42" y="114" textAnchor="middle" fill="#F5C518" fontSize="10">✦</text>
-            <text x="178" y="114" textAnchor="middle" fill="#F5C518" fontSize="10">✦</text>
+            <text x="42" y="114" textAnchor="middle" fill="#F0D030" fontSize="10">✦</text>
+            <text x="178" y="114" textAnchor="middle" fill="#F0D030" fontSize="10">✦</text>
           </g>
         </svg>
       </div>
@@ -369,7 +369,7 @@ export default function LandingPage() {
                 { label: t.navWhy, id: "why" },
                 { label: t.navGuarantee, id: "guarantee" },
               ].map((l) => (
-                <button key={l.id} onClick={() => scrollTo(l.id)} className="text-[13px] text-[#E5E5E5] hover:text-white transition-colors tracking-wide uppercase cursor-pointer">
+                <button key={l.id} onClick={() => scrollTo(l.id)} className="text-[13px] text-[#D0D0D0] hover:text-white transition-colors tracking-wide uppercase cursor-pointer">
                   {l.label}
                 </button>
               ))}
@@ -380,19 +380,19 @@ export default function LandingPage() {
               <div className="flex gap-1">
                 {LANGS.map((l) => (
                   <button key={l} onClick={() => setLang(l)}
-                    className={`w-8 h-6 rounded overflow-hidden border transition-all cursor-pointer ${lang === l ? "border-[#F5C518]/60 opacity-100" : "border-transparent opacity-40 hover:opacity-70"}`}>
+                    className={`w-8 h-6 rounded overflow-hidden border transition-all cursor-pointer ${lang === l ? "border-[#F0D030]/60 opacity-100" : "border-transparent opacity-40 hover:opacity-70"}`}>
                     <img src={`/flags/${l.toLowerCase()}.jpg`} alt={l} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
               <button onClick={() => setDrawerOpen(true)}
-                className="text-[13px] font-semibold tracking-wider uppercase px-5 py-2 border border-[#F5C518]/30 text-[#F5C518] hover:bg-[#F5C518] hover:text-black transition-all duration-300 cursor-pointer">
+                className="text-[13px] font-semibold tracking-wider uppercase px-5 py-2 border border-[#F0D030]/30 text-[#F0D030] hover:bg-[#F0D030] hover:text-black transition-all duration-300 cursor-pointer">
                 {t.navBook}
               </button>
             </div>
 
             {/* Mobile hamburger */}
-            <button className="md:hidden text-[#E5E5E5] cursor-pointer" onClick={() => setMenuOpen(!menuOpen)}>
+            <button className="md:hidden text-[#D0D0D0] cursor-pointer" onClick={() => setMenuOpen(!menuOpen)}>
               {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
@@ -403,12 +403,12 @@ export default function LandingPage() {
               <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="md:hidden bg-background/95 backdrop-blur-md border-t border-foreground/5 overflow-hidden">
                 <div className="px-6 py-6 space-y-4">
                   {[{ label: t.navHow, id: "how" }, { label: t.navWhy, id: "why" }, { label: t.navGuarantee, id: "guarantee" }].map((l) => (
-                    <button key={l.id} onClick={() => scrollTo(l.id)} className="block text-[#E5E5E5] text-sm tracking-wide uppercase cursor-pointer">{l.label}</button>
+                    <button key={l.id} onClick={() => scrollTo(l.id)} className="block text-[#D0D0D0] text-sm tracking-wide uppercase cursor-pointer">{l.label}</button>
                   ))}
                   <div className="flex gap-1 pt-2">
                     {LANGS.map((l) => (
                       <button key={l} onClick={() => { setLang(l); setMenuOpen(false); }}
-                        className={`w-8 h-6 rounded overflow-hidden border transition-all cursor-pointer ${lang === l ? "border-[#F5C518]/60 opacity-100" : "border-transparent opacity-40"}`}>
+                        className={`w-8 h-6 rounded overflow-hidden border transition-all cursor-pointer ${lang === l ? "border-[#F0D030]/60 opacity-100" : "border-transparent opacity-40"}`}>
                         <img src={`/flags/${l.toLowerCase()}.jpg`} alt={l} className="w-full h-full object-cover" />
                       </button>
                     ))}
@@ -425,8 +425,8 @@ export default function LandingPage() {
         <section className="relative min-h-screen flex items-center justify-center">
           <div className="absolute inset-0">
             <img src="/images/hub_dobra1_hero.jpg" alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/65" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/40" />
+            <div className="absolute inset-0 bg-[#0A0A0A]/65" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-transparent to-[#0A0A0A]/40" />
           </div>
 
           <div className="relative z-10 max-w-3xl mx-auto px-6 text-center pt-20 pb-32">
@@ -441,7 +441,7 @@ export default function LandingPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6 }}
                   className="text-[2.8rem] md:text-[4.5rem] leading-[1.05] font-bold"
-                  style={{ fontFamily: "var(--font-display)", color: "#F5C518" }}
+                  style={{ fontFamily: "var(--font-display)", color: "#F0D030" }}
                 >
                   {t.headlineHighlight}
                 </motion.h1>
@@ -464,11 +464,11 @@ export default function LandingPage() {
               className="mt-10"
             >
               <button onClick={() => setDrawerOpen(true)}
-                className="inline-flex items-center gap-2 bg-[#F5C518] text-black text-[13px] font-semibold tracking-[0.15em] uppercase px-8 py-4 hover:bg-[#d4a817] transition-colors duration-300 cursor-pointer">
+                className="inline-flex items-center gap-2 bg-[#F0D030] text-black text-[13px] font-semibold tracking-[0.15em] uppercase px-8 py-4 hover:bg-[#D4B828] transition-colors duration-300 cursor-pointer">
                 {t.ctaBook}
                 <ArrowRight className="w-4 h-4" />
               </button>
-              <p className="mt-4 text-[#E5E5E5] text-xs tracking-wide">{t.ctaSupport}</p>
+              <p className="mt-4 text-[#D0D0D0] text-xs tracking-wide">{t.ctaSupport}</p>
             </motion.div>
           </div>
 
@@ -487,7 +487,7 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  SOCIAL PROOF — Numbers strip                              */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section id="stats" className="border-y border-white/5">
+        <section id="stats" className="border-y border-[#2A2A2A]">
           <div className="max-w-6xl mx-auto px-6 py-14 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4">
             {[
               { n: "4.387", l: t.statClients },
@@ -496,8 +496,8 @@ export default function LandingPage() {
               { n: "24/7", l: t.statSupport },
             ].map((s, i) => (
               <Reveal key={i} delay={i * 0.1} className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-[#F5C518] tracking-tight" style={{ fontFamily: "var(--font-mono)" }}>{s.n}</div>
-                <div className="text-[#E5E5E5] text-xs tracking-wider uppercase mt-1">{s.l}</div>
+                <div className="text-2xl md:text-3xl font-bold text-[#F0D030] tracking-tight" style={{ fontFamily: "var(--font-mono)" }}>{s.n}</div>
+                <div className="text-[#D0D0D0] text-xs tracking-wider uppercase mt-1">{s.l}</div>
               </Reveal>
             ))}
           </div>
@@ -514,16 +514,16 @@ export default function LandingPage() {
                 <RadarIllustration />
               </Reveal>
               <Reveal className="lg:order-1">
-                <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelTech}</p>
+                <p className="text-[#F0D030] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelTech}</p>
                 <h2 className="text-3xl md:text-5xl font-bold leading-tight mb-6" style={{ fontFamily: "var(--font-display)" }}>
                   {t.techTitle}
                 </h2>
-                <p className="text-[#E5E5E5] text-base leading-relaxed mb-8 max-w-lg">{t.algoDesc}</p>
+                <p className="text-[#D0D0D0] text-base leading-relaxed mb-8 max-w-lg">{t.algoDesc}</p>
                 <div className="space-y-5">
                   {[t.algoFeature1, t.algoFeature2, t.algoFeature3].map((f, i) => (
                     <div key={i} className="flex items-center gap-3">
-                      <div className="w-px h-4 bg-[#F5C518]" />
-                      <span className="text-[#E5E5E5] text-sm">{f}</span>
+                      <div className="w-px h-4 bg-[#F0D030]" />
+                      <span className="text-[#D0D0D0] text-sm">{f}</span>
                     </div>
                   ))}
                 </div>
@@ -538,17 +538,17 @@ export default function LandingPage() {
         <section className="py-16 md:py-24">
           <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 lg:gap-0 items-center">
             <Reveal className="order-2 lg:order-1 lg:pr-20">
-              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelProblem}</p>
+              <p className="text-[#F0D030] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelProblem}</p>
               <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-6" style={{ fontFamily: "var(--font-display)" }}>
                 {t.painTitle}
               </h2>
-              <p className="text-[#E5E5E5] text-base leading-relaxed mb-6">{t.painDesc}</p>
-              <p className="text-[#F5C518] text-sm font-medium">{t.painSubtext}</p>
+              <p className="text-[#D0D0D0] text-base leading-relaxed mb-6">{t.painDesc}</p>
+              <p className="text-[#F0D030] text-sm font-medium">{t.painSubtext}</p>
             </Reveal>
             <Reveal delay={0.2} className="order-1 lg:order-2">
               <div className="relative">
                 <img src="/images/pessoas.png" alt="Passageiros no aeroporto de Lisboa" className="w-full h-[400px] lg:h-[560px] object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-black/10" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0A]/60 to-[#0A0A0A]/10" />
               </div>
             </Reveal>
           </div>
@@ -562,20 +562,20 @@ export default function LandingPage() {
             <Reveal>
               <div className="relative">
                 <img src="/images/mercedes.png" alt="Mercedes S-Class HUB Transfer em Lisboa" className="w-full h-[400px] lg:h-[560px] object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-l from-black/40 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-l from-[#0A0A0A]/40 to-transparent" />
               </div>
             </Reveal>
             <Reveal delay={0.2} className="lg:pl-20">
-              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelFleet}</p>
+              <p className="text-[#F0D030] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelFleet}</p>
               <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-6" style={{ fontFamily: "var(--font-display)" }}>
                 {t.fleetTitle}
               </h2>
-              <p className="text-[#E5E5E5] text-base leading-relaxed mb-8">{t.fleetDesc}</p>
+              <p className="text-[#D0D0D0] text-base leading-relaxed mb-8">{t.fleetDesc}</p>
               <div className="space-y-4">
                 {[t.fleetFeature1, t.fleetFeature2, t.fleetFeature3].map((f, i) => (
                   <div key={i} className="flex items-center gap-3">
-                    <div className="w-px h-4 bg-[#F5C518]" />
-                    <span className="text-[#E5E5E5] text-sm">{f}</span>
+                    <div className="w-px h-4 bg-[#F0D030]" />
+                    <span className="text-[#D0D0D0] text-sm">{f}</span>
                   </div>
                 ))}
               </div>
@@ -586,18 +586,18 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  PARTNERS — Discrete scrolling logos                       */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section className="py-10 md:py-14 border-y border-white/5 overflow-hidden">
+        <section className="py-10 md:py-14 border-y border-[#2A2A2A] overflow-hidden">
           {/* Title + subtitle */}
           <div className="max-w-6xl mx-auto px-6 text-center mb-8">
             <Reveal>
-              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-3">{t.partnersLabel}</p>
+              <p className="text-[#F0D030] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-3">{t.partnersLabel}</p>
               <p className="text-[#B0B0B0] text-sm max-w-xl mx-auto">{t.partnersSub}</p>
             </Reveal>
           </div>
           {/* Carousel */}
           <div className="relative">
-            <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-black to-transparent z-10" />
-            <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-black to-transparent z-10" />
+            <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#0A0A0A] to-transparent z-10" />
+            <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#0A0A0A] to-transparent z-10" />
             <div className="flex animate-[scroll_50s_linear_infinite] gap-12 md:gap-16 items-center w-max">
               {[...Array(2)].flatMap(() => [
                 "tap", "emirates", "british-airways", "lufthansa", "air-france", "klm", "iberia", "swiss", "turkish-airlines", "qatar", "mercedes", "bmw", "marriott", "air-europa", "royal-air-maroc", "aer-lingus", "air-canada", "jet2",
@@ -616,7 +616,7 @@ export default function LandingPage() {
         <section className="py-16 md:py-24 px-6">
           <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-0 items-center">
             <Reveal className="lg:pr-20">
-              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelHow}</p>
+              <p className="text-[#F0D030] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelHow}</p>
               <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-10" style={{ fontFamily: "var(--font-display)" }}>
                 {t.algoTitle}
               </h2>
@@ -627,10 +627,10 @@ export default function LandingPage() {
                   { step: "03", title: t.step3Title, desc: t.step3Desc },
                 ].map((s, i) => (
                   <div key={i} className="flex gap-5">
-                    <div className="text-[#F5C518]/25 text-4xl font-bold leading-none flex-shrink-0 w-12" style={{ fontFamily: "var(--font-mono)" }}>{s.step}</div>
+                    <div className="text-[#F0D030]/25 text-4xl font-bold leading-none flex-shrink-0 w-12" style={{ fontFamily: "var(--font-mono)" }}>{s.step}</div>
                     <div>
                       <h3 className="text-base font-semibold text-white mb-1.5">{s.title}</h3>
-                      <p className="text-[#E5E5E5] text-sm leading-relaxed">{s.desc}</p>
+                      <p className="text-[#D0D0D0] text-sm leading-relaxed">{s.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -639,7 +639,7 @@ export default function LandingPage() {
             <Reveal delay={0.2}>
               <div className="relative">
                 <img src="/images/app.png" alt="Aplicação HUB Transfer com vista de Lisboa" className="w-full h-[400px] lg:h-[520px] object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0A]/50 to-transparent" />
               </div>
             </Reveal>
           </div>
@@ -662,7 +662,7 @@ export default function LandingPage() {
             </div>
 
             <Reveal delay={0.5}>
-              <p className="text-[#888] text-sm">{t.commitSub}</p>
+              <p className="text-[#B0B0B0] text-sm">{t.commitSub}</p>
             </Reveal>
           </div>
         </section>
@@ -670,10 +670,10 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  TESTIMONIALS                                               */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section className="py-16 md:py-24 px-6 border-t border-white/5">
+        <section className="py-16 md:py-24 px-6 border-t border-[#2A2A2A]">
           <div className="max-w-5xl mx-auto">
             <Reveal>
-              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelReviews}</p>
+              <p className="text-[#F0D030] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelReviews}</p>
             </Reveal>
             <div className="mt-12 grid md:grid-cols-3 gap-12">
               {[
@@ -682,10 +682,10 @@ export default function LandingPage() {
                 { name: "Marie Dupont", from: "Paris, FR", text: t.review3 },
               ].map((r, i) => (
                 <Reveal key={i} delay={i * 0.1}>
-                  <p className="text-[#E5E5E5] text-sm leading-relaxed italic">&ldquo;{r.text}&rdquo;</p>
+                  <p className="text-[#D0D0D0] text-sm leading-relaxed italic">&ldquo;{r.text}&rdquo;</p>
                   <div className="mt-5">
                     <p className="text-white text-sm font-medium">{r.name}</p>
-                    <p className="text-[#E5E5E5] text-xs">{r.from}</p>
+                    <p className="text-[#D0D0D0] text-xs">{r.from}</p>
                   </div>
                 </Reveal>
               ))}
@@ -699,11 +699,11 @@ export default function LandingPage() {
         <section id="guarantee" className="py-16 md:py-24 px-6">
           <div className="max-w-3xl mx-auto text-center">
             <Reveal>
-              <p className="text-[#F5C518] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.guaranteeBadge}</p>
+              <p className="text-[#F0D030] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.guaranteeBadge}</p>
               <h2 className="text-3xl md:text-5xl font-bold leading-tight" style={{ fontFamily: "var(--font-display)" }}>
                 {t.guaranteeTitle}
               </h2>
-              <p className="mt-6 text-[#E5E5E5] text-base md:text-lg leading-relaxed max-w-xl mx-auto">
+              <p className="mt-6 text-[#D0D0D0] text-base md:text-lg leading-relaxed max-w-xl mx-auto">
                 {t.guaranteeDesc}
               </p>
             </Reveal>
@@ -717,8 +717,8 @@ export default function LandingPage() {
                   { l: t.badgeFlight },
                 ].map((b, i) => (
                   <div key={i} className="text-center">
-                    <div className="text-[#F5C518] text-lg mb-1">✓</div>
-                    <p className="text-[#E5E5E5] text-xs tracking-wide">{b.l}</p>
+                    <div className="text-[#F0D030] text-lg mb-1">✓</div>
+                    <p className="text-[#D0D0D0] text-xs tracking-wide">{b.l}</p>
                   </div>
                 ))}
               </div>
@@ -727,7 +727,7 @@ export default function LandingPage() {
             <Reveal delay={0.3}>
               <div className="mt-14">
                 <button onClick={() => setDrawerOpen(true)}
-                  className="inline-flex items-center gap-2 bg-[#F5C518] text-black text-[13px] font-semibold tracking-[0.15em] uppercase px-10 py-4 hover:bg-[#d4a817] transition-colors duration-300 cursor-pointer">
+                  className="inline-flex items-center gap-2 bg-[#F0D030] text-black text-[13px] font-semibold tracking-[0.15em] uppercase px-10 py-4 hover:bg-[#D4B828] transition-colors duration-300 cursor-pointer">
                   {t.ctaBook}
                   <ArrowRight className="w-4 h-4" />
                 </button>
@@ -739,32 +739,32 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  FOOTER                                                     */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <footer className="border-t border-white/5 py-16 md:py-20 px-6">
+        <footer className="border-t border-[#2A2A2A] py-16 md:py-20 px-6">
           <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
             <div>
               <Image src="/images/logo.png" alt="HUB Transfer" width={160} height={50} className="h-12 w-auto mb-3" />
-              <p className="text-[#E5E5E5] text-xs leading-relaxed">Transfer and Tourism</p>
+              <p className="text-[#D0D0D0] text-xs leading-relaxed">Transfer and Tourism</p>
               <div className="flex gap-3 mt-4">
-                <a href="https://www.facebook.com/hubtransfer" target="_blank" rel="noopener noreferrer" className="text-[#E5E5E5] hover:text-white/80 transition-colors"><Facebook className="w-4 h-4" /></a>
-                <a href="https://www.instagram.com/hubtransfer" target="_blank" rel="noopener noreferrer" className="text-[#E5E5E5] hover:text-white/80 transition-colors"><Instagram className="w-4 h-4" /></a>
+                <a href="https://www.facebook.com/hubtransfer" target="_blank" rel="noopener noreferrer" className="text-[#D0D0D0] hover:text-white/80 transition-colors"><Facebook className="w-4 h-4" /></a>
+                <a href="https://www.instagram.com/hubtransfer" target="_blank" rel="noopener noreferrer" className="text-[#D0D0D0] hover:text-white/80 transition-colors"><Instagram className="w-4 h-4" /></a>
               </div>
             </div>
             <div>
-              <p className="text-[#E5E5E5] text-xs tracking-wider uppercase mb-4">{lang === "PT" ? "Contacto" : "Contact"}</p>
-              <div className="space-y-2 text-[#E5E5E5] text-xs">
-                <a href={WA_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#E5E5E5] transition-colors"><Phone className="w-3 h-3" />{COMPANY.whatsappFormatted}</a>
-                <a href={`mailto:${COMPANY.email}`} className="flex items-center gap-2 hover:text-[#E5E5E5] transition-colors"><Mail className="w-3 h-3" />{COMPANY.email}</a>
+              <p className="text-[#D0D0D0] text-xs tracking-wider uppercase mb-4">{lang === "PT" ? "Contacto" : "Contact"}</p>
+              <div className="space-y-2 text-[#D0D0D0] text-xs">
+                <a href={WA_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#D0D0D0] transition-colors"><Phone className="w-3 h-3" />{COMPANY.whatsappFormatted}</a>
+                <a href={`mailto:${COMPANY.email}`} className="flex items-center gap-2 hover:text-[#D0D0D0] transition-colors"><Mail className="w-3 h-3" />{COMPANY.email}</a>
                 <div className="flex items-center gap-2"><MapPin className="w-3 h-3" />{COMPANY.location}</div>
               </div>
             </div>
             <div>
-              <p className="text-[#E5E5E5] text-xs tracking-wider uppercase mb-4">{lang === "PT" ? "Parceiros" : "Partners"}</p>
-              <a href="/login" className="text-[#E5E5E5] text-xs hover:text-[#F5C518] transition-colors flex items-center gap-1.5">
+              <p className="text-[#D0D0D0] text-xs tracking-wider uppercase mb-4">{lang === "PT" ? "Parceiros" : "Partners"}</p>
+              <a href="/login" className="text-[#D0D0D0] text-xs hover:text-[#F0D030] transition-colors flex items-center gap-1.5">
                 <ExternalLink className="w-3 h-3" />{lang === "PT" ? "Área Reservada" : "Reserved Area"}
               </a>
             </div>
             <div className="md:text-right">
-              <p className="text-[#999] text-xs leading-relaxed">© 2026 Jornadas e Possibilidades,<br />Unipessoal Lda</p>
+              <p className="text-[#B0B0B0] text-xs leading-relaxed">© 2026 Jornadas e Possibilidades,<br />Unipessoal Lda</p>
             </div>
           </div>
         </footer>
@@ -775,7 +775,7 @@ export default function LandingPage() {
         <div className="fixed bottom-0 left-0 right-0 z-40 p-4 md:hidden">
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full flex items-center justify-center gap-2 bg-[#F5C518] text-black text-[13px] font-semibold tracking-[0.15em] uppercase py-4 animate-[subtlePulse_3s_ease-in-out_infinite] cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 bg-[#F0D030] text-black text-[13px] font-semibold tracking-[0.15em] uppercase py-4 animate-[subtlePulse_3s_ease-in-out_infinite] cursor-pointer"
           >
             {t.ctaBook}
             <ArrowRight className="w-4 h-4" />
@@ -797,7 +797,7 @@ export default function LandingPage() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setDrawerOpen(false)}
-                className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
+                className="fixed inset-0 z-50 bg-[#0A0A0A]/80 backdrop-blur-sm"
               />
 
               {/* Drawer */}
@@ -818,7 +818,7 @@ export default function LandingPage() {
                     <h3 className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)" }}>
                       {lang === "PT" ? "Reserve o seu transfer" : "Book your transfer"}
                     </h3>
-                    <button onClick={() => setDrawerOpen(false)} className="text-[#E5E5E5] hover:text-white transition-colors cursor-pointer">
+                    <button onClick={() => setDrawerOpen(false)} className="text-[#D0D0D0] hover:text-white transition-colors cursor-pointer">
                       <X className="w-5 h-5" />
                     </button>
                   </div>
@@ -826,21 +826,21 @@ export default function LandingPage() {
                   <div className="space-y-4">
                     {/* Origin */}
                     <div>
-                      <label className="text-[#E5E5E5] text-xs tracking-wider uppercase block mb-1.5">📍 {lang === "PT" ? "Origem" : "From"}</label>
+                      <label className="text-[#D0D0D0] text-xs tracking-wider uppercase block mb-1.5">📍 {lang === "PT" ? "Origem" : "From"}</label>
                       <div className="flex gap-2 mb-1.5">
                         <button type="button" onClick={() => setBOrigin("Aeroporto de Lisboa (LIS), Lisboa, Portugal")}
-                          className={`text-xs px-3 py-1.5 border transition-colors cursor-pointer ${bOrigin.includes("Aeroporto") ? "border-[#F5C518]/40 text-[#F5C518]" : "border-white/10 text-[#E5E5E5] hover:text-white/80"}`}>
+                          className={`text-xs px-3 py-1.5 border transition-colors cursor-pointer ${bOrigin.includes("Aeroporto") ? "border-[#F0D030]/40 text-[#F0D030]" : "border-[#2A2A2A] text-[#D0D0D0] hover:text-white/80"}`}>
                           Aeroporto de Lisboa
                         </button>
                       </div>
                       <input id="drawerOrigin" type="text" value={bOrigin} onChange={(e) => setBOrigin(e.target.value)}
                         placeholder={lang === "PT" ? "Endereço..." : "Address..."}
-                        className="w-full h-11 bg-white/5 border-b border-white/10 px-0 text-white text-sm placeholder-white/20 focus:outline-none focus:border-[#F5C518]/40 transition-colors" />
+                        className="w-full h-11 bg-white/5 border-b border-[#2A2A2A] px-0 text-white text-sm placeholder-white/20 focus:outline-none focus:border-[#F0D030]/40 transition-colors" />
                     </div>
 
                     {/* Destination */}
                     <div>
-                      <label className="text-[#E5E5E5] text-xs tracking-wider uppercase block mb-1.5">🏁 {lang === "PT" ? "Destino" : "To"}</label>
+                      <label className="text-[#D0D0D0] text-xs tracking-wider uppercase block mb-1.5">🏁 {lang === "PT" ? "Destino" : "To"}</label>
                       <div className="flex gap-2 mb-1.5 flex-wrap">
                         {[
                           { l: "Aeroporto", v: "Aeroporto de Lisboa (LIS), Lisboa, Portugal" },
@@ -848,29 +848,29 @@ export default function LandingPage() {
                           { l: "Sintra", v: "Sintra, Portugal" },
                         ].map((q) => (
                           <button key={q.l} type="button" onClick={() => setBDest(q.v)}
-                            className={`text-xs px-3 py-1.5 border transition-colors cursor-pointer ${bDest === q.v ? "border-[#F5C518]/40 text-[#F5C518]" : "border-white/10 text-[#E5E5E5] hover:text-white/80"}`}>
+                            className={`text-xs px-3 py-1.5 border transition-colors cursor-pointer ${bDest === q.v ? "border-[#F0D030]/40 text-[#F0D030]" : "border-[#2A2A2A] text-[#D0D0D0] hover:text-white/80"}`}>
                             {q.l}
                           </button>
                         ))}
                       </div>
                       <input id="drawerDest" type="text" value={bDest} onChange={(e) => setBDest(e.target.value)}
                         placeholder={lang === "PT" ? "Endereço..." : "Address..."}
-                        className="w-full h-11 bg-white/5 border-b border-white/10 px-0 text-white text-sm placeholder-white/20 focus:outline-none focus:border-[#F5C518]/40 transition-colors" />
+                        className="w-full h-11 bg-white/5 border-b border-[#2A2A2A] px-0 text-white text-sm placeholder-white/20 focus:outline-none focus:border-[#F0D030]/40 transition-colors" />
                     </div>
 
                     {/* Date + Pax */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="text-[#E5E5E5] text-xs tracking-wider uppercase block mb-1.5">{lang === "PT" ? "Data" : "Date"}</label>
+                        <label className="text-[#D0D0D0] text-xs tracking-wider uppercase block mb-1.5">{lang === "PT" ? "Data" : "Date"}</label>
                         <input type="date" value={bDate} onChange={(e) => setBDate(e.target.value)}
-                          className="w-full h-11 bg-white/5 border-b border-white/10 px-0 text-white text-sm focus:outline-none focus:border-[#F5C518]/40 [color-scheme:dark] transition-colors" />
+                          className="w-full h-11 bg-white/5 border-b border-[#2A2A2A] px-0 text-white text-sm focus:outline-none focus:border-[#F0D030]/40 [color-scheme:dark] transition-colors" />
                       </div>
                       <div>
-                        <label className="text-[#E5E5E5] text-xs tracking-wider uppercase block mb-1.5">{lang === "PT" ? "Passageiros" : "Passengers"}</label>
+                        <label className="text-[#D0D0D0] text-xs tracking-wider uppercase block mb-1.5">{lang === "PT" ? "Passageiros" : "Passengers"}</label>
                         <div className="flex gap-1">
                           {[1, 2, 3, 4, 5, 6].map((n) => (
                             <button key={n} type="button" onClick={() => setBPax(n)}
-                              className={`flex-1 h-11 text-sm font-medium transition-colors cursor-pointer ${bPax === n ? "bg-[#F5C518] text-black" : "bg-white/5 text-[#E5E5E5] hover:text-white/80"}`}>
+                              className={`flex-1 h-11 text-sm font-medium transition-colors cursor-pointer ${bPax === n ? "bg-[#F0D030] text-black" : "bg-white/5 text-[#D0D0D0] hover:text-white/80"}`}>
                               {n}
                             </button>
                           ))}
@@ -880,9 +880,9 @@ export default function LandingPage() {
 
                     {/* Phone */}
                     <div>
-                      <label className="text-[#E5E5E5] text-xs tracking-wider uppercase block mb-1.5">WhatsApp</label>
+                      <label className="text-[#D0D0D0] text-xs tracking-wider uppercase block mb-1.5">WhatsApp</label>
                       <input type="tel" value={bPhone} onChange={(e) => setBPhone(e.target.value)}
-                        className="w-full h-11 bg-white/5 border-b border-white/10 px-0 text-white text-sm placeholder-white/20 focus:outline-none focus:border-[#F5C518]/40 transition-colors" />
+                        className="w-full h-11 bg-white/5 border-b border-[#2A2A2A] px-0 text-white text-sm placeholder-white/20 focus:outline-none focus:border-[#F0D030]/40 transition-colors" />
                     </div>
 
                     {/* Route info */}
@@ -890,23 +890,23 @@ export default function LandingPage() {
                       <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
                         className="flex justify-center gap-10 py-3">
                         <div className="text-center">
-                          <div className="text-[#F5C518] text-xl font-bold" style={{ fontFamily: "var(--font-mono)" }}>{routeInfo.distance}</div>
-                          <div className="text-[#E5E5E5] text-xs mt-0.5">{lang === "PT" ? "Distância" : "Distance"}</div>
+                          <div className="text-[#F0D030] text-xl font-bold" style={{ fontFamily: "var(--font-mono)" }}>{routeInfo.distance}</div>
+                          <div className="text-[#D0D0D0] text-xs mt-0.5">{lang === "PT" ? "Distância" : "Distance"}</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-[#F5C518] text-xl font-bold" style={{ fontFamily: "var(--font-mono)" }}>~{routeInfo.duration}</div>
-                          <div className="text-[#E5E5E5] text-xs mt-0.5">{lang === "PT" ? "Tempo" : "Time"}</div>
+                          <div className="text-[#F0D030] text-xl font-bold" style={{ fontFamily: "var(--font-mono)" }}>~{routeInfo.duration}</div>
+                          <div className="text-[#D0D0D0] text-xs mt-0.5">{lang === "PT" ? "Tempo" : "Time"}</div>
                         </div>
                       </motion.div>
                     )}
 
                     {/* Submit */}
                     <a href={waBookingUrl()} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 w-full h-12 bg-[#F5C518] text-black text-[13px] font-semibold tracking-[0.12em] uppercase hover:bg-[#d4a817] transition-colors">
+                      className="flex items-center justify-center gap-2 w-full h-12 bg-[#F0D030] text-black text-[13px] font-semibold tracking-[0.12em] uppercase hover:bg-[#D4B828] transition-colors">
                       {lang === "PT" ? "Solicitar orçamento" : "Request quote"}
                       <ArrowRight className="w-4 h-4" />
                     </a>
-                    <p className="text-center text-[#E5E5E5] text-xs">{lang === "PT" ? "Resposta em menos de 5 minutos" : "Response in under 5 minutes"}</p>
+                    <p className="text-center text-[#D0D0D0] text-xs">{lang === "PT" ? "Resposta em menos de 5 minutos" : "Response in under 5 minutes"}</p>
                   </div>
                 </div>
               </motion.div>

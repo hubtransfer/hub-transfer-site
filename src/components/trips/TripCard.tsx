@@ -30,11 +30,11 @@ interface TripCardProps {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Color maps — CHEGADA=#f59e0b  RECOLHA=#10b981  TOUR=#a855f7       */
+/*  Color maps — CHEGADA=#D4A847  RECOLHA=#10b981  TOUR=#a855f7       */
 /* ------------------------------------------------------------------ */
 
 const TYPE_COLORS = {
-  CHEGADA: { text: "text-[#f59e0b]", bg: "bg-[#f59e0b]/10", border: "border-l-[#f59e0b]", hex: "#f59e0b" },
+  CHEGADA: { text: "text-[#D4A847]", bg: "bg-[#D4A847]/10", border: "border-l-[#D4A847]", hex: "#D4A847" },
   RECOLHA: { text: "text-[#10b981]", bg: "bg-[#10b981]/10", border: "border-l-[#10b981]", hex: "#10b981" },
   TOUR:    { text: "text-[#a855f7]", bg: "bg-[#a855f7]/10", border: "border-l-[#a855f7]", hex: "#a855f7" },
 } as const;
@@ -101,7 +101,7 @@ function FlightProgress({ progress }: { progress: number }) {
   return (
     <div className="relative w-full h-2 rounded-full bg-white/5 overflow-hidden">
       <div
-        className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-[#f59e0b] to-[#f59e0b]/60 transition-all duration-700"
+        className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-[#D4A847] to-[#D4A847]/60 transition-all duration-700"
         style={{ width: `${Math.min(Math.max(progress, 0), 100)}%` }}
       />
       {progress > 0 && progress < 100 && (

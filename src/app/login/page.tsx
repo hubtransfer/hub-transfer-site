@@ -101,7 +101,7 @@ export default function LoginPage() {
               placeholder="Ex: Empire Lisbon Hotel"
               autoFocus
               autoComplete="name"
-              className="w-full h-14 text-lg bg-white/5 border border-white/10 rounded-xl px-4 text-white placeholder-white/20 focus:outline-none focus:border-[#F5C518]/50 transition-colors"
+              className="w-full h-14 text-lg bg-white/5 border border-white/10 rounded-xl px-4 text-white placeholder-white/20 focus:outline-none focus:border-[#F0D030]/50 transition-colors"
             />
           </div>
 
@@ -121,13 +121,13 @@ export default function LoginPage() {
               }}
               placeholder="Senha de acesso"
               autoComplete="current-password"
-              className="w-full h-14 text-lg bg-white/5 border border-white/10 rounded-xl px-4 text-white placeholder-white/20 focus:outline-none focus:border-[#F5C518]/50 transition-colors"
+              className="w-full h-14 text-lg bg-white/5 border border-white/10 rounded-xl px-4 text-white placeholder-white/20 focus:outline-none focus:border-[#F0D030]/50 transition-colors"
             />
           </div>
 
           {/* Error */}
           {error && (
-            <div className="text-center text-sm text-[#ef4444] bg-[#ef4444]/10 border border-[#ef4444]/20 rounded-xl px-4 py-3">
+            <div className="text-center text-sm text-[#C06060] bg-[#C06060]/10 border border-[#C06060]/20 rounded-xl px-4 py-3">
               {error}
             </div>
           )}
@@ -135,7 +135,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full h-14 font-bold text-lg bg-[#F5C518] text-black rounded-xl active:bg-[#F5C518]/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-14 font-bold text-lg bg-[#F0D030] text-black rounded-xl active:bg-[#F0D030]/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "A entrar..." : "Entrar"}
           </button>

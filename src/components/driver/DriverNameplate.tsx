@@ -119,7 +119,7 @@ export default function DriverNameplate({ isOpen, name, destination, onClose }: 
           maxHeight: "55vh",
           overflow: "hidden",
           wordBreak: "break-word",
-          background: "linear-gradient(180deg, #F5C518 0%, #F5C518 45%, #FFD700 50%, #F5C518 55%, #F5C518 100%)",
+          background: "linear-gradient(180deg, #F0D030 0%, #F0D030 45%, #FFD700 50%, #F0D030 55%, #F0D030 100%)",
           backgroundSize: "100% 200%",
           WebkitBackgroundClip: "text",
           WebkitTextFillColor: "transparent",
@@ -158,11 +158,11 @@ export default function DriverNameplate({ isOpen, name, destination, onClose }: 
         .driver-nameplate-shimmer {
           background: linear-gradient(
             180deg,
-            #F5C518 0%,
-            #F5C518 45%,
+            #F0D030 0%,
+            #F0D030 45%,
             #FFD700 50%,
-            #F5C518 55%,
-            #F5C518 100%
+            #F0D030 55%,
+            #F0D030 100%
           );
           background-size: 100% 200%;
           -webkit-background-clip: text;

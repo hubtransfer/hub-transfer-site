@@ -27,9 +27,9 @@ function countryFlag(iso: string): string {
 
 function flightBarStyle(progress: number, status?: string): { color: string; pulse: boolean } {
   const st = (status || "").toLowerCase();
-  if (st === "landed" || st === "aterrou" || progress >= 95) return { color: "#10b981", pulse: false };
+  if (st === "landed" || st === "aterrou" || progress >= 95) return { color: "#7EAA6E", pulse: false };
   if (progress <= 5 && st !== "boarding") return { color: "#374151", pulse: false };
-  return { color: "#f59e0b", pulse: true };
+  return { color: "#D4A847", pulse: true };
 }
 
 function formatCountdown(arrTime: string): string | null {
@@ -68,9 +68,9 @@ const PhoneIcon = () => (
 /* ─── Color config ─── */
 
 const TYPE_COLORS = {
-  CHEGADA: { text: "text-[#10b981]", bg: "bg-[#10b981]/10", border: "border-l-[#10b981]", hex: "#10b981" },
-  RECOLHA: { text: "text-[#3b82f6]", bg: "bg-[#3b82f6]/10", border: "border-l-[#3b82f6]", hex: "#3b82f6" },
-  TOUR:    { text: "text-[#a855f7]", bg: "bg-[#a855f7]/10", border: "border-l-[#a855f7]", hex: "#a855f7" },
+  CHEGADA: { text: "text-[#D4A847]", bg: "bg-[#D4A847]/15", border: "border-l-[#D4A847]", hex: "#D4A847" },
+  RECOLHA: { text: "text-[#8B9DAF]", bg: "bg-[#8B9DAF]/15", border: "border-l-[#8B9DAF]", hex: "#8B9DAF" },
+  TOUR:    { text: "text-[#C17E4A]", bg: "bg-[#C17E4A]/15", border: "border-l-[#C17E4A]", hex: "#C17E4A" },
 } as const;
 function ts(tipo: string) { return TYPE_COLORS[tipo as keyof typeof TYPE_COLORS] ?? { text: "text-gray-400", bg: "bg-gray-500/10", border: "border-l-gray-500", hex: "#999" }; }
 
@@ -184,7 +184,7 @@ export default function DriverTripCard({
   const swipePct = Math.min(swipeX / SWIPE_PX, 1);
 
   // Swipe color: gold when armed, green when threshold reached
-  const swipeColor = swipePct >= 1 ? "#10b981" : "#F5C518";
+  const swipeColor = swipePct >= 1 ? "#7EAA6E" : "#F0D030";
 
   /* ─── Address helpers ─── */
   const originLoc = useMemo(() => splitLocation(viagem.origin || ""), [viagem.origin]);
@@ -202,8 +202,8 @@ export default function DriverTripCard({
       onPointerUp={expanded && !isDone ? onUp : undefined}
       onPointerCancel={expanded && !isDone ? onCancel : undefined}
       className={`
-        relative bg-[#111] rounded-2xl border border-white/5 overflow-hidden
-        border-l-4 ${isSwipeActive || isCompleting ? "border-l-[#F5C518]" : c.border}
+        relative bg-[#1A1A1A] rounded-2xl border border-[#2A2A2A] overflow-hidden
+        border-l-4 ${isSwipeActive || isCompleting ? "border-l-[#F0D030]" : c.border}
         ${isDone ? "opacity-40" : ""}
         ${isSwipeActive || isCompleting ? `ring-2 ring-[${swipeColor}]/30` : ""}
         select-none
@@ -219,7 +219,7 @@ export default function DriverTripCard({
       <AnimatePresence>
         {toast && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            className="absolute top-2 left-1/2 -translate-x-1/2 z-30 bg-[#F5C518] text-black text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg">
+            className="absolute top-2 left-1/2 -translate-x-1/2 z-30 bg-[#F0D030] text-black text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg">
             {toast}
           </motion.div>
         )}
@@ -240,7 +240,7 @@ export default function DriverTripCard({
               {isSwiping && swipePct >= 1 && <><span>Soltar para concluir</span><span className="text-xl">✓</span></>}
             </div>
             {isSwiping && (
-              <div className="absolute bottom-0 left-0 right-0 h-1.5 rounded-full overflow-hidden bg-white/5">
+              <div className="absolute bottom-0 left-0 right-0 h-1.5 rounded-full overflow-hidden bg-[#1A1A1A]">
                 <motion.div className="h-full rounded-full" style={{ width: `${swipePct * 100}%`, backgroundColor: swipeColor }} />
               </div>
             )}
@@ -250,7 +250,7 @@ export default function DriverTripCard({
 
       {/* ── Hold indicator ── */}
       {swipeState === "holding" && (
-        <div className="absolute inset-0 z-10 pointer-events-none rounded-2xl border-2 border-[#F5C518]/20 animate-pulse" />
+        <div className="absolute inset-0 z-10 pointer-events-none rounded-2xl border-2 border-[#F0D030]/20 animate-pulse" />
       )}
 
       {/* ════════════════════════════════════════════════ */}
@@ -264,25 +264,25 @@ export default function DriverTripCard({
           </div>
           <div className="flex-1 min-w-0">
             <p
-              className={`text-base font-bold text-white truncate ${expanded ? "cursor-pointer hover:text-[#F5C518] transition-colors" : ""}`}
+              className={`text-base font-bold text-white truncate ${expanded ? "cursor-pointer hover:text-[#F0D030] transition-colors" : ""}`}
               onClick={expanded ? (e) => { e.stopPropagation(); onShowNameplate(viagem.client, viagem.destination); } : undefined}
             >
               {viagem.client}
             </p>
             <div className="flex items-center gap-2 mt-0.5">
               <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${c.bg} ${c.text}`}>{tipo}</span>
-              {viagem.pax && <span className="text-[10px] font-mono text-[#D4D4D4]">{viagem.pax} pax</span>}
-              {expanded && <span className="text-[10px] text-white/20">▲</span>}
-              {!expanded && <span className="text-[10px] text-white/20">▼</span>}
+              {viagem.pax && <span className="text-[10px] font-mono text-[#D0D0D0]">{viagem.pax} pax</span>}
+              {expanded && <span className="text-[10px] text-[#666666]">▲</span>}
+              {!expanded && <span className="text-[10px] text-[#666666]">▼</span>}
             </div>
           </div>
           <div className="flex-shrink-0 text-right flex flex-col items-end gap-0.5">
             {mode === "admin" && (
               viagem.driver
-                ? <span className="font-mono text-[10px] font-semibold text-[#10b981]/80 truncate max-w-[80px]">{viagem.driver}</span>
-                : <span className="font-mono text-[10px] text-white/20">Sem motorista</span>
+                ? <span className="font-mono text-[10px] font-semibold text-[#7EAA6E]/80 truncate max-w-[80px]">{viagem.driver}</span>
+                : <span className="font-mono text-[10px] text-[#666666]">Sem motorista</span>
             )}
-            {price > 0 && <span className="font-mono text-sm font-bold text-[#F5C518]">€{price}</span>}
+            {price > 0 && <span className="font-mono text-sm font-bold text-[#F0D030]">€{price}</span>}
           </div>
         </div>
 
@@ -293,19 +293,19 @@ export default function DriverTripCard({
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center gap-2.5 px-4 pb-3 pt-0.5 cursor-pointer hover:bg-white/[0.02] transition-colors rounded-b-2xl"
+            className="flex items-center gap-2.5 px-4 pb-3 pt-0.5 cursor-pointer hover:bg-[#151515] transition-colors rounded-b-2xl"
           >
             <div className="flex items-center gap-1 flex-shrink-0 min-w-[52px]">
               {flag && <span className="text-sm leading-none">{flag}</span>}
               <span className="font-mono text-xs font-bold text-[#E5E5E5]">{depIata || "???"}</span>
             </div>
             <div className="flex-1 relative">
-              <div className="h-2.5 rounded-full bg-white/[0.06] overflow-hidden">
+              <div className="h-2.5 rounded-full bg-[#222222] overflow-hidden">
                 <div className={`h-full rounded-full transition-all duration-1000 ${bar.pulse ? "animate-flight-pulse" : ""}`}
                   style={{ width: `${Math.max(flightProg, 4)}%`, backgroundColor: bar.color }} />
               </div>
               {viagem.flight && (
-                <span className="absolute -top-4 left-1/2 -translate-x-1/2 font-mono text-sm font-bold text-[#E5E5E5] hover:text-[#F5C518] transition-colors">
+                <span className="absolute -top-4 left-1/2 -translate-x-1/2 font-mono text-sm font-bold text-[#E5E5E5] hover:text-[#F0D030] transition-colors">
                   {viagem.flight}
                 </span>
               )}
@@ -337,18 +337,18 @@ export default function DriverTripCard({
             {/* ── Flight block (CHEGADA) — clickable to search flight ── */}
             {tipo === "CHEGADA" && hasFlight && (
               <div
-                className={`px-4 py-3 border-t border-white/5 ${viagem.flight ? "cursor-pointer hover:bg-white/[0.03] transition-colors" : ""}`}
+                className={`px-4 py-3 border-t border-[#2A2A2A] ${viagem.flight ? "cursor-pointer hover:bg-[#181818] transition-colors" : ""}`}
                 style={{ backgroundColor: `${c.hex}08` }}
                 onClick={viagem.flight ? () => window.open(`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`, "_blank") : undefined}
               >
                 <div className="flex items-center justify-between text-xs mb-2">
                   <div className="text-center">
                     <p className="font-mono font-bold text-sm" style={{ color: c.hex }}>{depIata || "???"}</p>
-                    <p className="text-[10px] text-[#D4D4D4]">{viagem.depCity || ""}</p>
-                    {viagem.depTime && <p className="font-mono text-[10px] text-[#D4D4D4] mt-0.5">{viagem.depTime}</p>}
+                    <p className="text-[10px] text-[#D0D0D0]">{viagem.depCity || ""}</p>
+                    {viagem.depTime && <p className="font-mono text-[10px] text-[#D0D0D0] mt-0.5">{viagem.depTime}</p>}
                   </div>
                   <div className="flex-1 mx-3">
-                    <div className="relative w-full h-2.5 rounded-full bg-white/[0.06] overflow-hidden">
+                    <div className="relative w-full h-2.5 rounded-full bg-[#222222] overflow-hidden">
                       <div className={`h-full rounded-full ${bar.pulse ? "animate-flight-pulse" : ""}`}
                         style={{ width: `${Math.max(flightProg, 4)}%`, backgroundColor: bar.color }} />
                     </div>
@@ -356,8 +356,8 @@ export default function DriverTripCard({
                   </div>
                   <div className="text-center">
                     <p className="font-mono font-bold text-sm" style={{ color: c.hex }}>{(viagem.arrAirport || viagem.arrIata || "LIS").toUpperCase()}</p>
-                    <p className="text-[10px] text-[#D4D4D4]">{viagem.arrCity || "Lisboa"}</p>
-                    {viagem.arrTime && <p className="font-mono text-[10px] text-[#D4D4D4] mt-0.5">{viagem.arrTime}</p>}
+                    <p className="text-[10px] text-[#D0D0D0]">{viagem.arrCity || "Lisboa"}</p>
+                    {viagem.arrTime && <p className="font-mono text-[10px] text-[#D0D0D0] mt-0.5">{viagem.arrTime}</p>}
                   </div>
                 </div>
                 {(viagem.depTerminal || viagem.arrTerminal) && (
@@ -370,10 +370,10 @@ export default function DriverTripCard({
             )}
 
             {/* ── Route: Origin + Destination — clickable to copy, real icons ── */}
-            <div className="px-4 py-3 border-t border-white/5 space-y-3">
+            <div className="px-4 py-3 border-t border-[#2A2A2A] space-y-3">
               {/* Origin */}
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-wider text-[#F5C518] mb-1">{tipo === "CHEGADA" ? "Origem — Aeroporto" : "Origem — Recolha"}</p>
+                <p className="font-mono text-[10px] uppercase tracking-wider text-[#F0D030] mb-1">{tipo === "CHEGADA" ? "Origem — Aeroporto" : "Origem — Recolha"}</p>
                 <button type="button" onClick={() => copyWithToast(viagem.origin)} className="text-left w-full active:opacity-70 transition-opacity">
                   {originLoc.name && <p className="text-sm font-bold text-white">{originLoc.name}</p>}
                   <p className="text-xs text-[#E5E5E5]">{originLoc.addr}</p>
@@ -392,7 +392,7 @@ export default function DriverTripCard({
               {/* Destination */}
               {viagem.destination && (
                 <div>
-                  <p className="font-mono text-[10px] uppercase tracking-wider text-[#F5C518] mb-1">Destino</p>
+                  <p className="font-mono text-[10px] uppercase tracking-wider text-[#F0D030] mb-1">Destino</p>
                   <button type="button" onClick={() => copyWithToast(viagem.destination)} className="text-left w-full active:opacity-70 transition-opacity">
                     {destLoc.name && <p className="text-sm font-bold text-white">{destLoc.name}</p>}
                     <p className="text-xs text-[#E5E5E5]">{destLoc.addr}</p>
@@ -412,11 +412,11 @@ export default function DriverTripCard({
             </div>
 
             {/* ── Actions ── */}
-            <div className="border-t border-white/5 bg-[#0d0d0d] px-4 py-3 space-y-3">
+            <div className="border-t border-[#2A2A2A] bg-[#111111] px-4 py-3 space-y-3">
               {/* Phone — click to copy */}
               {viagem.phone && (
                 <button type="button" onClick={() => copyWithToast(`+${viagem.phone!.replace(/\D/g, "")}`)}
-                  className="w-full h-11 rounded-xl bg-white/5 border border-white/10 font-mono text-sm text-[#E5E5E5] active:bg-white/10 transition-colors flex items-center justify-center gap-2">
+                  className="w-full h-11 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] font-mono text-sm text-[#E5E5E5] active:bg-[#2A2A2A] transition-colors flex items-center justify-center gap-2">
                   <PhoneIcon /> +{viagem.phone.replace(/\D/g, "")}
                 </button>
               )}
@@ -437,7 +437,7 @@ export default function DriverTripCard({
                     const drv = driverNameProp || viagem.driver || "o motorista";
                     window.open(generateDriverSmsURL(viagem, drv), "_blank");
                   }}
-                    className="flex items-center justify-center gap-2 h-12 rounded-xl bg-[#3b82f6]/10 border border-[#3b82f6]/20 text-[#3b82f6] font-mono text-sm font-bold active:bg-[#3b82f6]/20 transition-colors">
+                    className="flex items-center justify-center gap-2 h-12 rounded-xl bg-[#8B9DAF]/10 border border-[#8B9DAF]/20 text-[#8B9DAF] font-mono text-sm font-bold active:bg-[#8B9DAF]/20 transition-colors">
                     <SmsIcon /> SMS
                   </button>
                 )}
@@ -446,7 +446,7 @@ export default function DriverTripCard({
               {/* Admin-only: driver selector + dispatch */}
               {mode === "admin" && drivers && onSetDriver && (
                 <select value={viagem.driver ?? ""} onChange={(e) => onSetDriver(cardId, e.target.value)}
-                  className="w-full h-12 bg-black/50 border border-white/10 rounded-xl px-4 font-mono text-sm text-white/90 focus:outline-none focus:border-[#F5C518]/40">
+                  className="w-full h-12 bg-black/50 border border-[#2A2A2A] rounded-xl px-4 font-mono text-sm text-white/90 focus:outline-none focus:border-[#F0D030]/40">
                   <option value="">Atribuir motorista...</option>
                   {drivers.map((d) => <option key={d.name} value={d.name}>{d.name}{d.viatura ? ` · ${d.viatura}` : ""}</option>)}
                 </select>
@@ -462,12 +462,12 @@ export default function DriverTripCard({
               {/* Dar Baixa button (fallback for non-swipe) */}
               {!isDone && (
                 <button type="button" onClick={() => onDarBaixa(viagem.id, viagem.rowIndex ?? "", cardId)}
-                  className="w-full h-12 rounded-xl bg-[#10b981]/10 border border-[#10b981]/20 text-[#10b981] font-mono text-sm font-bold active:bg-[#10b981]/20 transition-colors">
+                  className="w-full h-12 rounded-xl bg-[#7EAA6E]/10 border border-[#7EAA6E]/20 text-[#7EAA6E] font-mono text-sm font-bold active:bg-[#7EAA6E]/20 transition-colors">
                   ✅ Dar Baixa
                 </button>
               )}
               {isDone && (
-                <div className="w-full h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-[#999] font-mono text-sm">
+                <div className="w-full h-12 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-[#999] font-mono text-sm">
                   ✅ Concluída
                 </div>
               )}

@@ -61,8 +61,8 @@ function useLisbonClock() {
 
 function tabColor(key: TabType, active: boolean) {
   if (!active) return "";
-  if (key === "chegadas") return "bg-[#10b981]/10 text-[#10b981] border-r-2 border-[#10b981]";
-  if (key === "recolhas") return "bg-[#3b82f6]/10 text-[#3b82f6] border-r-2 border-[#3b82f6]";
+  if (key === "chegadas") return "bg-[#D4A847]/10 text-[#D4A847] border-r-2 border-[#D4A847]";
+  if (key === "recolhas") return "bg-[#8B9DAF]/10 text-[#8B9DAF] border-r-2 border-[#8B9DAF]";
   return "bg-hub-gold/10 text-hub-gold border-r-2 border-hub-gold";
 }
 
@@ -216,10 +216,10 @@ export default function TripsPage() {
         {/* Clock + Badges */}
         <div className="flex items-center gap-3">
           {/* Badges */}
-          <span className="hidden sm:inline-flex items-center gap-1 bg-[#10b981]/10 text-[#10b981] text-xs font-bold px-2 py-0.5 rounded-full">
+          <span className="hidden sm:inline-flex items-center gap-1 bg-[#D4A847]/10 text-[#D4A847] text-xs font-bold px-2 py-0.5 rounded-full">
             <span className="text-[10px]">{"\u25BC"}</span> {store.counts.chegadas}
           </span>
-          <span className="hidden sm:inline-flex items-center gap-1 bg-[#3b82f6]/10 text-[#3b82f6] text-xs font-bold px-2 py-0.5 rounded-full">
+          <span className="hidden sm:inline-flex items-center gap-1 bg-[#8B9DAF]/10 text-[#8B9DAF] text-xs font-bold px-2 py-0.5 rounded-full">
             <span className="text-[10px]">{"\u25B2"}</span> {store.counts.recolhas}
           </span>
           {/* Clock */}
@@ -517,10 +517,10 @@ export default function TripsPage() {
                       <span
                         className={`text-xs font-bold uppercase px-2 py-0.5 rounded ${
                           s.type === "CHEGADA"
-                            ? "bg-[#10b981]/10 text-[#10b981]"
+                            ? "bg-[#D4A847]/10 text-[#D4A847]"
                             : s.type === "RECOLHA"
-                              ? "bg-[#3b82f6]/10 text-[#3b82f6]"
-                              : "bg-[#a855f7]/10 text-[#a855f7]"
+                              ? "bg-[#8B9DAF]/10 text-[#8B9DAF]"
+                              : "bg-[#C17E4A]/10 text-[#C17E4A]"
                         }`}
                       >
                         {(s.type || "").toUpperCase()}

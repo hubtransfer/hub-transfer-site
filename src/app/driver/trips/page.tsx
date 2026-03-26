@@ -255,7 +255,7 @@ export default function DriverTripsPage() {
                 placeholder="Ex: Filipe Ventura"
                 autoFocus
                 autoComplete="name"
-                className="w-full h-14 text-lg bg-white/5 border border-white/10 rounded-xl px-4 text-white placeholder-white/30 focus:outline-none focus:border-[#F5C518]/50 transition-colors"
+                className="w-full h-14 text-lg bg-white/5 border border-white/10 rounded-xl px-4 text-white placeholder-white/30 focus:outline-none focus:border-[#F0D030]/50 transition-colors"
               />
             </div>
             <div>
@@ -271,7 +271,7 @@ export default function DriverTripsPage() {
                 }}
                 placeholder="Senha"
                 autoComplete="current-password"
-                className="w-full h-14 text-lg bg-white/5 border border-white/10 rounded-xl px-4 text-white placeholder-white/30 focus:outline-none focus:border-[#F5C518]/50 transition-colors"
+                className="w-full h-14 text-lg bg-white/5 border border-white/10 rounded-xl px-4 text-white placeholder-white/30 focus:outline-none focus:border-[#F0D030]/50 transition-colors"
               />
             </div>
 
@@ -285,7 +285,7 @@ export default function DriverTripsPage() {
             <button
               type="submit"
               disabled={!loginInput.trim() || !passwordInput.trim() || isValidating}
-              className="w-full h-14 font-bold text-lg bg-[#F5C518] text-black rounded-xl active:bg-[#F5C518]/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="w-full h-14 font-bold text-lg bg-[#F0D030] text-black rounded-xl active:bg-[#F0D030]/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
               {isValidating ? "A verificar..." : "Entrar"}
             </button>
@@ -318,7 +318,7 @@ export default function DriverTripsPage() {
           <button
             type="button"
             onClick={handleLogout}
-            className="text-[#F5C518] font-bold text-base truncate block"
+            className="text-[#F0D030] font-bold text-base truncate block"
             title="Sair"
           >
             {store.driverName}
@@ -327,11 +327,11 @@ export default function DriverTripsPage() {
         </div>
         <div className="flex items-center gap-3 flex-shrink-0">
           {store.isLoading ? (
-            <span className="text-xs text-[#F5C518]/60 animate-pulse font-mono">A sincronizar...</span>
+            <span className="text-xs text-[#F0D030]/60 animate-pulse font-mono">A sincronizar...</span>
           ) : store.isFromCache ? (
             <span className="text-xs text-[#D4D4D4] font-mono">Cache &middot; {store.cacheAge}</span>
           ) : store.lastSyncTime ? (
-            <span className="text-xs text-[#10b981] font-mono">Sincronizado &#10003;</span>
+            <span className="text-xs text-[#D4A847] font-mono">Sincronizado &#10003;</span>
           ) : null}
           <span className="text-sm text-white/50 tabular-nums font-mono">
             {clock}
@@ -350,16 +350,16 @@ export default function DriverTripsPage() {
               Total
             </div>
           </div>
-          <div className="flex-1 bg-[#10b981]/10 rounded-lg px-3 py-2 text-center">
-            <div className="text-lg font-bold text-[#10b981] font-mono">
+          <div className="flex-1 bg-[#D4A847]/10 rounded-lg px-3 py-2 text-center">
+            <div className="text-lg font-bold text-[#D4A847] font-mono">
               {stats.chegadas}
             </div>
             <div className="text-[10px] text-[#D4D4D4] uppercase font-mono">
               Chegadas
             </div>
           </div>
-          <div className="flex-1 bg-[#3b82f6]/10 rounded-lg px-3 py-2 text-center">
-            <div className="text-lg font-bold text-[#3b82f6] font-mono">
+          <div className="flex-1 bg-[#8B9DAF]/10 rounded-lg px-3 py-2 text-center">
+            <div className="text-lg font-bold text-[#8B9DAF] font-mono">
               {stats.recolhas}
             </div>
             <div className="text-[10px] text-white/40 uppercase font-mono">
@@ -368,7 +368,7 @@ export default function DriverTripsPage() {
           </div>
         </div>
         <div className="flex items-center justify-between">
-          <span className="font-mono font-bold text-[#F5C518]">
+          <span className="font-mono font-bold text-[#F0D030]">
             &euro;{stats.totalPay.toFixed(0)}
           </span>
           <span className="text-xs text-white/30 font-mono">
@@ -393,7 +393,7 @@ export default function DriverTripsPage() {
           </button>
           <button
             onClick={() => store.loadDate("")}
-            className="h-10 px-4 bg-[#F5C518]/20 text-[#F5C518] rounded-lg text-xs font-bold active:bg-[#F5C518]/30 transition-colors font-mono"
+            className="h-10 px-4 bg-[#F0D030]/20 text-[#F0D030] rounded-lg text-xs font-bold active:bg-[#F0D030]/30 transition-colors font-mono"
           >
             &#128197; Hoje
           </button>
@@ -413,7 +413,7 @@ export default function DriverTripsPage() {
               const [y, m, d] = e.target.value.split("-");
               store.loadDate(`${d}/${m}/${y}`);
             }}
-            className="h-10 flex-1 min-w-0 bg-white/5 border border-white/10 rounded-lg px-2 text-xs text-white font-mono focus:border-[#F5C518]/40 focus:outline-none"
+            className="h-10 flex-1 min-w-0 bg-white/5 border border-white/10 rounded-lg px-2 text-xs text-white font-mono focus:border-[#F0D030]/40 focus:outline-none"
           />
         </div>
       </div>
@@ -429,7 +429,7 @@ export default function DriverTripsPage() {
               Nenhuma viagem para hoje
             </p>
             <button type="button" onClick={() => store.syncViagens()}
-              className="mt-3 text-[#F5C518] text-xs font-mono underline underline-offset-2 cursor-pointer">
+              className="mt-3 text-[#F0D030] text-xs font-mono underline underline-offset-2 cursor-pointer">
               Sincronizar
             </button>
           </div>
