@@ -305,7 +305,7 @@ export default function DriverTripCard({
                   style={{ width: `${Math.max(flightProg, 4)}%`, backgroundColor: bar.color }} />
               </div>
               {viagem.flight && (
-                <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 font-mono text-[11px] font-bold text-[#E5E5E5] hover:text-[#F5C518] transition-colors">
+                <span className="absolute -top-4 left-1/2 -translate-x-1/2 font-mono text-sm font-bold text-[#E5E5E5] hover:text-[#F5C518] transition-colors">
                   {viagem.flight}
                 </span>
               )}
@@ -334,9 +334,13 @@ export default function DriverTripCard({
             transition={{ duration: 0.25, ease: "easeInOut" }}
             className="overflow-hidden"
           >
-            {/* ── Flight block (CHEGADA) ── */}
+            {/* ── Flight block (CHEGADA) — clickable to search flight ── */}
             {tipo === "CHEGADA" && hasFlight && (
-              <div className="px-4 py-3 border-t border-white/5" style={{ backgroundColor: `${c.hex}08` }}>
+              <div
+                className={`px-4 py-3 border-t border-white/5 ${viagem.flight ? "cursor-pointer hover:bg-white/[0.03] transition-colors" : ""}`}
+                style={{ backgroundColor: `${c.hex}08` }}
+                onClick={viagem.flight ? () => window.open(`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`, "_blank") : undefined}
+              >
                 <div className="flex items-center justify-between text-xs mb-2">
                   <div className="text-center">
                     <p className="font-mono font-bold text-sm" style={{ color: c.hex }}>{depIata || "???"}</p>
@@ -348,7 +352,7 @@ export default function DriverTripCard({
                       <div className={`h-full rounded-full ${bar.pulse ? "animate-flight-pulse" : ""}`}
                         style={{ width: `${Math.max(flightProg, 4)}%`, backgroundColor: bar.color }} />
                     </div>
-                    {viagem.flight && <p className="text-center font-mono text-[10px] mt-1" style={{ color: `${c.hex}99` }}>{viagem.flight}</p>}
+                    {viagem.flight && <p className="text-center font-mono text-sm font-bold mt-1" style={{ color: c.hex }}>{viagem.flight}</p>}
                   </div>
                   <div className="text-center">
                     <p className="font-mono font-bold text-sm" style={{ color: c.hex }}>{(viagem.arrAirport || viagem.arrIata || "LIS").toUpperCase()}</p>
