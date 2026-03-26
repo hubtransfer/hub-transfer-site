@@ -150,109 +150,91 @@ function RadarIllustration() {
 }
 const WA_URL = `https://wa.me/${COMPANY.whatsapp.replace(/\+/g, "")}`;
 
-/* ─── Signature: SVG path pen-drawing "HUB Transfer" ─── */
-function SignatureAnimation() {
-  const pathRef = useRef<SVGPathElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(false);
-  const [len, setLen] = useState(0);
-  const [filled, setFilled] = useState(false);
+/* ─── Stamp: circular seal with impact animation ─── */
+function StampAnimation() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [stamped, setStamped] = useState(false);
+  const [ring, setRing] = useState(false);
 
   useEffect(() => {
-    const path = pathRef.current;
-    const container = containerRef.current;
-    if (!path || !container) return;
-    const totalLen = path.getTotalLength();
-    setLen(totalLen);
-    path.style.strokeDasharray = `${totalLen}`;
-    path.style.strokeDashoffset = `${totalLen}`;
-
+    const el = ref.current;
+    if (!el) return;
     const obs = new IntersectionObserver(
       ([e]) => {
-        if (e.isIntersecting && !active) {
-          setActive(true);
-          setTimeout(() => setFilled(true), 3200);
+        if (e.isIntersecting && !stamped) {
+          setStamped(true);
+          setTimeout(() => setRing(true), 350);
         }
       },
       { threshold: 0.4 },
     );
-    obs.observe(container);
+    obs.observe(el);
     return () => obs.disconnect();
-  }, [active]);
-
-  /* Hand-traced continuous cursive path for "HUB Transfer"
-     Each letter flows into the next — pen never lifts. */
-  const sigPath =
-    // H
-    "M 12 40 L 12 12 L 12 26 C 16 26, 24 26, 28 26 L 28 12 L 28 40 " +
-    // U (connected from H)
-    "M 28 40 C 28 42, 30 40, 34 14 C 34 14, 34 38, 42 38 C 48 38, 48 14, 48 14 " +
-    // B (connected)
-    "M 48 14 L 48 40 L 48 12 C 48 12, 62 12, 62 22 C 62 26, 48 26, 48 26 C 48 26, 64 26, 64 34 C 64 42, 48 40, 48 40 " +
-    // space + T
-    "M 72 14 L 84 14 M 78 14 L 78 40 " +
-    // r
-    "M 84 24 L 84 40 M 84 28 C 86 24, 90 22, 94 24 " +
-    // a
-    "M 106 24 C 100 24, 96 28, 96 32 C 96 36, 100 40, 106 40 C 106 40, 106 24, 106 24 L 106 40 " +
-    // n
-    "M 110 24 L 110 40 M 110 28 C 112 24, 118 22, 120 28 L 120 40 " +
-    // s
-    "M 132 26 C 130 24, 124 24, 124 28 C 124 32, 132 32, 132 36 C 132 40, 126 40, 124 38 " +
-    // f
-    "M 140 10 C 138 10, 136 14, 136 18 L 136 40 M 132 22 L 140 22 " +
-    // e
-    "M 144 32 L 154 32 C 154 26, 148 22, 144 26 C 140 30, 144 40, 154 38 " +
-    // r
-    "M 158 24 L 158 40 M 158 28 C 160 24, 164 22, 168 24";
+  }, [stamped]);
 
   return (
-    <div ref={containerRef} className="flex flex-col items-center">
-      <div className="flex items-center gap-3">
-        {/* Left line */}
-        <div className="h-px bg-[#F5C518]/30 transition-all duration-700" style={{ width: active ? 32 : 0 }} />
+    <div ref={ref} className="flex justify-center">
+      <div className="relative">
+        {/* Impact ring — expands and fades */}
+        {ring && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="w-[140px] h-[140px] md:w-[200px] md:h-[200px] rounded-full border-2 border-[#F5C518]"
+              style={{ animation: "stampRing 0.6s ease-out forwards" }} />
+          </div>
+        )}
 
-        {/* SVG signature */}
-        <svg viewBox="0 0 180 52" className="w-64 md:w-80 h-auto overflow-visible">
-          <path
-            ref={pathRef}
-            d={sigPath}
-            fill="none"
-            stroke="#F5C518"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={{
-              strokeDasharray: len || 2000,
-              strokeDashoffset: active ? 0 : len || 2000,
-              transition: active ? "stroke-dashoffset 3s ease-in-out" : "none",
-            }}
-          />
-          {/* Fill overlay — same path but with fill, fades in after stroke */}
-          <path
-            d={sigPath}
-            fill="none"
-            stroke="#F5C518"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={{
-              opacity: filled ? 1 : 0,
-              filter: "drop-shadow(0 0 4px rgba(245,197,24,0.3))",
-              transition: "opacity 0.5s ease-in",
-            }}
-          />
+        {/* The stamp */}
+        <svg
+          viewBox="0 0 200 200"
+          className="w-[140px] h-[140px] md:w-[200px] md:h-[200px]"
+          style={{
+            opacity: stamped ? 0.9 : 0,
+            transform: stamped ? "scale(1) rotate(-6deg)" : "scale(2.5) rotate(-15deg)",
+            transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease-out",
+          }}
+        >
+          {/* Outer ring */}
+          <circle cx="100" cy="100" r="92" fill="none" stroke="#F5C518" strokeWidth="3" />
+          {/* Inner ring */}
+          <circle cx="100" cy="100" r="82" fill="none" stroke="#F5C518" strokeWidth="1.2" />
+
+          {/* Top text: HUB TRANSFER */}
+          <path id="stampArcTop" d="M 30 100 A 70 70 0 0 1 170 100" fill="none" />
+          <text fill="#F5C518" fontSize="14" fontWeight="700" letterSpacing="0.35em">
+            <textPath href="#stampArcTop" startOffset="50%" textAnchor="middle"
+              style={{ fontFamily: "var(--font-body)" }}>
+              HUB TRANSFER
+            </textPath>
+          </text>
+
+          {/* Bottom text: LISBON · PORTUGAL */}
+          <path id="stampArcBot" d="M 170 112 A 70 70 0 0 1 30 112" fill="none" />
+          <text fill="#F5C518" fontSize="10" fontWeight="600" letterSpacing="0.2em">
+            <textPath href="#stampArcBot" startOffset="50%" textAnchor="middle"
+              style={{ fontFamily: "var(--font-body)" }}>
+              LISBON · PORTUGAL
+            </textPath>
+          </text>
+
+          {/* Center: star + year */}
+          <text x="100" y="96" textAnchor="middle" fill="#F5C518" fontSize="18"
+            style={{ fontFamily: "var(--font-body)" }}>★</text>
+          <text x="100" y="115" textAnchor="middle" fill="#F5C518" fontSize="11" fontWeight="700"
+            letterSpacing="0.15em" style={{ fontFamily: "var(--font-mono)" }}>2024</text>
+
+          {/* Decorative dots */}
+          <circle cx="52" cy="100" r="1.5" fill="#F5C518" />
+          <circle cx="148" cy="100" r="1.5" fill="#F5C518" />
         </svg>
-
-        {/* Right line */}
-        <div className="h-px bg-[#F5C518]/30 transition-all duration-700" style={{ width: filled ? 32 : 0, transitionDelay: "0.2s" }} />
       </div>
 
-      {/* Underline flourish */}
-      <div
-        className="h-px bg-gradient-to-r from-transparent via-[#F5C518]/25 to-transparent mx-auto mt-4 transition-all duration-1000"
-        style={{ width: filled ? 260 : 0, transitionDelay: "0.3s" }}
-      />
+      {/* Keyframes */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes stampRing {
+          0% { transform: scale(0.8); opacity: 0.5; }
+          100% { transform: scale(2); opacity: 0; }
+        }
+      `}} />
     </div>
   );
 }
@@ -667,7 +649,7 @@ export default function LandingPage() {
 
             {/* Animated "HUB Transfer" handwritten signature */}
             <div className="mt-8 mb-4">
-              <SignatureAnimation />
+              <StampAnimation />
             </div>
 
             <Reveal delay={0.5}>

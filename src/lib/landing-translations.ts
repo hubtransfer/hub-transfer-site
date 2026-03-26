@@ -160,7 +160,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Commitment block
     commitTitle: 'Ou apertamos sua mão, ou pagamos a conta.',
-    commitSub: 'O nosso compromisso, por escrito.',
+    commitSub: 'O nosso compromisso, carimbado.',
 
     // Guarantee
     guaranteeTitle: 'Garantia HUB: Risco Zero',
@@ -276,7 +276,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Commitment block
     commitTitle: 'We shake your hand, or we pay the bill.',
-    commitSub: 'Our commitment, in writing.',
+    commitSub: 'Our commitment, stamped.',
 
     // Guarantee
     guaranteeTitle: 'HUB Guarantee: Zero Risk',
@@ -392,7 +392,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Commitment block
     commitTitle: 'O le damos la mano, o pagamos la cuenta.',
-    commitSub: 'Nuestro compromiso, por escrito.',
+    commitSub: 'Nuestro compromiso, sellado.',
 
     // Guarantee
     guaranteeTitle: 'Garantía HUB: Riesgo Cero',
@@ -508,7 +508,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Commitment block
     commitTitle: "On vous serre la main, ou on paie l'addition.",
-    commitSub: 'Notre engagement, par écrit.',
+    commitSub: 'Notre engagement, tamponné.',
 
     // Guarantee
     guaranteeTitle: 'Garantie HUB: Zéro Risque',
@@ -624,7 +624,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Commitment block
     commitTitle: 'O vi stringiamo la mano, o paghiamo il conto.',
-    commitSub: 'Il nostro impegno, nero su bianco.',
+    commitSub: 'Il nostro impegno, timbrato.',
 
     // Guarantee
     guaranteeTitle: 'Garanzia HUB: Zero Rischi',
