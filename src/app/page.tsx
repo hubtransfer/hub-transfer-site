@@ -175,64 +175,73 @@ function StampAnimation() {
   return (
     <div ref={ref} className="flex justify-center">
       <div className="relative">
-        {/* Impact ring — expands and fades */}
+        {/* Impact ring */}
         {ring && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-[140px] h-[140px] md:w-[200px] md:h-[200px] rounded-full border-2 border-[#F5C518]"
+            <div className="w-[160px] h-[160px] md:w-[220px] md:h-[220px] rounded-full border border-[#F5C518]"
               style={{ animation: "stampRing 0.6s ease-out forwards" }} />
           </div>
         )}
 
         {/* The stamp */}
         <svg
-          viewBox="0 0 200 200"
-          className="w-[140px] h-[140px] md:w-[200px] md:h-[200px]"
+          viewBox="0 0 220 220"
+          className="w-[160px] h-[160px] md:w-[220px] md:h-[220px]"
           style={{
-            opacity: stamped ? 0.9 : 0,
-            transform: stamped ? "scale(1) rotate(-6deg)" : "scale(2.5) rotate(-15deg)",
-            transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease-out",
+            opacity: stamped ? 1 : 0,
+            transform: stamped ? "scale(1) rotate(-7deg)" : "scale(2.5) rotate(-20deg)",
+            transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.15s ease-out",
           }}
         >
-          {/* Outer ring */}
-          <circle cx="100" cy="100" r="92" fill="none" stroke="#F5C518" strokeWidth="3" />
-          {/* Inner ring */}
-          <circle cx="100" cy="100" r="82" fill="none" stroke="#F5C518" strokeWidth="1.2" />
+          {/* Subtle ink texture filter */}
+          <defs>
+            <filter id="inkTexture">
+              <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="4" result="noise" />
+              <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.8" />
+            </filter>
+          </defs>
 
-          {/* Top text: HUB TRANSFER */}
-          <path id="stampArcTop" d="M 30 100 A 70 70 0 0 1 170 100" fill="none" />
-          <text fill="#F5C518" fontSize="14" fontWeight="700" letterSpacing="0.35em">
-            <textPath href="#stampArcTop" startOffset="50%" textAnchor="middle"
-              style={{ fontFamily: "var(--font-body)" }}>
-              HUB TRANSFER
-            </textPath>
-          </text>
+          <g filter="url(#inkTexture)">
+            {/* Outer circle — 3px solid */}
+            <circle cx="110" cy="110" r="102" fill="none" stroke="#F5C518" strokeWidth="3" />
+            {/* Inner circle — 1.5px, 4px gap from outer */}
+            <circle cx="110" cy="110" r="94" fill="none" stroke="#F5C518" strokeWidth="1.5" />
 
-          {/* Bottom text: LISBON · PORTUGAL */}
-          <path id="stampArcBot" d="M 170 112 A 70 70 0 0 1 30 112" fill="none" />
-          <text fill="#F5C518" fontSize="10" fontWeight="600" letterSpacing="0.2em">
-            <textPath href="#stampArcBot" startOffset="50%" textAnchor="middle"
-              style={{ fontFamily: "var(--font-body)" }}>
-              LISBON · PORTUGAL
-            </textPath>
-          </text>
+            {/* ── TOP TEXT: "HUB TRANSFER" ──
+                 Arc goes left→right along the top half.
+                 Radius 78 keeps text inside the inner ring. */}
+            <path id="arcTop" d="M 32 110 A 78 78 0 0 1 188 110" fill="none" />
+            <text fill="#F5C518" fontSize="15" fontWeight="700" letterSpacing="4">
+              <textPath href="#arcTop" startOffset="50%" textAnchor="middle"
+                style={{ fontFamily: "var(--font-body)" }}>
+                HUB TRANSFER
+              </textPath>
+            </text>
 
-          {/* Center: star + year */}
-          <text x="100" y="96" textAnchor="middle" fill="#F5C518" fontSize="18"
-            style={{ fontFamily: "var(--font-body)" }}>★</text>
-          <text x="100" y="115" textAnchor="middle" fill="#F5C518" fontSize="11" fontWeight="700"
-            letterSpacing="0.15em" style={{ fontFamily: "var(--font-mono)" }}>2024</text>
+            {/* ── BOTTOM TEXT: "LISBON · PORTUGAL" ──
+                 KEY: This path goes LEFT→RIGHT along the bottom
+                 by starting at the LEFT side of the bottom and
+                 arcing DOWN then back up to the RIGHT side.
+                 This keeps text upright and readable. */}
+            <path id="arcBot" d="M 42 128 A 74 74 0 0 0 178 128" fill="none" />
+            <text fill="#F5C518" fontSize="11" fontWeight="600" letterSpacing="2.5">
+              <textPath href="#arcBot" startOffset="50%" textAnchor="middle"
+                style={{ fontFamily: "var(--font-body)" }}>
+                LISBON · PORTUGAL
+              </textPath>
+            </text>
 
-          {/* Decorative dots */}
-          <circle cx="52" cy="100" r="1.5" fill="#F5C518" />
-          <circle cx="148" cy="100" r="1.5" fill="#F5C518" />
+            {/* Center separators: ✦ left and right */}
+            <text x="42" y="114" textAnchor="middle" fill="#F5C518" fontSize="10">✦</text>
+            <text x="178" y="114" textAnchor="middle" fill="#F5C518" fontSize="10">✦</text>
+          </g>
         </svg>
       </div>
 
-      {/* Keyframes */}
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes stampRing {
-          0% { transform: scale(0.8); opacity: 0.5; }
-          100% { transform: scale(2); opacity: 0; }
+          0% { transform: scale(0.8); opacity: 0.4; }
+          100% { transform: scale(2.2); opacity: 0; }
         }
       `}} />
     </div>
