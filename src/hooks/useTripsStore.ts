@@ -240,7 +240,7 @@ export function useTripsStore(): TripsStore {
     };
 
     for (const v of diaList) {
-      const tipo = detectTipo(v.origin || "", v.flight || "");
+      const tipo = detectTipo(v.origin || "", v.flight || "", v.type);
       if (tipo === "CHEGADA") stats.chegadas++;
       else if (tipo === "RECOLHA") stats.recolhas++;
       else if (tipo === "TOUR") stats.tours++;

@@ -306,15 +306,20 @@ const PLACE_KEYWORDS = [
  * Detect trip type: CHEGADA (arrival), RECOLHA (pick-up) or TOUR
  * based on whether the origin mentions an airport and a flight exists.
  */
-export function detectTipo(origin: string, flight: string): string {
+export function detectTipo(origin: string, flight: string, backendType?: string): string {
+  // 1. If backend explicitly says TOUR, respect it
+  const bt = (backendType || '').toUpperCase().trim();
+  if (bt === 'TOUR') return 'TOUR';
+
+  // 2. If origin is the airport → CHEGADA (arrival)
   const o = (origin || '').toLowerCase();
   const hasAirport = AIRPORT_KEYWORDS.some((kw) => o.includes(kw)) ||
     /\b(lis|opo|fao|fnc|pdl)\b/i.test(o) ||
     /lisbon\s*airport|lisboa\s*aeroporto|humberto\s*delgado/i.test(o);
 
-  if (hasAirport && flight && flight.trim().length > 1) return 'CHEGADA';
-  if (flight && flight.trim().length > 1) return 'RECOLHA';
-  if (!flight || flight.trim().length <= 1) return 'TOUR';
+  if (hasAirport) return 'CHEGADA';
+
+  // 3. Everything else → RECOLHA
   return 'RECOLHA';
 }
 

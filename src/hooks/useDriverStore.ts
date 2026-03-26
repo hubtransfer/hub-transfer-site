@@ -186,7 +186,7 @@ export function useDriverStore(): DriverStore {
     let totalPay = 0;
 
     for (const v of viagens) {
-      const tipo = detectTipo(v.origin, v.flight);
+      const tipo = detectTipo(v.origin, v.flight, v.type);
       if (tipo === 'CHEGADA') chegadas++;
       else if (tipo === 'RECOLHA') recolhas++;
       totalPay += calcDriverPrice(v.platform);

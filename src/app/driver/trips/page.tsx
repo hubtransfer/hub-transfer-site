@@ -207,7 +207,7 @@ export default function DriverTripsPage() {
     let recolhas = 0;
     let totalPay = 0;
     for (const v of driverTrips) {
-      const tipo = detectTipo(v.origin || "", v.flight || "");
+      const tipo = detectTipo(v.origin || "", v.flight || "", v.type);
       if (tipo === "CHEGADA") chegadas++;
       else recolhas++;
       totalPay += calcDriverPrice(v.platform || "");
@@ -350,16 +350,16 @@ export default function DriverTripsPage() {
               Total
             </div>
           </div>
-          <div className="flex-1 bg-[#f59e0b]/10 rounded-lg px-3 py-2 text-center">
-            <div className="text-lg font-bold text-[#f59e0b] font-mono">
+          <div className="flex-1 bg-[#10b981]/10 rounded-lg px-3 py-2 text-center">
+            <div className="text-lg font-bold text-[#10b981] font-mono">
               {stats.chegadas}
             </div>
-            <div className="text-[10px] text-white/40 uppercase font-mono">
+            <div className="text-[10px] text-[#D4D4D4] uppercase font-mono">
               Chegadas
             </div>
           </div>
-          <div className="flex-1 bg-[#10b981]/10 rounded-lg px-3 py-2 text-center">
-            <div className="text-lg font-bold text-[#10b981] font-mono">
+          <div className="flex-1 bg-[#3b82f6]/10 rounded-lg px-3 py-2 text-center">
+            <div className="text-lg font-bold text-[#3b82f6] font-mono">
               {stats.recolhas}
             </div>
             <div className="text-[10px] text-white/40 uppercase font-mono">

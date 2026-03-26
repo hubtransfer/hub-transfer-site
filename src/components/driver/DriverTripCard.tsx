@@ -70,8 +70,8 @@ const PhoneIcon = () => (
 /* ─── Color config ─── */
 
 const TYPE_COLORS = {
-  CHEGADA: { text: "text-[#f59e0b]", bg: "bg-[#f59e0b]/10", border: "border-l-[#f59e0b]", hex: "#f59e0b" },
-  RECOLHA: { text: "text-[#10b981]", bg: "bg-[#10b981]/10", border: "border-l-[#10b981]", hex: "#10b981" },
+  CHEGADA: { text: "text-[#10b981]", bg: "bg-[#10b981]/10", border: "border-l-[#10b981]", hex: "#10b981" },
+  RECOLHA: { text: "text-[#3b82f6]", bg: "bg-[#3b82f6]/10", border: "border-l-[#3b82f6]", hex: "#3b82f6" },
   TOUR:    { text: "text-[#a855f7]", bg: "bg-[#a855f7]/10", border: "border-l-[#a855f7]", hex: "#a855f7" },
 } as const;
 function ts(tipo: string) { return TYPE_COLORS[tipo as keyof typeof TYPE_COLORS] ?? { text: "text-gray-400", bg: "bg-gray-500/10", border: "border-l-gray-500", hex: "#999" }; }
@@ -117,7 +117,7 @@ export default function DriverTripCard({
 
   /* ─ Derived data ─ */
   const cardId = viagem.id || (viagem.client || "x").replace(/\W/g, "");
-  const tipo = detectTipo(viagem.origin || "", viagem.flight || "");
+  const tipo = detectTipo(viagem.origin || "", viagem.flight || "", viagem.type);
   const hora = cleanHora(viagem.pickupTime || "");
   const lang = resolveLanguage(viagem.language || "", viagem.phone);
   const price = calcDriverPrice(viagem.platform || "");
@@ -286,18 +286,31 @@ export default function DriverTripCard({
           </div>
         </div>
 
-        {/* Flight progress bar (collapsed, CHEGADA only) */}
+        {/* Flight progress bar (collapsed, CHEGADA only) — clickable */}
         {!expanded && hasFlight && (
-          <div className="flex items-center gap-2.5 px-4 pb-3 pt-0.5">
+          <a
+            href={viagem.flight ? `https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}` : "#"}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="flex items-center gap-2.5 px-4 pb-3 pt-0.5 cursor-pointer hover:bg-white/[0.02] transition-colors rounded-b-2xl"
+          >
             <div className="flex items-center gap-1 flex-shrink-0 min-w-[52px]">
               {flag && <span className="text-sm leading-none">{flag}</span>}
-              <span className="font-mono text-xs font-bold text-white/60">{depIata || "???"}</span>
+              <span className="font-mono text-xs font-bold text-[#E5E5E5]">{depIata || "???"}</span>
             </div>
-            <div className="flex-1 h-2.5 rounded-full bg-white/[0.06] relative overflow-hidden">
-              <div className={`h-full rounded-full transition-all duration-1000 ${bar.pulse ? "animate-flight-pulse" : ""}`}
-                style={{ width: `${Math.max(flightProg, 4)}%`, backgroundColor: bar.color }} />
+            <div className="flex-1 relative">
+              <div className="h-2.5 rounded-full bg-white/[0.06] overflow-hidden">
+                <div className={`h-full rounded-full transition-all duration-1000 ${bar.pulse ? "animate-flight-pulse" : ""}`}
+                  style={{ width: `${Math.max(flightProg, 4)}%`, backgroundColor: bar.color }} />
+              </div>
+              {viagem.flight && (
+                <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 font-mono text-[11px] font-bold text-[#E5E5E5] hover:text-[#F5C518] transition-colors">
+                  {viagem.flight}
+                </span>
+              )}
               {flightProg > 8 && flightProg < 92 && (
-                <span className="absolute top-1/2 text-[9px] leading-none" style={{ left: `calc(${flightProg}% - 5px)`, transform: "translateY(-50%)", filter: "drop-shadow(0 0 2px rgba(0,0,0,.8))" }}>✈</span>
+                <span className="absolute top-0 text-[9px] leading-none" style={{ left: `calc(${flightProg}% - 5px)`, transform: "translateY(-50%)", filter: "drop-shadow(0 0 2px rgba(0,0,0,.8))" }}>✈</span>
               )}
             </div>
             <span className="font-mono text-xs font-bold flex-shrink-0" style={{ color: bar.color }}>LIS</span>
@@ -305,7 +318,7 @@ export default function DriverTripCard({
               {arrTime !== "—:—" && <span className="font-mono text-base font-black leading-none" style={{ color: bar.color }}>{arrTime}</span>}
               {countdown && <span className="font-mono text-[9px] leading-tight mt-0.5" style={{ color: `${bar.color}99` }}>{countdown}</span>}
             </div>
-          </div>
+          </a>
         )}
       </div>
 
