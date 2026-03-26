@@ -1,25 +1,25 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useDriverStore } from "@/hooks/useDriverStore";
 import DriverTripCard from "@/components/driver/DriverTripCard";
 import DriverNameplate from "@/components/driver/DriverNameplate";
 import { SkeletonList } from "@/components/trips/SkeletonCard";
+import { getSession, clearSession } from "@/lib/auth";
 import {
   detectTipo,
   calcDriverPrice,
   todayStr,
   dateToISO,
-  HUB_CENTRAL_URL,
 } from "@/lib/trips";
-import type { HubViagem, Driver } from "@/lib/trips";
+import type { HubViagem } from "@/lib/trips";
 
 /* ================================================================== */
 /*  Constants                                                          */
 /* ================================================================== */
 
-const DRIVER_PASSWORD = "hub2026";
-const LS_DRIVER_NAME = "hub_driver_name";
+const LS_DRIVER_NAME = "hub_driver_name"; // legacy key for backward compat
 const SYNC_INTERVAL = 3 * 60 * 1000;
 
 /* ================================================================== */
@@ -49,38 +49,6 @@ function useLisbonClock() {
 /*  Fetch drivers list from HUB Central                                */
 /* ================================================================== */
 
-async function fetchDriversList(): Promise<Driver[]> {
-  try {
-    const res = await fetch(
-      `${HUB_CENTRAL_URL}?action=motoristas&t=${Date.now()}`,
-      { redirect: "follow" },
-    );
-    if (!res.ok) return [];
-    const data = await res.json();
-    const list = Array.isArray(data)
-      ? data
-      : data.motoristas || data.drivers || [];
-    return list
-      .map((d: Record<string, unknown>) => ({
-        name: String(d.name || d.nome || d.NOME || d.motorista || "").trim(),
-        phone: String(d.phone || d.telefone || d.tel || d.TELEFONE || "")
-          .replace(/[\s\-+()]/g, ""),
-        viatura: String(d.viatura || d.car || d.vehicle || "").trim(),
-      }))
-      .filter((d: Driver) => d.name);
-  } catch {
-    return [];
-  }
-}
-
-function normalize(s: string) {
-  return s
-    .toLowerCase()
-    .trim()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-}
-
 /* ================================================================== */
 /*  PAGE                                                               */
 /* ================================================================== */
@@ -88,12 +56,8 @@ function normalize(s: string) {
 export default function DriverTripsPage() {
   const store = useDriverStore();
   const clock = useLisbonClock();
+  const router = useRouter();
 
-  /* ── Login state ── */
-  const [loginInput, setLoginInput] = useState("");
-  const [passwordInput, setPasswordInput] = useState("");
-  const [loginError, setLoginError] = useState("");
-  const [isValidating, setIsValidating] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   /* ── Nameplate ── */
@@ -101,15 +65,22 @@ export default function DriverTripsPage() {
   const [nameplateName, setNameplateName] = useState("");
   const [nameplateDest, setNameplateDest] = useState("");
 
-  /* ── (cards self-manage expand/collapse) ── */
-
-  /* ── Load stored session ── */
+  /* ── Load session from auth ── */
   useEffect(() => {
-    const stored = localStorage.getItem(LS_DRIVER_NAME);
-    if (stored) {
-      store.setDriverName(stored);
-      setIsLoggedIn(true);
+    const session = getSession();
+    if (!session || session.role !== "driver") {
+      // Fallback: check legacy localStorage
+      const legacy = localStorage.getItem(LS_DRIVER_NAME);
+      if (legacy) {
+        store.setDriverName(legacy);
+        setIsLoggedIn(true);
+        return;
+      }
+      router.replace("/login");
+      return;
     }
+    store.setDriverName(session.name);
+    setIsLoggedIn(true);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── Auto-sync ── */
@@ -119,57 +90,11 @@ export default function DriverTripsPage() {
     return () => clearInterval(id);
   }, [isLoggedIn, store]);
 
-  /* ── Login handler ── */
-  const handleLogin = useCallback(async () => {
-    const name = loginInput.trim();
-    const pwd = passwordInput.trim();
-    setLoginError("");
-
-    if (!name) {
-      setLoginError("Insere o teu nome.");
-      return;
-    }
-    if (pwd !== DRIVER_PASSWORD) {
-      setLoginError("Senha incorrecta.");
-      return;
-    }
-
-    setIsValidating(true);
-
-    // Validate against HUB Central drivers list
-    const drivers = await fetchDriversList();
-    const me = normalize(name);
-    const match = drivers.find((d) => {
-      const dn = normalize(d.name);
-      return dn === me || dn.includes(me) || me.includes(dn);
-    });
-
-    if (!match) {
-      setLoginError(
-        drivers.length > 0
-          ? `"${name}" não encontrado na HUB Central.`
-          : "Não foi possível conectar à HUB Central. Tenta novamente.",
-      );
-      setIsValidating(false);
-      return;
-    }
-
-    // Login successful — use the canonical name from HUB Central
-    localStorage.setItem(LS_DRIVER_NAME, match.name);
-    store.setDriverName(match.name);
-    setIsLoggedIn(true);
-    setIsValidating(false);
-  }, [loginInput, passwordInput, store]);
-
   /* ── Logout ── */
   const handleLogout = useCallback(() => {
-    localStorage.removeItem(LS_DRIVER_NAME);
-    store.setDriverName("");
-    setIsLoggedIn(false);
-    setLoginInput("");
-    setPasswordInput("");
-    setLoginError("");
-  }, [store]);
+    clearSession();
+    router.replace("/login");
+  }, [router]);
 
   /* ── Nameplate ── */
   const openNameplate = useCallback((name: string, destination?: string) => {
@@ -223,74 +148,8 @@ export default function DriverTripsPage() {
 
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center px-6">
-        <div className="w-full max-w-sm space-y-8">
-          {/* Brand */}
-          <div className="text-center space-y-2">
-            <img src="/images/logo.png" alt="HUB Transfer" className="h-14 w-auto mx-auto" />
-            <p className="text-sm text-white/40 tracking-widest uppercase">
-              Motorista
-            </p>
-          </div>
-
-          {/* Login form */}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleLogin();
-            }}
-            className="space-y-4"
-          >
-            <div>
-              <label className="block text-xs text-white/40 mb-1.5 tracking-wider uppercase">
-                Nome
-              </label>
-              <input
-                type="text"
-                value={loginInput}
-                onChange={(e) => {
-                  setLoginInput(e.target.value);
-                  setLoginError("");
-                }}
-                placeholder="Ex: Filipe Ventura"
-                autoFocus
-                autoComplete="name"
-                className="w-full h-14 text-lg bg-white/5 border border-white/10 rounded-xl px-4 text-white placeholder-white/30 focus:outline-none focus:border-[#F0D030]/50 transition-colors"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-white/40 mb-1.5 tracking-wider uppercase">
-                Senha
-              </label>
-              <input
-                type="password"
-                value={passwordInput}
-                onChange={(e) => {
-                  setPasswordInput(e.target.value);
-                  setLoginError("");
-                }}
-                placeholder="Senha"
-                autoComplete="current-password"
-                className="w-full h-14 text-lg bg-white/5 border border-white/10 rounded-xl px-4 text-white placeholder-white/30 focus:outline-none focus:border-[#F0D030]/50 transition-colors"
-              />
-            </div>
-
-            {/* Error */}
-            {loginError && (
-              <div className="text-center text-sm text-[#ef4444] bg-[#ef4444]/10 border border-[#ef4444]/20 rounded-xl px-4 py-3">
-                {loginError}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={!loginInput.trim() || !passwordInput.trim() || isValidating}
-              className="w-full h-14 font-bold text-lg bg-[#F0D030] text-black rounded-xl active:bg-[#F0D030]/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              {isValidating ? "A verificar..." : "Entrar"}
-            </button>
-          </form>
-        </div>
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+        <div className="w-5 h-5 border-2 border-[#F0D030]/30 border-t-[#F0D030] rounded-full animate-spin" />
       </div>
     );
   }

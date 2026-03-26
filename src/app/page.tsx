@@ -291,7 +291,7 @@ export default function LandingPage() {
     return `https://wa.me/351968698138?text=${encodeURIComponent(msg)}`;
   }, [bOrigin, bDest, routeInfo, bDate, bPax, bPhone]);
 
-  const scrollTo = (id: string) => { document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }); setMenuOpen(false); };
+  const scrollTo = (id: string) => { setMenuOpen(false); setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }), 150); };
 
   /* ── Typewriter ── */
   const [typed, setTyped] = useState("");
@@ -375,6 +375,10 @@ export default function LandingPage() {
                   {[{ label: t.navHow, id: "how" }, { label: t.navWhy, id: "why" }, { label: t.navGuarantee, id: "guarantee" }].map((l) => (
                     <button key={l.id} onClick={() => scrollTo(l.id)} className="block text-[#D0D0D0] text-sm tracking-wide uppercase cursor-pointer">{l.label}</button>
                   ))}
+                  <button onClick={() => { setMenuOpen(false); setDrawerOpen(true); }}
+                    className="w-full text-center text-[13px] font-semibold tracking-wider uppercase py-3 border border-[#F0D030]/30 text-[#F0D030] hover:bg-[#F0D030] hover:text-[#0A0A0A] transition-all cursor-pointer">
+                    {t.navBook}
+                  </button>
                   <div className="flex gap-1 pt-2">
                     {LANGS.map((l) => (
                       <button key={l} onClick={() => { setLang(l); setMenuOpen(false); }}
