@@ -219,7 +219,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     // Guarantee badges
     badgePrice: 'Preço fixo',
     badgePunctual: 'Sempre pontual',
-    badgeCancel: 'Cancelamento grátis',
+    badgeCancel: 'Cancelamento grátis até 3h antes',
     badgeFlight: 'Voo monitorizado',
 
     // Nav
@@ -339,7 +339,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     // Guarantee badges
     badgePrice: 'Fixed price',
     badgePunctual: 'Always on time',
-    badgeCancel: 'Free cancellation',
+    badgeCancel: 'Free cancellation up to 3h before',
     badgeFlight: 'Flight tracked',
 
     // Nav
@@ -459,7 +459,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     // Guarantee badges
     badgePrice: 'Precio fijo',
     badgePunctual: 'Siempre puntual',
-    badgeCancel: 'Cancelación gratis',
+    badgeCancel: 'Cancelación gratis hasta 3h antes',
     badgeFlight: 'Vuelo monitorizado',
 
     // Nav
@@ -579,7 +579,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     // Guarantee badges
     badgePrice: 'Prix fixe',
     badgePunctual: 'Toujours ponctuel',
-    badgeCancel: 'Annulation gratuite',
+    badgeCancel: 'Annulation gratuite jusqu\'à 3h avant',
     badgeFlight: 'Vol surveillé',
 
     // Nav
@@ -699,7 +699,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     // Guarantee badges
     badgePrice: 'Prezzo fisso',
     badgePunctual: 'Sempre puntuale',
-    badgeCancel: 'Cancellazione gratuita',
+    badgeCancel: 'Cancellazione gratuita fino a 3h prima',
     badgeFlight: 'Volo monitorato',
 
     // Nav
