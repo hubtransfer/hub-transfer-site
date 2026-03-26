@@ -424,7 +424,7 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         <section className="relative min-h-screen flex items-center justify-center">
           <div className="absolute inset-0">
-            <img src="/images/hub_dobra1_hero.jpg" alt="" className="w-full h-full object-cover" />
+            <img src="/images/hub_dobra1_hero.jpg" alt="Transfer privado no Aeroporto de Lisboa à noite" className="w-full h-full object-cover" loading="eager" />
             <div className="absolute inset-0 bg-[#0A0A0A]/65" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-transparent to-[#0A0A0A]/40" />
           </div>
@@ -436,15 +436,15 @@ export default function LandingPage() {
                 {!showHighlight && <span className="inline-block w-[2px] h-[0.9em] bg-white/80 ml-1 animate-pulse align-middle" />}
               </h1>
               {showHighlight && (
-                <motion.h1
+                <motion.span
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6 }}
-                  className="text-[2.8rem] md:text-[4.5rem] leading-[1.05] font-bold"
+                  className="block text-[2.8rem] md:text-[4.5rem] leading-[1.05] font-bold"
                   style={{ fontFamily: "var(--font-display)", color: "#F0D030" }}
                 >
                   {t.headlineHighlight}
-                </motion.h1>
+                </motion.span>
               )}
             </div>
 
@@ -701,11 +701,13 @@ export default function LandingPage() {
                 { name: "Marie Dupont", from: "Paris, FR", text: t.review3 },
               ].map((r, i) => (
                 <Reveal key={i} delay={i * 0.1}>
-                  <p className="text-[#D0D0D0] text-sm leading-relaxed italic">&ldquo;{r.text}&rdquo;</p>
-                  <div className="mt-5">
-                    <p className="text-white text-sm font-medium">{r.name}</p>
-                    <p className="text-[#D0D0D0] text-xs">{r.from}</p>
-                  </div>
+                  <article>
+                    <p className="text-[#D0D0D0] text-sm leading-relaxed italic">&ldquo;{r.text}&rdquo;</p>
+                    <div className="mt-5">
+                      <p className="text-white text-sm font-medium">{r.name}</p>
+                      <p className="text-[#D0D0D0] text-xs">{r.from}</p>
+                    </div>
+                  </article>
                 </Reveal>
               ))}
             </div>
