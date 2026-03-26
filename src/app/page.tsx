@@ -577,10 +577,17 @@ export default function LandingPage() {
                   { icon: <Radar className="w-7 h-7" strokeWidth={1.5} />, text: t.fleetFeature2 },
                   { icon: <Headphones className="w-7 h-7" strokeWidth={1.5} />, text: t.fleetFeature3 },
                 ].map((f, i) => (
-                  <div key={i} className="flex items-center gap-3 group">
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: i * 0.15, ease: "easeOut" }}
+                    className="flex items-center gap-3 group"
+                  >
                     <div className="text-[#F0D030] group-hover:scale-110 transition-transform duration-200 flex-shrink-0">{f.icon}</div>
                     <span className="text-[#F5F5F5] text-base font-semibold">{f.text}</span>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </Reveal>
