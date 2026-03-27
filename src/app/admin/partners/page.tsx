@@ -3,8 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
-  getSession, clearSession, getPartners, updatePassword,
+  getSession, clearSession, setSession, getPartners, updatePassword,
   validateLogin, getAdminEmail, setAdminEmail, getLocalAdminPassword, setLocalAdminPassword,
+  getHotelUrl, setHotelUrl, getAllHotelUrls,
   type Partner, type Hotel,
 } from "@/lib/auth";
 
@@ -301,8 +302,8 @@ export default function PartnersPage() {
 
           <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl overflow-hidden">
             {/* Header */}
-            <div className="hidden md:grid grid-cols-[80px_1fr_180px] gap-2 px-4 py-2 border-b border-[#2A2A2A] text-[10px] text-[#888] uppercase tracking-wider font-mono">
-              <span>Código</span><span>Nome</span><span>Senha</span>
+            <div className="hidden md:grid grid-cols-[80px_1fr_150px_140px] gap-2 px-4 py-2 border-b border-[#2A2A2A] text-[10px] text-[#888] uppercase tracking-wider font-mono">
+              <span>Código</span><span>Nome</span><span>Senha</span><span>Acções</span>
             </div>
 
             {loading ? (
@@ -310,13 +311,38 @@ export default function PartnersPage() {
             ) : hotels.length === 0 ? (
               <div className="text-center py-10 text-[#666] text-sm font-mono">Nenhum hotel encontrado</div>
             ) : (
-              hotels.map((h, i) => (
-                <div key={i} className="grid grid-cols-1 md:grid-cols-[80px_1fr_180px] gap-2 px-4 py-3 border-b border-[#2A2A2A]/50 hover:bg-[#1A1A1A] items-center">
-                  <span className="text-xs font-mono font-bold text-[#F0D030] bg-[#F0D030]/10 px-2 py-0.5 rounded w-fit uppercase">{h.code}</span>
-                  <span className="font-semibold text-sm text-[#F5F5F5]">{h.name}</span>
-                  <PasswordCell hasPassword={h.hasPassword} rowIndex={h.rowIndex} type="hotel" />
-                </div>
-              ))
+              hotels.map((h, i) => {
+                const url = getHotelUrl(h.code);
+                return (
+                  <div key={i} className="space-y-2 px-4 py-3 border-b border-[#2A2A2A]/50 hover:bg-[#1A1A1A]">
+                    <div className="grid grid-cols-1 md:grid-cols-[80px_1fr_150px_140px] gap-2 items-center">
+                      <span className="text-xs font-mono font-bold text-[#F0D030] bg-[#F0D030]/10 px-2 py-0.5 rounded w-fit uppercase">{h.code}</span>
+                      <span className="font-semibold text-sm text-[#F5F5F5]">{h.name}</span>
+                      <PasswordCell hasPassword={h.hasPassword} rowIndex={h.rowIndex} type="hotel" />
+                      <button
+                        onClick={() => {
+                          // Enter portal as admin for this hotel
+                          setSession({ name: adminName, role: "admin", code: h.code.toUpperCase() });
+                          // Set the hotel URL in webappUrl for the portal to use
+                          if (url) localStorage.setItem("webappUrl", url);
+                          router.push("/portal");
+                        }}
+                        className="text-[11px] font-bold text-[#F0D030] bg-[#F0D030]/10 border border-[#F0D030]/20 rounded-lg px-3 py-1.5 hover:bg-[#F0D030]/20 cursor-pointer transition-colors"
+                      >
+                        Entrar no Portal →
+                      </button>
+                    </div>
+                    {/* URL status */}
+                    <div className="flex items-center gap-2 ml-0 md:ml-[88px]">
+                      {url ? (
+                        <span className="text-[10px] font-mono text-[#7EAA6E]">● URL configurada</span>
+                      ) : (
+                        <span className="text-[10px] font-mono text-[#C06060]">● Sem URL — configure no portal</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
             )}
           </div>
         </section>

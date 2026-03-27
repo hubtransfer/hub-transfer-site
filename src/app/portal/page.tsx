@@ -12,9 +12,7 @@ import ConfigPanel from "@/components/portal/ConfigPanel";
 import ClearDataPanel from "@/components/portal/ClearDataPanel";
 import StatusToast from "@/components/portal/StatusToast";
 import type { Transfer } from "@/lib/transfers";
-import { getSession } from "@/lib/auth";
-
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwwr4_wjibbZgVEDD7JC0VSYce7C8iIvSmJFSbDHO_IX1L5KHSagOxkJZOL0ya746Uicw/exec";
+import { getSession, getHotelUrl } from "@/lib/auth";
 
 export default function PortalPage() {
   const store = useTransferStore();
@@ -22,18 +20,39 @@ export default function PortalPage() {
   const [showConfig, setShowConfig] = useState(false);
   const [showClearData, setShowClearData] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [hotelName, setHotelName] = useState("");
+  const [hotelCode, setHotelCode] = useState("");
+  const [noUrl, setNoUrl] = useState(false);
 
-  // Auto-configure GAS URL and detect role
+  // Auto-configure GAS URL based on session
   useEffect(() => {
-    // Pre-set the GAS URL so hotels don't need to configure
-    if (!localStorage.getItem("webappUrl")) {
-      localStorage.setItem("webappUrl", GAS_URL);
-    }
-    // Detect if admin for showing config panel
     const session = getSession();
-    if (session?.role === "admin") setIsAdmin(true);
+    if (session?.role === "admin") {
+      setIsAdmin(true);
+      // Admin entering a specific hotel portal
+      if (session.code) {
+        setHotelCode(session.code);
+        setHotelName(session.name || session.code);
+        const url = getHotelUrl(session.code);
+        if (url) {
+          localStorage.setItem("webappUrl", url);
+        } else {
+          setNoUrl(true);
+        }
+      }
+    } else if (session?.role === "hotel") {
+      setHotelCode(session.code || "");
+      setHotelName(session.name || "");
+      const url = getHotelUrl(session.code || "");
+      if (url) {
+        localStorage.setItem("webappUrl", url);
+      } else {
+        setNoUrl(true);
+        return; // Don't load if no URL
+      }
+    }
     // Auto-load transfers
-    store.loadFromSheets();
+    if (!noUrl) store.loadFromSheets();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const scrollToForm = useCallback(() => {
@@ -74,21 +93,33 @@ export default function PortalPage() {
         type={store.statusType}
       />
 
+      {/* Admin bar */}
+      {isAdmin && hotelCode && (
+        <div className="bg-[#F0D030]/10 border-b border-[#F0D030]/20 px-4 py-2 text-center">
+          <span className="text-sm text-[#F0D030] font-mono">
+            Modo Administrador — Hotel: {hotelCode}
+          </span>
+          <a href="/admin/partners" className="ml-4 text-xs text-[#888] hover:text-[#F5F5F5] font-mono cursor-pointer">← Voltar</a>
+        </div>
+      )}
+
+      {/* No URL warning */}
+      {noUrl && (
+        <div className="bg-[#C06060]/10 border-b border-[#C06060]/20 px-4 py-4 text-center">
+          <p className="text-sm text-[#C06060] font-semibold">Portal em configuração.</p>
+          <p className="text-xs text-[#888] mt-1">
+            {isAdmin ? "Configure a URL do GAS para este hotel na secção abaixo." : "Contacte o administrador para configurar o acesso."}
+          </p>
+        </div>
+      )}
+
       {/* Header */}
       <header className="bg-gradient-to-br from-hub-black-card to-hub-black border-b border-hub-gold/10">
         <div className="max-w-[1400px] mx-auto px-4 py-8 text-center">
           <Image src="/images/logo.png" alt="HUB Transfer" width={200} height={56} className="h-14 w-auto mx-auto mb-2" priority />
           <p className="text-hub-gray-400 text-lg font-body tracking-wide">
-            Sistema de Gestão de Transfers
+            {hotelName || "Sistema de Gestão de Transfers"}
           </p>
-          <div className="flex justify-center gap-6 mt-4">
-            <span className="bg-hub-gold/10 border border-hub-gold/20 text-hub-gold px-5 py-2 rounded-xl text-sm font-semibold">
-              🏨 Portal Hotéis
-            </span>
-            <span className="bg-hub-gold/10 border border-hub-gold/20 text-hub-gold px-5 py-2 rounded-xl text-sm font-semibold">
-              🚗 HUB Transfer
-            </span>
-          </div>
         </div>
       </header>
 

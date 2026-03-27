@@ -111,6 +111,46 @@ export async function validateLogin(
   }
 }
 
+// ─── Hotel URL management ───
+
+const LS_HOTEL_URLS = "hub_hotel_urls";
+
+const FALLBACK_HOTEL_URLS: Record<string, string> = {
+  ELH: "https://script.google.com/macros/s/AKfycbzt67dsRUlVfhTUHUtpdCUCN6ejEkU_CKlQ-JJ0PLrPboikkHSdWF0_6unIkVykkxxSog/exec",
+  EMH: "https://script.google.com/macros/s/AKfycbxiEN9sN8MynFS4DOsfwOqVcB_3y1FobWeOk_Dl8ftJ318LCDixBSi0T82TnNgca_UuEA/exec",
+};
+
+export function getHotelUrl(code: string): string {
+  if (typeof window === "undefined") return "";
+  try {
+    const stored = localStorage.getItem(LS_HOTEL_URLS);
+    if (stored) {
+      const urls = JSON.parse(stored) as Record<string, string>;
+      if (urls[code.toUpperCase()]) return urls[code.toUpperCase()];
+    }
+  } catch { /* */ }
+  return FALLBACK_HOTEL_URLS[code.toUpperCase()] || "";
+}
+
+export function setHotelUrl(code: string, url: string): void {
+  try {
+    const stored = localStorage.getItem(LS_HOTEL_URLS);
+    const urls: Record<string, string> = stored ? JSON.parse(stored) : {};
+    urls[code.toUpperCase()] = url;
+    localStorage.setItem(LS_HOTEL_URLS, JSON.stringify(urls));
+  } catch { /* */ }
+}
+
+export function getAllHotelUrls(): Record<string, string> {
+  try {
+    const stored = typeof window !== "undefined" ? localStorage.getItem(LS_HOTEL_URLS) : null;
+    const custom = stored ? JSON.parse(stored) as Record<string, string> : {};
+    return { ...FALLBACK_HOTEL_URLS, ...custom };
+  } catch {
+    return { ...FALLBACK_HOTEL_URLS };
+  }
+}
+
 export interface Partner {
   id?: string;
   name: string;
@@ -126,6 +166,7 @@ export interface Hotel {
   name: string;
   hasPassword?: boolean;
   rowIndex?: string;
+  gasUrl?: string;
 }
 
 export async function getPartners(): Promise<{ drivers: Partner[]; hotels: Hotel[] }> {
