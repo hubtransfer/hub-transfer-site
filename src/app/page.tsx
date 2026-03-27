@@ -253,7 +253,7 @@ export default function LandingPage() {
   const [bDest, setBDest] = useState("");
   const [bDate, setBDate] = useState("");
   const [bPax, setBPax] = useState(2);
-  const [bPhone, setBPhone] = useState("+351 ");
+  const [bPhone, setBPhone] = useState("");
   const [routeInfo, setRouteInfo] = useState<{ distance: string; duration: string } | null>(null);
 
   const calcRoute = useCallback(() => {
