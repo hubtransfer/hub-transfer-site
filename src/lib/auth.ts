@@ -49,10 +49,42 @@ export function getRedirectPath(role: string): string {
   }
 }
 
+const LS_ADMIN_PWD = "hub_admin_password";
+const LS_ADMIN_EMAIL = "hub_admin_email";
+
+export function getAdminEmail(): string {
+  if (typeof window === "undefined") return "";
+  return localStorage.getItem(LS_ADMIN_EMAIL) || "";
+}
+
+export function setAdminEmail(email: string): void {
+  localStorage.setItem(LS_ADMIN_EMAIL, email);
+}
+
+export function getLocalAdminPassword(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(LS_ADMIN_PWD);
+}
+
+export function setLocalAdminPassword(pwd: string): void {
+  localStorage.setItem(LS_ADMIN_PWD, pwd);
+}
+
 export async function validateLogin(
   name: string,
   password: string,
 ): Promise<{ success: boolean; session?: AuthSession; message?: string }> {
+  // 1. Check local admin password override first
+  const localAdminPwd = getLocalAdminPassword();
+  if (localAdminPwd && password === localAdminPwd) {
+    const norm = name.toLowerCase().trim();
+    // Accept common admin names
+    if (norm === "admin" || norm === "junior" || norm === "junior gutierez" || norm === "roberta" || norm === "hub" || norm === "hubtransfer") {
+      return { success: true, session: { name, role: "admin" } };
+    }
+  }
+
+  // 2. Call GAS backend
   try {
     const url = `${HUB_CENTRAL_URL}?action=validateLogin&name=${encodeURIComponent(name)}&password=${encodeURIComponent(password)}`;
     const res = await fetch(url, { redirect: "follow" });

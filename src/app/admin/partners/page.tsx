@@ -2,7 +2,110 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { getSession, clearSession, getPartners, updatePassword, type Partner, type Hotel } from "@/lib/auth";
+import {
+  getSession, clearSession, getPartners, updatePassword,
+  validateLogin, getAdminEmail, setAdminEmail, getLocalAdminPassword, setLocalAdminPassword,
+  type Partner, type Hotel,
+} from "@/lib/auth";
+
+/* ─── Admin account section ─── */
+function AdminSection({ adminName }: { adminName: string }) {
+  const [editingPwd, setEditingPwd] = useState(false);
+  const [currentPwd, setCurrentPwd] = useState("");
+  const [newPwd, setNewPwd] = useState("");
+  const [confirmPwd, setConfirmPwd] = useState("");
+  const [pwdError, setPwdError] = useState("");
+  const [pwdSuccess, setPwdSuccess] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const [email, setEmail] = useState(() => getAdminEmail());
+  const [emailSaved, setEmailSaved] = useState(false);
+
+  const hasCustomPwd = !!getLocalAdminPassword();
+
+  const handleSavePwd = useCallback(async () => {
+    setPwdError(""); setPwdSuccess("");
+    if (!currentPwd) { setPwdError("Insira a senha actual."); return; }
+    if (newPwd.length < 6) { setPwdError("Nova senha: mínimo 6 caracteres."); return; }
+    if (newPwd !== confirmPwd) { setPwdError("As senhas não coincidem."); return; }
+
+    setSaving(true);
+    // Validate current password
+    const check = await validateLogin(adminName, currentPwd);
+    setSaving(false);
+
+    if (!check.success) {
+      setPwdError("Senha actual incorrecta.");
+      return;
+    }
+
+    setLocalAdminPassword(newPwd);
+    setPwdSuccess("Senha admin actualizada com sucesso.");
+    setEditingPwd(false);
+    setCurrentPwd(""); setNewPwd(""); setConfirmPwd("");
+    setTimeout(() => setPwdSuccess(""), 3000);
+  }, [adminName, currentPwd, newPwd, confirmPwd]);
+
+  const handleSaveEmail = useCallback(() => {
+    setAdminEmail(email);
+    setEmailSaved(true);
+    setTimeout(() => setEmailSaved(false), 2000);
+  }, [email]);
+
+  return (
+    <section className="bg-[#1A1A1A] border border-[#F0D030]/20 rounded-xl p-5 space-y-4">
+      <div className="flex items-center gap-2 mb-1">
+        <svg className="w-5 h-5 text-[#F0D030]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+        <h2 className="text-base font-bold text-[#F0D030]">Conta Admin</h2>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <span className="text-sm text-[#D0D0D0]">Logado como:</span>
+        <span className="text-sm font-bold text-[#F5F5F5]">{adminName}</span>
+        {hasCustomPwd && <span className="text-[10px] text-[#7EAA6E] bg-[#7EAA6E]/10 px-2 py-0.5 rounded font-mono">Senha personalizada</span>}
+      </div>
+
+      {/* Password */}
+      {!editingPwd ? (
+        <button onClick={() => setEditingPwd(true)}
+          className="text-xs text-[#F0D030] hover:text-[#D4B828] font-mono cursor-pointer">
+          Redefinir senha admin →
+        </button>
+      ) : (
+        <div className="space-y-2 bg-[#0A0A0A] rounded-lg p-4 border border-[#2A2A2A]">
+          <input type="password" value={currentPwd} onChange={(e) => setCurrentPwd(e.target.value)}
+            placeholder="Senha actual" className="w-full h-10 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg px-3 text-sm text-[#F5F5F5] placeholder-[#666] focus:outline-none focus:border-[#F0D030] font-mono" />
+          <input type="password" value={newPwd} onChange={(e) => setNewPwd(e.target.value)}
+            placeholder="Nova senha (mín. 6 caracteres)" className="w-full h-10 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg px-3 text-sm text-[#F5F5F5] placeholder-[#666] focus:outline-none focus:border-[#F0D030] font-mono" />
+          <input type="password" value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)}
+            placeholder="Confirmar nova senha" className="w-full h-10 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg px-3 text-sm text-[#F5F5F5] placeholder-[#666] focus:outline-none focus:border-[#F0D030] font-mono" />
+          {pwdError && <p className="text-xs text-[#C06060]">{pwdError}</p>}
+          <div className="flex gap-2">
+            <button onClick={handleSavePwd} disabled={saving}
+              className="h-9 px-4 bg-[#F0D030] text-[#0A0A0A] text-xs font-bold rounded-lg hover:bg-[#D4B828] disabled:opacity-50 cursor-pointer">
+              {saving ? "A verificar..." : "Guardar"}
+            </button>
+            <button onClick={() => { setEditingPwd(false); setPwdError(""); setCurrentPwd(""); setNewPwd(""); setConfirmPwd(""); }}
+              className="h-9 px-4 text-[#888] text-xs hover:text-[#F5F5F5] cursor-pointer">Cancelar</button>
+          </div>
+        </div>
+      )}
+      {pwdSuccess && <p className="text-xs text-[#7EAA6E] font-mono">{pwdSuccess}</p>}
+
+      {/* Recovery email */}
+      <div className="flex items-center gap-2 pt-2 border-t border-[#2A2A2A]">
+        <label className="text-xs text-[#888] flex-shrink-0 font-mono">Email recuperação:</label>
+        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+          placeholder="admin@hubtransferencia.com"
+          className="flex-1 h-8 bg-[#0A0A0A] border border-[#2A2A2A] rounded px-2 text-xs text-[#F5F5F5] placeholder-[#666] focus:outline-none focus:border-[#F0D030] font-mono" />
+        <button onClick={handleSaveEmail}
+          className="h-8 px-3 text-[10px] font-bold bg-[#222] text-[#D0D0D0] rounded hover:text-[#F5F5F5] cursor-pointer">
+          {emailSaved ? "✓" : "Guardar"}
+        </button>
+      </div>
+    </section>
+  );
+}
 
 /* ─── Skeleton row ─── */
 function SkeletonRow() {
@@ -112,13 +215,16 @@ export default function PartnersPage() {
   const [drivers, setDrivers] = useState<Partner[]>([]);
   const [hotels, setHotels] = useState<Hotel[]>([]);
   const [loading, setLoading] = useState(true);
+  const [adminName, setAdminName] = useState("");
 
   // Auth check
   useEffect(() => {
     const session = getSession();
     if (!session || session.role !== "admin") {
       router.replace("/login");
+      return;
     }
+    setAdminName(session.name);
   }, [router]);
 
   // Load data
@@ -150,6 +256,9 @@ export default function PartnersPage() {
       </header>
 
       <div className="max-w-5xl mx-auto px-4 py-8 space-y-10">
+
+        {/* ═══ ADMIN ACCOUNT ═══ */}
+        {adminName && <AdminSection adminName={adminName} />}
 
         {/* ═══ MOTORISTAS ═══ */}
         <section>
