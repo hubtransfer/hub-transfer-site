@@ -313,8 +313,10 @@ export default function TransferTable({
                   return (
                     <tr
                       key={s.id}
-                      style={{ backgroundColor: `${tripColor}08`, borderLeft: `3px solid ${tripColor}` }}
-                      className="border-b border-[#2A2A2A] hover:bg-hub-black-elevated transition-colors"
+                      style={{ backgroundColor: `${tripColor}26`, borderLeft: `4px solid ${tripColor}` }}
+                      className="border-b border-[#2A2A2A] transition-colors"
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `${tripColor}38`}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = `${tripColor}26`}
                     >
                       {/* ID */}
                       <td className="px-3 py-2.5 text-gray-400 font-mono text-xs">
@@ -333,7 +335,7 @@ export default function TransferTable({
 
                       {/* Tipo */}
                       <td className="px-3 py-2.5 text-xs whitespace-nowrap">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold" style={{ backgroundColor: `${tripColor}15`, color: tripColor, border: `1px solid ${tripColor}30` }}>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold" style={{ backgroundColor: `${tripColor}40`, color: tripColor, border: `1px solid ${tripColor}66` }}>
                           {s.tipoServico}
                         </span>
                         {s.tourNome && (
