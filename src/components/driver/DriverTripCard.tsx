@@ -49,19 +49,19 @@ function formatCountdown(arrTime: string): string | null {
 
 /* ─── SVG Brand Icons ─── */
 const WhatsAppIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
+  <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
 );
 const MapsIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg>
+  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg>
 );
 const WazeIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M12 2C6.5 2 2 6.5 2 12c0 2.3.8 4.4 2.1 6.1L2 22l3.9-2.1c1.7 1.3 3.8 2.1 6.1 2.1 5.5 0 10-4.5 10-10S17.5 2 12 2zm-2 13c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1zm4 0c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1zm2-4H8c0-2.2 1.8-4 4-4s4 1.8 4 4z" /></svg>
+  <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current"><path d="M12 2C6.5 2 2 6.5 2 12c0 2.3.8 4.4 2.1 6.1L2 22l3.9-2.1c1.7 1.3 3.8 2.1 6.1 2.1 5.5 0 10-4.5 10-10S17.5 2 12 2zm-2 13c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1zm4 0c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1zm2-4H8c0-2.2 1.8-4 4-4s4 1.8 4 4z" /></svg>
 );
 const SmsIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>
+  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>
 );
 const PhoneIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" /></svg>
+  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" /></svg>
 );
 
 /* ─── Color config ─── */
@@ -89,6 +89,7 @@ interface DriverTripCardProps {
   onSmsMsg?: (cid: string, type: string, client: string, lang: string, origin: string, hora: string, phone: string) => void;
   driverName?: string;  // logged-in driver name (driver mode) or selected driver (admin mode)
   mode?: "driver" | "admin";
+  isNext?: boolean;     // first non-done trip gets hero treatment
 }
 
 /* ================================================================== */
@@ -100,6 +101,7 @@ export default function DriverTripCard({
   onSetDriver, onDispatch, onClientMsg, onSmsMsg,
   driverName: driverNameProp,
   mode = "driver",
+  isNext = false,
 }: DriverTripCardProps) {
   /* ─ Tick for countdown refresh ─ */
   const [, setTick] = useState(0);
@@ -207,11 +209,12 @@ export default function DriverTripCard({
       onPointerUp={expanded && !isDone ? onUp : undefined}
       onPointerCancel={expanded && !isDone ? onCancel : undefined}
       className={`
-        relative bg-[#1A1A1A] rounded-2xl border border-[#2A2A2A] overflow-hidden
-        border-l-4 ${isSwipeActive || isCompleting ? "border-l-[#F0D030]" : c.border}
-        ${isDone ? "opacity-40" : ""}
+        relative rounded-2xl border overflow-hidden border-l-4 select-none
+        ${isSwipeActive || isCompleting ? "border-l-[#F0D030]" : c.border}
+        ${isDone ? "opacity-40 bg-[#1A1A1A] border-[#2A2A2A]" : ""}
+        ${!isDone && isNext ? "bg-[#1A1A00] border-[#2A2A1A] ring-1 ring-[#F0D030]/20" : ""}
+        ${!isDone && !isNext ? "bg-[#1A1A1A] border-[#2A2A2A] opacity-90" : ""}
         ${isSwipeActive || isCompleting ? `ring-2 ring-[${swipeColor}]/30` : ""}
-        select-none
       `}
       style={{
         transform: isSwiping ? `translateX(${swipeX}px)` : isCompleting ? "translateX(100vw)" : undefined,
@@ -263,31 +266,31 @@ export default function DriverTripCard({
       {/* ════════════════════════════════════════════════ */}
       <div className="cursor-pointer" onClick={toggleExpand}>
         {/* Main row: time | name+tags | price */}
-        <div className="flex items-center gap-3 px-4 py-3">
-          <div className="flex-shrink-0 min-w-[56px]">
-            <span className={`text-xl font-bold font-mono ${c.text}`}>{hora}</span>
+        <div className="flex items-center gap-4 px-5 py-4">
+          <div className="flex-shrink-0 min-w-[60px]">
+            <span className={`text-2xl font-black font-mono ${c.text}`}>{hora}</span>
           </div>
           <div className="flex-1 min-w-0">
             <p
-              className={`text-base font-bold text-white truncate ${expanded ? "cursor-pointer hover:text-[#F0D030] transition-colors" : ""}`}
+              className={`text-lg font-bold text-white truncate ${expanded ? "cursor-pointer hover:text-[#F0D030] transition-colors" : ""}`}
               onClick={expanded ? (e) => { e.stopPropagation(); onShowNameplate(viagem.client, viagem.destination); } : undefined}
             >
               {viagem.client}
             </p>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${c.bg} ${c.text}`}>{tipo}</span>
-              {viagem.pax && <span className="text-[10px] font-mono text-[#D0D0D0]">{viagem.pax} pax</span>}
-              {expanded && <span className="text-[10px] text-[#666666]">▲</span>}
-              {!expanded && <span className="text-[10px] text-[#666666]">▼</span>}
+            <div className="flex items-center gap-2 mt-1">
+              <span className={`text-xs font-bold uppercase px-2.5 py-1 rounded-md ${c.bg} ${c.text}`}>{tipo}</span>
+              {viagem.pax && <span className="text-sm font-mono font-bold text-[#D0D0D0]">{viagem.pax} pax</span>}
+              {expanded && <span className="text-xs text-[#666666]">▲</span>}
+              {!expanded && <span className="text-xs text-[#666666]">▼</span>}
             </div>
           </div>
-          <div className="flex-shrink-0 text-right flex flex-col items-end gap-0.5">
+          <div className="flex-shrink-0 text-right flex flex-col items-end gap-1">
             {mode === "admin" && (
               viagem.driver
-                ? <span className="font-mono text-[10px] font-semibold text-[#7EAA6E]/80 truncate max-w-[80px]">{viagem.driver}</span>
-                : <span className="font-mono text-[10px] text-[#666666]">Sem motorista</span>
+                ? <span className="font-mono text-xs font-semibold text-[#7EAA6E]/80 truncate max-w-[80px]">{viagem.driver}</span>
+                : <span className="font-mono text-xs text-[#666666]">Sem motorista</span>
             )}
-            {price > 0 && <span className="font-mono text-sm font-bold text-[#F0D030]">€{price}</span>}
+            {price > 0 && <span className="font-mono text-base font-bold text-[#F0D030]">€{price}</span>}
           </div>
         </div>
 
@@ -301,33 +304,33 @@ export default function DriverTripCard({
             className="flex items-center gap-2.5 px-4 pb-3 pt-0.5 cursor-pointer hover:bg-[#151515] transition-colors rounded-b-2xl"
           >
             {/* Origin: flag (if known) + IATA or ✈ */}
-            <div className="flex items-center gap-1 flex-shrink-0 min-w-[40px]">
-              <span className="text-sm leading-none">{originFlag || "✈️"}</span>
-              {depIata && <span className="font-mono text-xs font-bold text-[#E5E5E5]">{depIata}</span>}
+            <div className="flex items-center gap-1 flex-shrink-0 min-w-[44px]">
+              <span className="text-base leading-none">{originFlag || "✈️"}</span>
+              {depIata && <span className="font-mono text-sm font-bold text-[#E5E5E5]">{depIata}</span>}
             </div>
             {/* Progress bar + flight number */}
             <div className="flex-1 relative">
-              <div className="h-2.5 rounded-full bg-[#222222] overflow-hidden">
+              <div className="h-3 rounded-full bg-[#222222] overflow-hidden">
                 <div className={`h-full rounded-full transition-all duration-1000 ${bar.pulse ? "animate-flight-pulse" : ""}`}
                   style={{ width: `${Math.max(flightProg, 4)}%`, backgroundColor: bar.color }} />
               </div>
               {viagem.flight && (
-                <span className="absolute -top-4 left-1/2 -translate-x-1/2 font-mono text-sm font-bold text-[#E5E5E5] hover:text-[#F0D030] transition-colors">
+                <span className="absolute -top-4 left-1/2 -translate-x-1/2 font-mono text-base font-bold text-[#E5E5E5] hover:text-[#F0D030] transition-colors">
                   {viagem.flight}
                 </span>
               )}
               {flightProg > 8 && flightProg < 92 && (
-                <span className="absolute top-0 text-[9px] leading-none" style={{ left: `calc(${flightProg}% - 5px)`, transform: "translateY(-50%)", filter: "drop-shadow(0 0 2px rgba(0,0,0,.8))" }}>✈</span>
+                <span className="absolute top-0 text-[10px] leading-none" style={{ left: `calc(${flightProg}% - 5px)`, transform: "translateY(-50%)", filter: "drop-shadow(0 0 2px rgba(0,0,0,.8))" }}>✈</span>
               )}
             </div>
             {/* Destination: always Portugal LIS */}
             <div className="flex items-center gap-1 flex-shrink-0">
-              <span className="font-mono text-xs font-bold" style={{ color: bar.color }}>LIS</span>
-              <span className="text-sm leading-none">🇵🇹</span>
+              <span className="font-mono text-sm font-bold" style={{ color: bar.color }}>LIS</span>
+              <span className="text-base leading-none">🇵🇹</span>
             </div>
-            <div className="flex flex-col items-end flex-shrink-0 min-w-[48px]">
-              {arrTime !== "—:—" && <span className="font-mono text-base font-black leading-none" style={{ color: bar.color }}>{arrTime}</span>}
-              {countdown && <span className="font-mono text-[9px] leading-tight mt-0.5" style={{ color: `${bar.color}99` }}>{countdown}</span>}
+            <div className="flex flex-col items-end flex-shrink-0 min-w-[52px]">
+              {arrTime !== "—:—" && <span className="font-mono text-lg font-black leading-none" style={{ color: bar.color }}>{arrTime}</span>}
+              {countdown && <span className="font-mono text-[10px] leading-tight mt-0.5" style={{ color: `${bar.color}99` }}>{countdown}</span>}
             </div>
           </a>
         )}
@@ -352,28 +355,28 @@ export default function DriverTripCard({
                 style={{ backgroundColor: `${c.hex}08` }}
                 onClick={viagem.flight ? () => window.open(`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`, "_blank") : undefined}
               >
-                <div className="flex items-center justify-between text-xs mb-2">
+                <div className="flex items-center justify-between text-sm mb-2">
                   {/* Origin airport + flag (only if tracking data available) */}
                   <div className="text-center">
-                    <p className="text-base mb-0.5">{originFlag || "✈️"}</p>
-                    {depIata && <p className="font-mono font-bold text-sm" style={{ color: c.hex }}>{depIata}</p>}
-                    <p className="text-[10px] text-[#D0D0D0]">{viagem.depCity || ""}</p>
-                    {viagem.depTime && <p className="font-mono text-[10px] text-[#D0D0D0] mt-0.5">{viagem.depTime}</p>}
+                    <p className="text-lg mb-0.5">{originFlag || "✈️"}</p>
+                    {depIata && <p className="font-mono font-bold text-base" style={{ color: c.hex }}>{depIata}</p>}
+                    <p className="text-xs text-[#D0D0D0]">{viagem.depCity || ""}</p>
+                    {viagem.depTime && <p className="font-mono text-xs text-[#D0D0D0] mt-0.5">{viagem.depTime}</p>}
                   </div>
                   {/* Progress bar + flight number */}
-                  <div className="flex-1 mx-3">
-                    <div className="relative w-full h-2.5 rounded-full bg-[#222222] overflow-hidden">
+                  <div className="flex-1 mx-4">
+                    <div className="relative w-full h-3 rounded-full bg-[#222222] overflow-hidden">
                       <div className={`h-full rounded-full ${bar.pulse ? "animate-flight-pulse" : ""}`}
                         style={{ width: `${Math.max(flightProg, 4)}%`, backgroundColor: bar.color }} />
                     </div>
-                    {viagem.flight && <p className="text-center font-mono text-sm font-bold mt-1" style={{ color: c.hex }}>{viagem.flight}</p>}
+                    {viagem.flight && <p className="text-center font-mono text-base font-bold mt-1.5" style={{ color: c.hex }}>{viagem.flight}</p>}
                   </div>
                   {/* Destination: always Portugal LIS */}
                   <div className="text-center">
-                    <p className="text-base mb-0.5">🇵🇹</p>
-                    <p className="font-mono font-bold text-sm" style={{ color: c.hex }}>LIS</p>
-                    <p className="text-[10px] text-[#D0D0D0]">Lisboa</p>
-                    {viagem.arrTime && <p className="font-mono text-[10px] text-[#D0D0D0] mt-0.5">{viagem.arrTime}</p>}
+                    <p className="text-lg mb-0.5">🇵🇹</p>
+                    <p className="font-mono font-bold text-base" style={{ color: c.hex }}>LIS</p>
+                    <p className="text-xs text-[#D0D0D0]">Lisboa</p>
+                    {viagem.arrTime && <p className="font-mono text-xs text-[#D0D0D0] mt-0.5">{viagem.arrTime}</p>}
                   </div>
                 </div>
                 {(viagem.depTerminal || viagem.arrTerminal) && (
@@ -386,21 +389,21 @@ export default function DriverTripCard({
             )}
 
             {/* ── Route: Origin + Destination — clickable to copy, real icons ── */}
-            <div className="px-4 py-3 border-t border-[#2A2A2A] space-y-3">
+            <div className="px-5 py-4 border-t border-[#2A2A2A] space-y-4">
               {/* Origin */}
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-wider text-[#F0D030] mb-1">{tipo === "CHEGADA" ? "Origem — Aeroporto" : "Origem — Recolha"}</p>
+                <p className="font-mono text-xs uppercase tracking-wider text-[#F0D030] mb-1.5">{tipo === "CHEGADA" ? "Origem — Aeroporto" : "Origem — Recolha"}</p>
                 <button type="button" onClick={() => copyWithToast(viagem.origin)} className="text-left w-full active:opacity-70 transition-opacity">
-                  {originLoc.name && <p className="text-sm font-bold text-white">{originLoc.name}</p>}
-                  <p className="text-xs text-[#E5E5E5]">{originLoc.addr}</p>
+                  {originLoc.name && <p className="text-base font-bold text-white">{originLoc.name}</p>}
+                  <p className="text-sm text-[#E5E5E5]">{originLoc.addr}</p>
                 </button>
-                <div className="grid grid-cols-2 gap-2 mt-2">
+                <div className="grid grid-cols-2 gap-2.5 mt-3">
                   <a href={getMapUrl(viagem.origin)} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 h-12 rounded-xl bg-[#4285f4]/10 border border-[#4285f4]/20 text-[#4285f4] font-mono text-sm font-bold active:bg-[#4285f4]/20 transition-colors">
+                    className="flex items-center justify-center gap-2.5 h-14 rounded-xl bg-[#4285f4]/10 border border-[#4285f4]/20 text-[#4285f4] font-mono text-base font-bold active:bg-[#4285f4]/20 transition-colors">
                     <MapsIcon /> Google Maps
                   </a>
                   <a href={getWazeUrl(viagem.origin)} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 h-12 rounded-xl bg-[#35c5f0]/10 border border-[#35c5f0]/20 text-[#35c5f0] font-mono text-sm font-bold active:bg-[#35c5f0]/20 transition-colors">
+                    className="flex items-center justify-center gap-2.5 h-14 rounded-xl bg-[#35c5f0]/10 border border-[#35c5f0]/20 text-[#35c5f0] font-mono text-base font-bold active:bg-[#35c5f0]/20 transition-colors">
                     <WazeIcon /> Waze
                   </a>
                 </div>
@@ -408,18 +411,18 @@ export default function DriverTripCard({
               {/* Destination */}
               {viagem.destination && (
                 <div>
-                  <p className="font-mono text-[10px] uppercase tracking-wider text-[#F0D030] mb-1">Destino</p>
+                  <p className="font-mono text-xs uppercase tracking-wider text-[#F0D030] mb-1.5">Destino</p>
                   <button type="button" onClick={() => copyWithToast(viagem.destination)} className="text-left w-full active:opacity-70 transition-opacity">
-                    {destLoc.name && <p className="text-sm font-bold text-white">{destLoc.name}</p>}
-                    <p className="text-xs text-[#E5E5E5]">{destLoc.addr}</p>
+                    {destLoc.name && <p className="text-base font-bold text-white">{destLoc.name}</p>}
+                    <p className="text-sm text-[#E5E5E5]">{destLoc.addr}</p>
                   </button>
-                  <div className="grid grid-cols-2 gap-2 mt-2">
+                  <div className="grid grid-cols-2 gap-2.5 mt-3">
                     <a href={getMapUrl(viagem.destination)} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 h-12 rounded-xl bg-[#4285f4]/10 border border-[#4285f4]/20 text-[#4285f4] font-mono text-sm font-bold active:bg-[#4285f4]/20 transition-colors">
+                      className="flex items-center justify-center gap-2.5 h-14 rounded-xl bg-[#4285f4]/10 border border-[#4285f4]/20 text-[#4285f4] font-mono text-base font-bold active:bg-[#4285f4]/20 transition-colors">
                       <MapsIcon /> Google Maps
                     </a>
                     <a href={getWazeUrl(viagem.destination)} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 h-12 rounded-xl bg-[#35c5f0]/10 border border-[#35c5f0]/20 text-[#35c5f0] font-mono text-sm font-bold active:bg-[#35c5f0]/20 transition-colors">
+                      className="flex items-center justify-center gap-2.5 h-14 rounded-xl bg-[#35c5f0]/10 border border-[#35c5f0]/20 text-[#35c5f0] font-mono text-base font-bold active:bg-[#35c5f0]/20 transition-colors">
                       <WazeIcon /> Waze
                     </a>
                   </div>
@@ -428,23 +431,23 @@ export default function DriverTripCard({
             </div>
 
             {/* ── Actions ── */}
-            <div className="border-t border-[#2A2A2A] bg-[#111111] px-4 py-3 space-y-3">
+            <div className="border-t border-[#2A2A2A] bg-[#111111] px-5 py-4 space-y-3">
               {/* Phone — click to copy */}
               {viagem.phone && (
                 <button type="button" onClick={() => copyWithToast(`+${viagem.phone!.replace(/\D/g, "")}`)}
-                  className="w-full h-11 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] font-mono text-sm text-[#E5E5E5] active:bg-[#2A2A2A] transition-colors flex items-center justify-center gap-2">
+                  className="w-full h-14 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] font-mono text-base text-[#E5E5E5] active:bg-[#2A2A2A] transition-colors flex items-center justify-center gap-2.5">
                   <PhoneIcon /> +{viagem.phone.replace(/\D/g, "")}
                 </button>
               )}
 
               {/* WhatsApp + SMS — smart templates */}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2.5">
                 {viagem.phone && (
                   <button type="button" onClick={() => {
                     const drv = driverNameProp || viagem.driver || "o motorista";
                     window.open(generateDriverWhatsAppURL(viagem, drv), "_blank");
                   }}
-                    className="flex items-center justify-center gap-2 h-12 rounded-xl bg-[#25d366]/10 border border-[#25d366]/20 text-[#25d366] font-mono text-sm font-bold active:bg-[#25d366]/20 transition-colors">
+                    className="flex items-center justify-center gap-2.5 h-14 rounded-xl bg-[#25d366]/10 border border-[#25d366]/20 text-[#25d366] font-mono text-base font-bold active:bg-[#25d366]/20 transition-colors">
                     <WhatsAppIcon /> WhatsApp
                   </button>
                 )}
@@ -453,7 +456,7 @@ export default function DriverTripCard({
                     const drv = driverNameProp || viagem.driver || "o motorista";
                     window.open(generateDriverSmsURL(viagem, drv), "_blank");
                   }}
-                    className="flex items-center justify-center gap-2 h-12 rounded-xl bg-[#8B9DAF]/10 border border-[#8B9DAF]/20 text-[#8B9DAF] font-mono text-sm font-bold active:bg-[#8B9DAF]/20 transition-colors">
+                    className="flex items-center justify-center gap-2.5 h-14 rounded-xl bg-[#8B9DAF]/10 border border-[#8B9DAF]/20 text-[#8B9DAF] font-mono text-base font-bold active:bg-[#8B9DAF]/20 transition-colors">
                     <SmsIcon /> SMS
                   </button>
                 )}
@@ -462,14 +465,14 @@ export default function DriverTripCard({
               {/* Admin-only: driver selector + dispatch */}
               {mode === "admin" && drivers && onSetDriver && (
                 <select value={viagem.driver ?? ""} onChange={(e) => onSetDriver(cardId, e.target.value)}
-                  className="w-full h-12 bg-black/50 border border-[#2A2A2A] rounded-xl px-4 font-mono text-sm text-white/90 focus:outline-none focus:border-[#F0D030]/40">
+                  className="w-full h-14 bg-black/50 border border-[#2A2A2A] rounded-xl px-4 font-mono text-base text-white/90 focus:outline-none focus:border-[#F0D030]/40">
                   <option value="">Atribuir motorista...</option>
                   {drivers.map((d) => <option key={d.name} value={d.name}>{d.name}{d.viatura ? ` · ${d.viatura}` : ""}</option>)}
                 </select>
               )}
               {mode === "admin" && onDispatch && (
                 <button type="button" onClick={() => onDispatch(cardId, tipo, viagem.client, lang, viagem.origin, hora)}
-                  className="w-full h-12 rounded-xl border transition-colors font-mono text-sm font-bold"
+                  className="w-full h-14 rounded-xl border transition-colors font-mono text-base font-bold"
                   style={{ backgroundColor: `${c.hex}15`, color: c.hex, borderColor: `${c.hex}33` }}>
                   ⚡ Enviar Template Motorista
                 </button>
@@ -478,12 +481,12 @@ export default function DriverTripCard({
               {/* Dar Baixa button (fallback for non-swipe) */}
               {!isDone && (
                 <button type="button" onClick={() => onDarBaixa(viagem.id, viagem.rowIndex ?? "", cardId)}
-                  className="w-full h-12 rounded-xl bg-[#7EAA6E]/10 border border-[#7EAA6E]/20 text-[#7EAA6E] font-mono text-sm font-bold active:bg-[#7EAA6E]/20 transition-colors">
+                  className="w-full h-14 rounded-2xl bg-[#7EAA6E]/15 border border-[#7EAA6E]/20 text-[#7EAA6E] font-mono text-base font-bold active:bg-[#7EAA6E]/25 transition-colors">
                   ✅ Dar Baixa
                 </button>
               )}
               {isDone && (
-                <div className="w-full h-12 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-[#999] font-mono text-sm">
+                <div className="w-full h-14 rounded-2xl bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-[#999] font-mono text-base">
                   ✅ Concluída
                 </div>
               )}

@@ -201,27 +201,27 @@ export default function DriverTripsPage() {
       {/* ── STATS ── */}
       <div className="px-4 pt-3 pb-2 space-y-2">
         <div className="flex gap-2">
-          <div className="flex-1 bg-blue-500/10 rounded-lg px-3 py-2 text-center">
-            <div className="text-lg font-bold text-blue-400 font-mono">
+          <div className="flex-1 bg-[#F0D030]/10 rounded-lg px-3 py-2.5 text-center">
+            <div className="text-xl font-bold text-[#F0D030] font-mono">
               {stats.total}
             </div>
-            <div className="text-[10px] text-white/40 uppercase font-mono">
+            <div className="text-xs text-[#D0D0D0] uppercase font-mono">
               Total
             </div>
           </div>
-          <div className="flex-1 bg-[#D4A847]/10 rounded-lg px-3 py-2 text-center">
-            <div className="text-lg font-bold text-[#D4A847] font-mono">
+          <div className="flex-1 bg-[#D4A847]/10 rounded-lg px-3 py-2.5 text-center">
+            <div className="text-xl font-bold text-[#D4A847] font-mono">
               {stats.chegadas}
             </div>
-            <div className="text-[10px] text-[#D4D4D4] uppercase font-mono">
+            <div className="text-xs text-[#D0D0D0] uppercase font-mono">
               Chegadas
             </div>
           </div>
-          <div className="flex-1 bg-[#8B9DAF]/10 rounded-lg px-3 py-2 text-center">
-            <div className="text-lg font-bold text-[#8B9DAF] font-mono">
+          <div className="flex-1 bg-[#8B9DAF]/10 rounded-lg px-3 py-2.5 text-center">
+            <div className="text-xl font-bold text-[#8B9DAF] font-mono">
               {stats.recolhas}
             </div>
-            <div className="text-[10px] text-white/40 uppercase font-mono">
+            <div className="text-xs text-[#D0D0D0] uppercase font-mono">
               Recolhas
             </div>
           </div>
@@ -294,16 +294,28 @@ export default function DriverTripsPage() {
           </div>
         ) : (
           <>
-            {nonDoneTrips.map((viagem) => {
+            {nonDoneTrips.map((viagem, i) => {
               const vId = viagem.id || (viagem.client || "x").replace(/\W/g, "");
               return (
-                <DriverTripCard
-                  key={vId}
-                  viagem={viagem}
-                  driverName={store.driverName}
-                  onDarBaixa={store.darBaixa}
-                  onShowNameplate={openNameplate}
-                />
+                <React.Fragment key={vId}>
+                  {i === 0 && nonDoneTrips.length > 1 && (
+                    <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#F0D030] px-1">
+                      Pr&oacute;xima viagem
+                    </p>
+                  )}
+                  {i === 1 && (
+                    <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#666] px-1 pt-1">
+                      Mais tarde
+                    </p>
+                  )}
+                  <DriverTripCard
+                    viagem={viagem}
+                    driverName={store.driverName}
+                    onDarBaixa={store.darBaixa}
+                    onShowNameplate={openNameplate}
+                    isNext={i === 0}
+                  />
+                </React.Fragment>
               );
             })}
 
