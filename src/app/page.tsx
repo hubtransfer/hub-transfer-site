@@ -248,7 +248,7 @@ export default function LandingPage() {
   }, [drawerOpen]);
 
   /* ── Booking state ── */
-  const [bOrigin, setBOrigin] = useState("");
+  const [bOrigin, setBOrigin] = useState("Aeroporto de Lisboa (LIS), Lisboa, Portugal");
   const [bDest, setBDest] = useState("");
   const [bDate, setBDate] = useState("");
   const [bPax, setBPax] = useState(2);
@@ -855,57 +855,49 @@ export default function LandingPage() {
                     </div>
 
                     <div className="space-y-3">
-                      {/* Origin */}
+                      {/* Origin — single button, pre-selected */}
                       <div>
-                        <label className="text-[#F0D030] text-[10px] tracking-wider uppercase block mb-1">{lang === "PT" ? "ORIGEM" : lang === "ES" ? "ORIGEN" : lang === "FR" ? "ORIGINE" : lang === "IT" ? "ORIGINE" : "FROM"}</label>
-                        <div className="flex gap-1.5 mb-1.5">
-                          <button type="button" onClick={() => setBOrigin("Aeroporto de Lisboa (LIS), Lisboa, Portugal")}
-                            className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${bOrigin.includes("Aeroporto") ? "border-[#F0D030]/40 text-[#F0D030] bg-[#F0D030]/10" : "border-white/12 text-[#B0B0B0]"}`}>
-                            Aeroporto de Lisboa
-                          </button>
-                        </div>
-                        <input id="drawerOrigin" type="text" value={bOrigin} onChange={(e) => setBOrigin(e.target.value)}
-                          placeholder={lang === "PT" ? "Endereço..." : "Address..."}
-                          className="w-full h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 text-[#F5F5F5] text-sm placeholder-[#666] focus:outline-none focus:border-[#F0D030] transition-colors" />
+                        <label className="text-[#F0D030] text-[10px] tracking-wider uppercase block mb-1.5">{lang === "PT" ? "ORIGEM" : lang === "ES" ? "ORIGEN" : lang === "FR" ? "ORIGINE" : lang === "IT" ? "ORIGINE" : "FROM"}</label>
+                        <button type="button" onClick={() => setBOrigin("Aeroporto de Lisboa (LIS), Lisboa, Portugal")}
+                          className={`w-full text-left text-sm px-3 py-2.5 rounded-lg border transition-colors cursor-pointer ${bOrigin.includes("Aeroporto") ? "border-[#F0D030]/40 text-[#F0D030] bg-[#F0D030]/10" : "border-white/12 text-[#B0B0B0] bg-white/[0.06]"}`}>
+                          ✈ Aeroporto de Lisboa
+                        </button>
                       </div>
 
-                      {/* Destination */}
+                      {/* Destination — 3 quick buttons */}
                       <div>
-                        <label className="text-[#F0D030] text-[10px] tracking-wider uppercase block mb-1">{lang === "PT" ? "DESTINO" : lang === "ES" ? "DESTINO" : lang === "FR" ? "DESTINATION" : lang === "IT" ? "DESTINAZIONE" : "TO"}</label>
-                        <div className="flex gap-1.5 mb-1.5 flex-wrap">
+                        <label className="text-[#F0D030] text-[10px] tracking-wider uppercase block mb-1.5">{lang === "PT" ? "DESTINO" : lang === "ES" ? "DESTINO" : lang === "FR" ? "DESTINATION" : lang === "IT" ? "DESTINAZIONE" : "TO"}</label>
+                        <div className="grid grid-cols-3 gap-2">
                           {[
-                            { l: "Aeroporto", v: "Aeroporto de Lisboa (LIS), Lisboa, Portugal" },
-                            { l: "Cascais", v: "Cascais, Portugal" },
-                            { l: "Sintra", v: "Sintra, Portugal" },
+                            { l: "✈ Aeroporto", v: "Aeroporto de Lisboa (LIS), Lisboa, Portugal" },
+                            { l: "🏖 Cascais", v: "Cascais, Portugal" },
+                            { l: "🏰 Sintra", v: "Sintra, Portugal" },
                           ].map((q) => (
                             <button key={q.l} type="button" onClick={() => setBDest(q.v)}
-                              className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${bDest === q.v ? "border-[#F0D030]/40 text-[#F0D030] bg-[#F0D030]/10" : "border-white/12 text-[#B0B0B0]"}`}>
+                              className={`text-sm px-2 py-2.5 rounded-lg border text-center transition-colors cursor-pointer ${bDest === q.v ? "border-[#F0D030]/40 text-[#F0D030] bg-[#F0D030]/10" : "border-white/12 text-[#B0B0B0] bg-white/[0.06]"}`}>
                               {q.l}
                             </button>
                           ))}
                         </div>
-                        <input id="drawerDest" type="text" value={bDest} onChange={(e) => setBDest(e.target.value)}
-                          placeholder={lang === "PT" ? "Endereço..." : "Address..."}
-                          className="w-full h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 text-[#F5F5F5] text-sm placeholder-[#666] focus:outline-none focus:border-[#F0D030] transition-colors" />
                       </div>
 
-                      {/* Date + Pax — same line */}
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="text-[#F0D030] text-[10px] tracking-wider uppercase block mb-1">{lang === "PT" ? "DATA" : lang === "ES" ? "FECHA" : lang === "FR" ? "DATE" : "DATE"}</label>
-                          <input type="date" value={bDate} onChange={(e) => setBDate(e.target.value)}
-                            className="w-full h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 text-[#F5F5F5] text-sm focus:outline-none focus:border-[#F0D030] [color-scheme:dark] transition-colors" />
-                        </div>
-                        <div>
-                          <label className="text-[#F0D030] text-[10px] tracking-wider uppercase block mb-1">{lang === "PT" ? "PAX" : "PAX"}</label>
-                          <div className="flex gap-1">
-                            {[1, 2, 3, 4, 5, 6].map((n) => (
-                              <button key={n} type="button" onClick={() => setBPax(n)}
-                                className={`flex-1 h-[44px] text-sm font-medium rounded-lg transition-colors cursor-pointer ${bPax === n ? "bg-[#F0D030] text-[#0A0A0A]" : "bg-white/[0.06] border border-white/[0.12] text-[#B0B0B0]"}`}>
-                                {n}
-                              </button>
-                            ))}
-                          </div>
+                      {/* Date — full width */}
+                      <div>
+                        <label className="text-[#F0D030] text-[10px] tracking-wider uppercase block mb-1.5">{lang === "PT" ? "DATA" : lang === "ES" ? "FECHA" : lang === "FR" ? "DATE" : "DATE"}</label>
+                        <input type="date" value={bDate} onChange={(e) => setBDate(e.target.value)}
+                          className="w-full h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 text-[#F5F5F5] text-sm focus:outline-none focus:border-[#F0D030] [color-scheme:dark] transition-colors" />
+                      </div>
+
+                      {/* Pax — separate row */}
+                      <div>
+                        <label className="text-[#F0D030] text-[10px] tracking-wider uppercase block mb-1.5">{lang === "PT" ? "PASSAGEIROS" : lang === "ES" ? "PASAJEROS" : lang === "FR" ? "PASSAGERS" : lang === "IT" ? "PASSEGGERI" : "PASSENGERS"}</label>
+                        <div className="flex gap-1.5">
+                          {[1, 2, 3, 4, 5, 6].map((n) => (
+                            <button key={n} type="button" onClick={() => setBPax(n)}
+                              className={`flex-1 h-10 text-sm font-medium rounded-lg transition-colors cursor-pointer ${bPax === n ? "bg-[#F0D030] text-[#0A0A0A]" : "bg-white/[0.06] border border-white/[0.12] text-[#B0B0B0]"}`}>
+                              {n}
+                            </button>
+                          ))}
                         </div>
                       </div>
 
