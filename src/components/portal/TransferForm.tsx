@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import PhoneInput from "@/components/PhoneInput";
 import {
   Transfer,
   TOURS_DATA,
@@ -448,13 +449,10 @@ export default function TransferForm({
         <label className={labelClass}>
           📱 Contacto do Cliente <span className="text-hub-error">*</span>
         </label>
-        <input
-          type="tel"
+        <PhoneInput
           value={contacto}
-          onChange={(e) => setContacto(e.target.value)}
-          className={inputClass}
-          placeholder="+351 912 345 678"
-          required
+          onChange={setContacto}
+          defaultCountry="PT"
         />
       </div>
 

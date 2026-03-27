@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Phone, Mail, MapPin, Facebook, Instagram, ExternalLink, ArrowRight, ChevronDown, Crosshair, Radar, Headphones, Radio, BellRing, MessageSquareOff, Lock, Clock, ShieldCheck } from "lucide-react";
 import Script from "next/script";
 import Image from "next/image";
+import PhoneInput from "@/components/PhoneInput";
 import { COMPANY } from "@/lib/constants";
 import { getLandingT, type LandingLang } from "@/lib/landing-translations";
 // import ThemeToggle, { useTheme } from "@/components/ThemeToggle";
@@ -909,12 +910,10 @@ export default function LandingPage() {
                         </div>
                       </div>
 
-                      {/* Phone */}
+                      {/* Phone with DDI selector */}
                       <div>
                         <label className="text-[#F0D030] text-[10px] tracking-wider uppercase block mb-1">WHATSAPP</label>
-                        <input type="tel" value={bPhone} onChange={(e) => setBPhone(e.target.value)}
-                          placeholder="+351 912 345 678"
-                          className="w-full h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 text-[#F5F5F5] text-sm placeholder-[#666] focus:outline-none focus:border-[#F0D030] transition-colors" />
+                        <PhoneInput value={bPhone} onChange={setBPhone} defaultCountry="PT" />
                       </div>
 
                       {/* Route info */}
