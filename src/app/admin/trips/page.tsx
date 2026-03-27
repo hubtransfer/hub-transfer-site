@@ -255,6 +255,11 @@ export default function TripsPage() {
               </span>
             </button>
           ))}
+          {/* Partners link */}
+          <a href="/admin/partners"
+            className="w-full text-left px-4 py-3 font-mono text-sm text-zinc-400 hover:bg-hub-black-elevated hover:text-[#F0D030] transition-all flex items-center gap-2 border-t border-[#2A2A2A] mt-1">
+            👥 Parceiros
+          </a>
         </nav>
 
         {/* Sync status */}
