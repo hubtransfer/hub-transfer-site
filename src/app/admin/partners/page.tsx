@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   getSession, clearSession, setSession, getPartners, updatePassword,
   validateLogin, getAdminEmail, setAdminEmail, getLocalAdminPassword, setLocalAdminPassword,
-  getHotelUrl, setHotelUrl, getAllHotelUrls,
+  getHotelUrlSync,
   type Partner, type Hotel,
 } from "@/lib/auth";
 
@@ -312,7 +312,7 @@ export default function PartnersPage() {
               <div className="text-center py-10 text-[#666] text-sm font-mono">Nenhum hotel encontrado</div>
             ) : (
               hotels.map((h, i) => {
-                const url = getHotelUrl(h.code);
+                const url = getHotelUrlSync(h.code);
                 return (
                   <div key={i} className="space-y-2 px-4 py-3 border-b border-[#2A2A2A]/50 hover:bg-[#1A1A1A]">
                     <div className="grid grid-cols-1 md:grid-cols-[80px_1fr_150px_140px] gap-2 items-center">

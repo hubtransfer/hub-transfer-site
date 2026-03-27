@@ -12,7 +12,7 @@ import ConfigPanel from "@/components/portal/ConfigPanel";
 import ClearDataPanel from "@/components/portal/ClearDataPanel";
 import StatusToast from "@/components/portal/StatusToast";
 import type { Transfer } from "@/lib/transfers";
-import { getSession, getHotelUrl } from "@/lib/auth";
+import { getSession, fetchHotelUrl, saveHotelUrl } from "@/lib/auth";
 
 export default function PortalPage() {
   const store = useTransferStore();
@@ -23,36 +23,36 @@ export default function PortalPage() {
   const [hotelName, setHotelName] = useState("");
   const [hotelCode, setHotelCode] = useState("");
   const [noUrl, setNoUrl] = useState(false);
+  const [hotelGasUrl, setHotelGasUrl] = useState("");
+  const [urlSaving, setUrlSaving] = useState(false);
+  const [urlToast, setUrlToast] = useState("");
 
-  // Auto-configure GAS URL based on session
+  // Auto-configure GAS URL based on session — fetch from backend
   useEffect(() => {
     const session = getSession();
-    if (session?.role === "admin") {
-      setIsAdmin(true);
-      // Admin entering a specific hotel portal
-      if (session.code) {
-        setHotelCode(session.code);
-        setHotelName(session.name || session.code);
-        const url = getHotelUrl(session.code);
-        if (url) {
-          localStorage.setItem("webappUrl", url);
-        } else {
-          setNoUrl(true);
-        }
+    const code = session?.code || "";
+    if (session?.role === "admin") setIsAdmin(true);
+    if (code) {
+      setHotelCode(code);
+      setHotelName(session?.name || code);
+    }
+
+    (async () => {
+      if (!code) {
+        // No hotel code — try loading with whatever webappUrl exists
+        store.loadFromSheets();
+        return;
       }
-    } else if (session?.role === "hotel") {
-      setHotelCode(session.code || "");
-      setHotelName(session.name || "");
-      const url = getHotelUrl(session.code || "");
+      // Fetch URL from backend
+      const url = await fetchHotelUrl(code);
       if (url) {
         localStorage.setItem("webappUrl", url);
+        setHotelGasUrl(url);
+        store.loadFromSheets();
       } else {
         setNoUrl(true);
-        return; // Don't load if no URL
       }
-    }
-    // Auto-load transfers
-    if (!noUrl) store.loadFromSheets();
+    })();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const scrollToForm = useCallback(() => {
@@ -93,13 +93,56 @@ export default function PortalPage() {
         type={store.statusType}
       />
 
-      {/* Admin bar */}
+      {/* Admin bar + URL editor */}
       {isAdmin && hotelCode && (
-        <div className="bg-[#F0D030]/10 border-b border-[#F0D030]/20 px-4 py-2 text-center">
-          <span className="text-sm text-[#F0D030] font-mono">
-            Modo Administrador — Hotel: {hotelCode}
-          </span>
-          <a href="/admin/partners" className="ml-4 text-xs text-[#888] hover:text-[#F5F5F5] font-mono cursor-pointer">← Voltar</a>
+        <div className="bg-[#F0D030]/10 border-b border-[#F0D030]/20 px-4 py-3">
+          <div className="max-w-[1400px] mx-auto">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-[#F0D030] font-mono font-bold">
+                Modo Administrador — Hotel: {hotelCode}
+              </span>
+              <a href="/admin/partners" className="text-xs text-[#888] hover:text-[#F5F5F5] font-mono cursor-pointer">← Voltar</a>
+            </div>
+            {/* URL editor */}
+            <div className="flex items-center gap-2">
+              <label className="text-[10px] text-[#F0D030] font-mono flex-shrink-0">URL GAS:</label>
+              <input
+                type="url"
+                value={hotelGasUrl}
+                onChange={(e) => setHotelGasUrl(e.target.value)}
+                placeholder="https://script.google.com/macros/s/..."
+                className="flex-1 h-8 bg-[#0A0A0A] border border-[#2A2A2A] rounded px-2 text-[11px] text-[#F5F5F5] placeholder-[#666] focus:outline-none focus:border-[#F0D030] font-mono"
+              />
+              <button
+                onClick={async () => {
+                  if (!hotelGasUrl.trim()) return;
+                  setUrlSaving(true);
+                  const res = await saveHotelUrl(hotelCode, hotelGasUrl.trim());
+                  setUrlSaving(false);
+                  if (res.success) {
+                    localStorage.setItem("webappUrl", hotelGasUrl.trim());
+                    setNoUrl(false);
+                    setUrlToast("URL guardada ✓");
+                    store.loadFromSheets();
+                  } else {
+                    setUrlToast(res.message || "Erro ao guardar");
+                  }
+                  setTimeout(() => setUrlToast(""), 3000);
+                }}
+                disabled={urlSaving}
+                className="h-8 px-3 bg-[#F0D030] text-[#0A0A0A] text-[10px] font-bold rounded hover:bg-[#D4B828] disabled:opacity-50 cursor-pointer"
+              >
+                {urlSaving ? "..." : "Guardar"}
+              </button>
+              <button
+                onClick={() => store.testConnectionAction(hotelGasUrl)}
+                className="h-8 px-3 bg-[#222] text-[#D0D0D0] text-[10px] font-bold rounded hover:text-[#F5F5F5] cursor-pointer"
+              >
+                Testar
+              </button>
+              {urlToast && <span className="text-[10px] text-[#7EAA6E] font-mono">{urlToast}</span>}
+            </div>
+          </div>
         </div>
       )}
 

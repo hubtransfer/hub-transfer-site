@@ -111,43 +111,43 @@ export async function validateLogin(
   }
 }
 
-// ─── Hotel URL management ───
-
-const LS_HOTEL_URLS = "hub_hotel_urls";
+// ─── Hotel URL management (backend-first, local fallback) ───
 
 const FALLBACK_HOTEL_URLS: Record<string, string> = {
   ELH: "https://script.google.com/macros/s/AKfycbzt67dsRUlVfhTUHUtpdCUCN6ejEkU_CKlQ-JJ0PLrPboikkHSdWF0_6unIkVykkxxSog/exec",
   EMH: "https://script.google.com/macros/s/AKfycbxiEN9sN8MynFS4DOsfwOqVcB_3y1FobWeOk_Dl8ftJ318LCDixBSi0T82TnNgca_UuEA/exec",
 };
 
-export function getHotelUrl(code: string): string {
-  if (typeof window === "undefined") return "";
+/** Fetch hotel URL from backend, fallback to hardcoded if network fails */
+export async function fetchHotelUrl(code: string): Promise<string> {
   try {
-    const stored = localStorage.getItem(LS_HOTEL_URLS);
-    if (stored) {
-      const urls = JSON.parse(stored) as Record<string, string>;
-      if (urls[code.toUpperCase()]) return urls[code.toUpperCase()];
-    }
-  } catch { /* */ }
+    const url = `${HUB_CENTRAL_URL}?action=getHotelUrl&code=${encodeURIComponent(code.toUpperCase())}&t=${Date.now()}`;
+    const res = await fetch(url, { redirect: "follow" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    if (data.success && data.url) return data.url;
+  } catch { /* network error — use fallback */ }
   return FALLBACK_HOTEL_URLS[code.toUpperCase()] || "";
 }
 
-export function setHotelUrl(code: string, url: string): void {
-  try {
-    const stored = localStorage.getItem(LS_HOTEL_URLS);
-    const urls: Record<string, string> = stored ? JSON.parse(stored) : {};
-    urls[code.toUpperCase()] = url;
-    localStorage.setItem(LS_HOTEL_URLS, JSON.stringify(urls));
-  } catch { /* */ }
+/** Synchronous fallback for initial renders (hardcoded only) */
+export function getHotelUrlSync(code: string): string {
+  return FALLBACK_HOTEL_URLS[code.toUpperCase()] || "";
 }
 
-export function getAllHotelUrls(): Record<string, string> {
+/** Save hotel URL to backend */
+export async function saveHotelUrl(
+  code: string,
+  newUrl: string,
+): Promise<{ success: boolean; message: string }> {
   try {
-    const stored = typeof window !== "undefined" ? localStorage.getItem(LS_HOTEL_URLS) : null;
-    const custom = stored ? JSON.parse(stored) as Record<string, string> : {};
-    return { ...FALLBACK_HOTEL_URLS, ...custom };
+    const url = `${HUB_CENTRAL_URL}?action=updateHotelUrl&code=${encodeURIComponent(code.toUpperCase())}&url=${encodeURIComponent(newUrl)}&t=${Date.now()}`;
+    const res = await fetch(url, { redirect: "follow" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    return { success: !!data.success, message: data.message || "" };
   } catch {
-    return { ...FALLBACK_HOTEL_URLS };
+    return { success: false, message: "Erro de conexão. Tente novamente." };
   }
 }
 
