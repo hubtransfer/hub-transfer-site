@@ -308,15 +308,13 @@ export default function TransferTable({
                   const tour = isTourService(s.tipoServico);
                   const airportHotel = isAirportToHotel(s.origem, s.destino);
                   const phone = cleanPhone(s.contacto);
+                  const tripColor = tour ? "#C17E4A" : airportHotel ? "#D4A847" : "#8B9DAF";
 
                   return (
                     <tr
                       key={s.id}
-                      className={`
-                        bg-hub-black-card border-b border-hub-gold/5 hover:bg-hub-black-elevated transition-colors
-                        ${tour ? "border-l-2 border-l-hub-warning" : ""}
-                        ${airportHotel && !tour ? "border-l-2 border-l-blue-500/40" : ""}
-                      `}
+                      style={{ backgroundColor: `${tripColor}08`, borderLeft: `3px solid ${tripColor}` }}
+                      className="border-b border-[#2A2A2A] hover:bg-hub-black-elevated transition-colors"
                     >
                       {/* ID */}
                       <td className="px-3 py-2.5 text-gray-400 font-mono text-xs">
@@ -334,8 +332,10 @@ export default function TransferTable({
                       </td>
 
                       {/* Tipo */}
-                      <td className="px-3 py-2.5 text-gray-300 text-xs whitespace-nowrap">
-                        {s.tipoServico}
+                      <td className="px-3 py-2.5 text-xs whitespace-nowrap">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold" style={{ backgroundColor: `${tripColor}15`, color: tripColor, border: `1px solid ${tripColor}30` }}>
+                          {s.tipoServico}
+                        </span>
                         {s.tourNome && (
                           <span className="block text-hub-gold/60 text-[10px] mt-0.5">
                             {s.tourNome}

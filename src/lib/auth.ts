@@ -70,21 +70,26 @@ export function setLocalAdminPassword(pwd: string): void {
   localStorage.setItem(LS_ADMIN_PWD, pwd);
 }
 
+const ADMIN_NAMES = ["admin", "junior", "junior gutierez", "roberta", "hub", "hubtransfer"];
+
 export async function validateLogin(
   name: string,
   password: string,
 ): Promise<{ success: boolean; session?: AuthSession; message?: string }> {
-  // 1. Check local admin password override first
+  const norm = name.toLowerCase().trim();
+  const isAdminName = ADMIN_NAMES.includes(norm);
+
+  // 1. If a custom admin password exists in localStorage, use it EXCLUSIVELY for admin names
   const localAdminPwd = getLocalAdminPassword();
-  if (localAdminPwd && password === localAdminPwd) {
-    const norm = name.toLowerCase().trim();
-    // Accept common admin names
-    if (norm === "admin" || norm === "junior" || norm === "junior gutierez" || norm === "roberta" || norm === "hub" || norm === "hubtransfer") {
+  if (localAdminPwd && isAdminName) {
+    if (password === localAdminPwd) {
       return { success: true, session: { name, role: "admin" } };
     }
+    // Local password exists but doesn't match — BLOCK, don't fall through to GAS
+    return { success: false, message: "Senha incorrecta." };
   }
 
-  // 2. Call GAS backend
+  // 2. Call GAS backend (for drivers, hotels, and admin without custom password)
   try {
     const url = `${HUB_CENTRAL_URL}?action=validateLogin&name=${encodeURIComponent(name)}&password=${encodeURIComponent(password)}`;
     const res = await fetch(url, { redirect: "follow" });

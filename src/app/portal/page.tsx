@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { useTransferStore } from "@/hooks/useTransferStore";
 import TransferForm from "@/components/portal/TransferForm";
@@ -12,12 +12,29 @@ import ConfigPanel from "@/components/portal/ConfigPanel";
 import ClearDataPanel from "@/components/portal/ClearDataPanel";
 import StatusToast from "@/components/portal/StatusToast";
 import type { Transfer } from "@/lib/transfers";
+import { getSession } from "@/lib/auth";
+
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwwr4_wjibbZgVEDD7JC0VSYce7C8iIvSmJFSbDHO_IX1L5KHSagOxkJZOL0ya746Uicw/exec";
 
 export default function PortalPage() {
   const store = useTransferStore();
   const formRef = useRef<HTMLDivElement>(null);
   const [showConfig, setShowConfig] = useState(false);
   const [showClearData, setShowClearData] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Auto-configure GAS URL and detect role
+  useEffect(() => {
+    // Pre-set the GAS URL so hotels don't need to configure
+    if (!localStorage.getItem("webappUrl")) {
+      localStorage.setItem("webappUrl", GAS_URL);
+    }
+    // Detect if admin for showing config panel
+    const session = getSession();
+    if (session?.role === "admin") setIsAdmin(true);
+    // Auto-load transfers
+    store.loadFromSheets();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const scrollToForm = useCallback(() => {
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -81,20 +98,22 @@ export default function PortalPage() {
           onScrollToForm={scrollToForm}
           onClearForm={() => store.setEditingId(null)}
           onExportCSV={store.exportCSV}
-          onToggleConfig={() => setShowConfig(!showConfig)}
-          onToggleClearData={() => setShowClearData(!showClearData)}
+          onToggleConfig={isAdmin ? () => setShowConfig(!showConfig) : () => {}}
+          onToggleClearData={isAdmin ? () => setShowClearData(!showClearData) : () => {}}
         />
 
-        {/* Config Panel */}
-        <ConfigPanel
-          isOpen={showConfig}
-          onClose={() => setShowConfig(false)}
-          onTestConnection={(url) => {
-            store.testConnectionAction(url);
-          }}
-          statusMessage={store.statusMessage}
-          statusType={store.statusType}
-        />
+        {/* Config Panel — admin only */}
+        {isAdmin && (
+          <ConfigPanel
+            isOpen={showConfig}
+            onClose={() => setShowConfig(false)}
+            onTestConnection={(url) => {
+              store.testConnectionAction(url);
+            }}
+            statusMessage={store.statusMessage}
+            statusType={store.statusType}
+          />
+        )}
 
         {/* Clear Data Panel */}
         <ClearDataPanel
