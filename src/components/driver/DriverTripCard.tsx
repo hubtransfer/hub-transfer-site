@@ -14,6 +14,15 @@ import {
   getMapUrl,
   getWazeUrl,
 } from "@/lib/trips";
+
+/* ─── Extract airline prefix from flight number (e.g. "TP1323" → "TP", "FIA5811" → "FIA") ─── */
+function extractAirlineCode(flight: string): string | null {
+  if (!flight) return null;
+  const clean = flight.replace(/\s+/g, "").toUpperCase();
+  // Match leading letters (2-3 chars) before digits
+  const m = clean.match(/^([A-Z]{2,3})\d/);
+  return m ? m[1] : null;
+}
 import { generateDriverWhatsAppURL, generateDriverSmsURL } from "@/lib/driver-templates";
 
 /* ─── Helpers ─── */
@@ -127,14 +136,20 @@ export default function DriverTripCard({
 
   const hasFlightNumber = !!(viagem.flight && viagem.flight.trim());
   const flightProg = useMemo(() => hasFlightNumber ? calcFlightProgress(viagem.depTime || "", viagem.arrTime || "") : 0, [hasFlightNumber, viagem.depTime, viagem.arrTime]);
-  // Origin IATA — ONLY from backend flight tracking data, never guessed from airline code
+
+  // Origin: prefer backend tracking data (depAirport/depIata) for flag+IATA
+  // If backend has no data, fall back to airline code from flight number (no flag, just code)
   const depIata = useMemo(() => {
     if (!hasFlightNumber) return null;
     const raw = (viagem.depAirport || viagem.depIata || "").toUpperCase();
     return raw && raw !== "???" ? raw : null;
   }, [hasFlightNumber, viagem.depAirport, viagem.depIata]);
   const depInfo = useMemo(() => depIata ? getIataInfo(depIata) : null, [depIata]);
-  const originFlag = depInfo ? countryFlag(depInfo.c) : null; // null = no flag, show ✈ only
+  const originFlag = depInfo ? countryFlag(depInfo.c) : null;
+
+  // Airline code extracted from flight number (e.g. "TP" from "TP1323")
+  const airlineCode = useMemo(() => hasFlightNumber ? extractAirlineCode(viagem.flight) : null, [hasFlightNumber, viagem.flight]);
+
   const arrTime = cleanHora(viagem.arrTime || "");
   const bar = flightBarStyle(flightProg, viagem.status);
   const hasFlight = hasFlightNumber && (tipo === "CHEGADA" || !!(viagem.depAirport || viagem.depIata || viagem.arrTime));
@@ -303,10 +318,19 @@ export default function DriverTripCard({
             onClick={(e) => e.stopPropagation()}
             className="flex items-center gap-2.5 px-4 pb-3 pt-0.5 cursor-pointer hover:bg-[#151515] transition-colors rounded-b-2xl"
           >
-            {/* Origin: flag (if known) + IATA or ✈ */}
-            <div className="flex items-center gap-1 flex-shrink-0 min-w-[44px]">
-              <span className="text-base leading-none">{originFlag || "✈️"}</span>
-              {depIata && <span className="font-mono text-sm font-bold text-[#E5E5E5]">{depIata}</span>}
+            {/* Origin: backend flag+IATA if available, otherwise ✈️ + airline code */}
+            <div className="flex items-center gap-1.5 flex-shrink-0 min-w-[44px]">
+              {originFlag ? (
+                <>
+                  <span className="text-base leading-none">{originFlag}</span>
+                  {depIata && <span className="font-mono text-sm font-bold text-[#E5E5E5]">{depIata}</span>}
+                </>
+              ) : (
+                <>
+                  <span className="text-base leading-none">✈️</span>
+                  {airlineCode && <span className="font-mono text-sm font-bold text-[#E5E5E5]">{airlineCode}</span>}
+                </>
+              )}
             </div>
             {/* Progress bar + flight number */}
             <div className="flex-1 relative">
@@ -323,7 +347,7 @@ export default function DriverTripCard({
                 <span className="absolute top-0 text-[10px] leading-none" style={{ left: `calc(${flightProg}% - 5px)`, transform: "translateY(-50%)", filter: "drop-shadow(0 0 2px rgba(0,0,0,.8))" }}>✈</span>
               )}
             </div>
-            {/* Destination: always Portugal LIS */}
+            {/* Destination: always 🇵🇹 LIS */}
             <div className="flex items-center gap-1 flex-shrink-0">
               <span className="font-mono text-sm font-bold" style={{ color: bar.color }}>LIS</span>
               <span className="text-base leading-none">🇵🇹</span>
@@ -356,11 +380,20 @@ export default function DriverTripCard({
                 onClick={viagem.flight ? () => window.open(`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`, "_blank") : undefined}
               >
                 <div className="flex items-center justify-between text-sm mb-2">
-                  {/* Origin airport + flag (only if tracking data available) */}
-                  <div className="text-center">
-                    <p className="text-lg mb-0.5">{originFlag || "✈️"}</p>
-                    {depIata && <p className="font-mono font-bold text-base" style={{ color: c.hex }}>{depIata}</p>}
-                    <p className="text-xs text-[#D0D0D0]">{viagem.depCity || ""}</p>
+                  {/* Origin: backend flag+IATA or ✈️+airline code */}
+                  <div className="text-center min-w-[48px]">
+                    {originFlag ? (
+                      <>
+                        <p className="text-lg mb-0.5">{originFlag}</p>
+                        {depIata && <p className="font-mono font-bold text-base" style={{ color: c.hex }}>{depIata}</p>}
+                        <p className="text-xs text-[#D0D0D0]">{viagem.depCity || ""}</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-lg mb-0.5">✈️</p>
+                        {airlineCode && <p className="font-mono font-bold text-base" style={{ color: c.hex }}>{airlineCode}</p>}
+                      </>
+                    )}
                     {viagem.depTime && <p className="font-mono text-xs text-[#D0D0D0] mt-0.5">{viagem.depTime}</p>}
                   </div>
                   {/* Progress bar + flight number */}
@@ -371,8 +404,8 @@ export default function DriverTripCard({
                     </div>
                     {viagem.flight && <p className="text-center font-mono text-base font-bold mt-1.5" style={{ color: c.hex }}>{viagem.flight}</p>}
                   </div>
-                  {/* Destination: always Portugal LIS */}
-                  <div className="text-center">
+                  {/* Destination: always 🇵🇹 LIS */}
+                  <div className="text-center min-w-[48px]">
                     <p className="text-lg mb-0.5">🇵🇹</p>
                     <p className="font-mono font-bold text-base" style={{ color: c.hex }}>LIS</p>
                     <p className="text-xs text-[#D0D0D0]">Lisboa</p>
