@@ -248,7 +248,7 @@ export default function LandingPage() {
   }, [drawerOpen]);
 
   /* ── Booking state ── */
-  const [bOrigin, setBOrigin] = useState("Aeroporto de Lisboa (LIS), Lisboa, Portugal");
+  const [bOrigin, setBOrigin] = useState("");
   const [bDest, setBDest] = useState("");
   const [bDate, setBDate] = useState("");
   const [bPax, setBPax] = useState(2);
@@ -855,30 +855,38 @@ export default function LandingPage() {
                     </div>
 
                     <div className="space-y-3">
-                      {/* Origin — single button, pre-selected */}
+                      {/* Origin — quick button + free text with autocomplete */}
                       <div>
                         <label className="text-[#F0D030] text-[10px] tracking-wider uppercase block mb-1.5">{lang === "PT" ? "ORIGEM" : lang === "ES" ? "ORIGEN" : lang === "FR" ? "ORIGINE" : lang === "IT" ? "ORIGINE" : "FROM"}</label>
-                        <button type="button" onClick={() => setBOrigin("Aeroporto de Lisboa (LIS), Lisboa, Portugal")}
-                          className={`w-full text-left text-sm px-3 py-2.5 rounded-lg border transition-colors cursor-pointer ${bOrigin.includes("Aeroporto") ? "border-[#F0D030]/40 text-[#F0D030] bg-[#F0D030]/10" : "border-white/12 text-[#B0B0B0] bg-white/[0.06]"}`}>
-                          ✈ Aeroporto de Lisboa
-                        </button>
+                        <div className="flex gap-1.5 mb-1.5">
+                          <button type="button" onClick={() => setBOrigin("Aeroporto de Lisboa")}
+                            className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${bOrigin.includes("Aeroporto") ? "border-[#F0D030]/40 text-[#F0D030] bg-[#F0D030]/10" : "border-[#2A2A2A] text-[#B0B0B0]"}`}>
+                            ✈ Aeroporto de Lisboa
+                          </button>
+                        </div>
+                        <input id="drawerOrigin" type="text" value={bOrigin} onChange={(e) => setBOrigin(e.target.value)}
+                          placeholder={lang === "PT" ? "Endereço de origem..." : lang === "ES" ? "Dirección de origen..." : lang === "FR" ? "Adresse d'origine..." : lang === "IT" ? "Indirizzo di origine..." : "Pick-up address..."}
+                          className="w-full h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 text-[#F5F5F5] text-sm placeholder-[#666] focus:outline-none focus:border-[#F0D030] transition-colors" />
                       </div>
 
-                      {/* Destination — 3 quick buttons */}
+                      {/* Destination — quick buttons + free text with autocomplete */}
                       <div>
                         <label className="text-[#F0D030] text-[10px] tracking-wider uppercase block mb-1.5">{lang === "PT" ? "DESTINO" : lang === "ES" ? "DESTINO" : lang === "FR" ? "DESTINATION" : lang === "IT" ? "DESTINAZIONE" : "TO"}</label>
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="flex gap-1.5 mb-1.5 flex-wrap">
                           {[
-                            { l: "✈ Aeroporto", v: "Aeroporto de Lisboa (LIS), Lisboa, Portugal" },
+                            { l: "✈ Aeroporto", v: "Aeroporto de Lisboa" },
                             { l: "🏖 Cascais", v: "Cascais, Portugal" },
                             { l: "🏰 Sintra", v: "Sintra, Portugal" },
                           ].map((q) => (
                             <button key={q.l} type="button" onClick={() => setBDest(q.v)}
-                              className={`text-sm px-2 py-2.5 rounded-lg border text-center transition-colors cursor-pointer ${bDest === q.v ? "border-[#F0D030]/40 text-[#F0D030] bg-[#F0D030]/10" : "border-white/12 text-[#B0B0B0] bg-white/[0.06]"}`}>
+                              className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${bDest === q.v ? "border-[#F0D030]/40 text-[#F0D030] bg-[#F0D030]/10" : "border-[#2A2A2A] text-[#B0B0B0]"}`}>
                               {q.l}
                             </button>
                           ))}
                         </div>
+                        <input id="drawerDest" type="text" value={bDest} onChange={(e) => setBDest(e.target.value)}
+                          placeholder={lang === "PT" ? "Endereço de destino..." : lang === "ES" ? "Dirección de destino..." : lang === "FR" ? "Adresse de destination..." : lang === "IT" ? "Indirizzo di destinazione..." : "Destination address..."}
+                          className="w-full h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 text-[#F5F5F5] text-sm placeholder-[#666] focus:outline-none focus:border-[#F0D030] transition-colors" />
                       </div>
 
                       {/* Date — full width */}
