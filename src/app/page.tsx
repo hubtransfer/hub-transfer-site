@@ -628,9 +628,9 @@ export default function LandingPage() {
               {[...Array(2)].flatMap(() => [
                 { name: "TAP Portugal", src: "/images/logo_TAP.png" },
                 { name: "Emirates", src: "/logos/emirates.png" },
-                { name: "British Airways", src: "/images/logo_british.png" },
-                { name: "Lufthansa", src: "/logos/lufthansa.png" },
-                { name: "Air France", src: "/logos/air-france.png" },
+                { name: "British Airways", src: "/images/logo_british.png", w: 120 },
+                { name: "Lufthansa", src: "/logos/lufthansa.png", w: 110 },
+                { name: "Air France", src: "/logos/air-france.png", w: 110 },
                 { name: "KLM", src: "/logos/klm.png" },
                 { name: "Iberia", src: "/logos/iberia.png" },
                 { name: "Swiss", src: "/logos/swiss.png" },
@@ -649,7 +649,7 @@ export default function LandingPage() {
                   style={{ height: "52px", width: "auto", WebkitTouchCallout: "none", userSelect: "none" }}
                   onContextMenu={(e) => e.preventDefault()}>
                   <div className="h-[44px] md:h-[52px] bg-contain bg-center bg-no-repeat"
-                    style={{ backgroundImage: `url(${logo.src})`, width: "80px", minWidth: "60px", transform: "none" }}
+                    style={{ backgroundImage: `url(${logo.src})`, width: `${(logo as { w?: number }).w || 80}px`, minWidth: "60px", transform: "none" }}
                     role="img" aria-label={logo.name} draggable={false} onDragStart={(e) => e.preventDefault()} />
                 </div>
               ))}
