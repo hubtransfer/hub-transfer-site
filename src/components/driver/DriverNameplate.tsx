@@ -1,10 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
-
-/* ------------------------------------------------------------------ */
-/*  Props                                                              */
-/* ------------------------------------------------------------------ */
+import React, { useEffect, useRef, useCallback } from "react";
 
 interface DriverNameplateProps {
   isOpen: boolean;
@@ -13,15 +9,38 @@ interface DriverNameplateProps {
   onClose: () => void;
 }
 
-/* ================================================================== */
-/*  DRIVER NAMEPLATE — enhanced fullscreen client name                 */
-/*  Gold shimmer, landscape lock, brand watermark                      */
-/* ================================================================== */
-
 export default function DriverNameplate({ isOpen, name, destination, onClose }: DriverNameplateProps) {
   const nameRef = useRef<HTMLDivElement>(null);
 
-  /* Auto-fit text to fill screen — starts at 22vw */
+  /* ── Enter fullscreen + landscape ── */
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Fullscreen API
+    try { document.documentElement.requestFullscreen?.(); } catch { /* */ }
+    // Landscape lock
+    try {
+      if (screen.orientation && "lock" in screen.orientation) {
+        (screen.orientation as unknown as { lock: (o: string) => Promise<void> }).lock("landscape").catch(() => {});
+      }
+    } catch { /* */ }
+    // Lock scroll
+    document.body.style.overflow = "hidden";
+    // Theme color black for mobile status bar
+    let meta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null;
+    if (!meta) { meta = document.createElement("meta"); meta.name = "theme-color"; document.head.appendChild(meta); }
+    const prevColor = meta.content;
+    meta.content = "#000000";
+
+    return () => {
+      document.body.style.overflow = "";
+      try { if (document.fullscreenElement) document.exitFullscreen(); } catch { /* */ }
+      try { screen.orientation?.unlock?.(); } catch { /* */ }
+      if (meta) meta.content = prevColor || "#0A0A0A";
+    };
+  }, [isOpen]);
+
+  /* ── Auto-fit text ── */
   useEffect(() => {
     if (!isOpen || !nameRef.current) return;
     let sz = 22;
@@ -29,7 +48,7 @@ export default function DriverNameplate({ isOpen, name, destination, onClose }: 
     el.style.fontSize = sz + "vw";
     requestAnimationFrame(() => {
       const maxW = window.innerWidth * 0.92;
-      const maxH = window.innerHeight * 0.55;
+      const maxH = window.innerHeight * 0.50;
       while ((el.scrollWidth > maxW || el.scrollHeight > maxH) && sz > 3) {
         sz -= 0.5;
         el.style.fontSize = sz + "vw";
@@ -37,140 +56,68 @@ export default function DriverNameplate({ isOpen, name, destination, onClose }: 
     });
   }, [isOpen, name]);
 
-  /* Lock body scroll when open */
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
-
-  /* Force landscape orientation when open */
+  /* ── Close on ESC / space / tap ── */
   useEffect(() => {
     if (!isOpen) return;
-
-    const lockOrientation = async () => {
-      try {
-        if (screen.orientation && "lock" in screen.orientation) {
-          await (screen.orientation as unknown as { lock: (o: string) => Promise<void> }).lock("landscape");
-        }
-      } catch {
-        // Orientation lock not supported or denied — silently continue
-      }
-    };
-
-    lockOrientation();
-
-    return () => {
-      try {
-        if (screen.orientation && "unlock" in screen.orientation) {
-          screen.orientation.unlock();
-        }
-      } catch {
-        // Silently continue
-      }
-    };
-  }, [isOpen]);
-
-  /* ESC key support */
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" || e.key === " " || e.key === "Enter") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
+    const h = (e: KeyboardEvent) => { if (["Escape", " ", "Enter"].includes(e.key)) onClose(); };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
   }, [isOpen, onClose]);
+
+  const handleClose = useCallback(() => {
+    try { if (document.fullscreenElement) document.exitFullscreen(); } catch { /* */ }
+    onClose();
+  }, [onClose]);
 
   if (!isOpen) return null;
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center select-none cursor-pointer"
-      style={{ background: "#000000" }}
-      onClick={onClose}
+      className="fixed inset-0 flex flex-col items-center justify-center select-none cursor-pointer"
+      style={{ background: "#000000", zIndex: 99999 }}
+      onClick={handleClose}
       role="button"
       tabIndex={0}
     >
-      {/* Top: brand watermark */}
-      <div className="absolute top-8 left-0 right-0 text-center">
-        <span
-          className="font-mono text-sm tracking-[0.3em] uppercase"
-          style={{ color: "rgba(245, 197, 24, 0.25)" }}
-        >
+      {/* Brand watermark — small, subtle */}
+      <div className="absolute top-6 left-0 right-0 text-center">
+        <span className="font-mono text-xs tracking-[0.3em] uppercase" style={{ color: "rgba(200,200,200,0.2)" }}>
           HUB TRANSFER
         </span>
       </div>
 
-      {/* Center: client name with gold shimmer */}
+      {/* Client name — gold, massive */}
       <div
         ref={nameRef}
-        className="driver-nameplate-shimmer px-[4vw] text-center leading-tight uppercase break-words"
+        className="px-[4vw] text-center leading-tight uppercase break-words"
         style={{
           fontWeight: 900,
           letterSpacing: "0.06em",
           maxWidth: "92vw",
-          maxHeight: "55vh",
+          maxHeight: "50vh",
           overflow: "hidden",
           wordBreak: "break-word",
-          background: "linear-gradient(180deg, #F0D030 0%, #F0D030 45%, #FFD700 50%, #F0D030 55%, #F0D030 100%)",
-          backgroundSize: "100% 200%",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
-          animation: "nameShimmer 3s ease-in-out infinite",
+          color: "#F0D030",
         }}
       >
         {name}
       </div>
 
-      {/* Bottom: destination + close hint */}
-      <div className="absolute bottom-6 left-0 right-0 text-center space-y-2 px-6">
-        {destination && (
-          <p className="text-sm text-gray-400 font-mono truncate max-w-[90vw] mx-auto">
-            📍 {destination}
+      {/* Destination — red pin + address */}
+      {destination && (
+        <div className="absolute bottom-14 left-0 right-0 text-center px-6">
+          <p className="text-sm font-mono truncate max-w-[90vw] mx-auto" style={{ color: "#D0D0D0" }}>
+            <span style={{ color: "#C06060" }}>📍</span> {destination}
           </p>
-        )}
-        <p className="text-xs tracking-wide" style={{ color: "rgba(255,255,255,0.12)" }}>
+        </div>
+      )}
+
+      {/* Close hint */}
+      <div className="absolute bottom-5 left-0 right-0 text-center">
+        <p className="text-[10px] tracking-wider" style={{ color: "rgba(255,255,255,0.10)" }}>
           toca para fechar
         </p>
       </div>
-
-      {/* Scoped styles for shimmer animation */}
-      <style jsx>{`
-        @keyframes nameShimmer {
-          0% {
-            background-position: 0% 0%;
-          }
-          50% {
-            background-position: 0% 100%;
-          }
-          100% {
-            background-position: 0% 0%;
-          }
-        }
-        .driver-nameplate-shimmer {
-          background: linear-gradient(
-            180deg,
-            #F0D030 0%,
-            #F0D030 45%,
-            #FFD700 50%,
-            #F0D030 55%,
-            #F0D030 100%
-          );
-          background-size: 100% 200%;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          animation: nameShimmer 3s ease-in-out infinite;
-        }
-      `}</style>
     </div>
   );
 }
