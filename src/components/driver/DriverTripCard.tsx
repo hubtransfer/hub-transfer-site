@@ -124,13 +124,17 @@ export default function DriverTripCard({
   const isDone = viagem.concluida || viagem.status === "CONCLUIDA" || viagem.status === "FINALIZOU";
   const c = ts(tipo);
 
-  const flightProg = useMemo(() => tipo === "CHEGADA" ? calcFlightProgress(viagem.depTime || "", viagem.arrTime || "") : 0, [tipo, viagem.depTime, viagem.arrTime]);
-  const depIata = useMemo(() => tipo === "CHEGADA" ? ((viagem.depAirport || viagem.depIata || guessDepAirport(viagem.flight || "") || "").toUpperCase() || null) : null, [tipo, viagem.depAirport, viagem.depIata, viagem.flight]);
+  const hasFlightNumber = !!(viagem.flight && viagem.flight.trim());
+  const flightProg = useMemo(() => hasFlightNumber ? calcFlightProgress(viagem.depTime || "", viagem.arrTime || "") : 0, [hasFlightNumber, viagem.depTime, viagem.arrTime]);
+  const depIata = useMemo(() => {
+    if (!hasFlightNumber) return null;
+    const raw = (viagem.depAirport || viagem.depIata || guessDepAirport(viagem.flight || "") || "").toUpperCase();
+    return raw || null;
+  }, [hasFlightNumber, viagem.depAirport, viagem.depIata, viagem.flight]);
   const depInfo = useMemo(() => depIata ? getIataInfo(depIata) : null, [depIata]);
-  const flag = depInfo ? countryFlag(depInfo.c) : null;
+  const originFlag = depInfo ? countryFlag(depInfo.c) : "✈";
   const arrTime = cleanHora(viagem.arrTime || "");
   const bar = flightBarStyle(flightProg, viagem.status);
-  const hasFlightNumber = !!(viagem.flight && viagem.flight.trim());
   const hasFlight = hasFlightNumber && (tipo === "CHEGADA" || !!(viagem.depAirport || viagem.depIata || viagem.arrTime));
   const countdown = arrTime !== "—:—" ? formatCountdown(arrTime) : null;
 
@@ -296,10 +300,12 @@ export default function DriverTripCard({
             onClick={(e) => e.stopPropagation()}
             className="flex items-center gap-2.5 px-4 pb-3 pt-0.5 cursor-pointer hover:bg-[#151515] transition-colors rounded-b-2xl"
           >
+            {/* Origin: flag + IATA */}
             <div className="flex items-center gap-1 flex-shrink-0 min-w-[52px]">
-              {flag && <span className="text-sm leading-none">{flag}</span>}
+              <span className="text-sm leading-none">{originFlag}</span>
               <span className="font-mono text-xs font-bold text-[#E5E5E5]">{depIata || "???"}</span>
             </div>
+            {/* Progress bar + flight number */}
             <div className="flex-1 relative">
               <div className="h-2.5 rounded-full bg-[#222222] overflow-hidden">
                 <div className={`h-full rounded-full transition-all duration-1000 ${bar.pulse ? "animate-flight-pulse" : ""}`}
@@ -314,7 +320,11 @@ export default function DriverTripCard({
                 <span className="absolute top-0 text-[9px] leading-none" style={{ left: `calc(${flightProg}% - 5px)`, transform: "translateY(-50%)", filter: "drop-shadow(0 0 2px rgba(0,0,0,.8))" }}>✈</span>
               )}
             </div>
-            <span className="font-mono text-xs font-bold flex-shrink-0" style={{ color: bar.color }}>LIS</span>
+            {/* Destination: always Portugal LIS */}
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <span className="font-mono text-xs font-bold" style={{ color: bar.color }}>LIS</span>
+              <span className="text-sm leading-none">🇵🇹</span>
+            </div>
             <div className="flex flex-col items-end flex-shrink-0 min-w-[48px]">
               {arrTime !== "—:—" && <span className="font-mono text-base font-black leading-none" style={{ color: bar.color }}>{arrTime}</span>}
               {countdown && <span className="font-mono text-[9px] leading-tight mt-0.5" style={{ color: `${bar.color}99` }}>{countdown}</span>}
@@ -343,11 +353,14 @@ export default function DriverTripCard({
                 onClick={viagem.flight ? () => window.open(`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`, "_blank") : undefined}
               >
                 <div className="flex items-center justify-between text-xs mb-2">
+                  {/* Origin airport + flag */}
                   <div className="text-center">
+                    <p className="text-base mb-0.5">{originFlag}</p>
                     <p className="font-mono font-bold text-sm" style={{ color: c.hex }}>{depIata || "???"}</p>
                     <p className="text-[10px] text-[#D0D0D0]">{viagem.depCity || ""}</p>
                     {viagem.depTime && <p className="font-mono text-[10px] text-[#D0D0D0] mt-0.5">{viagem.depTime}</p>}
                   </div>
+                  {/* Progress bar + flight number */}
                   <div className="flex-1 mx-3">
                     <div className="relative w-full h-2.5 rounded-full bg-[#222222] overflow-hidden">
                       <div className={`h-full rounded-full ${bar.pulse ? "animate-flight-pulse" : ""}`}
@@ -355,9 +368,11 @@ export default function DriverTripCard({
                     </div>
                     {viagem.flight && <p className="text-center font-mono text-sm font-bold mt-1" style={{ color: c.hex }}>{viagem.flight}</p>}
                   </div>
+                  {/* Destination: always Portugal LIS */}
                   <div className="text-center">
-                    <p className="font-mono font-bold text-sm" style={{ color: c.hex }}>{(viagem.arrAirport || viagem.arrIata || "LIS").toUpperCase()}</p>
-                    <p className="text-[10px] text-[#D0D0D0]">{viagem.arrCity || "Lisboa"}</p>
+                    <p className="text-base mb-0.5">🇵🇹</p>
+                    <p className="font-mono font-bold text-sm" style={{ color: c.hex }}>LIS</p>
+                    <p className="text-[10px] text-[#D0D0D0]">Lisboa</p>
                     {viagem.arrTime && <p className="font-mono text-[10px] text-[#D0D0D0] mt-0.5">{viagem.arrTime}</p>}
                   </div>
                 </div>

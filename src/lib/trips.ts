@@ -230,6 +230,15 @@ const IATA_DB: Record<string, IataInfo> = {
   // Oceania
   SYD: { c: 'AU', r: 'inter' }, MEL: { c: 'AU', r: 'inter' },
   AKL: { c: 'NZ', r: 'inter' },
+  // Eastern Europe / Moldova
+  KIV: { c: 'MD', r: 'eu' }, RMO: { c: 'MD', r: 'eu' },
+  TBS: { c: 'GE', r: 'eu' }, EVN: { c: 'AM', r: 'eu' },
+  KBP: { c: 'UA', r: 'eu' }, IEV: { c: 'UA', r: 'eu' },
+  BEG: { c: 'RS', r: 'eu' }, TIA: { c: 'AL', r: 'eu' },
+  SKP: { c: 'MK', r: 'eu' }, SJJ: { c: 'BA', r: 'eu' },
+  // Additional missing
+  LCA: { c: 'CY', r: 'eu' }, MLA: { c: 'MT', r: 'sch' },
+  HER: { c: 'GR', r: 'sch' }, SKG: { c: 'GR', r: 'sch' },
 };
 
 export function getIataInfo(code: string): IataInfo | null {
