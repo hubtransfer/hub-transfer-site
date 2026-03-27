@@ -130,7 +130,8 @@ export default function DriverTripCard({
   const flag = depInfo ? countryFlag(depInfo.c) : null;
   const arrTime = cleanHora(viagem.arrTime || "");
   const bar = flightBarStyle(flightProg, viagem.status);
-  const hasFlight = tipo === "CHEGADA" && !!(depIata || (arrTime && arrTime !== "—:—"));
+  const hasFlightNumber = !!(viagem.flight && viagem.flight.trim());
+  const hasFlight = hasFlightNumber && (tipo === "CHEGADA" || !!(viagem.depAirport || viagem.depIata || viagem.arrTime));
   const countdown = arrTime !== "—:—" ? formatCountdown(arrTime) : null;
 
   /* ─ Expand / Collapse ─ */
@@ -334,8 +335,8 @@ export default function DriverTripCard({
             transition={{ duration: 0.25, ease: "easeInOut" }}
             className="overflow-hidden"
           >
-            {/* ── Flight block (CHEGADA) — clickable to search flight ── */}
-            {tipo === "CHEGADA" && hasFlight && (
+            {/* ── Flight block — clickable to search flight ── */}
+            {hasFlight && (
               <div
                 className={`px-4 py-3 border-t border-[#2A2A2A] ${viagem.flight ? "cursor-pointer hover:bg-[#181818] transition-colors" : ""}`}
                 style={{ backgroundColor: `${c.hex}08` }}

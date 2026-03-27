@@ -269,6 +269,14 @@ const AIRLINE_BASE: Record<string, string> = {
   SQ: 'SIN', CX: 'HKG',           // Singapore, Cathay
   AT: 'CMN',                      // Royal Air Maroc
   S4: 'PDL',                      // SATA
+  // 3-letter ICAO codes (no duplicates)
+  TAP: 'LIS', RYR: 'STN',
+  BAW: 'LHR', DLH: 'FRA', AFR: 'CDG',
+  IBE: 'MAD', SWR: 'ZRH',
+  THY: 'IST', UAE: 'DXB', QTR: 'DOH',
+  ETD: 'AUH', FIA: 'HEL', SAS: 'CPH',
+  WZZ: 'BUD', DAL: 'JFK', AAL: 'JFK',
+  UAL: 'EWR', ACA: 'YYZ', RAM: 'CMN',
 };
 
 export function guessDepAirport(flight: string): string | null {
