@@ -398,8 +398,8 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         <section className="relative min-h-screen flex items-center justify-center">
           <div className="absolute inset-0">
-            <img src="/images/hub_dobra1_hero.jpg" alt="Transfer privado no Aeroporto de Lisboa à noite" className="w-full h-full object-cover" loading="eager" />
-            <div className="absolute inset-0 bg-[#0A0A0A]/65" />
+            <img src="/images/rua.jpg" alt="Rua de Lisboa com transfer privado HUB Transfer" className="w-full h-full object-cover" loading="eager" />
+            <div className="absolute inset-0 bg-[#0A0A0A]/75" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-transparent to-[#0A0A0A]/40" />
           </div>
 
@@ -626,14 +626,31 @@ export default function LandingPage() {
             <div className="absolute right-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-l from-[#0A0A0A] to-transparent z-10 pointer-events-none" />
             <div data-carousel="" className="flex items-center w-max gap-7 md:gap-12" style={{ animation: "scroll 35s linear infinite" }}>
               {[...Array(2)].flatMap(() => [
-                "tap", "emirates", "british-airways", "lufthansa", "air-france", "klm", "iberia", "swiss", "turkish-airlines", "qatar", "mercedes", "bmw", "marriott", "air-europa", "royal-air-maroc", "aer-lingus", "air-canada", "jet2",
+                { name: "TAP Portugal", src: "/images/logo_TAP.png" },
+                { name: "Emirates", src: "/logos/emirates.png" },
+                { name: "British Airways", src: "/images/logo_british.png" },
+                { name: "Lufthansa", src: "/logos/lufthansa.png" },
+                { name: "Air France", src: "/logos/air-france.png" },
+                { name: "KLM", src: "/logos/klm.png" },
+                { name: "Iberia", src: "/logos/iberia.png" },
+                { name: "Swiss", src: "/logos/swiss.png" },
+                { name: "Turkish Airlines", src: "/images/logo_turkish.png" },
+                { name: "Qatar Airways", src: "/images/logo_qatar.png" },
+                { name: "Mercedes-Benz", src: "/logos/mercedes.png" },
+                { name: "BMW", src: "/images/logo_bmw.png" },
+                { name: "Marriott", src: "/images/logo_marriott.png" },
+                { name: "Air Europa", src: "/images/logo_aireuropa.png" },
+                { name: "Royal Air Maroc", src: "/images/logo_airmaroc.png" },
+                { name: "Aer Lingus", src: "/images/logo_aerlingus.png" },
+                { name: "Air Canada", src: "/images/logo_aircanada.png" },
+                { name: "Jet2", src: "/logos/jet2.png" },
               ]).map((logo, i) => (
                 <div key={i} className="flex-shrink-0 flex items-center justify-center select-none"
                   style={{ height: "52px", width: "auto", WebkitTouchCallout: "none", userSelect: "none" }}
                   onContextMenu={(e) => e.preventDefault()}>
                   <div className="h-[44px] md:h-[52px] bg-contain bg-center bg-no-repeat"
-                    style={{ backgroundImage: `url(/logos/${logo}.png)`, width: "80px", minWidth: "60px", transform: "none" }}
-                    role="img" aria-label={logo} draggable={false} onDragStart={(e) => e.preventDefault()} />
+                    style={{ backgroundImage: `url(${logo.src})`, width: "80px", minWidth: "60px", transform: "none" }}
+                    role="img" aria-label={logo.name} draggable={false} onDragStart={(e) => e.preventDefault()} />
                 </div>
               ))}
             </div>
