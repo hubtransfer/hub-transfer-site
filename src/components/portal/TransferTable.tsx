@@ -41,9 +41,9 @@ function cleanPhone(phone: string): string {
   return phone.replace(/[^+\d]/g, "");
 }
 
-function isTourService(tipo: string): boolean {
-  const t = tipo.toLowerCase();
-  return t.includes("tour") || t.includes("private");
+function isTourService(tipo: string, tourNome?: string): boolean {
+  const t = (tipo || "").toLowerCase();
+  return t.includes("tour") || t.includes("private") || !!(tourNome && tourNome.trim());
 }
 
 function isAirportToHotel(origem: string, destino: string): boolean {
@@ -305,7 +305,7 @@ export default function TransferTable({
                 </tr>
               ) : (
                 services.map((s) => {
-                  const tour = isTourService(s.tipoServico);
+                  const tour = isTourService(s.tipoServico, s.tourNome);
                   const airportHotel = isAirportToHotel(s.origem, s.destino);
                   const phone = cleanPhone(s.contacto);
                   const tripColor = tour ? "#C17E4A" : airportHotel ? "#D4A847" : "#8B9DAF";
