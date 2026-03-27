@@ -10,7 +10,6 @@ import {
   calcFlightProgress,
   calcDriverPrice,
   resolveLanguage,
-  guessDepAirport,
   getIataInfo,
   getMapUrl,
   getWazeUrl,
@@ -126,13 +125,14 @@ export default function DriverTripCard({
 
   const hasFlightNumber = !!(viagem.flight && viagem.flight.trim());
   const flightProg = useMemo(() => hasFlightNumber ? calcFlightProgress(viagem.depTime || "", viagem.arrTime || "") : 0, [hasFlightNumber, viagem.depTime, viagem.arrTime]);
+  // Origin IATA — ONLY from backend flight tracking data, never guessed from airline code
   const depIata = useMemo(() => {
     if (!hasFlightNumber) return null;
-    const raw = (viagem.depAirport || viagem.depIata || guessDepAirport(viagem.flight || "") || "").toUpperCase();
-    return raw || null;
-  }, [hasFlightNumber, viagem.depAirport, viagem.depIata, viagem.flight]);
+    const raw = (viagem.depAirport || viagem.depIata || "").toUpperCase();
+    return raw && raw !== "???" ? raw : null;
+  }, [hasFlightNumber, viagem.depAirport, viagem.depIata]);
   const depInfo = useMemo(() => depIata ? getIataInfo(depIata) : null, [depIata]);
-  const originFlag = depInfo ? countryFlag(depInfo.c) : "✈";
+  const originFlag = depInfo ? countryFlag(depInfo.c) : null; // null = no flag, show ✈ only
   const arrTime = cleanHora(viagem.arrTime || "");
   const bar = flightBarStyle(flightProg, viagem.status);
   const hasFlight = hasFlightNumber && (tipo === "CHEGADA" || !!(viagem.depAirport || viagem.depIata || viagem.arrTime));
@@ -300,10 +300,10 @@ export default function DriverTripCard({
             onClick={(e) => e.stopPropagation()}
             className="flex items-center gap-2.5 px-4 pb-3 pt-0.5 cursor-pointer hover:bg-[#151515] transition-colors rounded-b-2xl"
           >
-            {/* Origin: flag + IATA */}
-            <div className="flex items-center gap-1 flex-shrink-0 min-w-[52px]">
-              <span className="text-sm leading-none">{originFlag}</span>
-              <span className="font-mono text-xs font-bold text-[#E5E5E5]">{depIata || "???"}</span>
+            {/* Origin: flag (if known) + IATA or ✈ */}
+            <div className="flex items-center gap-1 flex-shrink-0 min-w-[40px]">
+              <span className="text-sm leading-none">{originFlag || "✈️"}</span>
+              {depIata && <span className="font-mono text-xs font-bold text-[#E5E5E5]">{depIata}</span>}
             </div>
             {/* Progress bar + flight number */}
             <div className="flex-1 relative">
@@ -353,10 +353,10 @@ export default function DriverTripCard({
                 onClick={viagem.flight ? () => window.open(`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`, "_blank") : undefined}
               >
                 <div className="flex items-center justify-between text-xs mb-2">
-                  {/* Origin airport + flag */}
+                  {/* Origin airport + flag (only if tracking data available) */}
                   <div className="text-center">
-                    <p className="text-base mb-0.5">{originFlag}</p>
-                    <p className="font-mono font-bold text-sm" style={{ color: c.hex }}>{depIata || "???"}</p>
+                    <p className="text-base mb-0.5">{originFlag || "✈️"}</p>
+                    {depIata && <p className="font-mono font-bold text-sm" style={{ color: c.hex }}>{depIata}</p>}
                     <p className="text-[10px] text-[#D0D0D0]">{viagem.depCity || ""}</p>
                     {viagem.depTime && <p className="font-mono text-[10px] text-[#D0D0D0] mt-0.5">{viagem.depTime}</p>}
                   </div>
