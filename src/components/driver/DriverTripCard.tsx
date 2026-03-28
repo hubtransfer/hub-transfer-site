@@ -14,16 +14,16 @@ import {
   getMapUrl,
   getWazeUrl,
 } from "@/lib/trips";
+import { generateDriverWhatsAppURL, generateDriverSmsURL } from "@/lib/driver-templates";
+import { getCachedOrigin, setCachedOrigin, TOP_AIRPORTS } from "@/lib/flight-origins";
 
 /* ─── Extract airline prefix from flight number (e.g. "TP1323" → "TP", "FIA5811" → "FIA") ─── */
 function extractAirlineCode(flight: string): string | null {
   if (!flight) return null;
   const clean = flight.replace(/\s+/g, "").toUpperCase();
-  // Match leading letters (2-3 chars) before digits
   const m = clean.match(/^([A-Z]{2,3})\d/);
   return m ? m[1] : null;
 }
-import { generateDriverWhatsAppURL, generateDriverSmsURL } from "@/lib/driver-templates";
 
 /* ─── Helpers ─── */
 
@@ -137,23 +137,67 @@ export default function DriverTripCard({
   const hasFlightNumber = !!(viagem.flight && viagem.flight.trim());
   const flightProg = useMemo(() => hasFlightNumber ? calcFlightProgress(viagem.depTime || "", viagem.arrTime || "") : 0, [hasFlightNumber, viagem.depTime, viagem.arrTime]);
 
-  // Origin: prefer backend tracking data (depAirport/depIata) for flag+IATA
-  // If backend has no data, fall back to airline code from flight number (no flag, just code)
+  // Origin selector state (for manual airport selection)
+  const [originPickerOpen, setOriginPickerOpen] = useState(false);
+  const [originSearch, setOriginSearch] = useState("");
+  const [manualOrigin, setManualOrigin] = useState<string | null>(null);
+  const originSearchRef = useRef<HTMLInputElement>(null);
+
+  // Load cached origin from localStorage on mount
+  useEffect(() => {
+    if (!hasFlightNumber) return;
+    const cached = getCachedOrigin(viagem.flight, viagem.flightDate);
+    if (cached) setManualOrigin(cached);
+  }, [hasFlightNumber, viagem.flight, viagem.flightDate]);
+
+  // Origin resolution: backend > manual cache > null
   const depIata = useMemo(() => {
     if (!hasFlightNumber) return null;
+    // 1. Backend tracking data (highest priority)
     const raw = (viagem.depAirport || viagem.depIata || "").toUpperCase();
-    return raw && raw !== "???" ? raw : null;
-  }, [hasFlightNumber, viagem.depAirport, viagem.depIata]);
+    if (raw && raw !== "???") return raw;
+    // 2. Manual cache from localStorage
+    if (manualOrigin) return manualOrigin;
+    return null;
+  }, [hasFlightNumber, viagem.depAirport, viagem.depIata, manualOrigin]);
   const depInfo = useMemo(() => depIata ? getIataInfo(depIata) : null, [depIata]);
   const originFlag = depInfo ? countryFlag(depInfo.c) : null;
 
   // Airline code extracted from flight number (e.g. "TP" from "TP1323")
   const airlineCode = useMemo(() => hasFlightNumber ? extractAirlineCode(viagem.flight) : null, [hasFlightNumber, viagem.flight]);
 
+  // Has backend data (not manual)?
+  const hasBackendOrigin = useMemo(() => {
+    const raw = (viagem.depAirport || viagem.depIata || "").toUpperCase();
+    return !!(raw && raw !== "???");
+  }, [viagem.depAirport, viagem.depIata]);
+
   const arrTime = cleanHora(viagem.arrTime || "");
   const bar = flightBarStyle(flightProg, viagem.status);
-  const hasFlight = hasFlightNumber && (tipo === "CHEGADA" || !!(viagem.depAirport || viagem.depIata || viagem.arrTime));
+  const hasFlight = hasFlightNumber && (tipo === "CHEGADA" || !!(viagem.depAirport || viagem.depIata || viagem.arrTime || manualOrigin));
   const countdown = arrTime !== "—:—" ? formatCountdown(arrTime) : null;
+
+  // Handle selecting an origin airport
+  const handleSelectOrigin = useCallback((iata: string) => {
+    setManualOrigin(iata);
+    setCachedOrigin(viagem.flight, iata, viagem.flightDate);
+    setOriginPickerOpen(false);
+    setOriginSearch("");
+  }, [viagem.flight, viagem.flightDate]);
+
+  // Filtered airports for search
+  const filteredAirports = useMemo(() => {
+    if (!originSearch) return TOP_AIRPORTS;
+    const q = originSearch.toLowerCase();
+    return TOP_AIRPORTS.filter(([code, city]) =>
+      code.toLowerCase().includes(q) || city.toLowerCase().includes(q)
+    );
+  }, [originSearch]);
+
+  // Focus search when picker opens
+  useEffect(() => {
+    if (originPickerOpen) setTimeout(() => originSearchRef.current?.focus(), 50);
+  }, [originPickerOpen]);
 
   /* ─ Expand / Collapse ─ */
   const [expanded, setExpanded] = useState(false);
@@ -318,17 +362,18 @@ export default function DriverTripCard({
             onClick={(e) => e.stopPropagation()}
             className="flex items-center gap-2.5 px-4 pb-3 pt-0.5 cursor-pointer hover:bg-[#151515] transition-colors rounded-b-2xl"
           >
-            {/* Origin: backend flag+IATA if available, otherwise ✈️ + airline code */}
+            {/* Origin: flag+IATA if known (backend or manual), otherwise ✈️+airline+? */}
             <div className="flex items-center gap-1.5 flex-shrink-0 min-w-[44px]">
-              {originFlag ? (
+              {originFlag && depIata ? (
                 <>
                   <span className="text-base leading-none">{originFlag}</span>
-                  {depIata && <span className="font-mono text-sm font-bold text-[#E5E5E5]">{depIata}</span>}
+                  <span className="font-mono text-sm font-bold text-[#E5E5E5]">{depIata}</span>
                 </>
               ) : (
                 <>
                   <span className="text-base leading-none">✈️</span>
                   {airlineCode && <span className="font-mono text-sm font-bold text-[#E5E5E5]">{airlineCode}</span>}
+                  <span className="text-[10px] text-[#666]">?</span>
                 </>
               )}
             </div>
@@ -372,37 +417,48 @@ export default function DriverTripCard({
             transition={{ duration: 0.25, ease: "easeInOut" }}
             className="overflow-hidden"
           >
-            {/* ── Flight block — clickable to search flight ── */}
+            {/* ── Flight block — with origin selector ── */}
             {hasFlight && (
               <div
-                className={`px-4 py-3 border-t border-[#2A2A2A] ${viagem.flight ? "cursor-pointer hover:bg-[#181818] transition-colors" : ""}`}
+                className="px-4 py-3 border-t border-[#2A2A2A]"
                 style={{ backgroundColor: `${c.hex}08` }}
-                onClick={viagem.flight ? () => window.open(`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`, "_blank") : undefined}
               >
                 <div className="flex items-center justify-between text-sm mb-2">
-                  {/* Origin: backend flag+IATA or ✈️+airline code */}
+                  {/* Origin: flag+IATA if known, or clickable selector */}
                   <div className="text-center min-w-[48px]">
-                    {originFlag ? (
-                      <>
+                    {originFlag && depIata ? (
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); if (!hasBackendOrigin) setOriginPickerOpen(true); }}
+                        className={!hasBackendOrigin ? "cursor-pointer active:opacity-70" : ""}
+                      >
                         <p className="text-lg mb-0.5">{originFlag}</p>
-                        {depIata && <p className="font-mono font-bold text-base" style={{ color: c.hex }}>{depIata}</p>}
-                        <p className="text-xs text-[#D0D0D0]">{viagem.depCity || ""}</p>
-                      </>
+                        <p className="font-mono font-bold text-base" style={{ color: c.hex }}>{depIata}</p>
+                        {viagem.depCity && <p className="text-xs text-[#D0D0D0]">{viagem.depCity}</p>}
+                      </button>
                     ) : (
-                      <>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setOriginPickerOpen(true); }}
+                        className="cursor-pointer active:opacity-70"
+                      >
                         <p className="text-lg mb-0.5">✈️</p>
                         {airlineCode && <p className="font-mono font-bold text-base" style={{ color: c.hex }}>{airlineCode}</p>}
-                      </>
+                        <p className="text-[10px] text-[#F0D030]/60 mt-0.5">Definir</p>
+                      </button>
                     )}
                     {viagem.depTime && <p className="font-mono text-xs text-[#D0D0D0] mt-0.5">{viagem.depTime}</p>}
                   </div>
-                  {/* Progress bar + flight number */}
-                  <div className="flex-1 mx-4">
+                  {/* Progress bar + flight number — clickable to search */}
+                  <div
+                    className="flex-1 mx-4 cursor-pointer"
+                    onClick={() => viagem.flight && window.open(`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`, "_blank")}
+                  >
                     <div className="relative w-full h-3 rounded-full bg-[#222222] overflow-hidden">
                       <div className={`h-full rounded-full ${bar.pulse ? "animate-flight-pulse" : ""}`}
                         style={{ width: `${Math.max(flightProg, 4)}%`, backgroundColor: bar.color }} />
                     </div>
-                    {viagem.flight && <p className="text-center font-mono text-base font-bold mt-1.5" style={{ color: c.hex }}>{viagem.flight}</p>}
+                    {viagem.flight && <p className="text-center font-mono text-base font-bold mt-1.5 hover:text-[#F0D030] transition-colors" style={{ color: c.hex }}>{viagem.flight}</p>}
                   </div>
                   {/* Destination: always 🇵🇹 LIS */}
                   <div className="text-center min-w-[48px]">
@@ -416,6 +472,43 @@ export default function DriverTripCard({
                   <div className="flex justify-between font-mono text-[10px] text-[#999]">
                     {viagem.depTerminal && <span>T{viagem.depTerminal}</span>}
                     {viagem.arrTerminal && <span>T{viagem.arrTerminal}</span>}
+                  </div>
+                )}
+
+                {/* ── Origin airport picker dropdown ── */}
+                {originPickerOpen && (
+                  <div className="mt-2 bg-[#111] border border-[#2A2A2A] rounded-xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                    <div className="p-2 border-b border-[#2A2A2A]">
+                      <input
+                        ref={originSearchRef}
+                        type="text"
+                        value={originSearch}
+                        onChange={(e) => setOriginSearch(e.target.value)}
+                        placeholder="Procurar aeroporto..."
+                        className="w-full h-9 bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg px-3 text-sm text-[#F5F5F5] placeholder-[#666] focus:outline-none focus:border-[#F0D030]/40 font-mono"
+                      />
+                    </div>
+                    <div className="max-h-[200px] overflow-y-auto">
+                      {filteredAirports.map(([code, city, country]) => (
+                        <button
+                          key={code}
+                          type="button"
+                          onClick={() => handleSelectOrigin(code)}
+                          className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-sm hover:bg-[#222] transition-colors cursor-pointer ${depIata === code ? "bg-[#F0D030]/10 text-[#F0D030]" : "text-[#D0D0D0]"}`}
+                        >
+                          <span className="text-base leading-none">{countryFlag(country)}</span>
+                          <span className="font-mono font-bold text-sm">{code}</span>
+                          <span className="flex-1 truncate text-xs">{city}</span>
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => { setOriginPickerOpen(false); setOriginSearch(""); }}
+                      className="w-full py-2 text-center text-xs text-[#666] hover:text-[#999] border-t border-[#2A2A2A] transition-colors"
+                    >
+                      Fechar
+                    </button>
                   </div>
                 )}
               </div>

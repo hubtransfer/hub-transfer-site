@@ -156,14 +156,14 @@ export const DDI_LANG: Record<string, string> = {
 
 // ── IATA airport data ────────────────────────────────────────
 
-interface IataInfo {
+export interface IataInfo {
   /** Country ISO-2 */
   c: string;
   /** Region classification */
   r: 'sch' | 'uk' | 'eu' | 'inter';
 }
 
-const IATA_DB: Record<string, IataInfo> = {
+export const IATA_DB: Record<string, IataInfo> = {
   // Portugal
   LIS: { c: 'PT', r: 'sch' }, OPO: { c: 'PT', r: 'sch' }, FAO: { c: 'PT', r: 'sch' },
   FNC: { c: 'PT', r: 'sch' }, PDL: { c: 'PT', r: 'sch' }, TER: { c: 'PT', r: 'sch' },
