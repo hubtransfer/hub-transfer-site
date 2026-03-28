@@ -360,17 +360,17 @@ export default function TripsPage() {
             {/* Stats bar */}
             <div className="flex flex-wrap gap-2">
               {[
-                { label: "Total", value: store.diaStats.total, color: "text-white" },
-                { label: "Chegadas", value: store.diaStats.chegadas, color: "text-amber-400" },
-                { label: "Recolhas", value: store.diaStats.recolhas, color: "text-emerald-400" },
-                { label: "Tours", value: store.diaStats.tours, color: "text-purple-400" },
+                { label: "Total", value: store.diaStats.total, color: "text-white", labelColor: "text-zinc-500" },
+                { label: "Chegadas", value: store.diaStats.chegadas, color: "text-[#D4A847]", labelColor: "text-[#D4A847]" },
+                { label: "Recolhas", value: store.diaStats.recolhas, color: "text-[#8B9DAF]", labelColor: "text-[#8B9DAF]" },
+                { label: "Tours", value: store.diaStats.tours, color: "text-[#C17E4A]", labelColor: "text-[#C17E4A]" },
               ].map((s) => (
                 <div
                   key={s.label}
                   className="bg-hub-black-card border border-hub-gold/5 rounded-lg px-3 py-2 text-center min-w-[70px]"
                 >
                   <div className={`text-lg font-bold ${s.color}`}>{s.value}</div>
-                  <div className="text-[10px] text-zinc-500 uppercase tracking-wider">
+                  <div className={`text-[10px] uppercase tracking-wider ${s.labelColor}`}>
                     {s.label}
                   </div>
                 </div>
@@ -395,7 +395,7 @@ export default function TripsPage() {
                 onClick={() => shiftDate(1)}
                 className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1.5 rounded text-xs transition-colors"
               >
-                Amanh\u00E3 {"\u25B6"}
+                Amanhã ▶
               </button>
               <input
                 type="date"
@@ -449,7 +449,7 @@ export default function TripsPage() {
                       <span className="text-white font-medium">{name}</span>
                       <span className="text-zinc-400">
                         {data.count} viagens &middot;{" "}
-                        <span className="text-hub-gold">{data.total.toFixed(0)}\u20AC</span>
+                        <span className="text-hub-gold">€{data.total.toFixed(0)}</span>
                       </span>
                     </div>
                   ))}

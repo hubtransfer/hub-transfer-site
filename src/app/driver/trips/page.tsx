@@ -10,6 +10,7 @@ import { getSession, clearSession } from "@/lib/auth";
 import {
   detectTipo,
   calcDriverPrice,
+  cleanHora,
   todayStr,
   dateToISO,
 } from "@/lib/trips";
@@ -131,13 +132,15 @@ export default function DriverTripsPage() {
     let chegadas = 0;
     let recolhas = 0;
     let totalPay = 0;
+    let done = 0;
     for (const v of driverTrips) {
       const tipo = detectTipo(v.origin || "", v.flight || "", v.type);
       if (tipo === "CHEGADA") chegadas++;
       else recolhas++;
       totalPay += calcDriverPrice(v.platform || "");
+      if (v.concluida || v.status === "CONCLUIDA" || v.status === "FINALIZOU") done++;
     }
-    return { total: driverTrips.length, chegadas, recolhas, totalPay };
+    return { total: driverTrips.length, chegadas, recolhas, totalPay, done };
   }, [driverTrips]);
 
   /* ── (heroId removed — cards self-expand on tap) ── */
@@ -188,9 +191,9 @@ export default function DriverTripsPage() {
           {store.isLoading ? (
             <span className="text-xs text-[#F0D030]/60 animate-pulse font-mono">A sincronizar...</span>
           ) : store.isFromCache ? (
-            <span className="text-xs text-[#D4D4D4] font-mono">Cache &middot; {store.cacheAge}</span>
+            <span className="text-xs text-[#D4D4D4] font-mono">Cache · {store.cacheAge}</span>
           ) : store.lastSyncTime ? (
-            <span className="text-xs text-[#D4A847] font-mono">Sincronizado &#10003;</span>
+            <span className="text-xs text-[#D4A847] font-mono">Sincronizado ✓</span>
           ) : null}
           <span className="text-sm text-white/50 tabular-nums font-mono">
             {clock}
@@ -228,7 +231,7 @@ export default function DriverTripsPage() {
         </div>
         <div className="flex items-center justify-between">
           <span className="font-mono font-bold text-[#F0D030]">
-            &euro;{stats.totalPay.toFixed(0)}
+            €{stats.totalPay.toFixed(0)}
           </span>
           <span className="text-xs text-white/30 font-mono">
             {store.selectedDate || todayStr()}
@@ -248,19 +251,19 @@ export default function DriverTripsPage() {
             onClick={() => shiftDate(-1)}
             className="h-10 px-3 bg-white/5 rounded-lg text-xs text-white/60 active:bg-white/10 transition-colors font-mono"
           >
-            &#9664; Ontem
+            ◀ Ontem
           </button>
           <button
             onClick={() => store.loadDate("")}
             className="h-10 px-4 bg-[#F0D030]/20 text-[#F0D030] rounded-lg text-xs font-bold active:bg-[#F0D030]/30 transition-colors font-mono"
           >
-            &#128197; Hoje
+            📅 Hoje
           </button>
           <button
             onClick={() => shiftDate(1)}
             className="h-10 px-3 bg-white/5 rounded-lg text-xs text-white/60 active:bg-white/10 transition-colors font-mono"
           >
-            Amanh&atilde; &#9654;
+            Amanhã ▶
           </button>
           <input
             type="date"
@@ -283,7 +286,7 @@ export default function DriverTripsPage() {
           <SkeletonList count={3} />
         ) : driverTrips.length === 0 ? (
           <div className="text-center py-20">
-            <div className="text-5xl mb-4 opacity-30">&#128661;</div>
+            <div className="text-5xl mb-4 opacity-30">🚕</div>
             <p className="text-[#E5E5E5] text-sm font-mono">
               Nenhuma viagem para hoje
             </p>
@@ -300,7 +303,7 @@ export default function DriverTripsPage() {
                 <React.Fragment key={vId}>
                   {i === 0 && nonDoneTrips.length > 1 && (
                     <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#F0D030] px-1">
-                      Pr&oacute;xima viagem
+                      Próxima viagem
                     </p>
                   )}
                   {i === 1 && (
@@ -321,18 +324,38 @@ export default function DriverTripsPage() {
 
             {doneTrips.length > 0 && (
               <>
-                <p className="text-[10px] text-white/20 uppercase tracking-widest text-center py-2 font-mono">
-                  &#8213; conclu&iacute;das &#8213;
-                </p>
+                <div className="flex items-center gap-3 py-3">
+                  <div className="flex-1 h-px bg-white/5" />
+                  <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-mono">
+                    Concluídas ({doneTrips.length})
+                  </p>
+                  <div className="flex-1 h-px bg-white/5" />
+                </div>
                 {doneTrips.map((viagem) => {
                   const vId = viagem.id || (viagem.client || "x").replace(/\W/g, "");
+                  const tipo = detectTipo(viagem.origin || "", viagem.flight || "", viagem.type);
+                  const hora = cleanHora(viagem.pickupTime || "");
+                  const typeColor = tipo === "CHEGADA" ? "#D4A847" : tipo === "RECOLHA" ? "#8B9DAF" : "#C17E4A";
                   return (
-                    <DriverTripCard
+                    <div
                       key={vId}
-                      viagem={viagem}
-                      onDarBaixa={store.darBaixa}
-                      onShowNameplate={openNameplate}
-                    />
+                      className="bg-[#1A1A1A] rounded-xl border border-[#2A2A2A] px-4 py-3 flex items-center gap-3 opacity-50"
+                      style={{ borderLeftWidth: "3px", borderLeftColor: typeColor }}
+                    >
+                      <span className="font-mono text-sm font-bold text-[#666]">{hora}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-[#999] truncate">{viagem.client}</p>
+                      </div>
+                      <span
+                        className="text-[10px] font-bold uppercase px-2 py-0.5 rounded"
+                        style={{ backgroundColor: `${typeColor}15`, color: typeColor }}
+                      >
+                        {tipo}
+                      </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#22C55E]/10 text-[#22C55E]">
+                        CONCLUÍDA
+                      </span>
+                    </div>
                   );
                 })}
               </>

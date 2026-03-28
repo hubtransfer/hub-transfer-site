@@ -399,7 +399,7 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         <section className="relative min-h-screen flex items-center justify-center">
           <div className="absolute inset-0">
-            <img src="/images/rua.jpg" alt="Rua de Lisboa com transfer privado HUB Transfer" className="w-full h-full object-cover" loading="eager" />
+            <img src="/images/rua01.png" alt="Rua de Lisboa com transfer privado HUB Transfer" className="w-full h-full object-cover" loading="eager" />
             <div className="absolute inset-0 bg-[#0A0A0A]/75" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-transparent to-[#0A0A0A]/40" />
           </div>
@@ -832,7 +832,7 @@ export default function LandingPage() {
                 <div
                   className="relative w-full max-w-[480px] max-h-[85vh] overflow-y-auto rounded-2xl pointer-events-auto select-none"
                   style={{
-                    backgroundImage: "url(/images/rua.jpg)",
+                    backgroundImage: "url(/images/rua01.png)",
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     WebkitTouchCallout: "none",
