@@ -74,6 +74,8 @@ interface TripsStore {
   counts: TabCounts;
   currentList: TripService[] | HubViagem[];
   diaList: HubViagem[];
+  diaActiveList: HubViagem[];
+  diaDoneList: HubViagem[];
   diaStats: DiaStats;
   diaPaySummary: Record<string, { count: number; total: number }>;
 
@@ -182,13 +184,19 @@ export function useTripsStore(): TripsStore {
       (s) => s.type === "RECOLHA"
     ).length;
 
+    // Count completed hubViagens for "past" badge
+    const hubDone = hubViagens.filter(
+      (v) => v.concluida || v.status === "CONCLUIDA" || v.status === "FINALIZOU" || v.status === "concluida",
+    ).length;
+    const hubActive = hubViagens.length - hubDone;
+
     return {
       current: services.current.length,
       chegadas,
       recolhas,
-      past: services.past.length,
+      past: services.past.length + hubDone,
       cancelled: services.cancelled.length,
-      dia: hubViagens.length,
+      dia: hubActive,
     };
   }, [services, hubViagens]);
 
@@ -227,11 +235,26 @@ export function useTripsStore(): TripsStore {
   }, [hubViagens, selectedDriver, diaDriverMap]);
 
   // ──────────────────────────────────────────────
-  // Computed: Dia Stats
+  // Computed: Dia Active + Done split
+  // ──────────────────────────────────────────────
+  const diaActiveList = useMemo<HubViagem[]>(() => {
+    return diaList.filter(
+      (v) => !v.concluida && v.status !== "CONCLUIDA" && v.status !== "FINALIZOU" && v.status !== "concluida",
+    );
+  }, [diaList]);
+
+  const diaDoneList = useMemo<HubViagem[]>(() => {
+    return diaList.filter(
+      (v) => v.concluida || v.status === "CONCLUIDA" || v.status === "FINALIZOU" || v.status === "concluida",
+    );
+  }, [diaList]);
+
+  // ──────────────────────────────────────────────
+  // Computed: Dia Stats (active only)
   // ──────────────────────────────────────────────
   const diaStats = useMemo<DiaStats>(() => {
     const stats: DiaStats = {
-      total: diaList.length,
+      total: diaActiveList.length,
       chegadas: 0,
       recolhas: 0,
       tours: 0,
@@ -239,7 +262,7 @@ export function useTripsStore(): TripsStore {
       totalPay: 0,
     };
 
-    for (const v of diaList) {
+    for (const v of diaActiveList) {
       const tipo = detectTipo(v.origin || "", v.flight || "", v.type);
       if (tipo === "CHEGADA") stats.chegadas++;
       else if (tipo === "RECOLHA") stats.recolhas++;
@@ -251,7 +274,7 @@ export function useTripsStore(): TripsStore {
     }
 
     return stats;
-  }, [diaList]);
+  }, [diaActiveList]);
 
   // ──────────────────────────────────────────────
   // Computed: Dia Pay Summary
@@ -293,11 +316,11 @@ export function useTripsStore(): TripsStore {
       case "cancelled":
         return services.cancelled;
       case "dia":
-        return diaList;
+        return diaActiveList;
       default:
         return services.current;
     }
-  }, [currentTab, services, diaList]);
+  }, [currentTab, services, diaActiveList]);
 
   // ──────────────────────────────────────────────
   // Tab Navigation
@@ -665,6 +688,8 @@ export function useTripsStore(): TripsStore {
     counts,
     currentList,
     diaList,
+    diaActiveList,
+    diaDoneList,
     diaStats,
     diaPaySummary,
 

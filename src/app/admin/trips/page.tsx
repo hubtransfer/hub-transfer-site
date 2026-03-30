@@ -8,6 +8,7 @@ import type { TabType, HubViagem, TripService } from "@/lib/trips";
 import {
   TAB_INFO,
   TEMPLATES,
+  detectTipo,
   resolveLanguage,
   cleanHora,
   getWhatsAppUrl,
@@ -457,15 +458,19 @@ export default function TripsPage() {
               </div>
             )}
 
-            {/* Timeline / Cards */}
+            {/* Timeline / Cards — active trips only */}
             <div className="space-y-3 pb-4">
-              {store.diaList.length === 0 ? (
+              {store.diaActiveList.length === 0 && store.diaDoneList.length === 0 ? (
                 <div className="text-center py-16">
                   <div className="text-4xl mb-3 opacity-30">{"\u{1F5D3}"}</div>
                   <p className="text-zinc-500 text-sm">Nenhuma viagem para esta data</p>
                 </div>
+              ) : store.diaActiveList.length === 0 ? (
+                <div className="text-center py-10">
+                  <p className="text-zinc-500 text-sm">Todas as viagens foram concluídas</p>
+                </div>
               ) : (
-                store.diaList.map((viagem) => (
+                store.diaActiveList.map((viagem) => (
                   <TripCard
                     key={viagem.id || (viagem.client || "x").replace(/\W/g, "")}
                     viagem={viagem}
@@ -484,8 +489,51 @@ export default function TripsPage() {
           </div>
         )}
 
-        {/* ── OTHER TABS ── */}
-        {store.currentTab !== "dia" && (
+        {/* ── PAST TAB — completed hubViagens ── */}
+        {store.currentTab === "past" && (
+          <div className="px-4 sm:px-6 space-y-2 pb-4">
+            {store.diaDoneList.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="text-4xl mb-3 opacity-30">🏁</div>
+                <p className="text-zinc-500 text-sm">Nenhuma viagem concluída</p>
+              </div>
+            ) : (
+              store.diaDoneList.map((viagem) => {
+                const vId = viagem.id || (viagem.client || "x").replace(/\W/g, "");
+                const tipo = detectTipo(viagem.origin || "", viagem.flight || "", viagem.type);
+                const hora = cleanHora(viagem.pickupTime || "");
+                const typeColor = tipo === "CHEGADA" ? "#D4A847" : tipo === "RECOLHA" ? "#8B9DAF" : "#C17E4A";
+                return (
+                  <div
+                    key={vId}
+                    className="bg-hub-black-card border border-hub-gold/5 rounded-lg px-4 py-3 flex items-center gap-3 opacity-60"
+                    style={{ borderLeftWidth: "3px", borderLeftColor: typeColor }}
+                  >
+                    <span className="font-mono text-sm font-bold text-zinc-500">{hora}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-zinc-300 truncate">{viagem.client}</p>
+                      {viagem.driver && (
+                        <p className="text-[10px] text-zinc-500 truncate">{viagem.driver}</p>
+                      )}
+                    </div>
+                    <span
+                      className="text-[10px] font-bold uppercase px-2 py-0.5 rounded"
+                      style={{ backgroundColor: `${typeColor}15`, color: typeColor }}
+                    >
+                      {tipo}
+                    </span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#22C55E]/10 text-[#22C55E]">
+                      CONCLUÍDA
+                    </span>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        )}
+
+        {/* ── OTHER TABS (current, chegadas, recolhas, cancelled) ── */}
+        {store.currentTab !== "dia" && store.currentTab !== "past" && (
           <div className="px-4 sm:px-6 space-y-3 pb-4">
             {(store.currentTab === "current"
               ? filteredCurrentList
@@ -493,18 +541,12 @@ export default function TripsPage() {
             ).length === 0 ? (
               <div className="text-center py-16">
                 <div className="text-4xl mb-3 opacity-30">
-                  {store.currentTab === "past"
-                    ? "\u{1F3C1}"
-                    : store.currentTab === "cancelled"
-                      ? "\u2715"
-                      : "\u26A1"}
+                  {store.currentTab === "cancelled" ? "✕" : "⚡"}
                 </div>
                 <p className="text-zinc-500 text-sm">
-                  {store.currentTab === "past"
-                    ? "Nenhuma viagem conclu\u00EDda"
-                    : store.currentTab === "cancelled"
-                      ? "Nenhuma viagem cancelada"
-                      : "Nenhuma viagem activa"}
+                  {store.currentTab === "cancelled"
+                    ? "Nenhuma viagem cancelada"
+                    : "Nenhuma viagem activa"}
                 </p>
               </div>
             ) : (
@@ -539,14 +581,14 @@ export default function TripsPage() {
 
                   {/* Route */}
                   <div className="text-xs text-zinc-400">
-                    {s.origin || "—"} {"\u2192"} {s.destination || "—"}
+                    {s.origin || "—"} → {s.destination || "—"}
                   </div>
 
                   {/* Actions */}
                   <div className="flex flex-wrap items-center gap-2 pt-1">
                     {s.flightNumber && (
                       <span className="text-[10px] text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded">
-                        {"\u2708"} {s.flightNumber}
+                        ✈ {s.flightNumber}
                       </span>
                     )}
                     {s.platform && (
@@ -569,38 +611,38 @@ export default function TripsPage() {
                           onClick={() => store.markDone(s.id)}
                           className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded hover:bg-emerald-500/20 transition-colors"
                         >
-                          {"\u2713"} Done
+                          ✓ Done
                         </button>
                         <button
                           onClick={() => store.markCancelled(s.id)}
                           className="text-[10px] bg-red-500/10 text-red-400 px-2 py-1 rounded hover:bg-red-500/20 transition-colors"
                         >
-                          {"\u2715"}
+                          ✕
                         </button>
                       </div>
-                    ) : store.currentTab === "past" || store.currentTab === "cancelled" ? (
+                    ) : store.currentTab === "cancelled" ? (
                       <div className="ml-auto flex gap-1">
                         <button
                           onClick={() =>
                             store.restoreService(
                               s.id,
-                              store.currentTab as "past" | "cancelled",
+                              "cancelled",
                             )
                           }
                           className="text-[10px] bg-hub-gold/10 text-hub-gold px-2 py-1 rounded hover:bg-hub-gold/20 transition-colors"
                         >
-                          {"\u21A9"} Restaurar
+                          ↩ Restaurar
                         </button>
                         <button
                           onClick={() =>
                             store.removeService(
                               s.id,
-                              store.currentTab as "past" | "cancelled",
+                              "cancelled",
                             )
                           }
                           className="text-[10px] bg-red-500/10 text-red-400 px-2 py-1 rounded hover:bg-red-500/20 transition-colors"
                         >
-                          {"\u{1F5D1}"}
+                          🗑
                         </button>
                       </div>
                     ) : null}
