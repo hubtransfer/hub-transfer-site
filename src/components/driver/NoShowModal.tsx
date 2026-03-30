@@ -17,6 +17,8 @@ interface NoShowModalProps {
   isOpen: boolean;
   tripId: string;
   clientName: string;
+  driverName?: string;
+  gasUrl?: string;
   date?: string;
   onClose: () => void;
   onSubmit: (tripId: string) => void;
@@ -44,7 +46,7 @@ function fileToBase64(file: File): Promise<string> {
 
 /* ─── Component ─── */
 
-export default function NoShowModal({ isOpen, tripId, clientName, date, onClose, onSubmit }: NoShowModalProps) {
+export default function NoShowModal({ isOpen, tripId, clientName, driverName, gasUrl, date, onClose, onSubmit }: NoShowModalProps) {
   const [slots, setSlots] = useState<ProofSlot[]>(INITIAL_SLOTS);
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -74,6 +76,33 @@ export default function NoShowModal({ isOpen, tripId, clientName, date, onClose,
     if (fileRefs.current[index]) fileRefs.current[index]!.value = "";
   }, []);
 
+  /** Save to localStorage as fallback */
+  const saveToLocal = useCallback((
+    d: string,
+    proofs: { label: string; fileName: string; type: string; data: string }[],
+  ) => {
+    try {
+      const key = `hub_noshow_${tripId}_${d}`;
+      const record = {
+        tripId,
+        clientName,
+        date: d,
+        timestamp: new Date().toISOString(),
+        notes,
+        proofCount: proofs.length,
+        proofs,
+      };
+      localStorage.setItem(key, JSON.stringify(record));
+
+      const dayKey = `hub_noshows_${d}`;
+      const existing: string[] = JSON.parse(localStorage.getItem(dayKey) || "[]");
+      if (!existing.includes(tripId)) {
+        existing.push(tripId);
+        localStorage.setItem(dayKey, JSON.stringify(existing));
+      }
+    } catch { /* quota exceeded — ignore */ }
+  }, [tripId, clientName, notes]);
+
   const handleSubmit = useCallback(async () => {
     if (!canSubmit) return;
     setSubmitting(true);
@@ -93,34 +122,49 @@ export default function NoShowModal({ isOpen, tripId, clientName, date, onClose,
         }
       }
 
-      // Save to localStorage
       const d = date || new Date().toISOString().slice(0, 10);
-      const key = `hub_noshow_${tripId}_${d}`;
-      const record = {
-        tripId,
-        clientName,
-        date: d,
-        timestamp: new Date().toISOString(),
-        notes,
-        proofCount: proofs.length,
-        proofs,
-      };
-      localStorage.setItem(key, JSON.stringify(record));
+      let savedRemote = false;
 
-      // Also add to the day's no-show list
-      const dayKey = `hub_noshows_${d}`;
-      const existing: string[] = JSON.parse(localStorage.getItem(dayKey) || "[]");
-      if (!existing.includes(tripId)) {
-        existing.push(tripId);
-        localStorage.setItem(dayKey, JSON.stringify(existing));
+      // Try POST to GAS backend
+      if (gasUrl) {
+        try {
+          const payload = {
+            action: "registerNoShow",
+            tripId,
+            clientName,
+            date: d,
+            driverName: driverName || "",
+            observations: notes,
+            proofs: proofs.map((p) => ({
+              type: p.type,
+              filename: p.fileName,
+              data: p.data,
+            })),
+          };
+
+          const res = await fetch(gasUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify(payload),
+          });
+
+          const result = await res.json();
+          if (result.success) {
+            savedRemote = true;
+          }
+        } catch (err) {
+          console.error("NoShow GAS POST error:", err);
+        }
       }
 
-      setToast("Provas registadas com sucesso");
+      // Fallback: always save to localStorage too
+      saveToLocal(d, proofs);
+
+      setToast(savedRemote ? "Provas guardadas com sucesso" : "Provas guardadas localmente");
       setTimeout(() => {
         setToast("");
         onSubmit(tripId);
         onClose();
-        // Reset
         setSlots(INITIAL_SLOTS());
         setNotes("");
       }, 1500);
@@ -130,7 +174,7 @@ export default function NoShowModal({ isOpen, tripId, clientName, date, onClose,
     } finally {
       setSubmitting(false);
     }
-  }, [canSubmit, slots, notes, tripId, clientName, date, onSubmit, onClose]);
+  }, [canSubmit, slots, notes, tripId, clientName, driverName, gasUrl, date, saveToLocal, onSubmit, onClose]);
 
   if (!isOpen) return null;
 

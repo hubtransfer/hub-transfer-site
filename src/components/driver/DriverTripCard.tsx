@@ -4,6 +4,7 @@ import React, { useMemo, useState, useRef, useCallback, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion";
 import type { HubViagem, Driver } from "@/lib/trips";
 import {
+  HUB_CENTRAL_URL,
   detectTipo,
   splitLocation,
   cleanHora,
@@ -640,6 +641,8 @@ export default function DriverTripCard({
         isOpen={noShowOpen}
         tripId={cardId}
         clientName={viagem.client}
+        driverName={driverNameProp || viagem.driver || ""}
+        gasUrl={HUB_CENTRAL_URL}
         date={viagem.flightDate}
         onClose={() => setNoShowOpen(false)}
         onSubmit={(id) => {
