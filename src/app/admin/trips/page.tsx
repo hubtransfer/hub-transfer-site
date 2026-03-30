@@ -477,6 +477,7 @@ export default function TripsPage() {
                     drivers={store.drivers}
                     onSetDriver={store.diaSetDriver}
                     onDarBaixa={store.darBaixa}
+                    onNoShow={store.markNoShow}
                     onDispatch={handleDispatch}
                     onClientMsg={handleClientMsg}
                     onSmsMsg={handleSmsMsg}
@@ -532,22 +533,59 @@ export default function TripsPage() {
           </div>
         )}
 
-        {/* ── OTHER TABS (current, chegadas, recolhas, cancelled) ── */}
-        {store.currentTab !== "dia" && store.currentTab !== "past" && (
+        {/* ── CANCELLED TAB — no-shows ── */}
+        {store.currentTab === "cancelled" && (
+          <div className="px-4 sm:px-6 space-y-2 pb-4">
+            {store.diaNoShowList.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="text-4xl mb-3 opacity-30">✕</div>
+                <p className="text-zinc-500 text-sm">Nenhuma viagem cancelada / no-show</p>
+              </div>
+            ) : (
+              store.diaNoShowList.map((viagem) => {
+                const vId = viagem.id || (viagem.client || "x").replace(/\W/g, "");
+                const tipo = detectTipo(viagem.origin || "", viagem.flight || "", viagem.type);
+                const hora = cleanHora(viagem.pickupTime || "");
+                const typeColor = tipo === "CHEGADA" ? "#D4A847" : tipo === "RECOLHA" ? "#8B9DAF" : "#C17E4A";
+                return (
+                  <div
+                    key={vId}
+                    className="bg-hub-black-card border border-hub-gold/5 rounded-lg px-4 py-3 flex items-center gap-3 opacity-60"
+                    style={{ borderLeftWidth: "3px", borderLeftColor: "#EF4444" }}
+                  >
+                    <span className="font-mono text-sm font-bold text-zinc-500">{hora}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-zinc-300 truncate">{viagem.client}</p>
+                      {viagem.driver && (
+                        <p className="text-[10px] text-zinc-500 truncate">{viagem.driver}</p>
+                      )}
+                    </div>
+                    <span
+                      className="text-[10px] font-bold uppercase px-2 py-0.5 rounded"
+                      style={{ backgroundColor: `${typeColor}15`, color: typeColor }}
+                    >
+                      {tipo}
+                    </span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#EF4444]/10 text-[#EF4444]">
+                      NO-SHOW
+                    </span>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        )}
+
+        {/* ── OTHER TABS (current, chegadas, recolhas) ── */}
+        {store.currentTab !== "dia" && store.currentTab !== "past" && store.currentTab !== "cancelled" && (
           <div className="px-4 sm:px-6 space-y-3 pb-4">
             {(store.currentTab === "current"
               ? filteredCurrentList
               : store.currentList
             ).length === 0 ? (
               <div className="text-center py-16">
-                <div className="text-4xl mb-3 opacity-30">
-                  {store.currentTab === "cancelled" ? "✕" : "⚡"}
-                </div>
-                <p className="text-zinc-500 text-sm">
-                  {store.currentTab === "cancelled"
-                    ? "Nenhuma viagem cancelada"
-                    : "Nenhuma viagem activa"}
-                </p>
+                <div className="text-4xl mb-3 opacity-30">⚡</div>
+                <p className="text-zinc-500 text-sm">Nenhuma viagem activa</p>
               </div>
             ) : (
               (store.currentTab === "current"
@@ -558,7 +596,6 @@ export default function TripsPage() {
                   key={s.id}
                   className="bg-hub-black-card border border-hub-gold/5 rounded-lg p-4 space-y-2"
                 >
-                  {/* Header row */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span
@@ -572,80 +609,30 @@ export default function TripsPage() {
                       >
                         {(s.type || "").toUpperCase()}
                       </span>
-                      <span className="text-sm font-bold text-white">
-                        {s.client || "—"}
-                      </span>
+                      <span className="text-sm font-bold text-white">{s.client || "—"}</span>
                     </div>
                     <span className="text-xs text-zinc-500">{s.pickupTime || ""}</span>
                   </div>
-
-                  {/* Route */}
                   <div className="text-xs text-zinc-400">
                     {s.origin || "—"} → {s.destination || "—"}
                   </div>
-
-                  {/* Actions */}
                   <div className="flex flex-wrap items-center gap-2 pt-1">
                     {s.flightNumber && (
-                      <span className="text-[10px] text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded">
-                        ✈ {s.flightNumber}
-                      </span>
+                      <span className="text-[10px] text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded">✈ {s.flightNumber}</span>
                     )}
-                    {s.platform && (
-                      <span className="text-[10px] text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded">
-                        {s.platform}
-                      </span>
+                    {s.assignedDriver && (
+                      <span className="text-[10px] text-hub-gold bg-hub-gold/10 px-2 py-0.5 rounded">{s.assignedDriver}</span>
                     )}
-                    {s.assignedDriver ? (
-                      <span className="text-[10px] text-hub-gold bg-hub-gold/10 px-2 py-0.5 rounded">
-                        {s.assignedDriver}
-                      </span>
-                    ) : null}
-
-                    {/* Tab-specific actions */}
-                    {store.currentTab === "current" ||
-                    store.currentTab === "chegadas" ||
-                    store.currentTab === "recolhas" ? (
-                      <div className="ml-auto flex gap-1">
-                        <button
-                          onClick={() => store.markDone(s.id)}
-                          className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded hover:bg-emerald-500/20 transition-colors"
-                        >
-                          ✓ Done
-                        </button>
-                        <button
-                          onClick={() => store.markCancelled(s.id)}
-                          className="text-[10px] bg-red-500/10 text-red-400 px-2 py-1 rounded hover:bg-red-500/20 transition-colors"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ) : store.currentTab === "cancelled" ? (
-                      <div className="ml-auto flex gap-1">
-                        <button
-                          onClick={() =>
-                            store.restoreService(
-                              s.id,
-                              "cancelled",
-                            )
-                          }
-                          className="text-[10px] bg-hub-gold/10 text-hub-gold px-2 py-1 rounded hover:bg-hub-gold/20 transition-colors"
-                        >
-                          ↩ Restaurar
-                        </button>
-                        <button
-                          onClick={() =>
-                            store.removeService(
-                              s.id,
-                              "cancelled",
-                            )
-                          }
-                          className="text-[10px] bg-red-500/10 text-red-400 px-2 py-1 rounded hover:bg-red-500/20 transition-colors"
-                        >
-                          🗑
-                        </button>
-                      </div>
-                    ) : null}
+                    <div className="ml-auto flex gap-1">
+                      <button onClick={() => store.markDone(s.id)}
+                        className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded hover:bg-emerald-500/20 transition-colors">
+                        ✓ Done
+                      </button>
+                      <button onClick={() => store.markCancelled(s.id)}
+                        className="text-[10px] bg-red-500/10 text-red-400 px-2 py-1 rounded hover:bg-red-500/20 transition-colors">
+                        ✕
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))

@@ -76,6 +76,7 @@ interface TripsStore {
   diaList: HubViagem[];
   diaActiveList: HubViagem[];
   diaDoneList: HubViagem[];
+  diaNoShowList: HubViagem[];
   diaStats: DiaStats;
   diaPaySummary: Record<string, { count: number; total: number }>;
 
@@ -96,6 +97,7 @@ interface TripsStore {
   filterDriver: (name: string) => void;
   diaSetDriver: (cardId: string, driver: string) => void;
   darBaixa: (id: string, rowIndex: string, cardId: string) => Promise<void>;
+  markNoShow: (cardId: string) => void;
 
   // Nameplate
   showNameplate: (name: string, destination?: string) => void;
@@ -184,18 +186,19 @@ export function useTripsStore(): TripsStore {
       (s) => s.type === "RECOLHA"
     ).length;
 
-    // Count completed hubViagens for "past" badge
+    // Count completed/no-show hubViagens
+    const hubNoShow = hubViagens.filter((v) => v.status === "NO-SHOW").length;
     const hubDone = hubViagens.filter(
-      (v) => v.concluida || v.status === "CONCLUIDA" || v.status === "FINALIZOU" || v.status === "concluida",
+      (v) => (v.concluida || v.status === "CONCLUIDA" || v.status === "FINALIZOU" || v.status === "concluida") && v.status !== "NO-SHOW",
     ).length;
-    const hubActive = hubViagens.length - hubDone;
+    const hubActive = hubViagens.length - hubDone - hubNoShow;
 
     return {
       current: services.current.length,
       chegadas,
       recolhas,
       past: services.past.length + hubDone,
-      cancelled: services.cancelled.length,
+      cancelled: services.cancelled.length + hubNoShow,
       dia: hubActive,
     };
   }, [services, hubViagens]);
@@ -239,14 +242,18 @@ export function useTripsStore(): TripsStore {
   // ──────────────────────────────────────────────
   const diaActiveList = useMemo<HubViagem[]>(() => {
     return diaList.filter(
-      (v) => !v.concluida && v.status !== "CONCLUIDA" && v.status !== "FINALIZOU" && v.status !== "concluida",
+      (v) => !v.concluida && v.status !== "CONCLUIDA" && v.status !== "FINALIZOU" && v.status !== "concluida" && v.status !== "NO-SHOW",
     );
   }, [diaList]);
 
   const diaDoneList = useMemo<HubViagem[]>(() => {
     return diaList.filter(
-      (v) => v.concluida || v.status === "CONCLUIDA" || v.status === "FINALIZOU" || v.status === "concluida",
+      (v) => (v.concluida || v.status === "CONCLUIDA" || v.status === "FINALIZOU" || v.status === "concluida") && v.status !== "NO-SHOW",
     );
+  }, [diaList]);
+
+  const diaNoShowList = useMemo<HubViagem[]>(() => {
+    return diaList.filter((v) => v.status === "NO-SHOW");
   }, [diaList]);
 
   // ──────────────────────────────────────────────
@@ -516,6 +523,21 @@ export function useTripsStore(): TripsStore {
   );
 
   // ──────────────────────────────────────────────
+  // No-Show (mark trip as cancelled/no-show locally)
+  // ──────────────────────────────────────────────
+  const markNoShow = useCallback((cardId: string) => {
+    setHubViagens((prev) =>
+      prev.map((v) => {
+        const vId = v.id || (v.client || "").replace(/\W/g, "");
+        if (String(vId) === String(cardId)) {
+          return { ...v, concluida: true, status: "NO-SHOW" };
+        }
+        return v;
+      })
+    );
+  }, []);
+
+  // ──────────────────────────────────────────────
   // Nameplate
   // ──────────────────────────────────────────────
   const showNameplate = useCallback((name: string, destination?: string) => {
@@ -690,6 +712,7 @@ export function useTripsStore(): TripsStore {
     diaList,
     diaActiveList,
     diaDoneList,
+    diaNoShowList,
     diaStats,
     diaPaySummary,
 
@@ -710,6 +733,7 @@ export function useTripsStore(): TripsStore {
     filterDriver,
     diaSetDriver,
     darBaixa,
+    markNoShow,
 
     // Nameplate
     showNameplate,

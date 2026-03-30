@@ -16,6 +16,7 @@ import {
 } from "@/lib/trips";
 import { generateDriverWhatsAppURL, generateDriverSmsURL } from "@/lib/driver-templates";
 import { getCachedOrigin, setCachedOrigin, TOP_AIRPORTS } from "@/lib/flight-origins";
+import NoShowModal from "@/components/driver/NoShowModal";
 
 /* ─── Extract airline prefix from flight number (e.g. "TP1323" → "TP", "FIA5811" → "FIA") ─── */
 function extractAirlineCode(flight: string): string | null {
@@ -97,6 +98,7 @@ interface DriverTripCardProps {
   onClientMsg?: (cid: string, type: string, client: string, lang: string, origin: string, hora: string, phone: string) => void;
   onSmsMsg?: (cid: string, type: string, client: string, lang: string, origin: string, hora: string, phone: string) => void;
   driverName?: string;  // logged-in driver name (driver mode) or selected driver (admin mode)
+  onNoShow?: (tripId: string) => void;  // called after no-show proofs submitted
   mode?: "driver" | "admin";
   isNext?: boolean;     // first non-done trip gets hero treatment
 }
@@ -109,6 +111,7 @@ export default function DriverTripCard({
   viagem, drivers, onDarBaixa, onShowNameplate,
   onSetDriver, onDispatch, onClientMsg, onSmsMsg,
   driverName: driverNameProp,
+  onNoShow,
   mode = "driver",
   isNext = false,
 }: DriverTripCardProps) {
@@ -198,6 +201,9 @@ export default function DriverTripCard({
   useEffect(() => {
     if (originPickerOpen) setTimeout(() => originSearchRef.current?.focus(), 50);
   }, [originPickerOpen]);
+
+  /* ─ No-Show modal ─ */
+  const [noShowOpen, setNoShowOpen] = useState(false);
 
   /* ─ Expand / Collapse ─ */
   const [expanded, setExpanded] = useState(false);
@@ -616,10 +622,31 @@ export default function DriverTripCard({
                   ✅ Concluída
                 </div>
               )}
+
+              {/* No-Show button */}
+              {!isDone && (
+                <button type="button" onClick={() => setNoShowOpen(true)}
+                  className="w-full h-12 rounded-xl bg-transparent border border-[#EF4444]/30 text-[#EF4444] font-mono text-sm font-bold hover:bg-[#EF4444]/15 active:bg-[#EF4444]/20 transition-colors">
+                  🚫 Cliente No-Show
+                </button>
+              )}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* No-Show Modal */}
+      <NoShowModal
+        isOpen={noShowOpen}
+        tripId={cardId}
+        clientName={viagem.client}
+        date={viagem.flightDate}
+        onClose={() => setNoShowOpen(false)}
+        onSubmit={(id) => {
+          if (onNoShow) onNoShow(id);
+          else onDarBaixa(viagem.id, viagem.rowIndex ?? "", id);
+        }}
+      />
     </motion.div>
   );
 }
