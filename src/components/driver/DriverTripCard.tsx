@@ -17,6 +17,8 @@ import {
 } from "@/lib/trips";
 import { generateDriverWhatsAppURL, generateDriverSmsURL } from "@/lib/driver-templates";
 import { getCachedOrigin } from "@/lib/flight-origins";
+import { getOriginFlag } from "@/lib/countryFlags";
+import { getDelayedTime, delayColor, statusDotColor, statusLabel, isFlightTracked } from "@/lib/flightUtils";
 import NoShowModal from "@/components/driver/NoShowModal";
 
 
@@ -145,6 +147,14 @@ export default function DriverTripCard({
   const bar = flightBarStyle(flightProg, viagem.status);
   const hasFlight = hasFlightNumber && (tipo === "CHEGADA" || !!(viagem.depAirport || viagem.depIata || viagem.arrTime || manualOrigin));
   const countdown = arrTime !== "—:—" ? formatCountdown(arrTime) : null;
+
+  // Delay info
+  const delayMin = parseInt(viagem.atrasoMin || "0", 10) || 0;
+  const delayedHora = delayMin > 0 ? getDelayedTime(hora, delayMin) : "";
+  const dColor = delayMin > 0 ? delayColor(delayMin) : "";
+
+  // Origin flag from depIata
+  const originFlag = getOriginFlag(viagem.depIata || "");
 
 
   /* ─ No-Show modal ─ */
@@ -279,7 +289,15 @@ export default function DriverTripCard({
         <div className="flex items-center gap-4 px-5 py-4">
           <div className="flex-shrink-0 min-w-[60px] text-center">
             <span className="block text-[10px] font-bold uppercase tracking-[1px] text-[#F0D030]/80 font-mono leading-none mb-0.5">{sourceLabel}</span>
-            <span className={`text-2xl font-black font-mono ${c.text}`}>{hora}</span>
+            {delayedHora ? (
+              <div className="flex items-center gap-1 justify-center">
+                <span className="text-lg font-bold font-mono line-through opacity-40 text-[#999]">{hora}</span>
+                <span className="text-[10px] text-[#666]">→</span>
+                <span className="text-xl font-black font-mono" style={{ color: dColor }}>{delayedHora}</span>
+              </div>
+            ) : (
+              <span className={`text-2xl font-black font-mono ${c.text}`}>{hora}</span>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <p
@@ -314,6 +332,10 @@ export default function DriverTripCard({
             onClick={(e) => e.stopPropagation()}
             className="flex items-center gap-2.5 px-4 pb-3 pt-0.5 cursor-pointer hover:bg-[#151515] transition-colors rounded-b-2xl"
           >
+            {/* Origin flag */}
+            <div className="flex-shrink-0 w-[28px] text-center">
+              {originFlag && <span className="text-xl leading-none">{originFlag}</span>}
+            </div>
             {/* Progress bar + flight number */}
             <div className="flex-1 relative">
               <div className="h-3 rounded-full bg-[#222222] overflow-hidden">
@@ -354,16 +376,78 @@ export default function DriverTripCard({
             transition={{ duration: 0.25, ease: "easeInOut" }}
             className="overflow-hidden"
           >
-            {/* ── Flight block — with origin selector ── */}
+            {/* ── Flight block — status + progress ── */}
             {hasFlight && (
               <div
                 className="px-4 py-3 border-t border-[#2A2A2A]"
                 style={{ backgroundColor: `${c.hex}08` }}
               >
-                <div className="flex items-center justify-between text-sm mb-2">
-                  {/* Progress bar + flight number — clickable to search */}
+                {/* Flight status header */}
+                {viagem.statusVoo && isFlightTracked(viagem.statusVoo) && (
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="font-mono text-[10px] uppercase tracking-wider text-[#F0D030]">Estado do voo</p>
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className="w-2 h-2 rounded-full"
+                        style={{
+                          backgroundColor: statusDotColor(viagem.statusVoo),
+                          boxShadow: viagem.statusVoo?.toUpperCase() === "EN_VOO" ? `0 0 6px ${statusDotColor(viagem.statusVoo)}` : "none",
+                        }}
+                      />
+                      <span className="font-mono text-xs font-bold" style={{ color: statusDotColor(viagem.statusVoo) }}>
+                        {statusLabel(viagem.statusVoo)}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Time rows (departure + arrival) */}
+                {viagem.statusVoo && isFlightTracked(viagem.statusVoo) && (
+                  <div className="space-y-1.5 mb-3">
+                    {viagem.depTimeProg && (
+                      <div className="flex items-center gap-2 font-mono text-xs">
+                        <span className="text-[#999] w-[72px]">Descolagem</span>
+                        {delayMin > 0 ? (
+                          <>
+                            <span className="line-through opacity-40 text-[#999]">{viagem.depTimeProg}</span>
+                            <span className="text-[#666]">→</span>
+                            <span style={{ color: dColor }}>{getDelayedTime(viagem.depTimeProg, delayMin)}</span>
+                            <span className="text-[10px]" style={{ color: dColor }}>(+{delayMin}min)</span>
+                          </>
+                        ) : (
+                          <span className="text-[#D0D0D0]">{viagem.depTimeProg}</span>
+                        )}
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 font-mono text-xs">
+                      <span className="text-[#999] w-[72px]">Aterragem</span>
+                      {delayMin > 0 ? (
+                        <>
+                          <span className="line-through opacity-40 text-[#999]">{hora}</span>
+                          <span className="text-[#666]">→</span>
+                          <span className="font-bold" style={{ color: dColor }}>{delayedHora}</span>
+                          <span className="text-[10px]" style={{ color: dColor }}>(+{delayMin}min)</span>
+                        </>
+                      ) : (
+                        <span className="text-[#D0D0D0] font-bold">{viagem.etaChegada || arrTime || hora}</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Flight bar: flag | progress | destination */}
+                <div className="flex items-center gap-2.5">
+                  {/* Origin flag */}
+                  <div className="flex-shrink-0 w-[32px] text-center">
+                    {originFlag ? (
+                      <span className="text-xl leading-none">{originFlag}</span>
+                    ) : viagem.depIata ? (
+                      <span className="font-mono text-xs font-bold text-[#D0D0D0]">{viagem.depIata}</span>
+                    ) : null}
+                  </div>
+                  {/* Progress bar + flight number — clickable */}
                   <div
-                    className="flex-1 mx-4 cursor-pointer"
+                    className="flex-1 cursor-pointer"
                     onClick={() => viagem.flight && window.open(`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`, "_blank")}
                   >
                     <div className="relative w-full h-3 rounded-full bg-[#222222] overflow-hidden">
@@ -372,21 +456,19 @@ export default function DriverTripCard({
                     </div>
                     {viagem.flight && <p className="text-center font-mono text-base font-bold mt-1.5 hover:text-[#F0D030] transition-colors" style={{ color: c.hex }}>{viagem.flight}</p>}
                   </div>
-                  {/* Destination: always 🇵🇹 LIS */}
-                  <div className="text-center min-w-[48px]">
+                  {/* Destination: 🇵🇹 LIS */}
+                  <div className="text-center flex-shrink-0 min-w-[48px]">
                     <p className="text-lg mb-0.5">🇵🇹</p>
-                    <p className="font-mono font-bold text-base" style={{ color: c.hex }}>LIS</p>
-                    <p className="text-xs text-[#D0D0D0]">Lisboa</p>
-                    {viagem.arrTime && <p className="font-mono text-xs text-[#D0D0D0] mt-0.5">{viagem.arrTime}</p>}
+                    <p className="font-mono font-bold text-sm" style={{ color: c.hex }}>LIS</p>
+                    {viagem.arrTime && <p className="font-mono text-[10px] text-[#D0D0D0] mt-0.5">{viagem.arrTime}</p>}
                   </div>
                 </div>
                 {(viagem.depTerminal || viagem.arrTerminal) && (
-                  <div className="flex justify-between font-mono text-[10px] text-[#999]">
+                  <div className="flex justify-between font-mono text-[10px] text-[#999] mt-1">
                     {viagem.depTerminal && <span>T{viagem.depTerminal}</span>}
                     {viagem.arrTerminal && <span>T{viagem.arrTerminal}</span>}
                   </div>
                 )}
-
               </div>
             )}
 

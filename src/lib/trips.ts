@@ -56,6 +56,10 @@ export interface HubViagem {
   arrTerminal?: string;
   depIata?: string;
   arrIata?: string;
+  statusVoo?: string;      // "AGUARDANDO" | "MONITORANDO" | "EN_VOO" | "ATERRISADO"
+  atrasoMin?: string;      // delay minutes ("25", "0")
+  depTimeProg?: string;    // programmed departure time
+  etaChegada?: string;     // estimated arrival time
   language: string;
   pax: string;
   bags?: string;
