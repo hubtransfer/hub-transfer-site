@@ -7,35 +7,26 @@ interface KPICardsProps {
   completed: number;
 }
 
-const cards = [
-  { key: "total", label: "Total de Serviços", icon: "📊", color: "hub-gold" },
-  { key: "pending", label: "Solicitados", icon: "⏳", color: "hub-warning" },
-  { key: "confirmed", label: "Confirmados", icon: "✅", color: "hub-success" },
-  { key: "completed", label: "Finalizados", icon: "🏁", color: "blue-400" },
-] as const;
-
-export default function KPICards({
-  total,
-  pending,
-  confirmed,
-  completed,
-}: KPICardsProps) {
-  const values = { total, pending, confirmed, completed };
+export default function KPICards({ total, pending, confirmed, completed }: KPICardsProps) {
+  const items = [
+    { label: "Total", value: total, color: "#F0D030" },
+    { label: "Solicitados", value: pending, color: "#FFA726" },
+    { label: "Confirmados", value: confirmed, color: "#7EAA6E" },
+    { label: "Finalizados", value: completed, color: "#60A5FA" },
+  ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {cards.map((card) => (
+    <div className="grid grid-cols-4 gap-2">
+      {items.map((item) => (
         <div
-          key={card.key}
-          className="card-hub p-6 text-center group hover:border-hub-gold/20 transition-all"
+          key={item.label}
+          className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg px-3 py-2 text-center hover:border-[#F0D030]/20 transition-all hover:-translate-y-0.5 cursor-default"
         >
-          <div
-            className={`font-display text-4xl font-bold text-${card.color} mb-2 tracking-tight`}
-          >
-            {values[card.key]}
+          <div className="text-xl font-bold font-mono" style={{ color: item.color }}>
+            {item.value}
           </div>
-          <div className="text-hub-gray-400 text-sm uppercase tracking-wider font-semibold">
-            {card.icon} {card.label}
+          <div className="text-[10px] text-[#888] uppercase tracking-wider font-mono">
+            {item.label}
           </div>
         </div>
       ))}

@@ -127,7 +127,7 @@ export default function PortalPage() {
         <div className="max-w-[960px] mx-auto px-4 pt-4 pb-0">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <Image src="/images/logo.png" alt="HUB Transfer" width={120} height={34} className="h-8 w-auto" priority />
+              <Image src="/images/logo.png" alt="HUB Transfer" width={180} height={50} className="h-11 w-auto" priority />
               <span className="text-sm text-[#A0A0A0] font-mono hidden sm:inline">{hotelName || "Portal"}</span>
             </div>
             <div className="flex items-center gap-2">
@@ -180,7 +180,7 @@ export default function PortalPage() {
 
         {/* ─── TAB 1: NOVO TRANSFER ─── */}
         {activeTab === "form" && (
-          <div ref={formRef} className="px-4 py-6">
+          <div ref={formRef} className="px-4 py-5 animate-[fadeSlideIn_200ms_ease]">
             <TransferForm
               onSubmit={store.submitTransfer}
               editingTransfer={editingTransfer}
@@ -193,7 +193,7 @@ export default function PortalPage() {
 
         {/* ─── TAB 2: VIAGENS ─── */}
         {activeTab === "viagens" && (
-          <div className="px-4 py-6 space-y-4">
+          <div className="px-4 py-5 space-y-3 animate-[fadeSlideIn_200ms_ease]">
             {/* Compact summary row */}
             <div className="flex flex-wrap gap-2">
               <KPICards
@@ -276,6 +276,14 @@ export default function PortalPage() {
       >
         Admin{store.isAdminMode ? " ✓" : ""}
       </button>
+
+      {/* Tab transition animation */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes fadeSlideIn {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}} />
     </div>
   );
 }

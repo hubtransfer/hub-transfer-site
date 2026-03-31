@@ -1,17 +1,16 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import {
+  User, FileText, Car, Users, Briefcase, Calendar, Clock,
+  Phone, Plane, MapPin, Navigation, DollarSign, CreditCard, MessageSquare,
+} from "lucide-react";
 import PhoneInput from "@/components/PhoneInput";
 import {
-  Transfer,
-  TOURS_DATA,
-  getTourPrice,
-  getTourUnitPrice,
-  calculatePrices,
-  formatDateForInput,
+  Transfer, TOURS_DATA, getTourPrice, getTourUnitPrice,
+  calculatePrices, formatDateForInput,
 } from "@/lib/transfers";
 
-// ─── Props ───
 interface TransferFormProps {
   onSubmit: (formData: Partial<Transfer>) => void;
   editingTransfer: Transfer | null;
@@ -20,21 +19,19 @@ interface TransferFormProps {
   onClear: () => void;
 }
 
-// ─── Constants ───
 const TIME_SLOTS = [
-  "06:00", "07:00", "08:00", "09:00", "10:00", "11:00",
-  "12:00", "13:00", "14:00", "15:00", "16:00", "17:00",
-  "18:00", "19:00", "20:00", "21:00", "22:00", "23:00",
+  "06:00","07:00","08:00","09:00","10:00","11:00",
+  "12:00","13:00","14:00","15:00","16:00","17:00",
+  "18:00","19:00","20:00","21:00","22:00","23:00",
 ];
 const QUICK_PRICES = [25, 35, 45, 60, 75, 100];
 const QUICK_OBS = [
-  { label: "🧳 Bagagem Extra", value: "Bagagem Extra" },
-  { label: "⚡ Urgente", value: "Urgente" },
-  { label: "⭐ VIP", value: "VIP" },
-  { label: "👶 Com Criança", value: "Com Crianca" },
+  { label: "Bagagem Extra", value: "Bagagem Extra", icon: Briefcase },
+  { label: "Urgente", value: "Urgente", icon: Clock },
+  { label: "VIP", value: "VIP", icon: User },
+  { label: "Com Criança", value: "Com Crianca", icon: Users },
 ];
 
-// ─── Component ───
 export default function TransferForm({
   onSubmit, editingTransfer, isAdminMode, isLoading, onClear,
 }: TransferFormProps) {
@@ -56,88 +53,59 @@ export default function TransferForm({
   const [observacoes, setObservacoes] = useState("");
 
   const isTour = tipoServico === "Tour Regular" || tipoServico === "Private Tour";
-
   const tourOptions = useMemo(() => {
     const type = tipoServico === "Tour Regular" ? "regular" : "private";
     return Object.entries(TOURS_DATA).filter(([, t]) => t.type === type);
   }, [tipoServico]);
 
   useEffect(() => {
-    if (isTour && tourSelecionado) {
-      setValorTotal(getTourPrice(tourSelecionado, numeroPessoas, tipoServico));
-    }
+    if (isTour && tourSelecionado) setValorTotal(getTourPrice(tourSelecionado, numeroPessoas, tipoServico));
   }, [isTour, tourSelecionado, numeroPessoas, tipoServico]);
 
-  const adminPrices = useMemo(() => {
-    return calculatePrices(
-      tipoServico === "Tour Regular" ? "tour" : tipoServico === "Private Tour" ? "private" : "transfer",
-      valorTotal
-    );
-  }, [tipoServico, valorTotal]);
+  const adminPrices = useMemo(() => calculatePrices(
+    tipoServico === "Tour Regular" ? "tour" : tipoServico === "Private Tour" ? "private" : "transfer", valorTotal
+  ), [tipoServico, valorTotal]);
 
-  const tourUnitPrice = useMemo(() => {
-    if (!tourSelecionado) return 0;
-    return getTourUnitPrice(tourSelecionado, numeroPessoas);
-  }, [tourSelecionado, numeroPessoas]);
+  const tourUnitPrice = useMemo(() => tourSelecionado ? getTourUnitPrice(tourSelecionado, numeroPessoas) : 0, [tourSelecionado, numeroPessoas]);
 
-  // Populate on edit
   useEffect(() => {
     if (editingTransfer) {
-      setNomeCliente(editingTransfer.nomeCliente || "");
-      setReferencia(editingTransfer.referencia || "");
-      setTipoServico(editingTransfer.tipoServico || "Transfer");
-      setTourSelecionado(editingTransfer.tourSelecionado || "");
-      setNumeroPessoas(editingTransfer.numeroPessoas || 1);
-      setNumeroBagagens(editingTransfer.numeroBagagens || 1);
-      setData(editingTransfer.data ? formatDateForInput(editingTransfer.data) : "");
-      setHoraPickup(editingTransfer.horaPickup || "");
-      setContacto(editingTransfer.contacto || "");
-      setNumeroVoo(editingTransfer.numeroVoo || "");
-      setOrigem(editingTransfer.origem || "");
-      setDestino(editingTransfer.destino || "");
-      setValorTotal(editingTransfer.valorTotal || 0);
-      setModoPagamento(editingTransfer.modoPagamento || "");
-      setPagoParaQuem(editingTransfer.pagoParaQuem || "");
-      setObservacoes(editingTransfer.observacoes || "");
+      setNomeCliente(editingTransfer.nomeCliente || ""); setReferencia(editingTransfer.referencia || "");
+      setTipoServico(editingTransfer.tipoServico || "Transfer"); setTourSelecionado(editingTransfer.tourSelecionado || "");
+      setNumeroPessoas(editingTransfer.numeroPessoas || 1); setNumeroBagagens(editingTransfer.numeroBagagens || 1);
+      setData(editingTransfer.data ? formatDateForInput(editingTransfer.data) : ""); setHoraPickup(editingTransfer.horaPickup || "");
+      setContacto(editingTransfer.contacto || ""); setNumeroVoo(editingTransfer.numeroVoo || "");
+      setOrigem(editingTransfer.origem || ""); setDestino(editingTransfer.destino || "");
+      setValorTotal(editingTransfer.valorTotal || 0); setModoPagamento(editingTransfer.modoPagamento || "");
+      setPagoParaQuem(editingTransfer.pagoParaQuem || ""); setObservacoes(editingTransfer.observacoes || "");
     }
   }, [editingTransfer]);
 
   const clearForm = useCallback(() => {
-    setNomeCliente(""); setReferencia(""); setTipoServico("Transfer");
-    setTourSelecionado(""); setNumeroPessoas(1); setNumeroBagagens(1);
-    setData(""); setHoraPickup(""); setContacto(""); setNumeroVoo("");
-    setOrigem(""); setDestino(""); setValorTotal(0); setModoPagamento("");
-    setPagoParaQuem(""); setObservacoes("");
+    setNomeCliente(""); setReferencia(""); setTipoServico("Transfer"); setTourSelecionado("");
+    setNumeroPessoas(1); setNumeroBagagens(1); setData(""); setHoraPickup("");
+    setContacto(""); setNumeroVoo(""); setOrigem(""); setDestino("");
+    setValorTotal(0); setModoPagamento(""); setPagoParaQuem(""); setObservacoes("");
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const tourData = tourSelecionado ? TOURS_DATA[tourSelecionado] : null;
-    const prices = calculatePrices(
-      tipoServico === "Tour Regular" ? "tour" : tipoServico === "Private Tour" ? "private" : "transfer",
-      valorTotal
-    );
+    const prices = calculatePrices(tipoServico === "Tour Regular" ? "tour" : tipoServico === "Private Tour" ? "private" : "transfer", valorTotal);
     onSubmit({
-      nomeCliente, referencia, tipoServico, tourSelecionado,
-      tourNome: tourData?.name || "", numeroPessoas, numeroBagagens,
-      data, horaPickup, contacto, numeroVoo, origem, destino,
+      nomeCliente, referencia, tipoServico, tourSelecionado, tourNome: tourData?.name || "",
+      numeroPessoas, numeroBagagens, data, horaPickup, contacto, numeroVoo, origem, destino,
       valorTotal, valorHotel: prices.valorHotel, valorHUB: prices.valorHUB,
-      comissaoRecepcao: prices.comissaoRecepcao, modoPagamento,
-      pagoParaQuem, observacoes, status: "Solicitado",
+      comissaoRecepcao: prices.comissaoRecepcao, modoPagamento, pagoParaQuem, observacoes, status: "Solicitado",
     });
     clearForm();
   };
 
   const handleClear = () => { clearForm(); onClear(); };
 
-  // Keyboard shortcut: Ctrl+Enter to submit
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.key === "Enter") {
-        e.preventDefault();
-        const form = document.querySelector("form");
-        if (form) form.requestSubmit();
-      }
+      if (e.ctrlKey && e.key === "Enter") { e.preventDefault(); document.querySelector("form")?.requestSubmit(); }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
@@ -145,80 +113,57 @@ export default function TransferForm({
 
   const setToday = () => setData(formatDateForInput(new Date()));
   const setTomorrow = () => { const d = new Date(); d.setDate(d.getDate() + 1); setData(formatDateForInput(d)); };
-
   const handlePeopleSelect = (n: number) => {
-    if (n === 8) {
-      const input = window.prompt("Quantas pessoas?", "8");
-      if (input) { const p = parseInt(input, 10); if (!isNaN(p) && p > 0) setNumeroPessoas(p); }
-      return;
-    }
+    if (n === 8) { const v = window.prompt("Quantas pessoas?", "8"); if (v) { const p = parseInt(v); if (!isNaN(p) && p > 0) setNumeroPessoas(p); } return; }
     setNumeroPessoas(n);
   };
-
   const handleBaggageSelect = (n: number) => {
-    if (n === 6) {
-      const input = window.prompt("Quantas bagagens?", "6");
-      if (input) { const p = parseInt(input, 10); if (!isNaN(p) && p >= 0) setNumeroBagagens(p); }
-      return;
-    }
+    if (n === 6) { const v = window.prompt("Quantas bagagens?", "6"); if (v) { const p = parseInt(v); if (!isNaN(p) && p >= 0) setNumeroBagagens(p); } return; }
     setNumeroBagagens(n);
   };
-
   const toggleObs = (value: string) => {
-    if (observacoes.includes(value)) {
-      setObservacoes(observacoes.replace(value, "").replace(/,\s*,/g, ",").replace(/^,\s*|,\s*$/g, "").trim());
-    } else {
-      setObservacoes(observacoes ? `${observacoes}, ${value}` : value);
-    }
+    if (observacoes.includes(value)) setObservacoes(observacoes.replace(value, "").replace(/,\s*,/g, ",").replace(/^,\s*|,\s*$/g, "").trim());
+    else setObservacoes(observacoes ? `${observacoes}, ${value}` : value);
   };
 
-  // ─── Style helpers ───
+  // Styles
   const chip = (active: boolean) =>
-    `px-3 py-1.5 text-xs font-bold rounded-full transition-all cursor-pointer ${
-      active ? "bg-[#F0D030] text-[#0A0A0A]" : "bg-[#1A1A1A] border border-[#2A2A2A] text-[#A0A0A0] hover:border-[#F0D030]/30"
+    `px-2.5 py-1 text-xs font-bold rounded-full transition-all cursor-pointer hover:scale-[1.03] ${
+      active ? "bg-[#F0D030] text-[#0A0A0A] shadow-[0_0_8px_rgba(240,208,48,0.2)]" : "bg-[#111] border border-[#2A2A2A] text-[#888] hover:border-[#F0D030]/30 hover:text-[#A0A0A0]"
     }`;
-
   const chipLg = (active: boolean) =>
-    `px-4 py-2 text-sm font-bold rounded-lg transition-all cursor-pointer ${
-      active ? "bg-[#F0D030] text-[#0A0A0A]" : "bg-[#1A1A1A] border border-[#2A2A2A] text-[#A0A0A0] hover:border-[#F0D030]/30"
+    `px-3 py-1.5 text-sm font-bold rounded-lg transition-all cursor-pointer hover:scale-[1.02] ${
+      active ? "bg-[#F0D030] text-[#0A0A0A] shadow-[0_0_8px_rgba(240,208,48,0.2)]" : "bg-[#111] border border-[#2A2A2A] text-[#888] hover:border-[#F0D030]/30"
     }`;
-
-  const input = "w-full h-10 bg-[#111] border border-[#2A2A2A] rounded-lg px-3 text-sm text-[#F5F5F5] placeholder-[#666] focus:outline-none focus:border-[#F0D030] focus:ring-1 focus:ring-[#F0D030]/20 transition-colors";
-
-  const label = "text-[#A0A0A0] text-xs font-semibold mb-1.5 block";
+  const inp = "w-full h-9 bg-[#111] border border-[#2A2A2A] rounded-md px-3 text-sm text-[#F5F5F5] placeholder-[#555] focus:outline-none focus:border-[#F0D030] focus:shadow-[0_0_0_2px_rgba(240,208,48,0.1)] transition-all";
+  const lbl = "flex items-center gap-1.5 text-[#A0A0A0] text-[11px] font-semibold mb-1 uppercase tracking-wider";
+  const iconCls = "w-3.5 h-3.5 text-[#F0D030]";
 
   return (
     <form onSubmit={handleSubmit}>
-      {/* Title */}
-      <h2 className="text-lg font-bold text-[#F5F5F5] mb-4">
+      <h2 className="text-base font-bold text-[#F5F5F5] mb-3">
         {editingTransfer ? "Editar Transfer" : "Novo Transfer"}
       </h2>
 
-      <div className="bg-[#1A1A1A] rounded-xl border border-[#2A2A2A] p-4 md:p-5 space-y-4">
-        {/* Row 1: Nome + Referencia */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div className="bg-[#1A1A1A] rounded-xl border border-[#2A2A2A] p-3 md:p-4 space-y-3">
+        {/* Nome + Referência */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
           <div>
-            <label className={label}>👤 Nome do Cliente <span className="text-[#C06060]">*</span></label>
-            <input type="text" value={nomeCliente} onChange={(e) => setNomeCliente(e.target.value)}
-              className={input} placeholder="Nome completo" required />
+            <label className={lbl}><User className={iconCls} /> Nome do Cliente <span className="text-[#C06060]">*</span></label>
+            <input type="text" value={nomeCliente} onChange={(e) => setNomeCliente(e.target.value)} className={inp} placeholder="Nome completo" required />
           </div>
           <div>
-            <label className={label}>📋 Referência</label>
-            <input type="text" value={referencia} onChange={(e) => setReferencia(e.target.value)}
-              className={input} placeholder="Booking.com, Expedia..." />
+            <label className={lbl}><FileText className={iconCls} /> Referência</label>
+            <input type="text" value={referencia} onChange={(e) => setReferencia(e.target.value)} className={inp} placeholder="Booking.com, Expedia..." />
           </div>
         </div>
 
-        {/* Tipo de Servico */}
+        {/* Tipo de Serviço */}
         <div>
-          <label className={label}>🚐 Tipo de Serviço</label>
-          <div className="flex gap-2">
+          <label className={lbl}><Car className={iconCls} /> Tipo de Serviço</label>
+          <div className="flex gap-1.5">
             {["Transfer", "Tour Regular", "Private Tour"].map((type) => (
-              <button key={type} type="button"
-                onClick={() => { setTipoServico(type); setTourSelecionado(""); }}
-                className={chipLg(tipoServico === type)}>
-                {type}
-              </button>
+              <button key={type} type="button" onClick={() => { setTipoServico(type); setTourSelecionado(""); }} className={chipLg(tipoServico === type)}>{type}</button>
             ))}
           </div>
         </div>
@@ -226,195 +171,155 @@ export default function TransferForm({
         {/* Tour selector */}
         {isTour && (
           <div>
-            <label className={label}>🎯 Selecionar Tour</label>
-            <select value={tourSelecionado} onChange={(e) => setTourSelecionado(e.target.value)} className={input}>
+            <label className={lbl}><Navigation className={iconCls} /> Selecionar Tour</label>
+            <select value={tourSelecionado} onChange={(e) => setTourSelecionado(e.target.value)} className={inp}>
               <option value="">-- Selecione --</option>
-              {tourOptions.map(([key, tour]) => (
-                <option key={key} value={key}>{tour.name}</option>
-              ))}
+              {tourOptions.map(([key, tour]) => <option key={key} value={key}>{tour.name}</option>)}
             </select>
-            {/* Inline price calculation */}
             {tourSelecionado && (
-              <div className="mt-2 flex flex-wrap items-center gap-3 text-xs font-mono text-[#A0A0A0]">
-                <span>Unitário: <span className="text-[#F0D030]">€{tourUnitPrice.toFixed(0)}</span></span>
-                <span>× {numeroPessoas} pax</span>
-                <span>= <span className="text-[#F0D030] font-bold text-sm">€{valorTotal.toFixed(0)}</span></span>
-                {isAdminMode && (
-                  <>
-                    <span className="text-[#2A2A2A]">|</span>
-                    <span>Hotel: <span className="text-[#FFA726]">€{adminPrices.valorHotel.toFixed(0)}</span></span>
-                    <span>HUB: <span className="text-[#7EAA6E]">€{adminPrices.valorHUB.toFixed(0)}</span></span>
-                  </>
-                )}
+              <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] font-mono text-[#888]">
+                <span>€{tourUnitPrice.toFixed(0)} × {numeroPessoas} pax = <span className="text-[#F0D030] font-bold">€{valorTotal.toFixed(0)}</span></span>
+                {isAdminMode && <><span className="text-[#2A2A2A]">|</span><span>Hotel: <span className="text-[#FFA726]">€{adminPrices.valorHotel.toFixed(0)}</span></span><span>HUB: <span className="text-[#7EAA6E]">€{adminPrices.valorHUB.toFixed(0)}</span></span></>}
               </div>
             )}
           </div>
         )}
 
-        {/* Row: Pessoas + Bagagens */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Pessoas + Bagagens */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
           <div>
-            <label className={label}>👥 Pessoas <span className="text-[#C06060]">*</span></label>
-            <div className="flex flex-wrap gap-1.5">
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-                <button key={n} type="button" onClick={() => handlePeopleSelect(n)}
-                  className={chip(n < 8 ? numeroPessoas === n : numeroPessoas >= 8)}>
-                  {n === 8 ? "8+" : n}
-                </button>
+            <label className={lbl}><Users className={iconCls} /> Pessoas <span className="text-[#C06060]">*</span></label>
+            <div className="flex flex-wrap gap-1">
+              {[1,2,3,4,5,6,7,8].map((n) => (
+                <button key={n} type="button" onClick={() => handlePeopleSelect(n)} className={chip(n < 8 ? numeroPessoas === n : numeroPessoas >= 8)}>{n === 8 ? "8+" : n}</button>
               ))}
             </div>
           </div>
           <div>
-            <label className={label}>🧳 Bagagens</label>
-            <div className="flex flex-wrap gap-1.5">
-              {[0, 1, 2, 3, 4, 5, 6].map((n) => (
-                <button key={n} type="button" onClick={() => handleBaggageSelect(n)}
-                  className={chip(n < 6 ? numeroBagagens === n : numeroBagagens >= 6)}>
-                  {n === 6 ? "6+" : n}
-                </button>
+            <label className={lbl}><Briefcase className={iconCls} /> Bagagens</label>
+            <div className="flex flex-wrap gap-1">
+              {[0,1,2,3,4,5,6].map((n) => (
+                <button key={n} type="button" onClick={() => handleBaggageSelect(n)} className={chip(n < 6 ? numeroBagagens === n : numeroBagagens >= 6)}>{n === 6 ? "6+" : n}</button>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Row: Data + Hora */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Data + Hora */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
           <div>
-            <label className={label}>📅 Data <span className="text-[#C06060]">*</span></label>
-            <div className="flex gap-1.5 mb-2">
+            <label className={lbl}><Calendar className={iconCls} /> Data <span className="text-[#C06060]">*</span></label>
+            <div className="flex gap-1 mb-1.5">
               <button type="button" onClick={setToday} className={chip(data === formatDateForInput(new Date()))}>Hoje</button>
               <button type="button" onClick={setTomorrow} className={chip((() => { const d = new Date(); d.setDate(d.getDate() + 1); return data === formatDateForInput(d); })())}>Amanhã</button>
             </div>
-            <input type="date" value={data} onChange={(e) => setData(e.target.value)} className={input} required />
+            <input type="date" value={data} onChange={(e) => setData(e.target.value)} className={inp} required />
           </div>
           <div>
-            <label className={label}>⏰ Hora Pick-up <span className="text-[#C06060]">*</span></label>
-            <div className="flex flex-wrap gap-1 mb-2">
+            <label className={lbl}><Clock className={iconCls} /> Hora Pick-up <span className="text-[#C06060]">*</span></label>
+            <div className="grid grid-cols-6 gap-0.5 mb-1.5">
               {TIME_SLOTS.map((time) => (
                 <button key={time} type="button" onClick={() => setHoraPickup(time)}
-                  className={`px-2 py-1 text-[10px] font-mono font-bold rounded transition-all cursor-pointer ${
-                    horaPickup === time ? "bg-[#F0D030] text-[#0A0A0A]" : "bg-[#111] text-[#666] hover:text-[#A0A0A0]"
-                  }`}>
-                  {time}
-                </button>
+                  className={`py-1 text-[11px] font-mono font-bold rounded transition-all cursor-pointer text-center ${
+                    horaPickup === time ? "bg-[#F0D030] text-[#0A0A0A]" : "bg-[#0A0A0A] text-[#555] hover:text-[#A0A0A0]"
+                  }`}>{time}</button>
               ))}
             </div>
-            <input type="time" value={horaPickup} onChange={(e) => setHoraPickup(e.target.value)} className={input} required />
+            <input type="time" value={horaPickup} onChange={(e) => setHoraPickup(e.target.value)} className={inp} required />
           </div>
         </div>
 
-        {/* Row: Contacto + Voo */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Contacto + Voo */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
           <div>
-            <label className={label}>📞 Contacto <span className="text-[#C06060]">*</span></label>
+            <label className={lbl}><Phone className={iconCls} /> Contacto <span className="text-[#C06060]">*</span></label>
             <PhoneInput value={contacto} onChange={setContacto} defaultCountry="PT" />
           </div>
           <div>
-            <label className={label}>✈️ Número do Voo</label>
-            <input type="text" value={numeroVoo} onChange={(e) => setNumeroVoo(e.target.value)}
-              className={input} placeholder="TP1234" />
+            <label className={lbl}><Plane className={iconCls} /> Número do Voo</label>
+            <input type="text" value={numeroVoo} onChange={(e) => setNumeroVoo(e.target.value)} className={inp} placeholder="TP1234" />
           </div>
         </div>
 
-        {/* Row: Origem + Destino */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Origem + Destino */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
           <div>
-            <label className={label}>📍 Origem <span className="text-[#C06060]">*</span></label>
-            <div className="flex gap-1.5 mb-2">
-              <button type="button" onClick={() => setOrigem("Aeroporto de Lisboa")}
-                className={chip(origem === "Aeroporto de Lisboa")}>✈️ Aeroporto</button>
-              <button type="button" onClick={() => setOrigem("Hotel Principal")}
-                className={chip(origem === "Hotel Principal")}>🏨 Hotel</button>
+            <label className={lbl}><MapPin className={iconCls} /> Origem <span className="text-[#C06060]">*</span></label>
+            <div className="flex gap-1 mb-1.5">
+              <button type="button" onClick={() => setOrigem("Aeroporto de Lisboa")} className={chip(origem === "Aeroporto de Lisboa")}>Aeroporto</button>
+              <button type="button" onClick={() => setOrigem("Hotel Principal")} className={chip(origem === "Hotel Principal")}>Hotel</button>
             </div>
-            <input type="text" value={origem} onChange={(e) => setOrigem(e.target.value)}
-              className={input} placeholder="Outro local..." required />
+            <input type="text" value={origem} onChange={(e) => setOrigem(e.target.value)} className={inp} placeholder="Outro local..." required />
           </div>
           <div>
-            <label className={label}>📍 Destino <span className="text-[#C06060]">*</span></label>
-            <div className="flex gap-1.5 mb-2">
-              <button type="button" onClick={() => setDestino("Hotel Principal")}
-                className={chip(destino === "Hotel Principal")}>🏨 Hotel</button>
-              <button type="button" onClick={() => setDestino("Aeroporto de Lisboa")}
-                className={chip(destino === "Aeroporto de Lisboa")}>✈️ Aeroporto</button>
+            <label className={lbl}><Navigation className={iconCls} /> Destino <span className="text-[#C06060]">*</span></label>
+            <div className="flex gap-1 mb-1.5">
+              <button type="button" onClick={() => setDestino("Hotel Principal")} className={chip(destino === "Hotel Principal")}>Hotel</button>
+              <button type="button" onClick={() => setDestino("Aeroporto de Lisboa")} className={chip(destino === "Aeroporto de Lisboa")}>Aeroporto</button>
             </div>
-            <input type="text" value={destino} onChange={(e) => setDestino(e.target.value)}
-              className={input} placeholder="Outro local..." required />
+            <input type="text" value={destino} onChange={(e) => setDestino(e.target.value)} className={inp} placeholder="Outro local..." required />
           </div>
         </div>
 
-        {/* Row: Valor + Pagamento */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Valor + Pagamento */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
           <div>
-            <label className={label}>💰 Valor € <span className="text-[#C06060]">*</span></label>
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {QUICK_PRICES.map((price) => (
-                <button key={price} type="button" onClick={() => setValorTotal(price)}
-                  className={chip(valorTotal === price)}>€{price}</button>
-              ))}
+            <label className={lbl}><DollarSign className={iconCls} /> Valor € <span className="text-[#C06060]">*</span></label>
+            <div className="flex flex-wrap gap-1 mb-1.5">
+              {QUICK_PRICES.map((p) => <button key={p} type="button" onClick={() => setValorTotal(p)} className={chip(valorTotal === p)}>€{p}</button>)}
             </div>
-            <input type="number" min={0} step={0.01} value={valorTotal || ""}
-              onChange={(e) => setValorTotal(parseFloat(e.target.value) || 0)}
-              className={input} placeholder="Valor em euros" required />
-            {/* Admin inline prices */}
+            <input type="number" min={0} step={0.01} value={valorTotal || ""} onChange={(e) => setValorTotal(parseFloat(e.target.value) || 0)} className={inp} placeholder="Valor em euros" required />
             {isAdminMode && valorTotal > 0 && !isTour && (
-              <div className="mt-1.5 flex gap-3 text-[10px] font-mono text-[#666]">
+              <div className="mt-1 flex gap-2 text-[10px] font-mono text-[#555]">
                 <span>Hotel: <span className="text-[#FFA726]">€{adminPrices.valorHotel.toFixed(0)}</span></span>
                 <span>HUB: <span className="text-[#7EAA6E]">€{adminPrices.valorHUB.toFixed(0)}</span></span>
-                <span>Comissão: <span className="text-[#F5F5F5]">€{adminPrices.comissaoRecepcao.toFixed(0)}</span></span>
               </div>
             )}
           </div>
           <div>
-            <label className={label}>💳 Pagamento <span className="text-[#C06060]">*</span></label>
+            <label className={lbl}><CreditCard className={iconCls} /> Pagamento <span className="text-[#C06060]">*</span></label>
             <div className="flex gap-1.5">
-              {[
-                { label: "💵 Dinheiro", value: "Dinheiro" },
-                { label: "💳 Cartão", value: "Cartao" },
-                { label: "🏦 Transf.", value: "Transferencia" },
-              ].map(({ label: l, value }) => (
-                <button key={value} type="button" onClick={() => setModoPagamento(value)}
-                  className={chipLg(modoPagamento === value)}>{l}</button>
+              {[{l:"Dinheiro",v:"Dinheiro"},{l:"Cartão",v:"Cartao"},{l:"Transf.",v:"Transferencia"}].map(({l,v}) => (
+                <button key={v} type="button" onClick={() => setModoPagamento(v)} className={chipLg(modoPagamento === v)}>{l}</button>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Row: Pago Para + Observações */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Pago Para + Observações */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
           <div>
-            <label className={label}>👤 Pago Para <span className="text-[#C06060]">*</span></label>
+            <label className={lbl}><User className={iconCls} /> Pago Para <span className="text-[#C06060]">*</span></label>
             <div className="flex gap-1.5">
-              {[
-                { label: "👨‍💼 Recepção", value: "Recepcao" },
-                { label: "🚗 Motorista", value: "Motorista" },
-              ].map(({ label: l, value }) => (
-                <button key={value} type="button" onClick={() => setPagoParaQuem(value)}
-                  className={chipLg(pagoParaQuem === value)}>{l}</button>
+              {[{l:"Recepção",v:"Recepcao"},{l:"Motorista",v:"Motorista"}].map(({l,v}) => (
+                <button key={v} type="button" onClick={() => setPagoParaQuem(v)} className={chipLg(pagoParaQuem === v)}>{l}</button>
               ))}
             </div>
           </div>
           <div>
-            <label className={label}>📝 Observações</label>
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {QUICK_OBS.map(({ label: l, value }) => (
-                <button key={value} type="button" onClick={() => toggleObs(value)}
-                  className={chip(observacoes.includes(value))}>{l}</button>
+            <label className={lbl}><MessageSquare className={iconCls} /> Observações</label>
+            <div className="flex flex-wrap gap-1 mb-1.5">
+              {QUICK_OBS.map(({label: l, value: v, icon: Icon}) => (
+                <button key={v} type="button" onClick={() => toggleObs(v)}
+                  className={`flex items-center gap-1 ${chip(observacoes.includes(v))}`}>
+                  <Icon className="w-3 h-3" />{l}
+                </button>
               ))}
             </div>
             <textarea value={observacoes} onChange={(e) => setObservacoes(e.target.value)}
-              className={`${input} min-h-[60px] h-auto resize-y py-2`} placeholder="Notas..." rows={2} />
+              className={`${inp} min-h-[52px] h-auto resize-y py-2`} placeholder="Notas..." rows={2} />
           </div>
         </div>
       </div>
 
       {/* Actions */}
-      <div className="flex gap-3 mt-4">
+      <div className="flex gap-2 mt-3">
         <button type="submit" disabled={isLoading} title="Ctrl+Enter"
-          className="flex-1 h-11 bg-[#F0D030] text-[#0A0A0A] font-bold text-sm rounded-lg hover:bg-[#D4B828] disabled:opacity-50 transition-colors cursor-pointer uppercase tracking-wider">
-          {isLoading ? "A Guardar..." : editingTransfer ? "Actualizar Transfer" : "Registar Transfer"}
+          className="flex-1 h-10 bg-[#F0D030] text-[#0A0A0A] font-bold text-sm rounded-lg hover:bg-[#D4B828] hover:shadow-[0_0_12px_rgba(240,208,48,0.15)] disabled:opacity-50 transition-all cursor-pointer uppercase tracking-wider">
+          {isLoading ? "A Guardar..." : editingTransfer ? "Actualizar" : "Registar Transfer"}
         </button>
         <button type="button" onClick={handleClear}
-          className="h-11 px-5 bg-[#1A1A1A] border border-[#2A2A2A] text-[#A0A0A0] text-sm font-semibold rounded-lg hover:text-[#F5F5F5] transition-colors cursor-pointer">
+          className="h-10 px-4 bg-[#111] border border-[#2A2A2A] text-[#888] text-sm rounded-lg hover:text-[#F5F5F5] transition-all cursor-pointer">
           Limpar
         </button>
       </div>
