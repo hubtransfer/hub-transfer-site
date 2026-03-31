@@ -627,7 +627,7 @@ export default function LandingPage() {
             <div className="absolute right-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-l from-[#0A0A0A] to-transparent z-10 pointer-events-none" />
             <div data-carousel="" className="flex items-center w-max gap-7 md:gap-12" style={{ animation: "scroll 35s linear infinite" }}>
               {[...Array(2)].flatMap(() => [
-                { name: "TAP Portugal", src: "/images/Logos/logo_TAP.png", w: 63 },
+                { name: "TAP Portugal", src: "/images/Logos/logo_TAP.png", w: 57 },
                 { name: "Emirates", src: "/logos/emirates.png", w: 80 },
                 { name: "British Airways", src: "/images/Logos/logo_british.png", w: 160 },
                 { name: "Lufthansa", src: "/images/Logos/logo_luftansa.png", w: 150 },
@@ -641,7 +641,7 @@ export default function LandingPage() {
                 { name: "BMW", src: "/images/Logos/logo_bmw.png", w: 80 },
                 { name: "Marriott", src: "/images/Logos/logo_marriott.png", w: 100 },
                 { name: "Air Europa", src: "/images/Logos/logo_aireuropa.png", w: 150 },
-                { name: "Royal Air Maroc", src: "/images/Logos/logo_airmaroc.png", w: 200 },
+                { name: "Royal Air Maroc", src: "/images/Logos/logo_airmaroc.png", w: 280 },
                 { name: "Aer Lingus", src: "/images/Logos/logo_aerlingus.png", w: 150 },
                 { name: "Air Canada", src: "/images/Logos/logo_aircanada.png", w: 150 },
                 { name: "Jet2", src: "/logos/jet2.png", w: 80 },
