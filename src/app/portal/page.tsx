@@ -178,9 +178,9 @@ export default function PortalPage() {
         </div>
       )}
 
-      {/* ─── TAB 1: NOVO TRANSFER — constrained width ─── */}
+      {/* ─── TAB 1: NOVO TRANSFER — full width ─── */}
       {activeTab === "form" && (
-        <div ref={formRef} className="max-w-[960px] mx-auto px-4 py-5 animate-[fadeSlideIn_200ms_ease]">
+        <div ref={formRef} className="w-full px-4 py-5 animate-[fadeSlideIn_200ms_ease]">
           <TransferForm
             onSubmit={store.submitTransfer}
             editingTransfer={editingTransfer}

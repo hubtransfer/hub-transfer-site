@@ -128,26 +128,26 @@ export default function TransferForm({
 
   // Styles
   const chip = (active: boolean) =>
-    `px-2.5 py-1 text-xs font-bold rounded-full transition-all cursor-pointer hover:scale-[1.03] ${
+    `px-3 py-1.5 text-sm font-bold rounded-full transition-all cursor-pointer hover:scale-[1.03] ${
       active ? "bg-[#F0D030] text-[#0A0A0A] shadow-[0_0_8px_rgba(240,208,48,0.2)]" : "bg-[#111] border border-[#2A2A2A] text-[#888] hover:border-[#F0D030]/30 hover:text-[#A0A0A0]"
     }`;
   const chipLg = (active: boolean) =>
-    `px-3 py-1.5 text-sm font-bold rounded-lg transition-all cursor-pointer hover:scale-[1.02] ${
+    `px-4 py-2 text-sm font-bold rounded-lg transition-all cursor-pointer hover:scale-[1.02] ${
       active ? "bg-[#F0D030] text-[#0A0A0A] shadow-[0_0_8px_rgba(240,208,48,0.2)]" : "bg-[#111] border border-[#2A2A2A] text-[#888] hover:border-[#F0D030]/30"
     }`;
-  const inp = "w-full h-9 bg-[#111] border border-[#2A2A2A] rounded-md px-3 text-sm text-[#F5F5F5] placeholder-[#555] focus:outline-none focus:border-[#F0D030] focus:shadow-[0_0_0_2px_rgba(240,208,48,0.1)] transition-all";
-  const lbl = "flex items-center gap-1.5 text-[#A0A0A0] text-[11px] font-semibold mb-1 uppercase tracking-wider";
-  const iconCls = "w-3.5 h-3.5 text-[#F0D030]";
+  const inp = "w-full h-11 bg-[#111] border border-[#2A2A2A] rounded-lg px-4 text-[15px] text-[#F5F5F5] placeholder-[#555] focus:outline-none focus:border-[#F0D030] focus:shadow-[0_0_0_2px_rgba(240,208,48,0.1)] transition-all";
+  const lbl = "flex items-center gap-1.5 text-[#A0A0A0] text-sm font-semibold mb-1.5 uppercase tracking-wider";
+  const iconCls = "w-4 h-4 text-[#F0D030]";
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2 className="text-base font-bold text-[#F5F5F5] mb-3">
+      <h2 className="text-lg font-bold text-[#F5F5F5] mb-4">
         {editingTransfer ? "Editar Transfer" : "Novo Transfer"}
       </h2>
 
-      <div className="bg-[#1A1A1A] rounded-xl border border-[#2A2A2A] p-3 md:p-4 space-y-2.5">
+      <div className="bg-[#1A1A1A] rounded-xl border border-[#2A2A2A] p-4 md:p-6 space-y-4">
         {/* L1: Nome + Referência */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className={lbl}><User className={iconCls} /> Nome do Cliente <span className="text-[#C06060]">*</span></label>
             <input type="text" value={nomeCliente} onChange={(e) => setNomeCliente(e.target.value)} className={inp} placeholder="Nome completo" required />
@@ -159,7 +159,7 @@ export default function TransferForm({
         </div>
 
         {/* L2: Tipo de Serviço + Bagagens */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className={lbl}><Car className={iconCls} /> Tipo de Serviço</label>
             <div className="flex gap-1.5">
@@ -196,7 +196,7 @@ export default function TransferForm({
         )}
 
         {/* L3: Pessoas + Data */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className={lbl}><Users className={iconCls} /> Pessoas <span className="text-[#C06060]">*</span></label>
             <div className="flex flex-wrap gap-1">
@@ -218,21 +218,21 @@ export default function TransferForm({
         {/* L4: Hora Pick-up (full width) */}
         <div>
           <label className={lbl}><Clock className={iconCls} /> Hora Pick-up <span className="text-[#C06060]">*</span></label>
-          <div className="flex items-center gap-2">
-            <div className="grid grid-cols-9 gap-0.5 flex-1">
+          <div className="flex items-center gap-3">
+            <div className="flex flex-wrap gap-1 flex-1">
               {TIME_SLOTS.map((time) => (
                 <button key={time} type="button" onClick={() => setHoraPickup(time)}
-                  className={`py-1 text-[11px] font-mono font-bold rounded transition-all cursor-pointer text-center ${
-                    horaPickup === time ? "bg-[#F0D030] text-[#0A0A0A]" : "bg-[#0A0A0A] text-[#555] hover:text-[#A0A0A0]"
+                  className={`px-3 py-1.5 text-sm font-mono font-bold rounded-lg transition-all cursor-pointer ${
+                    horaPickup === time ? "bg-[#F0D030] text-[#0A0A0A]" : "bg-[#0A0A0A] text-[#555] hover:text-[#A0A0A0] hover:bg-[#1A1A1A]"
                   }`}>{time}</button>
               ))}
             </div>
-            <input type="time" value={horaPickup} onChange={(e) => setHoraPickup(e.target.value)} className={`${inp} max-w-[110px]`} required />
+            <input type="time" value={horaPickup} onChange={(e) => setHoraPickup(e.target.value)} className={`${inp} max-w-[130px]`} required />
           </div>
         </div>
 
         {/* Contacto + Voo */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className={lbl}><Phone className={iconCls} /> Contacto <span className="text-[#C06060]">*</span></label>
             <PhoneInput value={contacto} onChange={setContacto} defaultCountry="PT" />
@@ -244,7 +244,7 @@ export default function TransferForm({
         </div>
 
         {/* Origem + Destino */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className={lbl}><MapPin className={iconCls} /> Origem <span className="text-[#C06060]">*</span></label>
             <div className="flex gap-1 mb-1.5">
@@ -264,7 +264,7 @@ export default function TransferForm({
         </div>
 
         {/* Valor + Pagamento */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className={lbl}><DollarSign className={iconCls} /> Valor € <span className="text-[#C06060]">*</span></label>
             <div className="flex flex-wrap gap-1 mb-1.5">
@@ -289,7 +289,7 @@ export default function TransferForm({
         </div>
 
         {/* Pago Para + Observações */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className={lbl}><User className={iconCls} /> Pago Para <span className="text-[#C06060]">*</span></label>
             <div className="flex gap-1.5">
@@ -309,19 +309,19 @@ export default function TransferForm({
               ))}
             </div>
             <textarea value={observacoes} onChange={(e) => setObservacoes(e.target.value)}
-              className={`${inp} min-h-[52px] h-auto resize-y py-2`} placeholder="Notas..." rows={2} />
+              className={`${inp} min-h-[60px] h-auto resize-y py-3`} placeholder="Notas adicionais..." rows={2} />
           </div>
         </div>
       </div>
 
       {/* Actions */}
-      <div className="flex gap-2 mt-3">
+      <div className="flex gap-3 mt-4">
         <button type="submit" disabled={isLoading} title="Ctrl+Enter"
-          className="flex-1 h-10 bg-[#F0D030] text-[#0A0A0A] font-bold text-sm rounded-lg hover:bg-[#D4B828] hover:shadow-[0_0_12px_rgba(240,208,48,0.15)] disabled:opacity-50 transition-all cursor-pointer uppercase tracking-wider">
-          {isLoading ? "A Guardar..." : editingTransfer ? "Actualizar" : "Registar Transfer"}
+          className="flex-1 h-12 bg-[#F0D030] text-[#0A0A0A] font-bold text-base rounded-lg hover:bg-[#D4B828] hover:shadow-[0_0_16px_rgba(240,208,48,0.2)] disabled:opacity-50 transition-all cursor-pointer uppercase tracking-wider">
+          {isLoading ? "A Guardar..." : editingTransfer ? "Actualizar Transfer" : "Registar Transfer"}
         </button>
         <button type="button" onClick={handleClear}
-          className="h-10 px-4 bg-[#111] border border-[#2A2A2A] text-[#888] text-sm rounded-lg hover:text-[#F5F5F5] transition-all cursor-pointer">
+          className="h-12 px-6 bg-[#111] border border-[#2A2A2A] text-[#888] text-base rounded-lg hover:text-[#F5F5F5] transition-all cursor-pointer">
           Limpar
         </button>
       </div>
