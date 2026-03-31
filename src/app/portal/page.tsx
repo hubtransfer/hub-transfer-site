@@ -7,7 +7,6 @@ import { useTransferStore } from "@/hooks/useTransferStore";
 import TransferForm from "@/components/portal/TransferForm";
 import TransferTable from "@/components/portal/TransferTable";
 import KPICards from "@/components/portal/KPICards";
-import FinancialSummary from "@/components/portal/FinancialSummary";
 import ConfigPanel from "@/components/portal/ConfigPanel";
 import ClearDataPanel from "@/components/portal/ClearDataPanel";
 import StatusToast from "@/components/portal/StatusToast";
@@ -84,17 +83,26 @@ export default function PortalPage() {
     ? { filtered: store.filteredServices.length, total: store.services.length }
     : null;
 
+  // Today string (client-only to avoid hydration mismatch)
+  const [todayStr, setTodayStr] = useState("");
+  const [todayLabel, setTodayLabel] = useState("");
+  useEffect(() => {
+    const now = new Date();
+    const iso = now.toISOString().slice(0, 10);
+    setTodayStr(iso);
+    setTodayLabel(now.toLocaleDateString("pt-PT", { weekday: "long", day: "numeric", month: "long" }));
+  }, []);
+
   // Today's flights for HUB Tracking tab
   const todayFlights = useMemo(() => {
-    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-    const todayParts = today.split("-"); // [YYYY, MM, DD]
-    const todayFormatted = `${todayParts[2]}/${todayParts[1]}/${todayParts[0]}`; // DD/MM/YYYY
+    if (!todayStr) return [];
+    const parts = todayStr.split("-");
+    const formatted = `${parts[2]}/${parts[1]}/${parts[0]}`;
     return store.services.filter((s) => {
       if (!s.numeroVoo || !s.numeroVoo.trim()) return false;
-      // Match both YYYY-MM-DD and DD/MM/YYYY formats
-      return s.data === today || s.data === todayFormatted;
+      return s.data === todayStr || s.data === formatted;
     });
-  }, [store.services]);
+  }, [store.services, todayStr]);
 
   // Tab definition
   const tabs: { key: PortalTab; label: string; icon?: typeof Plane; count?: number }[] = [
@@ -300,7 +308,7 @@ export default function PortalPage() {
               Voos de Hoje
             </h2>
             <span className="text-xs text-[#666] font-mono">
-              {new Date().toLocaleDateString("pt-PT", { weekday: "long", day: "numeric", month: "long" })}
+              {todayLabel}
             </span>
           </div>
 
