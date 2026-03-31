@@ -166,35 +166,36 @@ export default function PortalPage() {
       </header>
 
       {/* ═══ TAB CONTENT ═══ */}
-      <div className="max-w-[960px] mx-auto">
-        {/* Config + Clear panels (admin) */}
-        {isAdmin && (
-          <>
-            <ConfigPanel isOpen={showConfig} onClose={() => setShowConfig(false)}
-              onTestConnection={(url) => store.testConnectionAction(url)}
-              statusMessage={store.statusMessage} statusType={store.statusType} />
-            <ClearDataPanel isOpen={showClearData} onClose={() => setShowClearData(false)}
-              onClearAll={store.clearAllData} onClearTests={store.clearTestData} />
-          </>
-        )}
 
-        {/* ─── TAB 1: NOVO TRANSFER ─── */}
-        {activeTab === "form" && (
-          <div ref={formRef} className="px-4 py-5 animate-[fadeSlideIn_200ms_ease]">
-            <TransferForm
-              onSubmit={store.submitTransfer}
-              editingTransfer={editingTransfer}
-              isAdminMode={store.isAdminMode}
-              isLoading={store.syncInProgress}
-              onClear={() => store.setEditingId(null)}
-            />
-          </div>
-        )}
+      {/* Config + Clear panels (admin) — constrained width */}
+      {isAdmin && (
+        <div className="max-w-[960px] mx-auto">
+          <ConfigPanel isOpen={showConfig} onClose={() => setShowConfig(false)}
+            onTestConnection={(url) => store.testConnectionAction(url)}
+            statusMessage={store.statusMessage} statusType={store.statusType} />
+          <ClearDataPanel isOpen={showClearData} onClose={() => setShowClearData(false)}
+            onClearAll={store.clearAllData} onClearTests={store.clearTestData} />
+        </div>
+      )}
 
-        {/* ─── TAB 2: VIAGENS ─── */}
-        {activeTab === "viagens" && (
-          <div className="px-4 py-5 space-y-3 animate-[fadeSlideIn_200ms_ease]">
-            {/* Compact summary row */}
+      {/* ─── TAB 1: NOVO TRANSFER — constrained width ─── */}
+      {activeTab === "form" && (
+        <div ref={formRef} className="max-w-[960px] mx-auto px-4 py-5 animate-[fadeSlideIn_200ms_ease]">
+          <TransferForm
+            onSubmit={store.submitTransfer}
+            editingTransfer={editingTransfer}
+            isAdminMode={store.isAdminMode}
+            isLoading={store.syncInProgress}
+            onClear={() => store.setEditingId(null)}
+          />
+        </div>
+      )}
+
+      {/* ─── TAB 2: VIAGENS — FULL WIDTH ─── */}
+      {activeTab === "viagens" && (
+        <div className="w-full py-5 space-y-3 animate-[fadeSlideIn_200ms_ease]">
+          {/* Summary + buttons — with side padding */}
+          <div className="px-4 space-y-3">
             <div className="flex flex-wrap gap-2">
               <KPICards
                 total={store.summary.total}
@@ -204,7 +205,6 @@ export default function PortalPage() {
               />
             </div>
 
-            {/* Inline financial */}
             <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-[#A0A0A0] bg-[#1A1A1A] rounded-lg px-4 py-2.5 border border-[#2A2A2A]">
               <span>Receita: <span className="text-[#F0D030] font-bold">€{store.summary.totalRevenue.toFixed(0)}</span></span>
               <span className="text-[#2A2A2A]">|</span>
@@ -215,7 +215,6 @@ export default function PortalPage() {
               <span>Finalizado: <span className="text-[#60A5FA] font-bold">€{store.summary.completedRevenue.toFixed(0)}</span></span>
             </div>
 
-            {/* Action buttons */}
             <div className="flex flex-wrap gap-2">
               <button onClick={store.loadFromSheets} title="Ctrl+R"
                 className="h-8 px-3 bg-[#F0D030]/10 text-[#F0D030] text-xs font-bold rounded hover:bg-[#F0D030]/20 transition-colors cursor-pointer">
@@ -238,8 +237,10 @@ export default function PortalPage() {
                 </>
               )}
             </div>
+          </div>
 
-            {/* Transfer Table */}
+          {/* Transfer Table — full width, no max-width */}
+          <div className="px-2">
             <TransferTable
               services={store.paginatedServices}
               totalServices={hasActiveFilters ? store.filteredServices.length : store.services.length}
@@ -262,8 +263,8 @@ export default function PortalPage() {
               filterIndicator={filterIndicator}
             />
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Admin Toggle */}
       <button

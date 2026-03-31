@@ -255,35 +255,35 @@ export default function TransferTable({
       {/* ══════════════════════════════════════════════
           TABLE
          ══════════════════════════════════════════════ */}
-      <div className="rounded-xl border border-hub-gold/10 bg-hub-black-card overflow-hidden">
-        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-hub-gold/20 scrollbar-track-transparent">
-          <table className="w-full min-w-[1400px] text-sm">
+      <div className="rounded-xl border border-[#2A2A2A] bg-[#111] overflow-hidden">
+        <div className="overflow-x-auto" style={{ scrollbarWidth: "thin", scrollbarColor: "#F0D030/30 transparent" }}>
+          <table className="w-full text-[13px]">
             {/* Header */}
-            <thead>
-              <tr className="bg-hub-black-elevated text-hub-gold uppercase font-mono text-xs tracking-wider">
-                <th className="px-3 py-3 text-left whitespace-nowrap">{"🆔 ID"}</th>
-                <th className="px-3 py-3 text-left whitespace-nowrap">{"📋 Ref"}</th>
-                <th className="px-3 py-3 text-left whitespace-nowrap">{"👤 Cliente"}</th>
-                <th className="px-3 py-3 text-left whitespace-nowrap">{"🚗 Tipo"}</th>
-                <th className="px-3 py-3 text-center whitespace-nowrap">{"👥 Pessoas"}</th>
-                <th className="px-3 py-3 text-center whitespace-nowrap">{"🧳 Bagagens"}</th>
-                <th className="px-3 py-3 text-left whitespace-nowrap">{"📅 Data"}</th>
-                <th className="px-3 py-3 text-left whitespace-nowrap">{"🕐 Hora"}</th>
-                <th className="px-3 py-3 text-left whitespace-nowrap">{"📱 Contacto"}</th>
-                <th className="px-3 py-3 text-left whitespace-nowrap">{"✈️ Voo"}</th>
-                <th className="px-3 py-3 text-left whitespace-nowrap">{"🗺️ Rota"}</th>
-                <th className="px-3 py-3 text-right whitespace-nowrap">{"💰 Valor Total"}</th>
+            <thead className="sticky top-0 z-10">
+              <tr className="bg-[#0A0A0A] text-[#F0D030] uppercase font-mono text-[11px] tracking-wider">
+                <th className="px-2 py-2.5 text-left whitespace-nowrap">ID</th>
+                <th className="px-2 py-2.5 text-left whitespace-nowrap">Ref</th>
+                <th className="px-2 py-2.5 text-left whitespace-nowrap">Cliente</th>
+                <th className="px-2 py-2.5 text-left whitespace-nowrap">Tipo</th>
+                <th className="px-2 py-2.5 text-center whitespace-nowrap">Pax</th>
+                <th className="px-2 py-2.5 text-center whitespace-nowrap">Bag</th>
+                <th className="px-2 py-2.5 text-left whitespace-nowrap">Data</th>
+                <th className="px-2 py-2.5 text-left whitespace-nowrap">Hora</th>
+                <th className="px-2 py-2.5 text-left whitespace-nowrap">Contacto</th>
+                <th className="px-2 py-2.5 text-left whitespace-nowrap">Voo</th>
+                <th className="px-2 py-2.5 text-left whitespace-nowrap">Rota</th>
+                <th className="px-2 py-2.5 text-right whitespace-nowrap">Valor</th>
                 {isAdminMode && (
                   <>
-                    <th className="px-3 py-3 text-right whitespace-nowrap">{"🏨 Hotel"}</th>
-                    <th className="px-3 py-3 text-right whitespace-nowrap">{"🚗 HUB"}</th>
-                    <th className="px-3 py-3 text-right whitespace-nowrap">{"👨‍💼 Comissao"}</th>
+                    <th className="px-2 py-2.5 text-right whitespace-nowrap">Hotel</th>
+                    <th className="px-2 py-2.5 text-right whitespace-nowrap">HUB</th>
+                    <th className="px-2 py-2.5 text-right whitespace-nowrap">Comissão</th>
                   </>
                 )}
-                <th className="px-3 py-3 text-left whitespace-nowrap">{"💳 Pagamento"}</th>
-                <th className="px-3 py-3 text-left whitespace-nowrap">{"👨‍💼 Pago Para"}</th>
-                <th className="px-3 py-3 text-center whitespace-nowrap">{"🏷️ Status"}</th>
-                <th className="px-3 py-3 text-center whitespace-nowrap">{"⚙️ Acoes"}</th>
+                <th className="px-2 py-2.5 text-left whitespace-nowrap">Pagamento</th>
+                <th className="px-2 py-2.5 text-left whitespace-nowrap">Pago Para</th>
+                <th className="px-2 py-2.5 text-center whitespace-nowrap">Status</th>
+                <th className="px-2 py-2.5 text-center whitespace-nowrap">Acções</th>
               </tr>
             </thead>
 
@@ -314,148 +314,119 @@ export default function TransferTable({
                   return (
                     <tr
                       key={s.id}
-                      style={{ backgroundColor: `${tripColor}26`, borderLeft: `4px solid ${tripColor}` }}
-                      className="border-b border-[#2A2A2A] transition-colors"
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `${tripColor}38`}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = `${tripColor}26`}
+                      style={{ borderLeft: `3px solid ${tripColor}` }}
+                      className="border-b border-[#1A1A1A] bg-[#111] hover:bg-[#1A1A1A] transition-colors"
                     >
                       {/* ID */}
-                      <td className="px-3 py-2.5 text-gray-400 font-mono text-xs">
+                      <td className="px-2 py-2 text-[#666] font-mono text-xs">
                         {s.id}
                       </td>
 
                       {/* Ref */}
-                      <td className="px-3 py-2.5 text-gray-300 font-mono text-xs">
+                      <td className="px-2 py-2 text-[#888] font-mono text-xs max-w-[80px] truncate">
                         {s.referencia || "—"}
                       </td>
 
                       {/* Cliente */}
-                      <td className="px-3 py-2.5 text-white font-medium max-w-[160px] truncate">
+                      <td className="px-2 py-2 text-[#F5F5F5] font-medium max-w-[140px] truncate">
                         {s.nomeCliente}
                       </td>
 
                       {/* Tipo */}
-                      <td className="px-3 py-2.5 text-xs whitespace-nowrap">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold" style={{ backgroundColor: `${tripColor}40`, color: tripColor, border: `1px solid ${tripColor}66` }}>
+                      <td className="px-2 py-2 whitespace-nowrap">
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ backgroundColor: `${tripColor}30`, color: tripColor }}>
                           {s.tipoServico}
                         </span>
-                        {s.tourNome && (
-                          <span className="block text-hub-gold/60 text-[10px] mt-0.5">
-                            {s.tourNome}
-                          </span>
-                        )}
                       </td>
 
-                      {/* Pessoas */}
-                      <td className="px-3 py-2.5 text-center text-gray-300">
-                        <span title={`${s.numeroPessoas} pessoa(s)`}>
-                          {getPeopleEmoji(s.numeroPessoas)} {s.numeroPessoas}
-                        </span>
+                      {/* Pax */}
+                      <td className="px-2 py-2 text-center text-[#D0D0D0] font-mono">
+                        {s.numeroPessoas}
                       </td>
 
-                      {/* Bagagens */}
-                      <td className="px-3 py-2.5 text-center text-gray-300">
-                        <span title={`${s.numeroBagagens} bagagem(ns)`}>
-                          {getBaggageEmoji(s.numeroBagagens)} {s.numeroBagagens}
-                        </span>
+                      {/* Bag */}
+                      <td className="px-2 py-2 text-center text-[#D0D0D0] font-mono">
+                        {s.numeroBagagens}
                       </td>
 
                       {/* Data */}
-                      <td className="px-3 py-2.5 text-gray-300 whitespace-nowrap font-mono text-xs">
+                      <td className="px-2 py-2 text-[#D0D0D0] whitespace-nowrap font-mono text-xs">
                         {formatDisplayDate(s.data)}
                       </td>
 
                       {/* Hora */}
-                      <td className="px-3 py-2.5 text-gray-300 whitespace-nowrap font-mono text-xs">
-                        {getTimeEmoji(s.horaPickup)} {s.horaPickup || "—"}
+                      <td className="px-2 py-2 text-[#D0D0D0] whitespace-nowrap font-mono">
+                        {s.horaPickup || "—"}
                       </td>
 
                       {/* Contacto */}
-                      <td className="px-3 py-2.5 whitespace-nowrap">
+                      <td className="px-2 py-2 whitespace-nowrap">
                         {phone ? (
-                          <a
-                            href={`https://wa.me/${phone.replace("+", "")}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-green-400 hover:text-green-300 transition-colors text-xs underline underline-offset-2"
-                            title="Abrir WhatsApp"
-                          >
+                          <a href={`https://wa.me/${phone.replace("+", "")}`} target="_blank" rel="noopener noreferrer"
+                            className="text-[#25d366] hover:text-[#2ecc71] transition-colors text-xs underline underline-offset-2" title="WhatsApp">
                             {s.contacto}
                           </a>
-                        ) : (
-                          <span className="text-gray-500 text-xs">—</span>
-                        )}
+                        ) : <span className="text-[#555] text-xs">—</span>}
                       </td>
 
                       {/* Voo */}
-                      <td className="px-3 py-2.5 whitespace-nowrap">
+                      <td className="px-2 py-2 whitespace-nowrap">
                         {s.numeroVoo ? (
-                          <a
-                            href={`https://www.google.com/search?q=flight+${encodeURIComponent(s.numeroVoo)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-400 hover:text-blue-300 transition-colors text-xs underline underline-offset-2"
-                            title="Pesquisar voo"
-                          >
+                          <a href={`https://www.google.com/search?q=flight+${encodeURIComponent(s.numeroVoo)}`} target="_blank" rel="noopener noreferrer"
+                            className="text-[#60A5FA] hover:text-[#93C5FD] transition-colors text-xs font-mono" title="Pesquisar voo">
                             {s.numeroVoo}
                           </a>
-                        ) : (
-                          <span className="text-gray-500 text-xs">—</span>
-                        )}
+                        ) : <span className="text-[#555] text-xs">—</span>}
                       </td>
 
                       {/* Rota */}
-                      <td className="px-3 py-2.5 text-gray-300 text-xs max-w-[180px]" title={`${s.origem} → ${s.destino}`}>
+                      <td className="px-2 py-2 text-[#A0A0A0] text-xs max-w-[160px]" title={`${s.origem} → ${s.destino}`}>
                         <span className="block truncate">{s.origem.replace("Aeroporto de Lisboa", "Aeroporto").replace("Hotel Principal", "Hotel")}</span>
-                        <span className="text-[#666]">→</span>
-                        <span className="block truncate">{s.destino.replace("Aeroporto de Lisboa", "Aeroporto").replace("Hotel Principal", "Hotel")}</span>
+                        <span className="text-[#555]">→ </span>
+                        <span className="truncate">{s.destino.replace("Aeroporto de Lisboa", "Aeroporto").replace("Hotel Principal", "Hotel")}</span>
                       </td>
 
-                      {/* Valor Total */}
-                      <td className="px-3 py-2.5 text-right text-hub-gold font-bold font-mono whitespace-nowrap">
-                        {s.valorTotal > 0 ? `€${s.valorTotal.toFixed(2)}` : "—"}
+                      {/* Valor */}
+                      <td className="px-2 py-2 text-right text-[#F0D030] font-bold font-mono whitespace-nowrap">
+                        {s.valorTotal > 0 ? `€${s.valorTotal.toFixed(0)}` : "—"}
                       </td>
 
                       {/* Admin columns */}
                       {isAdminMode && (
                         <>
-                          <td className="px-3 py-2.5 text-right text-gray-400 font-mono text-xs whitespace-nowrap">
-                            {s.valorHotel > 0 ? `€${s.valorHotel.toFixed(2)}` : "—"}
+                          <td className="px-2 py-2 text-right text-[#888] font-mono text-xs whitespace-nowrap">
+                            {s.valorHotel > 0 ? `€${s.valorHotel.toFixed(0)}` : "—"}
                           </td>
-                          <td className="px-3 py-2.5 text-right text-gray-400 font-mono text-xs whitespace-nowrap">
-                            {s.valorHUB > 0 ? `€${s.valorHUB.toFixed(2)}` : "—"}
+                          <td className="px-2 py-2 text-right text-[#888] font-mono text-xs whitespace-nowrap">
+                            {s.valorHUB > 0 ? `€${s.valorHUB.toFixed(0)}` : "—"}
                           </td>
-                          <td className="px-3 py-2.5 text-right text-gray-400 font-mono text-xs whitespace-nowrap">
-                            {s.comissaoRecepcao > 0
-                              ? `€${s.comissaoRecepcao.toFixed(2)}`
-                              : "—"}
+                          <td className="px-2 py-2 text-right text-[#888] font-mono text-xs whitespace-nowrap">
+                            {s.comissaoRecepcao > 0 ? `€${s.comissaoRecepcao.toFixed(0)}` : "—"}
                           </td>
                         </>
                       )}
 
                       {/* Pagamento */}
-                      <td className="px-3 py-2.5 text-gray-300 text-xs whitespace-nowrap">
+                      <td className="px-2 py-2 text-[#A0A0A0] text-xs whitespace-nowrap">
                         {s.modoPagamento || "—"}
                       </td>
 
                       {/* Pago Para */}
-                      <td className="px-3 py-2.5 text-gray-300 text-xs whitespace-nowrap">
+                      <td className="px-2 py-2 text-[#A0A0A0] text-xs whitespace-nowrap">
                         {s.pagoParaQuem || "—"}
                       </td>
 
                       {/* Status */}
-                      <td className="px-3 py-2.5 text-center">
-                        <button
-                          onClick={() => onChangeStatus(s.id)}
-                          className={`inline-block rounded-full px-3 py-1 text-xs font-bold cursor-pointer transition-opacity hover:opacity-80 ${statusClass(s.status)}`}
-                          title="Clique para alterar status"
-                        >
+                      <td className="px-2 py-2 text-center">
+                        <button onClick={() => onChangeStatus(s.id)}
+                          className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold cursor-pointer transition-opacity hover:opacity-80 ${statusClass(s.status)}`}
+                          title="Alterar status">
                           {s.status}
                         </button>
                       </td>
 
-                      {/* Acoes */}
-                      <td className="px-3 py-2.5 text-center">
+                      {/* Acções */}
+                      <td className="px-2 py-2 text-center">
                         <div className="flex items-center justify-center gap-0.5">
                           <button onClick={() => onEdit(s.id)}
                             className="p-1.5 rounded-lg text-[#666] hover:text-[#F0D030] hover:bg-[#F0D030]/10 transition-colors" title="Editar">
