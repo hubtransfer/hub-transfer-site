@@ -444,6 +444,23 @@ export function calcDriverPrice(platform: string): number {
 }
 
 /**
+ * Get source label (TLX / WT / HUB) from trip data.
+ */
+export function getSourceLabel(trip: { platform?: string; id?: string }): string {
+  const platform = (trip.platform || '').toLowerCase();
+  const id = (trip.id || '').toLowerCase();
+  const all = platform + ' ' + id;
+
+  if (all.includes('talixo') || all.includes('tlx')) return 'TLX';
+
+  if (platform.includes('world transfer') || platform === 'wt' ||
+      platform.startsWith('wt ') || platform.startsWith('wt-') ||
+      id.startsWith('wt-') || id.startsWith('wt ')) return 'WT';
+
+  return 'HUB';
+}
+
+/**
  * Detect language from phone DDI.
  */
 export function detectLangFromPhone(phone: string): string | null {
