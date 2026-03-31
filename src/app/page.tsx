@@ -627,29 +627,29 @@ export default function LandingPage() {
             <div className="absolute right-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-l from-[#0A0A0A] to-transparent z-10 pointer-events-none" />
             <div data-carousel="" className="flex items-center w-max gap-7 md:gap-12" style={{ animation: "scroll 35s linear infinite" }}>
               {[...Array(2)].flatMap(() => [
-                { name: "TAP Portugal", src: "/images/Logos/logo_TAP.png" },
-                { name: "Emirates", src: "/logos/emirates.png" },
-                { name: "British Airways", src: "/images/Logos/logo_british.png", w: 120 },
-                { name: "Lufthansa", src: "/images/Logos/logo_luftansa.png", w: 110 },
-                { name: "Air France", src: "/images/Logos/logo_airfrance.png", w: 110 },
-                { name: "KLM", src: "/logos/klm.png" },
-                { name: "Iberia", src: "/images/Logos/logo_iberia.png" },
-                { name: "Swiss", src: "/logos/swiss.png" },
-                { name: "Turkish Airlines", src: "/images/Logos/logo_turkish.png" },
-                { name: "Qatar Airways", src: "/images/Logos/logo_qatar.png" },
-                { name: "Mercedes-Benz", src: "/logos/mercedes.png" },
-                { name: "BMW", src: "/images/Logos/logo_bmw.png" },
-                { name: "Marriott", src: "/images/Logos/logo_marriott.png" },
-                { name: "Air Europa", src: "/images/Logos/logo_aireuropa.png" },
-                { name: "Royal Air Maroc", src: "/images/Logos/logo_airmaroc.png" },
-                { name: "Aer Lingus", src: "/images/Logos/logo_aerlingus.png" },
-                { name: "Air Canada", src: "/images/Logos/logo_aircanada.png" },
-                { name: "Jet2", src: "/logos/jet2.png" },
+                { name: "TAP Portugal", src: "/images/Logos/logo_TAP.png", w: 90 },
+                { name: "Emirates", src: "/logos/emirates.png", w: 80 },
+                { name: "British Airways", src: "/images/Logos/logo_british.png", w: 160 },
+                { name: "Lufthansa", src: "/images/Logos/logo_luftansa.png", w: 150 },
+                { name: "Air France", src: "/images/Logos/logo_airfrance.png", w: 150 },
+                { name: "KLM", src: "/logos/klm.png", w: 80 },
+                { name: "Iberia", src: "/images/Logos/logo_iberia.png", w: 100 },
+                { name: "Swiss", src: "/logos/swiss.png", w: 80 },
+                { name: "Turkish Airlines", src: "/images/Logos/logo_turkish.png", w: 100 },
+                { name: "Qatar Airways", src: "/images/Logos/logo_qatar.png", w: 100 },
+                { name: "Mercedes-Benz", src: "/logos/mercedes.png", w: 80 },
+                { name: "BMW", src: "/images/Logos/logo_bmw.png", w: 80 },
+                { name: "Marriott", src: "/images/Logos/logo_marriott.png", w: 100 },
+                { name: "Air Europa", src: "/images/Logos/logo_aireuropa.png", w: 150 },
+                { name: "Royal Air Maroc", src: "/images/Logos/logo_airmaroc.png", w: 150 },
+                { name: "Aer Lingus", src: "/images/Logos/logo_aerlingus.png", w: 150 },
+                { name: "Air Canada", src: "/images/Logos/logo_aircanada.png", w: 150 },
+                { name: "Jet2", src: "/logos/jet2.png", w: 80 },
               ]).map((logo, i) => (
                 <div key={i} className="flex-shrink-0 flex items-center justify-center select-none"
                   style={{ height: "52px", width: "auto", WebkitTouchCallout: "none", userSelect: "none" }}
                   onContextMenu={(e) => e.preventDefault()}>
-                  <div className="h-[44px] md:h-[52px] bg-contain bg-center bg-no-repeat"
+                  <div className="h-[40px] md:h-[45px] bg-contain bg-center bg-no-repeat"
                     style={{ backgroundImage: `url(${logo.src})`, width: `${(logo as { w?: number }).w || 80}px`, minWidth: "60px", transform: "none" }}
                     role="img" aria-label={logo.name} draggable={false} onDragStart={(e) => e.preventDefault()} />
                 </div>
@@ -657,8 +657,8 @@ export default function LandingPage() {
             </div>
           </div>
           <style dangerouslySetInnerHTML={{ __html: `
-            [data-carousel] div[role="img"] { max-height:44px!important; transform:none!important; pointer-events:none; -webkit-touch-callout:none; user-select:none; }
-            @media(min-width:768px){ [data-carousel] div[role="img"]{ max-height:52px!important; height:52px!important; width:100px!important; } }
+            [data-carousel] div[role="img"] { max-height:40px!important; transform:none!important; pointer-events:none; -webkit-touch-callout:none; user-select:none; }
+            @media(min-width:768px){ [data-carousel] div[role="img"]{ max-height:45px!important; height:45px!important; } }
           `}} />
         </section>
 
