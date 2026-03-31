@@ -192,17 +192,22 @@ function PasswordCell({
   }
 
   return (
-    <div className="flex items-center gap-2 relative">
-      {hasPwd ? (
-        <span className="text-[#888] text-sm font-mono">•••••</span>
-      ) : (
-        <span className="text-[#666] text-xs font-mono">Sem senha</span>
+    <div className="flex flex-col gap-1 relative">
+      <div className="flex items-center gap-2">
+        {hasPwd ? (
+          <span className="text-[#888] text-sm font-mono">•••••</span>
+        ) : (
+          <span className="text-[#C06060] text-xs font-mono">⚠️ Sem senha</span>
+        )}
+        <button onClick={() => setEditing(true)}
+          className="text-[10px] text-[#F0D030] hover:text-[#D4B828] cursor-pointer font-mono">
+          {hasPwd ? "Redefinir" : "Definir"}
+        </button>
+      </div>
+      {!hasPwd && type === "driver" && (
+        <p className="text-[9px] text-[#C06060]/70 font-mono leading-tight">Usa senha padrão — redefina</p>
       )}
-      <button onClick={() => setEditing(true)}
-        className="text-[10px] text-[#F0D030] hover:text-[#D4B828] cursor-pointer font-mono">
-        {hasPwd ? "Redefinir" : "Definir"}
-      </button>
-      {toast && <span className="absolute -bottom-5 left-0 text-[10px] text-[#7EAA6E] font-mono">{toast}</span>}
+      {toast && <span className="text-[10px] text-[#7EAA6E] font-mono">{toast}</span>}
     </div>
   );
 }

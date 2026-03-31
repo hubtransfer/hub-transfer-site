@@ -19,6 +19,32 @@ import {
 // ─── LocalStorage Keys ───
 const LS_VIAGENS_URL = "hub_viagens_url";
 const LS_LAST_SYNC = "hub_viagens_last_sync";
+const LS_ADMIN_VIAGENS_CACHE = "hub_admin_viagens_cache";
+const LS_ADMIN_DRIVERS_CACHE = "hub_admin_drivers_cache";
+
+// ─── Cache TTL ───
+const CACHE_FRESH = 2 * 60 * 1000;   // <2 min: use cache directly, no fetch
+const CACHE_STALE = 5 * 60 * 1000;   // 2-5 min: show cache + background fetch
+// >5 min: show skeleton + fetch
+
+interface CacheRecord<T> { data: T; ts: number; date?: string }
+
+function readCache<T>(key: string, dateKey?: string): { data: T; ageMs: number } | null {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const c: CacheRecord<T> = JSON.parse(raw);
+    if (dateKey && c.date !== dateKey) return null;
+    return { data: c.data, ageMs: Date.now() - c.ts };
+  } catch { return null; }
+}
+
+function writeCache<T>(key: string, data: T, dateKey?: string): void {
+  try {
+    const c: CacheRecord<T> = { data, ts: Date.now(), date: dateKey };
+    localStorage.setItem(key, JSON.stringify(c));
+  } catch { /* storage full */ }
+}
 
 // ─── Sync Status ───
 type SyncStatus = "online" | "offline" | "loading";
@@ -165,10 +191,29 @@ export function useTripsStore(): TripsStore {
     setHubViagensUrl(storedUrl);
     setLastSyncTime(storedSync);
 
-    // Sync drivers on mount
-    syncDriversImpl(false);
+    // Load drivers from cache immediately
+    const drvCache = readCache<Driver[]>(LS_ADMIN_DRIVERS_CACHE);
+    if (drvCache) {
+      setDrivers(drvCache.data);
+      setHubCentralSyncStatus("online");
+      setHubCentralSyncMsg(`${drvCache.data.length} motoristas (cache)`);
+    }
 
-    // Sync viagens if URL is set
+    // Load viagens from cache immediately
+    const dateKey = selectedDate || "today";
+    const vCache = readCache<HubViagem[]>(LS_ADMIN_VIAGENS_CACHE, dateKey);
+    if (vCache) {
+      setHubViagens(vCache.data);
+      setHubViagensSyncStatus("online");
+      setHubViagensSyncMsg(`${vCache.data.length} viagens (cache)`);
+      // If cache is fresh (<2min), skip network fetch
+      if (vCache.ageMs < CACHE_FRESH) {
+        return;
+      }
+    }
+
+    // Sync from network (drivers + viagens in parallel)
+    syncDriversImpl(false);
     if (storedUrl) {
       syncViagensImpl(false, storedUrl);
     }
@@ -579,6 +624,7 @@ export function useTripsStore(): TripsStore {
 
       if (motoristas.length > 0) {
         setDrivers(motoristas);
+        writeCache(LS_ADMIN_DRIVERS_CACHE, motoristas);
         setHubCentralSyncStatus("online");
         setHubCentralSyncMsg(`${motoristas.length} motoristas carregados`);
 
@@ -639,6 +685,7 @@ export function useTripsStore(): TripsStore {
       }
 
       setHubViagens(viagens);
+      writeCache(LS_ADMIN_VIAGENS_CACHE, viagens, dateParam || "today");
       setHubViagensSyncStatus("online");
       setHubViagensSyncMsg(`${viagens.length} viagens carregadas`);
 

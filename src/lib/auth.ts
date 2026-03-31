@@ -7,22 +7,42 @@ export interface AuthSession {
   role: "admin" | "driver" | "hotel";
   code?: string;
   phone?: string;
+  expiresAt?: number; // timestamp — session expires after 8 hours
 }
 
 const SESSION_KEY = "hub_session";
+const SESSION_TTL = 8 * 60 * 60 * 1000; // 8 hours
 
 export function getSession(): AuthSession | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = sessionStorage.getItem(SESSION_KEY);
     if (!raw) return null;
-    return JSON.parse(raw);
+    const session: AuthSession = JSON.parse(raw);
+    // Validate required fields
+    if (!session.name || !session.role) { clearSession(); return null; }
+    // Check expiry
+    if (session.expiresAt && Date.now() > session.expiresAt) { clearSession(); return null; }
+    return session;
   } catch {
+    clearSession();
     return null;
   }
 }
 
+/** Check session exists AND has the correct role for a route */
+export function requireSession(expectedRole: "admin" | "driver" | "hotel"): AuthSession | null {
+  const session = getSession();
+  if (!session) return null;
+  if (session.role !== expectedRole) return null;
+  return session;
+}
+
 export function setSession(session: AuthSession): void {
+  // Add expiry if not set
+  if (!session.expiresAt) {
+    session.expiresAt = Date.now() + SESSION_TTL;
+  }
   sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
   // Also set legacy keys for backward compatibility
   if (session.role === "driver") {
@@ -34,10 +54,22 @@ export function setSession(session: AuthSession): void {
 }
 
 export function clearSession(): void {
-  sessionStorage.removeItem(SESSION_KEY);
-  localStorage.removeItem("hub_driver_name");
-  localStorage.removeItem("hub_hotel_name");
-  localStorage.removeItem("hub_hotel_code");
+  try { sessionStorage.removeItem(SESSION_KEY); } catch { /* */ }
+  try {
+    localStorage.removeItem("hub_driver_name");
+    localStorage.removeItem("hub_hotel_name");
+    localStorage.removeItem("hub_hotel_code");
+  } catch { /* */ }
+}
+
+/** Passwords that should NEVER be accepted for driver login from the frontend */
+const BLOCKED_DRIVER_PASSWORDS = ["hub2026", "hubtransfer", "elh", "emh", "gda"];
+
+/** Frontend validation before sending to backend */
+export function validateLoginInput(name: string, password: string): string | null {
+  if (name.trim().length < 3) return "Nome deve ter pelo menos 3 caracteres.";
+  if (password.trim().length < 4) return "Senha deve ter pelo menos 4 caracteres.";
+  return null;
 }
 
 export function getRedirectPath(role: string): string {
@@ -79,17 +111,25 @@ export async function validateLogin(
   const norm = name.toLowerCase().trim();
   const isAdminName = ADMIN_NAMES.includes(norm);
 
+  // 0. Frontend validation
+  const validationError = validateLoginInput(name, password);
+  if (validationError) return { success: false, message: validationError };
+
   // 1. If a custom admin password exists in localStorage, use it EXCLUSIVELY for admin names
   const localAdminPwd = getLocalAdminPassword();
   if (localAdminPwd && isAdminName) {
     if (password === localAdminPwd) {
       return { success: true, session: { name, role: "admin" } };
     }
-    // Local password exists but doesn't match — BLOCK, don't fall through to GAS
     return { success: false, message: "Senha incorrecta." };
   }
 
-  // 2. Call GAS backend (for drivers, hotels, and admin without custom password)
+  // 2. Block known fallback passwords for non-admin logins (prevents backend hub2026 fallback)
+  if (!isAdminName && BLOCKED_DRIVER_PASSWORDS.includes(password.toLowerCase())) {
+    return { success: false, message: "Senha padrão não é permitida. Contacte o administrador." };
+  }
+
+  // 3. Call GAS backend
   try {
     const url = `${HUB_CENTRAL_URL}?action=validateLogin&name=${encodeURIComponent(name)}&password=${encodeURIComponent(password)}`;
     const res = await fetch(url, { redirect: "follow" });
@@ -97,9 +137,21 @@ export async function validateLogin(
     const data = await res.json();
 
     if (data.success) {
+      const backendName = (data.name || "").trim();
+      const backendRole = data.role as "admin" | "driver" | "hotel";
+
+      // 4. Integrity check: if driver, backend name must match what user typed
+      if (backendRole === "driver" && backendName) {
+        const inputNorm = norm;
+        const backendNorm = backendName.toLowerCase().trim();
+        if (inputNorm !== backendNorm && !backendNorm.includes(inputNorm) && !inputNorm.includes(backendNorm)) {
+          return { success: false, message: "Nome não corresponde ao motorista registado." };
+        }
+      }
+
       const session: AuthSession = {
-        name: data.name || name,
-        role: data.role,
+        name: backendName || name, // Always use backend name
+        role: backendRole,
         code: data.code,
         phone: data.phone,
       };
