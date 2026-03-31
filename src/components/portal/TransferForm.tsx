@@ -145,8 +145,8 @@ export default function TransferForm({
         {editingTransfer ? "Editar Transfer" : "Novo Transfer"}
       </h2>
 
-      <div className="bg-[#1A1A1A] rounded-xl border border-[#2A2A2A] p-3 md:p-4 space-y-3">
-        {/* Nome + Referência */}
+      <div className="bg-[#1A1A1A] rounded-xl border border-[#2A2A2A] p-3 md:p-4 space-y-2.5">
+        {/* L1: Nome + Referência */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
           <div>
             <label className={lbl}><User className={iconCls} /> Nome do Cliente <span className="text-[#C06060]">*</span></label>
@@ -158,17 +158,27 @@ export default function TransferForm({
           </div>
         </div>
 
-        {/* Tipo de Serviço */}
-        <div>
-          <label className={lbl}><Car className={iconCls} /> Tipo de Serviço</label>
-          <div className="flex gap-1.5">
-            {["Transfer", "Tour Regular", "Private Tour"].map((type) => (
-              <button key={type} type="button" onClick={() => { setTipoServico(type); setTourSelecionado(""); }} className={chipLg(tipoServico === type)}>{type}</button>
-            ))}
+        {/* L2: Tipo de Serviço + Bagagens */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+          <div>
+            <label className={lbl}><Car className={iconCls} /> Tipo de Serviço</label>
+            <div className="flex gap-1.5">
+              {["Transfer", "Tour Regular", "Private Tour"].map((type) => (
+                <button key={type} type="button" onClick={() => { setTipoServico(type); setTourSelecionado(""); }} className={chipLg(tipoServico === type)}>{type}</button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className={lbl}><Briefcase className={iconCls} /> Bagagens</label>
+            <div className="flex flex-wrap gap-1">
+              {[0,1,2,3,4,5,6].map((n) => (
+                <button key={n} type="button" onClick={() => handleBaggageSelect(n)} className={chip(n < 6 ? numeroBagagens === n : numeroBagagens >= 6)}>{n === 6 ? "6+" : n}</button>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Tour selector */}
+        {/* Tour selector (conditional) */}
         {isTour && (
           <div>
             <label className={lbl}><Navigation className={iconCls} /> Selecionar Tour</label>
@@ -185,7 +195,7 @@ export default function TransferForm({
           </div>
         )}
 
-        {/* Pessoas + Bagagens */}
+        {/* L3: Pessoas + Data */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
           <div>
             <label className={lbl}><Users className={iconCls} /> Pessoas <span className="text-[#C06060]">*</span></label>
@@ -196,28 +206,20 @@ export default function TransferForm({
             </div>
           </div>
           <div>
-            <label className={lbl}><Briefcase className={iconCls} /> Bagagens</label>
-            <div className="flex flex-wrap gap-1">
-              {[0,1,2,3,4,5,6].map((n) => (
-                <button key={n} type="button" onClick={() => handleBaggageSelect(n)} className={chip(n < 6 ? numeroBagagens === n : numeroBagagens >= 6)}>{n === 6 ? "6+" : n}</button>
-              ))}
+            <label className={lbl}><Calendar className={iconCls} /> Data <span className="text-[#C06060]">*</span></label>
+            <div className="flex items-center gap-1.5">
+              <button type="button" onClick={setToday} className={chip(data === formatDateForInput(new Date()))}>Hoje</button>
+              <button type="button" onClick={setTomorrow} className={chip((() => { const d = new Date(); d.setDate(d.getDate() + 1); return data === formatDateForInput(d); })())}>Amanhã</button>
+              <input type="date" value={data} onChange={(e) => setData(e.target.value)} className={`${inp} max-w-[180px]`} required />
             </div>
           </div>
         </div>
 
-        {/* Data + Hora */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-          <div>
-            <label className={lbl}><Calendar className={iconCls} /> Data <span className="text-[#C06060]">*</span></label>
-            <div className="flex gap-1 mb-1.5">
-              <button type="button" onClick={setToday} className={chip(data === formatDateForInput(new Date()))}>Hoje</button>
-              <button type="button" onClick={setTomorrow} className={chip((() => { const d = new Date(); d.setDate(d.getDate() + 1); return data === formatDateForInput(d); })())}>Amanhã</button>
-            </div>
-            <input type="date" value={data} onChange={(e) => setData(e.target.value)} className={inp} required />
-          </div>
-          <div>
-            <label className={lbl}><Clock className={iconCls} /> Hora Pick-up <span className="text-[#C06060]">*</span></label>
-            <div className="grid grid-cols-6 gap-0.5 mb-1.5">
+        {/* L4: Hora Pick-up (full width) */}
+        <div>
+          <label className={lbl}><Clock className={iconCls} /> Hora Pick-up <span className="text-[#C06060]">*</span></label>
+          <div className="flex items-center gap-2">
+            <div className="grid grid-cols-9 gap-0.5 flex-1">
               {TIME_SLOTS.map((time) => (
                 <button key={time} type="button" onClick={() => setHoraPickup(time)}
                   className={`py-1 text-[11px] font-mono font-bold rounded transition-all cursor-pointer text-center ${
@@ -225,7 +227,7 @@ export default function TransferForm({
                   }`}>{time}</button>
               ))}
             </div>
-            <input type="time" value={horaPickup} onChange={(e) => setHoraPickup(e.target.value)} className={inp} required />
+            <input type="time" value={horaPickup} onChange={(e) => setHoraPickup(e.target.value)} className={`${inp} max-w-[110px]`} required />
           </div>
         </div>
 

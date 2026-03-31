@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { Pencil, Check, Trash2 } from "lucide-react";
 import {
   Transfer,
   ActiveFilters,
@@ -404,18 +405,10 @@ export default function TransferTable({
                       </td>
 
                       {/* Rota */}
-                      <td className="px-3 py-2.5 text-gray-300 text-xs max-w-[200px]">
-                        <span className="whitespace-nowrap">
-                          {getLocationEmoji(s.origem)}{" "}
-                          <span className="truncate inline-block max-w-[70px] align-bottom" title={s.origem}>
-                            {s.origem}
-                          </span>
-                          {" → "}
-                          {getLocationEmoji(s.destino)}{" "}
-                          <span className="truncate inline-block max-w-[70px] align-bottom" title={s.destino}>
-                            {s.destino}
-                          </span>
-                        </span>
+                      <td className="px-3 py-2.5 text-gray-300 text-xs max-w-[180px]" title={`${s.origem} → ${s.destino}`}>
+                        <span className="block truncate">{s.origem.replace("Aeroporto de Lisboa", "Aeroporto").replace("Hotel Principal", "Hotel")}</span>
+                        <span className="text-[#666]">→</span>
+                        <span className="block truncate">{s.destino.replace("Aeroporto de Lisboa", "Aeroporto").replace("Hotel Principal", "Hotel")}</span>
                       </td>
 
                       {/* Valor Total */}
@@ -463,27 +456,18 @@ export default function TransferTable({
 
                       {/* Acoes */}
                       <td className="px-3 py-2.5 text-center">
-                        <div className="flex items-center justify-center gap-1">
-                          <button
-                            onClick={() => onEdit(s.id)}
-                            className="p-1.5 rounded-lg text-gray-400 hover:text-hub-gold hover:bg-hub-gold/10 transition-colors"
-                            title="Editar"
-                          >
-                            {"✏️"}
+                        <div className="flex items-center justify-center gap-0.5">
+                          <button onClick={() => onEdit(s.id)}
+                            className="p-1.5 rounded-lg text-[#666] hover:text-[#F0D030] hover:bg-[#F0D030]/10 transition-colors" title="Editar">
+                            <Pencil className="w-4 h-4" />
                           </button>
-                          <button
-                            onClick={() => onChangeStatus(s.id)}
-                            className="p-1.5 rounded-lg text-gray-400 hover:text-blue-400 hover:bg-blue-400/10 transition-colors"
-                            title="Alterar Status"
-                          >
-                            {"🔄"}
+                          <button onClick={() => onChangeStatus(s.id)}
+                            className="p-1.5 rounded-lg text-[#666] hover:text-[#7EAA6E] hover:bg-[#7EAA6E]/10 transition-colors" title="Confirmar">
+                            <Check className="w-4 h-4" />
                           </button>
-                          <button
-                            onClick={() => onDelete(s.id)}
-                            className="p-1.5 rounded-lg text-gray-400 hover:text-hub-error hover:bg-hub-error/10 transition-colors"
-                            title="Eliminar"
-                          >
-                            {"🗑️"}
+                          <button onClick={() => onDelete(s.id)}
+                            className="p-1.5 rounded-lg text-[#666] hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors" title="Eliminar">
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </td>
