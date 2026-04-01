@@ -114,6 +114,14 @@ const AIRPORT_COUNTRY: Record<string, string> = {
   CAI: 'EG',
   // Nigéria
   LOS: 'NG',
+  // Islândia
+  KEF: 'IS',
+  // Eslovénia
+  LJU: 'SI',
+  // Quénia
+  NBO: 'KE',
+  // Nova Zelândia
+  AKL: 'NZ',
 };
 
 /** Country ISO-2 → emoji flag */
@@ -126,11 +134,11 @@ function countryToFlag(code: string): string {
   );
 }
 
-/** Get origin flag emoji from IATA code. Returns '' if unknown. */
+/** Get origin flag emoji from IATA code. Returns '🌍' if IATA unknown, '' if no IATA. */
 export function getOriginFlag(depIata: string): string {
   if (!depIata) return '';
   const country = AIRPORT_COUNTRY[depIata.toUpperCase().trim()];
-  return country ? countryToFlag(country) : '';
+  return country ? countryToFlag(country) : '🌍';
 }
 
 /** Get country code from IATA code */

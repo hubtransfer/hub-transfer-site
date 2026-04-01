@@ -280,41 +280,52 @@ export default function DriverTripCard({
       {/*  COLLAPSED VIEW (always visible)                */}
       {/* ════════════════════════════════════════════════ */}
       <div className="cursor-pointer" onClick={toggleExpand}>
-        {/* Main row: source+time | name+tags | price */}
-        <div className="flex items-center gap-4 px-5 py-4">
-          <div className="flex-shrink-0 min-w-[60px] text-center">
-            <span className="block text-[10px] font-bold uppercase tracking-[1px] text-[#F0D030]/80 font-mono leading-none mb-0.5">{sourceLabel}</span>
-            {delayedHora ? (
-              <div className="flex items-center gap-1 justify-center">
-                <span className="text-lg font-bold font-mono line-through opacity-40 text-[#999]">{hora}</span>
-                <span className="text-[10px] text-[#666]">→</span>
-                <span className="text-xl font-black font-mono" style={{ color: dColor }}>{delayedHora}</span>
-              </div>
+        {/* Main row: flag/globe | source+time | name | driver+price */}
+        <div className="flex items-center gap-3 px-4 py-3">
+          {/* Left: flag or globe */}
+          <div className="flex-shrink-0 w-[28px] flex items-center justify-center">
+            {hasFlightNumber && originFlag ? (
+              <span className="text-[22px] leading-none">{originFlag}</span>
+            ) : hasFlightNumber && depIata ? (
+              <span className="text-[22px] leading-none">🌍</span>
             ) : (
-              <span className={`text-2xl font-black font-mono ${c.text}`}>{hora}</span>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M2 12h20" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+              </svg>
             )}
           </div>
+          {/* Source label + time */}
+          <div className="flex-shrink-0 min-w-[52px]">
+            <span className="block text-[9px] font-bold uppercase tracking-[1px] text-[#F0D030]/70 font-mono leading-none mb-0.5">{sourceLabel}</span>
+            {delayedHora ? (
+              <div className="flex items-center gap-1">
+                <span className="text-base font-bold font-mono line-through opacity-40 text-[#999]">{hora}</span>
+                <span className="text-[9px] text-[#666]">→</span>
+                <span className="text-lg font-black font-mono" style={{ color: dColor }}>{delayedHora}</span>
+              </div>
+            ) : (
+              <span className={`text-xl font-bold font-mono ${c.text}`}>{hora}</span>
+            )}
+          </div>
+          {/* Client name */}
           <div className="flex-1 min-w-0">
             <p
-              className={`text-lg font-bold text-white truncate ${expanded ? "cursor-pointer hover:text-[#F0D030] transition-colors" : ""}`}
+              className={`text-[15px] font-semibold text-[#F5F5F5] truncate ${expanded ? "cursor-pointer hover:text-[#F0D030] transition-colors" : ""}`}
               onClick={expanded ? (e) => { e.stopPropagation(); onShowNameplate(viagem.client, viagem.destination); } : undefined}
             >
               {viagem.client}
             </p>
-            <div className="flex items-center gap-2 mt-1">
-              <span className={`text-xs font-bold uppercase px-2.5 py-1 rounded-md ${c.bg} ${c.text}`}>{tipo}</span>
-              {viagem.pax && <span className="text-sm font-mono font-bold text-[#D0D0D0]">{viagem.pax} pax</span>}
-              {expanded && <span className="text-xs text-[#666666]">▲</span>}
-              {!expanded && <span className="text-xs text-[#666666]">▼</span>}
-            </div>
           </div>
-          <div className="flex-shrink-0 text-right flex flex-col items-end gap-1">
+          {/* Right: driver + price */}
+          <div className="flex-shrink-0 text-right flex flex-col items-end">
             {mode === "admin" && (
               viagem.driver
-                ? <span className="font-mono text-xs font-semibold text-[#7EAA6E]/80 truncate max-w-[80px]">{viagem.driver}</span>
-                : <span className="font-mono text-xs text-[#666666]">Sem motorista</span>
+                ? <span className="font-mono text-[10px] font-semibold text-[#7EAA6E]/80 truncate max-w-[80px]">{viagem.driver}</span>
+                : <span className="font-mono text-[10px] text-[#555]">—</span>
             )}
-            {price > 0 && <span className="font-mono text-base font-bold text-[#F0D030]">€{price}</span>}
+            {price > 0 && <span className="font-mono text-sm font-bold text-[#F0D030]">€{price}</span>}
           </div>
         </div>
 
@@ -325,43 +336,31 @@ export default function DriverTripCard({
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center gap-2.5 px-4 pb-3 pt-0.5 cursor-pointer hover:bg-[#151515] transition-colors rounded-b-2xl"
+            className="flex items-center gap-2 px-4 pb-2.5 pt-0 cursor-pointer hover:bg-[#151515] transition-colors rounded-b-2xl"
           >
-            {/* Origin: flag + IATA */}
-            <div className="flex items-center gap-1 flex-shrink-0 min-w-[44px]">
-              {originFlag && <span className="text-lg leading-none">{originFlag}</span>}
-              {depIata && <span className="font-mono text-[10px] font-bold text-[#D0D0D0]">{depIata}</span>}
-            </div>
-            {/* Progress bar + flight number */}
+            {/* Collapsed flight bar — subtle */}
             <div className="flex-1 relative">
               {isCancelled ? (
-                <div className="h-3 rounded-full bg-[#EF5350]/20 flex items-center justify-center">
-                  <span className="text-[8px] font-mono font-bold text-[#EF5350] uppercase">Cancelado</span>
-                </div>
+                <div className="h-2 rounded-full bg-[#EF5350]/15" />
               ) : (
-                <div className="h-3 rounded-full bg-[#222222] overflow-hidden">
+                <div className="h-2 rounded-full bg-[#1A1A1A] overflow-hidden">
                   <div className={`h-full rounded-full transition-all duration-1000 ${barPulse ? "animate-flight-pulse" : ""}`}
-                    style={{ width: `${Math.max(flightProg, 4)}%`, backgroundColor: barColor }} />
+                    style={{ width: `${Math.max(flightProg, 4)}%`, backgroundColor: barColor, opacity: 0.7 }} />
                 </div>
               )}
               {viagem.flight && (
-                <span className="absolute -top-4 left-1/2 -translate-x-1/2 font-mono text-base font-bold text-[#E5E5E5] hover:text-[#F0D030] transition-colors">
+                <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 font-mono text-sm font-bold text-[#D0D0D0] hover:text-[#F0D030] transition-colors">
                   {viagem.flight}
                 </span>
               )}
-              {!isCancelled && flightProg > 8 && flightProg < 92 && (
-                <span className="absolute top-0 text-[10px] leading-none" style={{ left: `calc(${flightProg}% - 5px)`, transform: "translateY(-50%)", filter: "drop-shadow(0 0 2px rgba(0,0,0,.8))" }}>✈</span>
-              )}
             </div>
-            {/* Destination: always 🇵🇹 LIS */}
             <div className="flex items-center gap-1 flex-shrink-0">
-              <span className="font-mono text-sm font-bold" style={{ color: barColor }}>LIS</span>
-              <span className="text-base leading-none">🇵🇹</span>
+              <span className="font-mono text-xs font-bold" style={{ color: barColor }}>LIS</span>
+              <span className="text-sm leading-none">🇵🇹</span>
             </div>
-            <div className="flex flex-col items-end flex-shrink-0 min-w-[52px]">
-              {arrTime !== "—:—" && <span className="font-mono text-lg font-black leading-none" style={{ color: barColor }}>{arrTime}</span>}
-              {countdown && <span className="font-mono text-[10px] leading-tight mt-0.5" style={{ color: `${barColor}99` }}>{countdown}</span>}
-            </div>
+            {arrTime !== "—:—" && (
+              <span className="font-mono text-sm font-bold flex-shrink-0" style={{ color: barColor }}>{arrTime}</span>
+            )}
           </a>
         )}
       </div>
@@ -378,6 +377,14 @@ export default function DriverTripCard({
             transition={{ duration: 0.25, ease: "easeInOut" }}
             className="overflow-hidden"
           >
+            {/* ── Trip details (expanded only) ── */}
+            <div className="px-4 py-2.5 border-t border-[#2A2A2A] flex items-center gap-2 flex-wrap">
+              <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${c.bg} ${c.text}`}>{tipo}</span>
+              {viagem.pax && <span className="text-xs font-mono text-[#D0D0D0]">{viagem.pax} pax</span>}
+              {viagem.bags && <span className="text-xs font-mono text-[#999]">{viagem.bags} bag</span>}
+              {viagem.notes && <span className="text-[10px] text-[#888] truncate max-w-[200px]">{viagem.notes}</span>}
+            </div>
+
             {/* ── Flight block — status + progress ── */}
             {hasFlight && (
               <div
