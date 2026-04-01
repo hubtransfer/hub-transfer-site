@@ -62,13 +62,10 @@ export function clearSession(): void {
   } catch { /* */ }
 }
 
-/** Passwords that should NEVER be accepted for driver login from the frontend */
-const BLOCKED_DRIVER_PASSWORDS = ["hub2026", "hubtransfer", "elh", "emh", "gda"];
-
 /** Frontend validation before sending to backend */
 export function validateLoginInput(name: string, password: string): string | null {
-  if (name.trim().length < 3) return "Nome deve ter pelo menos 3 caracteres.";
-  if (password.trim().length < 4) return "Senha deve ter pelo menos 4 caracteres.";
+  if (name.trim().length < 2) return "Insira o seu nome.";
+  if (password.trim().length < 2) return "Insira a senha.";
   return null;
 }
 
@@ -124,12 +121,7 @@ export async function validateLogin(
     return { success: false, message: "Senha incorrecta." };
   }
 
-  // 2. Block known fallback passwords for non-admin logins (prevents backend hub2026 fallback)
-  if (!isAdminName && BLOCKED_DRIVER_PASSWORDS.includes(password.toLowerCase())) {
-    return { success: false, message: "Senha padrão não é permitida. Contacte o administrador." };
-  }
-
-  // 3. Call GAS backend
+  // 2. Call GAS backend
   try {
     const url = `${HUB_CENTRAL_URL}?action=validateLogin&name=${encodeURIComponent(name)}&password=${encodeURIComponent(password)}`;
     const res = await fetch(url, { redirect: "follow" });
@@ -137,21 +129,9 @@ export async function validateLogin(
     const data = await res.json();
 
     if (data.success) {
-      const backendName = (data.name || "").trim();
-      const backendRole = data.role as "admin" | "driver" | "hotel";
-
-      // 4. Integrity check: if driver, backend name must match what user typed
-      if (backendRole === "driver" && backendName) {
-        const inputNorm = norm;
-        const backendNorm = backendName.toLowerCase().trim();
-        if (inputNorm !== backendNorm && !backendNorm.includes(inputNorm) && !inputNorm.includes(backendNorm)) {
-          return { success: false, message: "Nome não corresponde ao motorista registado." };
-        }
-      }
-
       const session: AuthSession = {
-        name: backendName || name, // Always use backend name
-        role: backendRole,
+        name: data.name || name,
+        role: data.role,
         code: data.code,
         phone: data.phone,
       };
