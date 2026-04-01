@@ -78,7 +78,6 @@ export function getRedirectPath(role: string): string {
   }
 }
 
-const LS_ADMIN_PWD = "hub_admin_password";
 const LS_ADMIN_EMAIL = "hub_admin_email";
 
 export function getAdminEmail(): string {
@@ -90,38 +89,25 @@ export function setAdminEmail(email: string): void {
   localStorage.setItem(LS_ADMIN_EMAIL, email);
 }
 
+/** @deprecated No-op — passwords are validated 100% on the backend */
 export function getLocalAdminPassword(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(LS_ADMIN_PWD);
+  return null;
 }
 
-export function setLocalAdminPassword(pwd: string): void {
-  localStorage.setItem(LS_ADMIN_PWD, pwd);
+/** @deprecated No-op — passwords are validated 100% on the backend */
+export function setLocalAdminPassword(_pwd: string): void {
+  // No-op: passwords should never be stored in localStorage
 }
-
-const ADMIN_NAMES = ["admin", "junior", "junior gutierez", "roberta", "hub", "hubtransfer"];
 
 export async function validateLogin(
   name: string,
   password: string,
 ): Promise<{ success: boolean; session?: AuthSession; message?: string }> {
-  const norm = name.toLowerCase().trim();
-  const isAdminName = ADMIN_NAMES.includes(norm);
-
-  // 0. Frontend validation
+  // Minimal frontend validation
   const validationError = validateLoginInput(name, password);
   if (validationError) return { success: false, message: validationError };
 
-  // 1. If a custom admin password exists in localStorage, use it EXCLUSIVELY for admin names
-  const localAdminPwd = getLocalAdminPassword();
-  if (localAdminPwd && isAdminName) {
-    if (password === localAdminPwd) {
-      return { success: true, session: { name, role: "admin" } };
-    }
-    return { success: false, message: "Senha incorrecta." };
-  }
-
-  // 2. Call GAS backend
+  // 100% backend validation — no localStorage, no blocked lists
   try {
     const url = `${HUB_CENTRAL_URL}?action=validateLogin&name=${encodeURIComponent(name)}&password=${encodeURIComponent(password)}`;
     const res = await fetch(url, { redirect: "follow" });
