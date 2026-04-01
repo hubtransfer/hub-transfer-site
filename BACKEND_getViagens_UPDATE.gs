@@ -5,50 +5,49 @@
  * NÃO é a função inteira — apenas os campos novos.
  *
  * INSTRUÇÕES:
- * 1. Abrir o Google Apps Script
- * 2. Localizar a função getViagens() (aprox. linha 5200)
- * 3. No bloco de mapeamento de colunas (col = {...}), adicionar:
- * 4. No bloco viagens.push({...}), adicionar:
+ * 1. Abrir o Google Apps Script (CONFIG_E_CONSTANTES.gs)
+ * 2. Ctrl+F → procurar "col =" ou "var col" dentro de getViagens()
+ * 3. Adicionar as linhas do PASSO 1 ao bloco de mapeamento
+ * 4. Ctrl+F → procurar "viagens.push" dentro de getViagens()
+ * 5. Adicionar as linhas do PASSO 2 ao objecto
  *
- * GERADO EM: 2026-03-31
+ * GERADO EM: 2026-04-01
  */
 
 // ═══════════════════════════════════════════════
 // PASSO 1: Adicionar ao bloco col = {...}
-// (procurar "// Flight tracking" — aprox. linha 5258)
-// Adicionar DEPOIS dos campos existentes de flight tracking:
+// Procurar: "// Flight tracking" ou após os campos existentes
 // ═══════════════════════════════════════════════
 
 /*
-  depIata:      75,  // BX (76) — Aeroporto de origem IATA (ex: "BEG", "LHR")
-  depTimeProg:  76,  // BY (77) — Hora descolagem programada (ex: "12:00")
-  etaChegada:   80,  // CC (81) — ETA chegada estimada (ex: "15:55")
-  statusVoo:    81,  // CD (82) — Status do voo (AGUARDANDO, MONITORANDO, EN_VOO, ATERRISADO)
-  atrasoMin:    82,  // CE (83) — Minutos de atraso (ex: "25")
+  // Método A: Se getViagens usa findColWA (pesquisa por header):
+  depIata:         findColWA(headers, ['aeroporto origem', 'dep_iata', 'origem voo']),
+  horaPartidaProg: findColWA(headers, ['hora partida programada', 'hora decolagem']),
+
+  // Método B: Se getViagens usa índices fixos:
+  depIata:         75,  // Coluna BX (76) — Aeroporto de Origem (ex: "CDG", "LHR")
+  horaPartidaProg: 76,  // Coluna BY (77) — Hora Partida Programada (ex: "14:30")
 */
 
 
 // ═══════════════════════════════════════════════
 // PASSO 2: Adicionar ao bloco viagens.push({...})
-// (procurar "// Flight tracking" — aprox. linha 5356)
-// Adicionar DEPOIS dos campos existentes:
+// Procurar: "viagens.push" e adicionar antes do "}"
 // ═══════════════════════════════════════════════
 
 /*
-  depIata:     col.depIata >= 0 ? g(col.depIata) : '',
-  depTimeProg: col.depTimeProg >= 0 ? g(col.depTimeProg) : '',
-  etaChegada:  col.etaChegada >= 0 ? g(col.etaChegada) : '',
-  statusVoo:   col.statusVoo >= 0 ? g(col.statusVoo) : '',
-  atrasoMin:   col.atrasoMin >= 0 ? g(col.atrasoMin) : '',
+  depIata:  col.depIata >= 0 ? g(col.depIata) : '',
+  depTime:  col.horaPartidaProg >= 0 ? gHora(col.horaPartidaProg) : '',
 */
 
 
 // ═══════════════════════════════════════════════
 // NOTAS:
-// - Os índices de coluna (75, 76, 80, 81, 82) são baseados na
-//   estrutura actual do HUB Central. Verificar se as colunas
-//   BX, BY, CC, CD, CE correspondem aos dados de flight tracking v6.0.
-// - Se as colunas forem diferentes, ajustar os índices.
-// - g() é a função helper que já existe no GAS para ler células.
-// - Estes campos são opcionais — se a coluna não existir, retorna ''.
+// - g() é a função que já existe para ler células como string
+// - gHora() é a função que formata horas (se não existir, usar g())
+// - Verificar se as colunas BX e BY correspondem aos dados de flight tracking
+// - O campo statusVoo e atrasoMin já devem estar mapeados (verificar)
+// - Se statusVoo não está mapeado, adicionar:
+//   statusVoo:  col.statusVoo >= 0 ? g(col.statusVoo) : '',
+//   atrasoMin:  col.atrasoMin >= 0 ? g(col.atrasoMin) : '',
 // ═══════════════════════════════════════════════

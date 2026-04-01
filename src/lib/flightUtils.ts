@@ -1,5 +1,6 @@
 /**
  * Flight utilities — delay calculation and status helpers.
+ * Status values from backend: AGENDADO, EM VOO, APROXIMACAO, ATERRISADO, CANCELADO
  */
 
 /** Add delay minutes to a HH:MM time string */
@@ -15,33 +16,64 @@ export function getDelayedTime(pickupTime: string, delayMin: number): string {
 
 /** Delay severity color */
 export function delayColor(delayMin: number): string {
-  if (delayMin >= 30) return '#EF5350';  // red — critical
-  if (delayMin >= 15) return '#FFA726';  // orange — attention
-  return '#F0D030';                       // gold — minor
+  if (delayMin >= 30) return '#EF5350';
+  if (delayMin >= 15) return '#FFA726';
+  return '#F0D030';
+}
+
+/** Normalize statusVoo to uppercase key */
+function norm(statusVoo: string): string {
+  return (statusVoo || '').toUpperCase().replace(/[_\s]+/g, ' ').trim();
 }
 
 /** Status dot color */
 export function statusDotColor(statusVoo: string): string {
-  const s = (statusVoo || '').toUpperCase();
+  const s = norm(statusVoo);
   if (s === 'ATERRISADO' || s === 'LANDED') return '#7EAA6E';
-  if (s === 'EN_VOO' || s === 'IN_FLIGHT' || s === 'AIRBORNE') return '#F0D030';
-  if (s === 'MONITORANDO' || s === 'MONITORING') return '#60A5FA';
-  if (s === 'ATRASADO' || s === 'DELAYED') return '#EF5350';
-  return '#666666'; // AGUARDANDO or unknown
+  if (s === 'EM VOO' || s === 'EN VOO' || s === 'IN FLIGHT' || s === 'AIRBORNE') return '#F0D030';
+  if (s === 'APROXIMACAO' || s === 'APPROACH') return '#60A5FA';
+  if (s === 'CANCELADO' || s === 'CANCELLED' || s === 'CANCELED') return '#EF5350';
+  if (s === 'ATRASADO' || s === 'DELAYED') return '#FFA726';
+  if (s === 'AGENDADO' || s === 'SCHEDULED' || s === 'MONITORANDO' || s === 'MONITORING') return '#666666';
+  return '#666666';
 }
 
 /** Human-readable status label */
 export function statusLabel(statusVoo: string): string {
-  const s = (statusVoo || '').toUpperCase();
+  const s = norm(statusVoo);
   if (s === 'ATERRISADO' || s === 'LANDED') return 'Aterrou';
-  if (s === 'EN_VOO' || s === 'IN_FLIGHT' || s === 'AIRBORNE') return 'Em voo';
-  if (s === 'MONITORANDO' || s === 'MONITORING') return 'Monitorando';
+  if (s === 'EM VOO' || s === 'EN VOO' || s === 'IN FLIGHT' || s === 'AIRBORNE') return 'Em voo';
+  if (s === 'APROXIMACAO' || s === 'APPROACH') return 'Aproximação';
+  if (s === 'CANCELADO' || s === 'CANCELLED' || s === 'CANCELED') return 'Cancelado';
   if (s === 'ATRASADO' || s === 'DELAYED') return 'Atrasado';
+  if (s === 'AGENDADO' || s === 'SCHEDULED') return 'Agendado';
+  if (s === 'MONITORANDO' || s === 'MONITORING') return 'Monitorando';
   return 'Aguardando';
 }
 
-/** Is flight actively tracked (has meaningful status) */
+/** Is flight actively tracked (has meaningful status beyond waiting) */
 export function isFlightTracked(statusVoo: string): boolean {
-  const s = (statusVoo || '').toUpperCase();
+  const s = norm(statusVoo);
   return s !== '' && s !== 'AGUARDANDO';
+}
+
+/** Get progress percentage from statusVoo (0-100) */
+export function statusToProgress(statusVoo: string): number | null {
+  const s = norm(statusVoo);
+  if (s === 'AGENDADO' || s === 'SCHEDULED') return 0;
+  if (s === 'EM VOO' || s === 'EN VOO' || s === 'IN FLIGHT' || s === 'AIRBORNE') return 50;
+  if (s === 'APROXIMACAO' || s === 'APPROACH') return 80;
+  if (s === 'ATERRISADO' || s === 'LANDED') return 100;
+  if (s === 'CANCELADO' || s === 'CANCELLED' || s === 'CANCELED') return -1; // special: cancelled
+  return null; // unknown — use time-based calc
+}
+
+/** Get bar color from statusVoo */
+export function statusBarColor(statusVoo: string): string {
+  const s = norm(statusVoo);
+  if (s === 'ATERRISADO' || s === 'LANDED') return '#7EAA6E';
+  if (s === 'CANCELADO' || s === 'CANCELLED' || s === 'CANCELED') return '#EF5350';
+  if (s === 'APROXIMACAO' || s === 'APPROACH') return '#60A5FA';
+  if (s === 'EM VOO' || s === 'EN VOO' || s === 'IN FLIGHT') return '#D4A847';
+  return '#374151';
 }
