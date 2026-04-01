@@ -34,27 +34,6 @@ const TABS: { key: TabType; icon: string; label: string; mobileLabel: string }[]
 /*  CLOCK HOOK                                                         */
 /* ================================================================== */
 
-function useLisbonClock() {
-  const [time, setTime] = useState("");
-
-  useEffect(() => {
-    const tick = () => {
-      setTime(
-        new Date().toLocaleTimeString("pt-PT", {
-          timeZone: "Europe/Lisbon",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        }),
-      );
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  return time;
-}
 
 /* ================================================================== */
 /*  HELPERS                                                            */
@@ -79,7 +58,6 @@ function syncDot(status: string) {
 
 export default function TripsPage() {
   const store = useTripsStore();
-  const clock = useLisbonClock();
 
   // Filter sub-tab for "current" view
   const [currentFilter, setCurrentFilter] = useState<"all" | "chegadas" | "recolhas">("all");
@@ -223,8 +201,8 @@ export default function TripsPage() {
           <span className="hidden sm:inline-flex items-center gap-1 bg-[#8B9DAF]/10 text-[#8B9DAF] text-xs font-bold px-2 py-0.5 rounded-full">
             <span className="text-[10px]">{"\u25B2"}</span> {store.counts.recolhas}
           </span>
-          {/* Clock */}
-          <span className="text-xs text-zinc-400 tabular-nums">{clock}</span>
+          {/* Last sync */}
+          <span className="text-xs text-zinc-400 tabular-nums font-mono">{store.lastSyncTime ? `Sync: ${store.lastSyncTime}` : "Sync: --:--:--"}</span>
         </div>
       </header>
 

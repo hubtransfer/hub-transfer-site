@@ -23,28 +23,6 @@ import type { HubViagem } from "@/lib/trips";
 const LS_DRIVER_NAME = "hub_driver_name"; // legacy key for backward compat
 const SYNC_INTERVAL = 3 * 60 * 1000;
 
-/* ================================================================== */
-/*  Lisbon Clock                                                       */
-/* ================================================================== */
-
-function useLisbonClock() {
-  const [time, setTime] = useState("");
-  useEffect(() => {
-    const tick = () =>
-      setTime(
-        new Date().toLocaleTimeString("pt-PT", {
-          timeZone: "Europe/Lisbon",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        }),
-      );
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, []);
-  return time;
-}
 
 /* ================================================================== */
 /*  Fetch drivers list from HUB Central                                */
@@ -56,7 +34,6 @@ function useLisbonClock() {
 
 export default function DriverTripsPage() {
   const store = useDriverStore();
-  const clock = useLisbonClock();
   const router = useRouter();
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -192,11 +169,9 @@ export default function DriverTripsPage() {
             <span className="text-xs text-[#F0D030]/60 animate-pulse font-mono">A sincronizar...</span>
           ) : store.isFromCache ? (
             <span className="text-xs text-[#D4D4D4] font-mono">Cache · {store.cacheAge}</span>
-          ) : store.lastSyncTime ? (
-            <span className="text-xs text-[#D4A847] font-mono">Sincronizado ✓</span>
           ) : null}
-          <span className="text-sm text-white/50 tabular-nums font-mono">
-            {clock}
+          <span className="text-xs text-white/50 tabular-nums font-mono">
+            {store.lastSyncTime ? `Sync: ${store.lastSyncTime}` : "Sync: --:--:--"}
           </span>
         </div>
       </header>
