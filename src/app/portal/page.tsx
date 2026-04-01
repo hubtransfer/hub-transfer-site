@@ -187,6 +187,7 @@ export default function PortalPage() {
             isAdminMode={store.isAdminMode}
             isLoading={store.syncInProgress}
             onClear={() => store.setEditingId(null)}
+            hotelName={hotelName}
           />
         </div>
       )}

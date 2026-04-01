@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   User, FileText, Car, Users, Briefcase, Calendar, Clock,
   Phone, Plane, MapPin, Navigation, DollarSign, CreditCard, MessageSquare,
@@ -17,6 +17,27 @@ interface TransferFormProps {
   isAdminMode: boolean;
   isLoading: boolean;
   onClear: () => void;
+  hotelName?: string;
+}
+
+// Hotel name → full address mapping
+const HOTEL_ADDRESSES: Record<string, string> = {
+  "empire lisbon hotel": "Empire Lisbon Hotel, Rua Áurea 44, 1100-063 Lisboa, Portugal",
+  "empire marques hotel": "Empire Marques Hotel, Rua Marquês da Fronteira 8, 1070-296 Lisboa, Portugal",
+  "gota d'água": "Gota d'Água Guest House, Rua do Salitre 55, 1250-198 Lisboa, Portugal",
+  "gota dagua": "Gota d'Água Guest House, Rua do Salitre 55, 1250-198 Lisboa, Portugal",
+  "hotel lioz": "Hotel Lioz, Rua dos Fanqueiros 204, 1100-233 Lisboa, Portugal",
+  "lioz": "Hotel Lioz, Rua dos Fanqueiros 204, 1100-233 Lisboa, Portugal",
+  "teste sistema validado": "Hotel Teste, Lisboa, Portugal",
+};
+
+function getHotelAddress(hotelName: string): string {
+  if (!hotelName) return "Hotel, Lisboa";
+  const norm = hotelName.toLowerCase().trim();
+  for (const [key, addr] of Object.entries(HOTEL_ADDRESSES)) {
+    if (norm.includes(key) || key.includes(norm)) return addr;
+  }
+  return "Hotel, Lisboa";
 }
 
 const TIME_SLOTS = [
@@ -33,7 +54,7 @@ const QUICK_OBS = [
 ];
 
 export default function TransferForm({
-  onSubmit, editingTransfer, isAdminMode, isLoading, onClear,
+  onSubmit, editingTransfer, isAdminMode, isLoading, onClear, hotelName,
 }: TransferFormProps) {
   const [nomeCliente, setNomeCliente] = useState("");
   const [referencia, setReferencia] = useState("");
@@ -51,6 +72,35 @@ export default function TransferForm({
   const [modoPagamento, setModoPagamento] = useState("");
   const [pagoParaQuem, setPagoParaQuem] = useState("");
   const [observacoes, setObservacoes] = useState("");
+
+  // Refs for Google Places autocomplete
+  const origemInputRef = useRef<HTMLInputElement>(null);
+  const destinoInputRef = useRef<HTMLInputElement>(null);
+
+  // Google Places Autocomplete setup
+  useEffect(() => {
+    const g = window as unknown as { google?: { maps?: { places?: { Autocomplete: new (el: HTMLInputElement, opts: Record<string, unknown>) => { addListener: (event: string, cb: () => void) => void; getPlace: () => { formatted_address?: string } } } } } };
+    if (!g.google?.maps?.places) return;
+    const opts = { componentRestrictions: { country: "pt" }, fields: ["formatted_address"] };
+
+    if (origemInputRef.current) {
+      const ac = new g.google.maps.places.Autocomplete(origemInputRef.current, opts);
+      ac.addListener("place_changed", () => {
+        const place = ac.getPlace();
+        if (place.formatted_address) setOrigem(place.formatted_address);
+      });
+    }
+    if (destinoInputRef.current) {
+      const ac = new g.google.maps.places.Autocomplete(destinoInputRef.current, opts);
+      ac.addListener("place_changed", () => {
+        const place = ac.getPlace();
+        if (place.formatted_address) setDestino(place.formatted_address);
+      });
+    }
+  }, []);
+
+  // Hotel address for quick buttons
+  const hotelAddress = useMemo(() => getHotelAddress(hotelName || ""), [hotelName]);
 
   const isTour = tipoServico === "Tour Regular" || tipoServico === "Private Tour";
   const tourOptions = useMemo(() => {
@@ -243,23 +293,23 @@ export default function TransferForm({
           </div>
         </div>
 
-        {/* Origem + Destino */}
+        {/* Origem + Destino (with Google Places autocomplete) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className={lbl}><MapPin className={iconCls} /> Origem <span className="text-[#C06060]">*</span></label>
             <div className="flex gap-1 mb-1.5">
-              <button type="button" onClick={() => setOrigem("Aeroporto de Lisboa")} className={chip(origem === "Aeroporto de Lisboa")}>Aeroporto</button>
-              <button type="button" onClick={() => setOrigem("Hotel Principal")} className={chip(origem === "Hotel Principal")}>Hotel</button>
+              <button type="button" onClick={() => setOrigem("Aeroporto de Lisboa, 1700-008 Lisboa, Portugal")} className={chip(origem.includes("Aeroporto"))}>Aeroporto</button>
+              <button type="button" onClick={() => setOrigem(hotelAddress)} className={chip(origem === hotelAddress)}>Hotel</button>
             </div>
-            <input type="text" value={origem} onChange={(e) => setOrigem(e.target.value)} className={inp} placeholder="Outro local..." required />
+            <input ref={origemInputRef} type="text" value={origem} onChange={(e) => setOrigem(e.target.value)} className={inp} placeholder="Pesquisar endereço..." required />
           </div>
           <div>
             <label className={lbl}><Navigation className={iconCls} /> Destino <span className="text-[#C06060]">*</span></label>
             <div className="flex gap-1 mb-1.5">
-              <button type="button" onClick={() => setDestino("Hotel Principal")} className={chip(destino === "Hotel Principal")}>Hotel</button>
-              <button type="button" onClick={() => setDestino("Aeroporto de Lisboa")} className={chip(destino === "Aeroporto de Lisboa")}>Aeroporto</button>
+              <button type="button" onClick={() => setDestino(hotelAddress)} className={chip(destino === hotelAddress)}>Hotel</button>
+              <button type="button" onClick={() => setDestino("Aeroporto de Lisboa, 1700-008 Lisboa, Portugal")} className={chip(destino.includes("Aeroporto"))}>Aeroporto</button>
             </div>
-            <input type="text" value={destino} onChange={(e) => setDestino(e.target.value)} className={inp} placeholder="Outro local..." required />
+            <input ref={destinoInputRef} type="text" value={destino} onChange={(e) => setDestino(e.target.value)} className={inp} placeholder="Pesquisar endereço..." required />
           </div>
         </div>
 

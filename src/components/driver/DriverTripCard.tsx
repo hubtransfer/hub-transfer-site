@@ -416,44 +416,10 @@ export default function DriverTripCard({
                   </div>
                 )}
 
-                {/* Time rows (departure + arrival) */}
-                {viagem.statusVoo && isFlightTracked(viagem.statusVoo) && (
-                  <div className="space-y-1.5 mb-3">
-                    {viagem.depTimeProg && (
-                      <div className="flex items-center gap-2 font-mono text-xs">
-                        <span className="text-[#999] w-[72px]">Descolagem</span>
-                        {delayMin > 0 ? (
-                          <>
-                            <span className="line-through opacity-40 text-[#999]">{viagem.depTimeProg}</span>
-                            <span className="text-[#666]">→</span>
-                            <span style={{ color: dColor }}>{getDelayedTime(viagem.depTimeProg, delayMin)}</span>
-                            <span className="text-[10px]" style={{ color: dColor }}>(+{delayMin}min)</span>
-                          </>
-                        ) : (
-                          <span className="text-[#D0D0D0]">{viagem.depTimeProg}</span>
-                        )}
-                      </div>
-                    )}
-                    <div className="flex items-center gap-2 font-mono text-xs">
-                      <span className="text-[#999] w-[72px]">Aterragem</span>
-                      {delayMin > 0 ? (
-                        <>
-                          <span className="line-through opacity-40 text-[#999]">{hora}</span>
-                          <span className="text-[#666]">→</span>
-                          <span className="font-bold" style={{ color: dColor }}>{delayedHora}</span>
-                          <span className="text-[10px]" style={{ color: dColor }}>(+{delayMin}min)</span>
-                        </>
-                      ) : (
-                        <span className="text-[#D0D0D0] font-bold">{viagem.etaChegada || arrTime || hora}</span>
-                      )}
-                    </div>
-                  </div>
-                )}
-
                 {/* Flight bar: ORIGIN → progress → DESTINATION */}
                 <div className="flex items-center gap-2.5">
                   {/* LEFT: Origin flag + IATA + depTime */}
-                  <div className="flex-shrink-0 text-center min-w-[44px]">
+                  <div className="flex-shrink-0 text-center min-w-[48px]">
                     <p className="text-lg leading-none mb-0.5">{originFlag || "🌍"}</p>
                     <p className="font-mono text-[10px] font-bold" style={{ color: c.hex }}>{depIata || "???"}</p>
                     {viagem.depTime && <p className="font-mono text-[10px] text-[#999] mt-0.5">{viagem.depTime}</p>}
@@ -479,9 +445,22 @@ export default function DriverTripCard({
                   <div className="text-center flex-shrink-0 min-w-[48px]">
                     <p className="text-lg mb-0.5">🇵🇹</p>
                     <p className="font-mono font-bold text-sm" style={{ color: c.hex }}>LIS</p>
-                    <p className="font-mono text-[10px] text-[#D0D0D0] mt-0.5">{viagem.arrTime || hora}</p>
+                    {delayMin > 0 ? (
+                      <div className="mt-0.5">
+                        <span className="font-mono text-[10px] line-through opacity-40 text-[#999]">{hora}</span>
+                        <span className="font-mono text-[10px] font-bold ml-0.5" style={{ color: dColor }}>{delayedHora}</span>
+                      </div>
+                    ) : (
+                      <p className="font-mono text-[10px] text-[#D0D0D0] mt-0.5">{viagem.arrTime || hora}</p>
+                    )}
                   </div>
                 </div>
+                {/* Delay badge */}
+                {delayMin > 0 && (
+                  <div className="mt-1.5 text-center">
+                    <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded" style={{ backgroundColor: `${dColor}20`, color: dColor }}>+{delayMin} min atraso</span>
+                  </div>
+                )}
                 {(viagem.depTerminal || viagem.arrTerminal) && (
                   <div className="flex justify-between font-mono text-[10px] text-[#999] mt-1">
                     {viagem.depTerminal && <span>T{viagem.depTerminal}</span>}
