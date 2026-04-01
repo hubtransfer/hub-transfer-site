@@ -39,6 +39,7 @@ export interface HubViagem {
   id: string;
   rowIndex?: string;
   type?: string;
+  date?: string;          // DD/MM/YYYY — trip date
   client: string;
   phone: string;
   origin: string;

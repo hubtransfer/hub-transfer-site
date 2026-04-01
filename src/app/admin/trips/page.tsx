@@ -492,43 +492,92 @@ export default function TripsPage() {
 
         {/* ── PAST TAB — completed hubViagens ── */}
         {store.currentTab === "past" && (
-          <div className="px-4 sm:px-6 space-y-2 pb-4">
-            {store.diaDoneList.length === 0 ? (
-              <div className="text-center py-16">
-                <div className="text-4xl mb-3 opacity-30">🏁</div>
-                <p className="text-zinc-500 text-sm">Nenhuma viagem concluída</p>
-              </div>
-            ) : (
-              store.diaDoneList.map((viagem) => {
-                const vId = viagem.id || (viagem.client || "x").replace(/\W/g, "");
-                const tipo = detectTipo(viagem.origin || "", viagem.flight || "", viagem.type);
-                const hora = cleanHora(viagem.pickupTime || "");
-                const typeColor = tipo === "CHEGADA" ? "#D4A847" : tipo === "RECOLHA" ? "#8B9DAF" : "#C17E4A";
-                return (
-                  <div
-                    key={vId}
-                    className="bg-hub-black-card border border-hub-gold/5 rounded-lg px-4 py-3 flex items-center gap-3 opacity-60"
-                    style={{ borderLeftWidth: "3px", borderLeftColor: typeColor }}
-                  >
-                    <span className="font-mono text-sm font-bold text-zinc-500">{hora}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-zinc-300 truncate">{viagem.client}</p>
-                      {viagem.driver && (
-                        <p className="text-[10px] text-zinc-500 truncate">{viagem.driver}</p>
-                      )}
+          <div className="px-4 sm:px-6 space-y-3 pb-4">
+            {/* Date picker for past viagens */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs text-zinc-400 font-mono">Consultar data:</span>
+              <input
+                type="date"
+                value={store.pastDate ? dateToISO(store.pastDate) : ""}
+                onChange={(e) => {
+                  if (!e.target.value) return;
+                  const [y, m, d] = e.target.value.split("-");
+                  store.loadPastDate(`${d}/${m}/${y}`);
+                }}
+                className="bg-zinc-900 border border-zinc-700 rounded px-2 py-1.5 text-xs text-white focus:border-hub-gold focus:outline-none"
+              />
+              {store.pastLoading && <span className="text-xs text-hub-gold animate-pulse font-mono">A carregar...</span>}
+              {store.pastDate && !store.pastLoading && (
+                <span className="text-xs text-zinc-500 font-mono">
+                  {store.pastViagens.length} viagens em {store.pastDate}
+                </span>
+              )}
+            </div>
+
+            {/* Today's completed viagens */}
+            {store.diaDoneList.length > 0 && !store.pastDate && (
+              <>
+                <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-mono">Concluídas hoje</p>
+                {store.diaDoneList.map((viagem) => {
+                  const vId = viagem.id || (viagem.client || "x").replace(/\W/g, "");
+                  const tipo = detectTipo(viagem.origin || "", viagem.flight || "", viagem.type);
+                  const hora = cleanHora(viagem.pickupTime || "");
+                  const typeColor = tipo === "CHEGADA" ? "#D4A847" : tipo === "RECOLHA" ? "#8B9DAF" : "#C17E4A";
+                  return (
+                    <div key={vId}
+                      className="bg-hub-black-card border border-hub-gold/5 rounded-lg px-4 py-3 flex items-center gap-3 opacity-60"
+                      style={{ borderLeftWidth: "3px", borderLeftColor: typeColor }}>
+                      <span className="font-mono text-sm font-bold text-zinc-500">{hora}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-zinc-300 truncate">{viagem.client}</p>
+                        {viagem.driver && <p className="text-[10px] text-zinc-500 truncate">{viagem.driver}</p>}
+                      </div>
+                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded" style={{ backgroundColor: `${typeColor}15`, color: typeColor }}>{tipo}</span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#22C55E]/10 text-[#22C55E]">CONCLUÍDA</span>
                     </div>
-                    <span
-                      className="text-[10px] font-bold uppercase px-2 py-0.5 rounded"
-                      style={{ backgroundColor: `${typeColor}15`, color: typeColor }}
-                    >
-                      {tipo}
-                    </span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#22C55E]/10 text-[#22C55E]">
-                      CONCLUÍDA
-                    </span>
+                  );
+                })}
+              </>
+            )}
+
+            {/* Fetched past viagens for selected date */}
+            {store.pastDate && !store.pastLoading && (
+              <>
+                {store.pastViagens.length === 0 ? (
+                  <div className="text-center py-10">
+                    <p className="text-zinc-500 text-sm">Nenhuma viagem para {store.pastDate}</p>
                   </div>
-                );
-              })
+                ) : (
+                  store.pastViagens.map((viagem) => {
+                    const vId = viagem.id || (viagem.client || "x").replace(/\W/g, "");
+                    const tipo = detectTipo(viagem.origin || "", viagem.flight || "", viagem.type);
+                    const hora = cleanHora(viagem.pickupTime || "");
+                    const typeColor = tipo === "CHEGADA" ? "#D4A847" : tipo === "RECOLHA" ? "#8B9DAF" : "#C17E4A";
+                    const isDone = viagem.concluida || viagem.status === "CONCLUIDA" || viagem.status === "FINALIZOU";
+                    return (
+                      <div key={vId}
+                        className={`bg-hub-black-card border border-hub-gold/5 rounded-lg px-4 py-3 flex items-center gap-3 ${isDone ? "opacity-60" : ""}`}
+                        style={{ borderLeftWidth: "3px", borderLeftColor: typeColor }}>
+                        <span className="font-mono text-sm font-bold text-zinc-500">{hora}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-zinc-300 truncate">{viagem.client}</p>
+                          {viagem.driver && <p className="text-[10px] text-zinc-500 truncate">{viagem.driver}</p>}
+                        </div>
+                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded" style={{ backgroundColor: `${typeColor}15`, color: typeColor }}>{tipo}</span>
+                        {isDone && <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#22C55E]/10 text-[#22C55E]">CONCLUÍDA</span>}
+                      </div>
+                    );
+                  })
+                )}
+              </>
+            )}
+
+            {/* Empty state when no date selected and no done today */}
+            {!store.pastDate && store.diaDoneList.length === 0 && (
+              <div className="text-center py-10">
+                <div className="text-4xl mb-3 opacity-30">🏁</div>
+                <p className="text-zinc-500 text-sm">Seleccione uma data para consultar viagens passadas</p>
+              </div>
             )}
           </div>
         )}

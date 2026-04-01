@@ -14,6 +14,7 @@ import {
   TAB_INFO,
   detectTipo,
   calcDriverPrice,
+  todayStr,
 } from "@/lib/trips";
 
 // ─── LocalStorage Keys ───
@@ -125,6 +126,12 @@ interface TripsStore {
   darBaixa: (id: string, rowIndex: string, cardId: string) => Promise<void>;
   markNoShow: (cardId: string) => void;
 
+  // Past View
+  pastViagens: HubViagem[];
+  pastDate: string;
+  pastLoading: boolean;
+  loadPastDate: (dateStr: string) => void;
+
   // Nameplate
   showNameplate: (name: string, destination?: string) => void;
   closeNameplate: () => void;
@@ -175,6 +182,11 @@ export function useTripsStore(): TripsStore {
   // ─── Config ───
   const [hubViagensUrl, setHubViagensUrl] = useState("");
   const [showViagensCfg, setShowViagensCfg] = useState(false);
+
+  // ─── Past viagens (separate fetch for any date) ───
+  const [pastViagens, setPastViagens] = useState<HubViagem[]>([]);
+  const [pastDate, setPastDate] = useState("");
+  const [pastLoading, setPastLoading] = useState(false);
 
   // ─── Dia driver map (local overrides) ───
   const [diaDriverMap, setDiaDriverMap] = useState<Record<string, string>>({});
@@ -254,6 +266,23 @@ export function useTripsStore(): TripsStore {
   const diaList = useMemo<HubViagem[]>(() => {
     let list = [...hubViagens];
 
+    // Filter by date — only show trips matching selected date (or today)
+    const targetDate = selectedDate || todayStr();
+    list = list.filter((v) => {
+      const tripDate = (v.date || v.flightDate || "").trim();
+      // If trip has no date, include it (backend already filtered)
+      if (!tripDate) return true;
+      // Exact match DD/MM/YYYY
+      if (tripDate === targetDate) return true;
+      // Handle ISO format YYYY-MM-DD from some backends
+      if (tripDate.includes("-") && targetDate.includes("/")) {
+        const [td, tm, ty] = targetDate.split("/");
+        const iso = `${ty}-${tm}-${td}`;
+        if (tripDate === iso) return true;
+      }
+      return false;
+    });
+
     // Apply local driver overrides
     list = list.map((v) => {
       const cid = v.id || (v.client || "x").replace(/\W/g, "");
@@ -280,7 +309,7 @@ export function useTripsStore(): TripsStore {
     });
 
     return list;
-  }, [hubViagens, selectedDriver, diaDriverMap]);
+  }, [hubViagens, selectedDate, selectedDriver, diaDriverMap]);
 
   // ──────────────────────────────────────────────
   // Computed: Dia Active + Done split
@@ -583,6 +612,31 @@ export function useTripsStore(): TripsStore {
   }, []);
 
   // ──────────────────────────────────────────────
+  // Past: fetch viagens for any date
+  // ──────────────────────────────────────────────
+  const loadPastDate = useCallback(
+    async (dateStr: string) => {
+      setPastDate(dateStr);
+      if (!hubViagensUrl || !dateStr) return;
+      setPastLoading(true);
+      try {
+        const fetchUrl = `${hubViagensUrl}?action=viagens&t=${ts()}&data=${encodeURIComponent(dateStr)}`;
+        const res = await fetch(fetchUrl);
+        const data = await res.json();
+        let viagens: HubViagem[] = [];
+        if (Array.isArray(data)) viagens = data;
+        else if (data?.viagens && Array.isArray(data.viagens)) viagens = data.viagens;
+        setPastViagens(viagens);
+      } catch {
+        setPastViagens([]);
+      } finally {
+        setPastLoading(false);
+      }
+    },
+    [hubViagensUrl]
+  );
+
+  // ──────────────────────────────────────────────
   // Nameplate
   // ──────────────────────────────────────────────
   const showNameplate = useCallback((name: string, destination?: string) => {
@@ -781,6 +835,12 @@ export function useTripsStore(): TripsStore {
     diaSetDriver,
     darBaixa,
     markNoShow,
+
+    // Past View
+    pastViagens,
+    pastDate,
+    pastLoading,
+    loadPastDate,
 
     // Nameplate
     showNameplate,
