@@ -22,7 +22,7 @@ interface TransferFormProps {
 
 // Hotel name → full address mapping
 const HOTEL_ADDRESSES: Record<string, string> = {
-  "empire lisbon hotel": "Empire Lisbon Hotel, Rua Áurea 44, 1100-063 Lisboa, Portugal",
+  "empire lisbon hotel": "Empire Lisbon Hotel, Av. Almirante Reis 117, 1150-014 Lisboa, Portugal",
   "empire marques hotel": "Empire Marques Hotel, Rua Marquês da Fronteira 8, 1070-296 Lisboa, Portugal",
   "gota d'água": "Gota d'Água Guest House, Rua do Salitre 55, 1250-198 Lisboa, Portugal",
   "gota dagua": "Gota d'Água Guest House, Rua do Salitre 55, 1250-198 Lisboa, Portugal",
