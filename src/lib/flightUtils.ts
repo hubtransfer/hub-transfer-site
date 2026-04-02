@@ -1,79 +1,161 @@
 /**
- * Flight utilities — delay calculation and status helpers.
- * Status values from backend: AGENDADO, EM VOO, APROXIMACAO, ATERRISADO, CANCELADO
+ * Flight utilities — real-time progress, delay, status helpers.
+ * All data from backend only — NEVER call flight API from frontend.
  */
+
+/** Parse HH:MM to minutes since midnight */
+function toMin(t: string): number | null {
+  if (!t) return null;
+  const [h, m] = t.split(':').map(Number);
+  if (isNaN(h) || isNaN(m)) return null;
+  return h * 60 + m;
+}
+
+/** Minutes since midnight for Lisbon NOW */
+function nowMin(): number {
+  const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Lisbon' }));
+  return now.getHours() * 60 + now.getMinutes();
+}
+
+/** Format minutes to HH:MM */
+function minToStr(min: number): string {
+  const h = Math.floor(min / 60) % 24;
+  const m = min % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
 
 /** Add delay minutes to a HH:MM time string */
 export function getDelayedTime(pickupTime: string, delayMin: number): string {
   if (!pickupTime || !delayMin || delayMin <= 0) return '';
-  const parts = pickupTime.split(':').map(Number);
-  if (parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) return '';
-  const totalMin = parts[0] * 60 + parts[1] + delayMin;
-  const h = Math.floor(totalMin / 60) % 24;
-  const m = totalMin % 60;
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  const m = toMin(pickupTime);
+  if (m === null) return '';
+  return minToStr(m + delayMin);
 }
 
 /** Delay severity color */
 export function delayColor(delayMin: number): string {
   if (delayMin >= 30) return '#EF5350';
   if (delayMin >= 15) return '#FFA726';
-  return '#F0D030';
+  return '#F5C518';
 }
 
-/** Normalize statusVoo to uppercase key */
-function norm(statusVoo: string): string {
-  return (statusVoo || '').toUpperCase().replace(/[_\s]+/g, ' ').trim();
+// ─── Operational flight state ───
+
+export interface FlightState {
+  progress: number;    // 0-100
+  color: string;       // bar + plane color
+  pulse: boolean;      // animate pulse
+  cancelled: boolean;
+  noData: boolean;     // no dep/arr times at all
+  statusText: string;  // operational message for driver
 }
 
-/** Status dot color */
+const CLR_GREY    = '#6B7280';
+const CLR_BLUE    = '#3B82F6';
+const CLR_GOLD    = '#F5C518';
+const CLR_ORANGE  = '#F97316';
+const CLR_GREEN   = '#22C55E';
+const CLR_RED     = '#EF4444';
+
+/** Normalize status string */
+function norm(s: string): string {
+  return (s || '').toUpperCase().replace(/[_\s]+/g, ' ').trim();
+}
+
+/** Compute real-time flight state from backend data */
+export function computeFlightState(
+  depTime: string,
+  arrTime: string,
+  pickupTime: string,
+  statusVoo: string,
+  atrasoMin: number,
+): FlightState {
+  const st = norm(statusVoo);
+
+  // Cancelled
+  if (st === 'CANCELADO' || st === 'CANCELLED' || st === 'CANCELED') {
+    return { progress: 0, color: CLR_RED, pulse: false, cancelled: true, noData: false, statusText: '❌ Voo cancelado' };
+  }
+
+  // Landed
+  if (st === 'ATERRISADO' || st === 'LANDED') {
+    const arr = arrTime || pickupTime;
+    return { progress: 100, color: CLR_GREEN, pulse: false, cancelled: false, noData: false, statusText: `✅ Aterrisou às ${arr}` };
+  }
+
+  // Resolve dep/arr times with fallbacks
+  const arrM = toMin(arrTime) ?? toMin(pickupTime);
+  let depM = toMin(depTime);
+  if (depM === null && arrM !== null) depM = arrM - 120; // fallback: 2h flight
+  if (depM === null || arrM === null) {
+    return { progress: 50, color: CLR_GREY, pulse: false, cancelled: false, noData: true, statusText: 'Sem dados de voo' };
+  }
+
+  const now = nowMin();
+  const duration = Math.max(arrM - depM, 1);
+  const elapsed = now - depM;
+  const remaining = arrM - now;
+  const pct = Math.max(0, Math.min(100, (elapsed / duration) * 100));
+
+  // Scheduled — not departed yet
+  if (st === 'AGENDADO' || st === 'SCHEDULED' || now < depM) {
+    const untilDep = depM - now;
+    const hh = Math.floor(untilDep / 60);
+    const mm = untilDep % 60;
+    const txt = hh > 0 ? `Descola em ${hh}h ${mm}min` : `Descola em ${mm}min`;
+    return { progress: Math.min(pct, 3), color: CLR_GREY, pulse: false, cancelled: false, noData: false, statusText: txt };
+  }
+
+  // In flight
+  if (remaining <= 0) {
+    // Should have landed but no ATERRISADO status — assume landing
+    return { progress: 98, color: CLR_ORANGE, pulse: true, cancelled: false, noData: false, statusText: 'A aterrar agora!' };
+  }
+
+  if (remaining <= 15) {
+    return { progress: pct, color: CLR_ORANGE, pulse: true, cancelled: false, noData: false, statusText: `A aterrar em ${remaining}min!` };
+  }
+
+  if (remaining <= 45) {
+    return { progress: pct, color: CLR_GOLD, pulse: false, cancelled: false, noData: false, statusText: `A caminho · Chega em ${remaining}min` };
+  }
+
+  const hh = Math.floor(remaining / 60);
+  const mm = remaining % 60;
+  const txt = hh > 0 ? `Em voo · Chega em ${hh}h ${String(mm).padStart(2, '0')}min` : `Em voo · Chega em ${mm}min`;
+  return { progress: pct, color: CLR_BLUE, pulse: false, cancelled: false, noData: false, statusText: txt };
+}
+
+// ─── Legacy exports (used elsewhere) ───
+
 export function statusDotColor(statusVoo: string): string {
   const s = norm(statusVoo);
-  if (s === 'ATERRISADO' || s === 'LANDED') return '#7EAA6E';
-  if (s === 'EM VOO' || s === 'EN VOO' || s === 'IN FLIGHT' || s === 'AIRBORNE') return '#F0D030';
-  if (s === 'APROXIMACAO' || s === 'APPROACH') return '#60A5FA';
-  if (s === 'CANCELADO' || s === 'CANCELLED' || s === 'CANCELED') return '#EF5350';
-  if (s === 'ATRASADO' || s === 'DELAYED') return '#FFA726';
-  if (s === 'AGENDADO' || s === 'SCHEDULED' || s === 'MONITORANDO' || s === 'MONITORING') return '#666666';
-  return '#666666';
+  if (s === 'ATERRISADO' || s === 'LANDED') return CLR_GREEN;
+  if (s.includes('VOO') || s.includes('FLIGHT') || s === 'AIRBORNE') return CLR_BLUE;
+  if (s === 'APROXIMACAO' || s === 'APPROACH') return CLR_GOLD;
+  if (s === 'CANCELADO' || s.includes('CANCEL')) return CLR_RED;
+  return CLR_GREY;
 }
 
-/** Human-readable status label */
 export function statusLabel(statusVoo: string): string {
   const s = norm(statusVoo);
   if (s === 'ATERRISADO' || s === 'LANDED') return 'Aterrou';
-  if (s === 'EM VOO' || s === 'EN VOO' || s === 'IN FLIGHT' || s === 'AIRBORNE') return 'Em voo';
+  if (s.includes('VOO') || s.includes('FLIGHT')) return 'Em voo';
   if (s === 'APROXIMACAO' || s === 'APPROACH') return 'Aproximação';
-  if (s === 'CANCELADO' || s === 'CANCELLED' || s === 'CANCELED') return 'Cancelado';
-  if (s === 'ATRASADO' || s === 'DELAYED') return 'Atrasado';
+  if (s === 'CANCELADO' || s.includes('CANCEL')) return 'Cancelado';
   if (s === 'AGENDADO' || s === 'SCHEDULED') return 'Agendado';
-  if (s === 'MONITORANDO' || s === 'MONITORING') return 'Monitorando';
   return 'Aguardando';
 }
 
-/** Is flight actively tracked (has meaningful status beyond waiting) */
 export function isFlightTracked(statusVoo: string): boolean {
   const s = norm(statusVoo);
   return s !== '' && s !== 'AGUARDANDO';
 }
 
-/** Get progress percentage from statusVoo (0-100) */
 export function statusToProgress(statusVoo: string): number | null {
-  const s = norm(statusVoo);
-  if (s === 'AGENDADO' || s === 'SCHEDULED') return 0;
-  if (s === 'EM VOO' || s === 'EN VOO' || s === 'IN FLIGHT' || s === 'AIRBORNE') return 50;
-  if (s === 'APROXIMACAO' || s === 'APPROACH') return 80;
-  if (s === 'ATERRISADO' || s === 'LANDED') return 100;
-  if (s === 'CANCELADO' || s === 'CANCELLED' || s === 'CANCELED') return -1; // special: cancelled
-  return null; // unknown — use time-based calc
+  return null; // deprecated — use computeFlightState instead
 }
 
-/** Get bar color from statusVoo */
 export function statusBarColor(statusVoo: string): string {
-  const s = norm(statusVoo);
-  if (s === 'ATERRISADO' || s === 'LANDED') return '#7EAA6E';
-  if (s === 'CANCELADO' || s === 'CANCELLED' || s === 'CANCELED') return '#EF5350';
-  if (s === 'APROXIMACAO' || s === 'APPROACH') return '#60A5FA';
-  if (s === 'EM VOO' || s === 'EN VOO' || s === 'IN FLIGHT') return '#D4A847';
-  return '#374151';
+  return statusDotColor(statusVoo);
 }

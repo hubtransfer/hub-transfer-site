@@ -8,7 +8,6 @@ import {
   detectTipo,
   splitLocation,
   cleanHora,
-  calcFlightProgress,
   calcDriverPrice,
   resolveLanguage,
   getSourceLabel,
@@ -17,35 +16,12 @@ import {
 } from "@/lib/trips";
 import { generateDriverWhatsAppURL, generateDriverSmsURL } from "@/lib/driver-templates";
 import { getOriginFlag } from "@/lib/countryFlags";
-import { getDelayedTime, delayColor, statusDotColor, statusLabel, isFlightTracked, statusToProgress, statusBarColor } from "@/lib/flightUtils";
+import { getDelayedTime, delayColor, computeFlightState } from "@/lib/flightUtils";
 import NoShowModal from "@/components/driver/NoShowModal";
 
 
 
 /* ─── Helpers ─── */
-
-function flightBarStyle(progress: number, status?: string): { color: string; pulse: boolean } {
-  const st = (status || "").toLowerCase();
-  if (st === "landed" || st === "aterrou" || progress >= 95) return { color: "#7EAA6E", pulse: false };
-  if (progress <= 5 && st !== "boarding") return { color: "#374151", pulse: false };
-  return { color: "#D4A847", pulse: true };
-}
-
-function formatCountdown(arrTime: string): string | null {
-  if (!arrTime || arrTime === "—:—") return null;
-  const [h, m] = arrTime.split(":").map(Number);
-  if (isNaN(h) || isNaN(m)) return null;
-  const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Lisbon" }));
-  const target = new Date(now);
-  target.setHours(h, m, 0, 0);
-  if (target.getTime() < now.getTime() - 60000) return null;
-  const mins = Math.round((target.getTime() - now.getTime()) / 60000);
-  if (mins < 1) return null;
-  if (mins < 60) return `em ${mins}min`;
-  const hrs = Math.floor(mins / 60);
-  const rm = mins % 60;
-  return rm > 0 ? `em ${hrs}h${String(rm).padStart(2, "0")}` : `em ${hrs}h`;
-}
 
 /* ─── SVG Brand Icons ─── */
 const WhatsAppIcon = () => (
@@ -129,20 +105,23 @@ export default function DriverTripCard({
   const c = ts(tipo);
 
   const hasFlightNumber = !!(viagem.flight && viagem.flight.trim());
+  const hasFlight = hasFlightNumber && (tipo === "CHEGADA" || !!(viagem.depAirport || viagem.depIata || viagem.arrTime));
 
-  // Status-based progress (priority) or time-based fallback
-  const statusProg = useMemo(() => hasFlightNumber ? statusToProgress(viagem.statusVoo || "") : null, [hasFlightNumber, viagem.statusVoo]);
-  const timeProg = useMemo(() => hasFlightNumber ? calcFlightProgress(viagem.depTime || "", viagem.arrTime || "") : 0, [hasFlightNumber, viagem.depTime, viagem.arrTime]);
-  const flightProg = statusProg !== null && statusProg >= 0 ? statusProg : timeProg;
-  const isCancelled = statusProg === -1;
+  // Real-time flight state — recalculates every 30s
+  const [flightTick, setFlightTick] = useState(0);
+  useEffect(() => {
+    if (!hasFlight) return;
+    const id = setInterval(() => setFlightTick((t) => t + 1), 30000);
+    return () => clearInterval(id);
+  }, [hasFlight]);
+
+  const flight = useMemo(() => {
+    if (!hasFlight) return null;
+    void flightTick; // dependency to force recalc
+    return computeFlightState(viagem.depTime || "", viagem.arrTime || "", hora, viagem.statusVoo || "", parseInt(viagem.atrasoMin || "0", 10) || 0);
+  }, [hasFlight, viagem.depTime, viagem.arrTime, hora, viagem.statusVoo, viagem.atrasoMin, flightTick]);
 
   const arrTime = cleanHora(viagem.arrTime || "");
-  const barColor = viagem.statusVoo ? statusBarColor(viagem.statusVoo) : flightBarStyle(timeProg, viagem.status).color;
-  const barPulse = !isCancelled && flightProg > 0 && flightProg < 100;
-  const hasFlight = hasFlightNumber && (tipo === "CHEGADA" || !!(viagem.depAirport || viagem.depIata || viagem.arrTime));
-  const countdown = arrTime !== "—:—" ? formatCountdown(arrTime) : null;
-
-  // Delay info
   const delayMin = parseInt(viagem.atrasoMin || "0", 10) || 0;
   const delayedHora = delayMin > 0 ? getDelayedTime(hora, delayMin) : "";
   const dColor = delayMin > 0 ? delayColor(delayMin) : "";
@@ -329,50 +308,48 @@ export default function DriverTripCard({
           </div>
         </div>
 
-        {/* Flight progress bar (collapsed, CHEGADA only) — clickable */}
-        {!expanded && hasFlight && (
+        {/* Flight progress bar (collapsed) — clickable */}
+        {!expanded && hasFlight && flight && (
           <a
             href={viagem.flight ? `https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}` : "#"}
-            target="_blank"
-            rel="noopener noreferrer"
+            target="_blank" rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center gap-2 px-4 pb-2.5 pt-0 cursor-pointer hover:bg-[#151515] transition-colors rounded-b-2xl"
+            className="block px-4 pb-2.5 pt-0 cursor-pointer hover:bg-[#151515] transition-colors rounded-b-2xl"
           >
-            {/* LEFT: Origin flag + IATA + depTime */}
-            <div className="flex items-center gap-1 flex-shrink-0">
-              <span className="text-sm leading-none">{originFlag || (depIata ? "🌍" : "")}</span>
-              <span className="font-mono text-[10px] font-bold text-[#888]">{depIata || ""}</span>
-              {viagem.depTime && <span className="font-mono text-[10px] text-[#666]">{viagem.depTime}</span>}
-            </div>
-            {/* CENTER: Progress bar + flight number */}
-            <div className="flex-1 relative">
-              {isCancelled ? (
-                <div className="h-2 rounded-full bg-[#EF5350]/15" />
+            {/* Bar with plane */}
+            <div className="relative h-[3px] rounded-full bg-[#1A1A1A] overflow-visible">
+              {flight.cancelled ? (
+                <div className="absolute inset-0 rounded-full bg-[#EF4444]/20" />
               ) : (
-                <div className="h-2 rounded-full bg-[#1A1A1A] overflow-hidden">
-                  <div className={`h-full rounded-full transition-all duration-1000 ${barPulse ? "animate-flight-pulse" : ""}`}
-                    style={{ width: `${Math.max(flightProg, 4)}%`, backgroundColor: barColor, opacity: 0.7 }} />
-                </div>
+                <div className="h-full rounded-full transition-all duration-[2s] ease-in-out"
+                  style={{ width: `${Math.max(flight.progress, 2)}%`, backgroundColor: flight.color, opacity: 0.8 }} />
               )}
-              {viagem.flight && (
-                <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 font-mono text-sm font-bold text-[#D0D0D0] hover:text-[#F0D030] transition-colors">
-                  {viagem.flight}
-                </span>
+              {!flight.cancelled && !flight.noData && (
+                <svg width="10" height="10" viewBox="0 0 24 24" fill={flight.color}
+                  className="absolute top-1/2 -translate-y-1/2 transition-all duration-[2s] ease-in-out"
+                  style={{ left: `calc(${Math.max(flight.progress, 2)}% - 5px)`, filter: "drop-shadow(0 0 2px rgba(0,0,0,.6))" }}>
+                  <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+                </svg>
               )}
             </div>
-            {/* RIGHT: LIS 🇵🇹 + arrTime (with delay) */}
-            <div className="flex items-center gap-1 flex-shrink-0">
-              {delayMin > 0 ? (
-                <>
-                  <span className="font-mono text-[10px] line-through text-[#666]">{hora}</span>
-                  <span className="font-mono text-sm font-bold text-[#F0D030]">{delayedHora}</span>
-                </>
-              ) : (
-                <span className="font-mono text-sm font-bold" style={{ color: barColor }}>{viagem.arrTime || hora}</span>
-              )}
-              <span className="font-mono text-[10px] font-bold" style={{ color: barColor }}>LIS</span>
-              <span className="text-sm leading-none">🇵🇹</span>
+            {/* Info row */}
+            <div className="flex items-center justify-between mt-1">
+              <div className="flex items-center gap-1">
+                <span className="text-[10px] leading-none">{originFlag || (depIata ? "🌍" : "")}</span>
+                <span className="font-mono text-[9px] text-[#888]">{viagem.flight}</span>
+              </div>
+              <span className="font-mono text-[9px]" style={{ color: flight.color }}>{flight.statusText}</span>
+              <div className="flex items-center gap-0.5">
+                {delayMin > 0 ? (
+                  <span className="font-mono text-[10px] font-bold text-[#F5C518]">{delayedHora}</span>
+                ) : arrTime !== "—:—" ? (
+                  <span className="font-mono text-[10px]" style={{ color: flight.color }}>{arrTime}</span>
+                ) : null}
+                <span className="text-[10px] leading-none">🇵🇹</span>
+              </div>
             </div>
+            {flight.pulse && <style dangerouslySetInnerHTML={{ __html: `@keyframes fp{0%,100%{opacity:.8}50%{opacity:.4}}` }} />}
+            {flight.pulse && <div className="h-[3px] rounded-full mt-0.5" style={{ backgroundColor: flight.color, opacity: 0.3, animation: "fp 2s ease-in-out infinite" }} />}
           </a>
         )}
       </div>
@@ -397,9 +374,10 @@ export default function DriverTripCard({
               {viagem.notes && <span className="text-[10px] text-[#888] truncate max-w-[200px]">{viagem.notes}</span>}
             </div>
 
-            {/* ── Flight block — visual only, no text labels ── */}
-            {hasFlight && (
+            {/* ── Flight block — operational instrument ── */}
+            {hasFlight && flight && (
               <div className="px-4 py-3 border-t border-[#2A2A2A]" style={{ backgroundColor: `${c.hex}06` }}>
+                {/* Origin → Bar → Destination */}
                 <div className="flex items-start gap-3">
                   {/* LEFT: Origin */}
                   <div className="flex-shrink-0 text-center min-w-[52px]">
@@ -409,7 +387,7 @@ export default function DriverTripCard({
                       delayMin > 0 && viagem.depTimeProg ? (
                         <div className="mt-1">
                           <p className="font-mono text-[10px] line-through text-[#666]">{viagem.depTimeProg}</p>
-                          <p className="font-mono text-xs font-bold text-[#F0D030]">{getDelayedTime(viagem.depTimeProg, delayMin)}</p>
+                          <p className="font-mono text-xs font-bold text-[#F5C518]">{getDelayedTime(viagem.depTimeProg, delayMin)}</p>
                         </div>
                       ) : (
                         <p className="font-mono text-xs text-[#A0A0A0] mt-1">{viagem.depTime}</p>
@@ -418,32 +396,46 @@ export default function DriverTripCard({
                     <p className="font-mono text-[8px] text-[#555] mt-0.5 uppercase">Descolagem</p>
                   </div>
 
-                  {/* CENTER: Progress bar + flight number */}
-                  <div className="flex-1 pt-2.5">
+                  {/* CENTER: Progress bar + plane SVG + flight number */}
+                  <div className="flex-1 pt-3">
                     <div
                       className="cursor-pointer"
                       onClick={() => viagem.flight && window.open(`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`, "_blank")}
                     >
-                      {isCancelled ? (
-                        <div className="h-3 rounded-full bg-[#EF5350]/20 flex items-center justify-center">
-                          <span className="text-[8px] font-mono font-bold text-[#EF5350] uppercase">Cancelado</span>
+                      {flight.cancelled ? (
+                        <div className="h-4 rounded-full bg-[#EF4444]/15 flex items-center justify-center">
+                          <span className="text-[9px] font-mono font-bold text-[#EF4444]">CANCELADO</span>
                         </div>
                       ) : (
-                        <div className="relative w-full h-3 rounded-full bg-[#222222] overflow-hidden">
-                          <div className={`h-full rounded-full transition-all duration-1000 ${barPulse ? "animate-flight-pulse" : ""}`}
-                            style={{ width: `${Math.max(flightProg, 4)}%`, backgroundColor: barColor }} />
-                          {flightProg > 5 && flightProg < 95 && (
-                            <span className="absolute top-1/2 -translate-y-1/2 text-[9px]" style={{ left: `calc(${flightProg}% - 5px)`, filter: "drop-shadow(0 0 2px rgba(0,0,0,.8))" }}>✈</span>
+                        <div className="relative w-full h-4 rounded-full bg-[#222222] overflow-visible">
+                          <div className="h-full rounded-full transition-all duration-[2s] ease-in-out"
+                            style={{ width: `${Math.max(flight.progress, 2)}%`, backgroundColor: flight.color }} />
+                          {!flight.noData && (
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill={flight.color}
+                              className="absolute top-1/2 -translate-y-1/2 transition-all duration-[2s] ease-in-out"
+                              style={{ left: `calc(${Math.max(flight.progress, 2)}% - 8px)`, filter: "drop-shadow(0 1px 3px rgba(0,0,0,.5))" }}>
+                              <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+                            </svg>
                           )}
                         </div>
                       )}
-                      {viagem.flight && (
-                        <p className="text-center font-mono text-sm font-bold mt-1.5 hover:text-[#F0D030] transition-colors" style={{ color: c.hex }}>{viagem.flight}</p>
-                      )}
                     </div>
+                    {/* Flight number */}
+                    {viagem.flight && (
+                      <p className="text-center font-mono text-sm font-bold mt-1.5 cursor-pointer hover:text-[#F0D030] transition-colors"
+                        style={{ color: c.hex }}
+                        onClick={() => window.open(`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`, "_blank")}>
+                        {viagem.flight}
+                      </p>
+                    )}
+                    {/* Status text — operational message */}
+                    <p className="text-center font-mono text-[10px] mt-1" style={{ color: flight.color }}>
+                      {flight.statusText}
+                    </p>
+                    {/* Delay badge */}
                     {delayMin > 0 && (
                       <div className="text-center mt-1">
-                        <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: `${dColor}15`, color: dColor }}>+{delayMin}min</span>
+                        <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: `${dColor}15`, color: dColor }}>⚠️ +{delayMin}min atraso</span>
                       </div>
                     )}
                   </div>
@@ -455,7 +447,7 @@ export default function DriverTripCard({
                     {delayMin > 0 ? (
                       <div className="mt-1">
                         <p className="font-mono text-[10px] line-through text-[#666]">{hora}</p>
-                        <p className="font-mono text-xs font-bold text-[#F0D030]">{delayedHora}</p>
+                        <p className="font-mono text-xs font-bold text-[#F5C518]">{delayedHora}</p>
                       </div>
                     ) : (
                       <p className="font-mono text-xs text-[#A0A0A0] mt-1">{viagem.arrTime || hora}</p>
