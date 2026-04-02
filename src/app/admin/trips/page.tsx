@@ -23,7 +23,6 @@ import {
 
 const TABS: { key: TabType; icon: string; label: string; mobileLabel: string }[] = [
   { key: "dia",       icon: "\u{1F5D3}",  label: "Dia Completo",  mobileLabel: "Hoje" },
-  { key: "current",   icon: "\u26A1",      label: "Actuais",       mobileLabel: "Current" },
   { key: "chegadas",  icon: "\u25BC",      label: "Chegadas",      mobileLabel: "Chegadas" },
   { key: "recolhas",  icon: "\u25B2",      label: "Recolhas",      mobileLabel: "Recolhas" },
   { key: "past",      icon: "\u{1F3C1}",  label: "Passadas",      mobileLabel: "Past" },
@@ -59,26 +58,12 @@ function syncDot(status: string) {
 export default function TripsPage() {
   const store = useTripsStore();
 
-  // Filter sub-tab for "current" view
-  const [currentFilter, setCurrentFilter] = useState<"all" | "chegadas" | "recolhas">("all");
-
   // Local URL input
   const [urlInput, setUrlInput] = useState("");
 
   useEffect(() => {
     setUrlInput(store.hubViagensUrl);
   }, [store.hubViagensUrl]);
-
-  // ── Computed: filtered current list ──
-  const filteredCurrentList = useMemo(() => {
-    if (store.currentTab !== "current" || currentFilter === "all") return store.currentList;
-    return (store.currentList as TripService[]).filter((s) => {
-      const tipo = (s.type || "").toLowerCase();
-      if (currentFilter === "chegadas") return tipo === "chegada";
-      if (currentFilter === "recolhas") return tipo === "recolha";
-      return true;
-    });
-  }, [store.currentList, store.currentTab, currentFilter]);
 
   // ── Dispatch handlers ──
 
@@ -314,24 +299,6 @@ export default function TripsPage() {
           <p className="text-xs text-zinc-500">{info.sub}</p>
         </div>
 
-        {/* Filter chips (current tab only) */}
-        {store.currentTab === "current" && (
-          <div className="px-4 sm:px-6 pb-3 flex gap-2">
-            {(["all", "chegadas", "recolhas"] as const).map((f) => (
-              <button
-                key={f}
-                onClick={() => setCurrentFilter(f)}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                  currentFilter === f
-                    ? "bg-hub-gold/20 text-hub-gold"
-                    : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
-                }`}
-              >
-                {f === "all" ? "Todos" : f === "chegadas" ? "\u25BC Chegadas" : "\u25B2 Recolhas"}
-              </button>
-            ))}
-          </div>
-        )}
 
         {/* ── DIA TAB ── */}
         {store.currentTab === "dia" && (
@@ -603,22 +570,16 @@ export default function TripsPage() {
           </div>
         )}
 
-        {/* ── OTHER TABS (current, chegadas, recolhas) ── */}
+        {/* ── OTHER TABS (chegadas, recolhas) ── */}
         {store.currentTab !== "dia" && store.currentTab !== "past" && store.currentTab !== "cancelled" && (
           <div className="px-4 sm:px-6 space-y-3 pb-4">
-            {(store.currentTab === "current"
-              ? filteredCurrentList
-              : store.currentList
-            ).length === 0 ? (
+            {(store.currentList as TripService[]).length === 0 ? (
               <div className="text-center py-16">
                 <div className="text-4xl mb-3 opacity-30">⚡</div>
                 <p className="text-zinc-500 text-sm">Nenhuma viagem activa</p>
               </div>
             ) : (
-              (store.currentTab === "current"
-                ? (filteredCurrentList as TripService[])
-                : (store.currentList as TripService[])
-              ).map((s) => (
+              (store.currentList as TripService[]).map((s) => (
                 <div
                   key={s.id}
                   className="bg-hub-black-card border border-hub-gold/5 rounded-lg p-4 space-y-2"

@@ -313,12 +313,16 @@ export function useTripsStore(): TripsStore {
 
   // ──────────────────────────────────────────────
   // Computed: Dia Active + Done split
+  // Today: hide completed from Dia Completo. Past dates: show all.
   // ──────────────────────────────────────────────
+  const isViewingToday = !selectedDate || selectedDate === todayStr();
+
   const diaActiveList = useMemo<HubViagem[]>(() => {
+    if (!isViewingToday) return diaList; // Past dates: show ALL including completed
     return diaList.filter(
       (v) => !v.concluida && v.status !== "CONCLUIDA" && v.status !== "FINALIZOU" && v.status !== "concluida" && v.status !== "NO-SHOW",
     );
-  }, [diaList]);
+  }, [diaList, isViewingToday]);
 
   const diaDoneList = useMemo<HubViagem[]>(() => {
     return diaList.filter(
