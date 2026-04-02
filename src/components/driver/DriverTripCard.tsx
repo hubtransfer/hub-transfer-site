@@ -43,9 +43,9 @@ const PhoneIcon = () => (
 /* ─── Color config ─── */
 
 const TYPE_COLORS = {
-  CHEGADA: { text: "text-[#D4A847]", bg: "bg-[#D4A847]/15", border: "border-l-[#D4A847]", hex: "#D4A847" },
-  RECOLHA: { text: "text-[#8B9DAF]", bg: "bg-[#8B9DAF]/15", border: "border-l-[#8B9DAF]", hex: "#8B9DAF" },
-  TOUR:    { text: "text-[#C17E4A]", bg: "bg-[#C17E4A]/15", border: "border-l-[#C17E4A]", hex: "#C17E4A" },
+  CHEGADA: { text: "text-[#F5C518]", bg: "bg-[#F5C518]/15", border: "border-l-[#F5C518]", hex: "#F5C518" },
+  RECOLHA: { text: "text-[#3B82F6]", bg: "bg-[#3B82F6]/15", border: "border-l-[#3B82F6]", hex: "#3B82F6" },
+  TOUR:    { text: "text-[#A855F7]", bg: "bg-[#A855F7]/15", border: "border-l-[#A855F7]", hex: "#A855F7" },
 } as const;
 function ts(tipo: string) { return TYPE_COLORS[tipo as keyof typeof TYPE_COLORS] ?? { text: "text-gray-400", bg: "bg-gray-500/10", border: "border-l-gray-500", hex: "#999" }; }
 
@@ -259,40 +259,26 @@ export default function DriverTripCard({
       {/*  COLLAPSED VIEW (always visible)                */}
       {/* ════════════════════════════════════════════════ */}
       <div className="cursor-pointer" onClick={toggleExpand}>
-        {/* Main row: flag/globe | source+time | name | driver+price */}
-        <div className="flex items-center gap-3 px-4 py-3">
-          {/* Left: flag or globe */}
-          <div className="flex-shrink-0 w-[28px] flex items-center justify-center">
-            {hasFlightNumber && originFlag ? (
-              <span className="text-[22px] leading-none">{originFlag}</span>
-            ) : hasFlightNumber && depIata ? (
-              <span className="text-[22px] leading-none">🌍</span>
-            ) : (
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M2 12h20" />
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-              </svg>
-            )}
-          </div>
-          {/* Source label + time */}
-          <div className="flex-shrink-0 min-w-[52px]">
-            <span className="block text-[9px] font-bold uppercase tracking-[1px] text-[#F0D030]/70 font-mono leading-none mb-0.5">{sourceLabel}</span>
+        {/* Main row: source+tipo+time | name | driver+price */}
+        <div className="flex items-center gap-3 px-4 py-4">
+          {/* Left: source + tipo + time */}
+          <div className="flex-shrink-0 min-w-[56px]">
+            <span className="block font-semibold uppercase font-mono leading-none mb-1" style={{ fontSize: "0.65rem", letterSpacing: "0.5px", color: c.hex }}>{sourceLabel} · {tipo}</span>
             {delayedHora ? (
               <div className="flex items-center gap-1">
-                <span className="text-base font-bold font-mono line-through opacity-40 text-[#999]">{hora}</span>
+                <span className="font-bold font-mono line-through opacity-40 text-[#999]" style={{ fontSize: "1.1rem" }}>{hora}</span>
                 <span className="text-[9px] text-[#666]">→</span>
-                <span className="text-lg font-black font-mono" style={{ color: dColor }}>{delayedHora}</span>
+                <span className="font-black font-mono" style={{ fontSize: "1.5rem", color: dColor }}>{delayedHora}</span>
               </div>
             ) : (
-              <span className={`text-xl font-bold font-mono ${c.text}`}>{hora}</span>
+              <span className="font-bold font-mono" style={{ fontSize: "1.5rem", color: c.hex }}>{hora}</span>
             )}
           </div>
           {/* Client name */}
           <div className="flex-1 min-w-0">
             <p
-              className={`text-[15px] font-semibold text-[#F5F5F5] truncate ${expanded ? "cursor-pointer hover:text-[#F0D030] transition-colors" : ""}`}
-              onClick={expanded ? (e) => { e.stopPropagation(); onShowNameplate(viagem.client, viagem.destination); } : undefined}
+              className="font-semibold text-[#F5F5F5] truncate"
+              style={{ fontSize: "1.1rem" }}
             >
               {viagem.client}
             </p>
@@ -308,8 +294,8 @@ export default function DriverTripCard({
           </div>
         </div>
 
-        {/* Flight progress bar (collapsed) — clickable */}
-        {!expanded && hasFlight && flight && (
+        {/* Flight progress bar (collapsed) — CHEGADA with flight only */}
+        {!expanded && hasFlight && flight && tipo === "CHEGADA" && (
           <a
             href={viagem.flight ? `https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}` : "#"}
             target="_blank" rel="noopener noreferrer"
@@ -390,8 +376,8 @@ export default function DriverTripCard({
               {viagem.notes && <span className="text-[10px] text-[#888] truncate max-w-[200px]">{viagem.notes}</span>}
             </div>
 
-            {/* ── Flight block — operational instrument ── */}
-            {hasFlight && flight && (
+            {/* ── Flight block — CHEGADA with flight only ── */}
+            {hasFlight && flight && tipo === "CHEGADA" && (
               <div className="px-4 py-3 border-t border-[#2A2A2A]" style={{ backgroundColor: `${c.hex}06` }}>
                 {flight.noData ? (
                   /* Awaiting monitoring — no dep/arr data yet */

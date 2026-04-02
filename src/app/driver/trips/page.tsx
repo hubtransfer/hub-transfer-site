@@ -256,7 +256,7 @@ export default function DriverTripsPage() {
       </div>
 
       {/* ── TRIP CARDS ── */}
-      <div className="px-4 pb-8 space-y-3">
+      <div className="px-4 pb-8 space-y-2">
         {driverTrips.length === 0 && store.isLoading ? (
           <SkeletonList count={3} />
         ) : driverTrips.length === 0 ? (

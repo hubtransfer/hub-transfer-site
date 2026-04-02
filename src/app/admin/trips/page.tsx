@@ -437,7 +437,7 @@ export default function TripsPage() {
             )}
 
             {/* Timeline / Cards — active trips only */}
-            <div className="space-y-3 pb-4">
+            <div className="space-y-2 pb-4">
               {store.diaActiveList.length === 0 && store.diaDoneList.length === 0 ? (
                 <div className="text-center py-16">
                   <div className="text-4xl mb-3 opacity-30">{"\u{1F5D3}"}</div>
