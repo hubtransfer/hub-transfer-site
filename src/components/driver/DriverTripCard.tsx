@@ -67,6 +67,7 @@ interface DriverTripCardProps {
   onNoShow?: (tripId: string) => void;  // called after no-show proofs submitted
   mode?: "driver" | "admin";
   isNext?: boolean;     // first non-done trip gets hero treatment
+  isHistorical?: boolean; // viewing past date — don't dim completed trips
 }
 
 /* ================================================================== */
@@ -80,6 +81,7 @@ export default function DriverTripCard({
   onNoShow,
   mode = "driver",
   isNext = false,
+  isHistorical = false,
 }: DriverTripCardProps) {
   /* ─ Tick for countdown refresh ─ */
   const [, setTick] = useState(0);
@@ -205,7 +207,8 @@ export default function DriverTripCard({
       className={`
         relative rounded-2xl border overflow-hidden border-l-4 select-none
         ${isSwipeActive || isCompleting ? "border-l-[#F0D030]" : c.border}
-        ${isDone ? "opacity-40 bg-[#1A1A1A] border-[#2A2A2A]" : ""}
+        ${isDone && !isHistorical ? "opacity-40 bg-[#1A1A1A] border-[#2A2A2A]" : ""}
+        ${isDone && isHistorical ? "bg-[#1A1A1A] border-[#2A2A2A]" : ""}
         ${!isDone && isNext ? "bg-[#1A1A00] border-[#2A2A1A] ring-1 ring-[#F0D030]/20" : ""}
         ${!isDone && !isNext ? "bg-[#1A1A1A] border-[#2A2A2A] opacity-90" : ""}
         ${isSwipeActive || isCompleting ? `ring-2 ring-[${swipeColor}]/30` : ""}
@@ -214,7 +217,7 @@ export default function DriverTripCard({
         transform: isSwiping ? `translateX(${swipeX}px)` : isCompleting ? "translateX(100vw)" : undefined,
         transition: isSwiping ? "none" : "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
       }}
-      animate={isCompleting ? { x: "100vw", opacity: 0 } : { x: 0, opacity: isDone ? 0.4 : 1 }}
+      animate={isCompleting ? { x: "100vw", opacity: 0 } : { x: 0, opacity: (isDone && !isHistorical) ? 0.4 : 1 }}
       transition={{ duration: 0.4 }}
     >
       {/* ── Copy toast ── */}

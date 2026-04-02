@@ -428,6 +428,7 @@ export default function TripsPage() {
                     onSmsMsg={handleSmsMsg}
                     onShowNameplate={store.showNameplate}
                     mode="admin"
+                    isHistorical={!store.isViewingToday}
                   />
                 ))
               )}

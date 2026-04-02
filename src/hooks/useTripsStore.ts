@@ -104,6 +104,7 @@ interface TripsStore {
   diaActiveList: HubViagem[];
   diaDoneList: HubViagem[];
   diaNoShowList: HubViagem[];
+  isViewingToday: boolean;
   diaStats: DiaStats;
   diaPaySummary: Record<string, { count: number; total: number }>;
 
@@ -818,6 +819,7 @@ export function useTripsStore(): TripsStore {
     diaActiveList,
     diaDoneList,
     diaNoShowList,
+    isViewingToday,
     diaStats,
     diaPaySummary,
 
