@@ -160,8 +160,20 @@ export function useTransferStore(): TransferStore {
   }, [filters]);
 
   const filteredServices = useMemo(() => {
-    if (!hasActiveFilters) return services;
-    return applyFilters(services, filters);
+    const list = hasActiveFilters ? applyFilters(services, filters) : [...services];
+    // Sort by date DESC, then hora DESC
+    list.sort((a, b) => {
+      // Parse dd/mm/yyyy or yyyy-mm-dd to comparable string
+      const da = (a.data || "").includes("/")
+        ? a.data.split("/").reverse().join("")
+        : (a.data || "").replace(/-/g, "");
+      const db = (b.data || "").includes("/")
+        ? b.data.split("/").reverse().join("")
+        : (b.data || "").replace(/-/g, "");
+      if (da !== db) return db.localeCompare(da);
+      return (b.horaPickup || "").localeCompare(a.horaPickup || "");
+    });
+    return list;
   }, [services, filters, hasActiveFilters]);
 
   // ─── Computed: summary ───
