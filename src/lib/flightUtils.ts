@@ -69,39 +69,29 @@ export function computeFlightState(
   pickupTime: string,
   statusVoo: string,
   atrasoMin: number,
+  etaChegada?: string,
 ): FlightState {
   const st = norm(statusVoo);
-
-  // Cancelled
   if (st === 'CANCELADO' || st === 'CANCELLED' || st === 'CANCELED') {
     return { progress: 0, color: CLR_RED, pulse: false, cancelled: true, noData: false, statusText: '❌ Voo cancelado' };
   }
-
-  // Landed
   if (st === 'ATERRISADO' || st === 'LANDED') {
-    const arr = arrTime || pickupTime;
+    const arr = arrTime || etaChegada || pickupTime;
     return { progress: 100, color: CLR_GREEN, pulse: false, cancelled: false, noData: false, statusText: `✅ Aterrisou às ${arr}` };
   }
-
-  // Check what real data we have from the backend
+  const bestArrTime = arrTime || etaChegada || '';
   const hasRealDep = !!depTime && depTime.trim() !== '';
-  const hasRealArr = !!arrTime && arrTime.trim() !== '';
-
-  // No real data at all — monitoring not started
-  if (!hasRealDep && !hasRealArr) {
+  const hasArrEstimate = !!bestArrTime && bestArrTime.trim() !== '';
+  if (!hasRealDep && !hasArrEstimate) {
     return { progress: 0, color: CLR_GREY, pulse: false, cancelled: false, noData: true, statusText: 'Monitoramento em breve' };
   }
-
-  // Resolve times — only use real backend data, pickupTime only as arr estimate with label
   const depM = toMin(depTime);
-  const arrM = toMin(arrTime) ?? toMin(pickupTime); // pickupTime as arr fallback only
+  const arrM = toMin(bestArrTime) ?? toMin(pickupTime);
   if (depM === null && arrM === null) {
     return { progress: 0, color: CLR_GREY, pulse: false, cancelled: false, noData: true, statusText: 'Monitoramento em breve' };
   }
-
-  // Has arrTime but no depTime — show partial progress
+  const now = nowMin();
   if (depM === null && arrM !== null) {
-    const now = nowMin();
     const remaining = arrM - now;
     if (remaining <= 0) return { progress: 98, color: CLR_ORANGE, pulse: true, cancelled: false, noData: false, statusText: 'A aterrar agora!' };
     if (remaining <= 15) return { progress: 90, color: CLR_ORANGE, pulse: true, cancelled: false, noData: false, statusText: `A aterrar em ${remaining}min!` };
@@ -110,39 +100,37 @@ export function computeFlightState(
     const mm = remaining % 60;
     return { progress: 40, color: CLR_BLUE, pulse: false, cancelled: false, noData: false, statusText: hh > 0 ? `Em voo · Chega em ${hh}h ${String(mm).padStart(2, '0')}min` : `Em voo · Chega em ${mm}min` };
   }
-
-  const now = nowMin();
   const duration = Math.max((arrM ?? depM! + 120) - depM!, 1);
   const elapsed = now - depM!;
   const remaining = (arrM ?? depM! + 120) - now;
   const pct = Math.max(0, Math.min(100, (elapsed / duration) * 100));
-
-  // Scheduled — not departed yet (only show countdown if we have REAL depTime)
-  if (st === 'AGENDADO' || st === 'SCHEDULED' || now < depM!) {
+  if (st === 'AGUARDANDO' || st === 'PENDENTE FT' || st === 'AGENDADO' || st === 'SCHEDULED' || now < depM!) {
     const untilDep = depM! - now;
-    if (untilDep < 0) {
-      return { progress: Math.min(pct, 3), color: CLR_GREY, pulse: false, cancelled: false, noData: false, statusText: 'Agendado' };
+    if (untilDep <= 0) {
+      if (atrasoMin > 0) {
+        return { progress: 0, color: CLR_ORANGE, pulse: true, cancelled: false, noData: false, statusText: `Partida atrasada +${atrasoMin}min` };
+      }
+      return { progress: 0, color: CLR_GREY, pulse: false, cancelled: false, noData: false, statusText: 'Aguardando descolagem' };
     }
     const hh = Math.floor(untilDep / 60);
     const mm = untilDep % 60;
-    const txt = hh > 0 ? `Decola em ${hh}h ${mm}min` : `Decola em ${mm}min`;
-    return { progress: Math.min(pct, 3), color: CLR_GREY, pulse: false, cancelled: false, noData: false, statusText: txt };
+    let txt: string;
+    if (atrasoMin > 0) {
+      txt = hh > 0 ? `Decola em ${hh}h ${mm}min (atraso +${atrasoMin}min)` : `Decola em ${mm}min (atraso +${atrasoMin}min)`;
+    } else {
+      txt = hh > 0 ? `Decola em ${hh}h ${mm}min` : `Decola em ${mm}min`;
+    }
+    return { progress: 0, color: CLR_GREY, pulse: false, cancelled: false, noData: false, statusText: txt };
   }
-
-  // In flight
   if (remaining <= 0) {
-    // Should have landed but no ATERRISADO status — assume landing
     return { progress: 98, color: CLR_ORANGE, pulse: true, cancelled: false, noData: false, statusText: 'A aterrar agora!' };
   }
-
   if (remaining <= 15) {
     return { progress: pct, color: CLR_ORANGE, pulse: true, cancelled: false, noData: false, statusText: `A aterrar em ${remaining}min!` };
   }
-
   if (remaining <= 45) {
     return { progress: pct, color: CLR_GOLD, pulse: false, cancelled: false, noData: false, statusText: `A caminho · Chega em ${remaining}min` };
   }
-
   const hh = Math.floor(remaining / 60);
   const mm = remaining % 60;
   const txt = hh > 0 ? `Em voo · Chega em ${hh}h ${String(mm).padStart(2, '0')}min` : `Em voo · Chega em ${mm}min`;

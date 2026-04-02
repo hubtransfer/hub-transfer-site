@@ -61,6 +61,8 @@ export interface HubViagem {
   atrasoMin?: string;      // delay minutes ("25", "0")
   depTimeProg?: string;    // programmed departure time
   etaChegada?: string;     // estimated arrival time
+  etaChegadaFull?: string;  // full ETA string from backend
+  depTimeFull?: string;     // full departure time string from backend
   language: string;
   pax: string;
   bags?: string;
