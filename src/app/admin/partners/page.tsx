@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   getSession, clearSession, setSession, getPartners, updatePassword,
   validateLogin, getAdminEmail, setAdminEmail, getLocalAdminPassword, setLocalAdminPassword,
-  getHotelUrlSync,
+  getHotelUrlSync, fetchHotelUrl, saveHotelUrl,
   type Partner, type Hotel,
 } from "@/lib/auth";
 
@@ -223,6 +223,13 @@ export default function PartnersPage() {
   const [loading, setLoading] = useState(true);
   const [adminName, setAdminName] = useState("");
 
+  // URL config modal state
+  const [urlModalHotel, setUrlModalHotel] = useState<Hotel | null>(null);
+  const [urlInput, setUrlInput] = useState("");
+  const [urlSaving, setUrlSaving] = useState(false);
+  const [urlToast, setUrlToast] = useState("");
+  const [hotelUrls, setHotelUrls] = useState<Record<string, string>>({});
+
   // Auth check
   useEffect(() => {
     const session = getSession();
@@ -233,16 +240,38 @@ export default function PartnersPage() {
     setAdminName(session.name);
   }, [router]);
 
-  // Load data
+  // Load data + hotel URLs
   useEffect(() => {
     (async () => {
       setLoading(true);
       const data = await getPartners();
       setDrivers(data.drivers);
       setHotels(data.hotels);
+      // Load URLs for all hotels
+      const urls: Record<string, string> = {};
+      for (const h of data.hotels) {
+        const u = await fetchHotelUrl(h.code);
+        if (u) urls[h.code.toUpperCase()] = u;
+      }
+      setHotelUrls(urls);
       setLoading(false);
     })();
   }, []);
+
+  const handleSaveUrl = useCallback(async () => {
+    if (!urlModalHotel || !urlInput.trim()) return;
+    setUrlSaving(true);
+    const res = await saveHotelUrl(urlModalHotel.code, urlInput.trim());
+    setUrlSaving(false);
+    if (res.success) {
+      setHotelUrls((prev) => ({ ...prev, [urlModalHotel.code.toUpperCase()]: urlInput.trim() }));
+      setUrlToast("URL guardada ✓");
+      setTimeout(() => { setUrlToast(""); setUrlModalHotel(null); }, 1500);
+    } else {
+      setUrlToast(res.message || "Erro ao guardar");
+      setTimeout(() => setUrlToast(""), 3000);
+    }
+  }, [urlModalHotel, urlInput]);
 
   const handleLogout = useCallback(() => {
     clearSession();
@@ -317,7 +346,7 @@ export default function PartnersPage() {
               <div className="text-center py-10 text-[#666] text-sm font-mono">Nenhum hotel encontrado</div>
             ) : (
               hotels.map((h, i) => {
-                const url = getHotelUrlSync(h.code);
+                const url = hotelUrls[h.code.toUpperCase()] || getHotelUrlSync(h.code);
                 return (
                   <div key={i} className="space-y-2 px-4 py-3 border-b border-[#2A2A2A]/50 hover:bg-[#1A1A1A]">
                     <div className="grid grid-cols-1 md:grid-cols-[80px_1fr_150px_140px] gap-2 items-center">
@@ -326,9 +355,7 @@ export default function PartnersPage() {
                       <PasswordCell hasPassword={h.hasPassword} rowIndex={h.rowIndex} type="hotel" />
                       <button
                         onClick={() => {
-                          // Enter portal as admin for this hotel
-                          setSession({ name: adminName, role: "admin", code: h.code.toUpperCase() });
-                          // Set the hotel URL in webappUrl for the portal to use
+                          setSession({ name: h.name || adminName, role: "admin", code: h.code.toUpperCase() });
                           if (url) localStorage.setItem("webappUrl", url);
                           router.push("/portal");
                         }}
@@ -337,12 +364,20 @@ export default function PartnersPage() {
                         Entrar no Portal →
                       </button>
                     </div>
-                    {/* URL status */}
+                    {/* URL status + config button */}
                     <div className="flex items-center gap-2 ml-0 md:ml-[88px]">
                       {url ? (
-                        <span className="text-[10px] font-mono text-[#7EAA6E]">● URL configurada</span>
+                        <>
+                          <span className="text-[10px] font-mono text-[#7EAA6E]">🟢 URL configurada</span>
+                          <button onClick={() => { setUrlModalHotel(h); setUrlInput(url); }}
+                            className="text-[10px] font-mono text-[#888] hover:text-[#F0D030] cursor-pointer">Editar</button>
+                        </>
                       ) : (
-                        <span className="text-[10px] font-mono text-[#C06060]">● Sem URL — configure no portal</span>
+                        <>
+                          <span className="text-[10px] font-mono text-[#C06060]">🔴 Sem URL</span>
+                          <button onClick={() => { setUrlModalHotel(h); setUrlInput(""); }}
+                            className="text-[10px] font-mono text-[#F0D030] hover:text-[#D4B828] cursor-pointer font-bold">⚙️ Configurar URL</button>
+                        </>
                       )}
                     </div>
                   </div>
@@ -352,6 +387,61 @@ export default function PartnersPage() {
           </div>
         </section>
       </div>
+
+      {/* ═══ URL CONFIG MODAL ═══ */}
+      {urlModalHotel && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.8)" }} onClick={() => setUrlModalHotel(null)}>
+          <div className="w-full max-w-lg bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-5 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-bold text-[#F0D030]">Configurar URL do Hotel</h3>
+              <button onClick={() => setUrlModalHotel(null)} className="text-[#666] hover:text-white text-lg cursor-pointer">✕</button>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-[#888] font-mono w-[60px]">Hotel:</span>
+                <span className="text-sm text-[#F5F5F5] font-semibold">{urlModalHotel.name}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-[#888] font-mono w-[60px]">Código:</span>
+                <span className="text-xs text-[#F0D030] font-mono font-bold uppercase">{urlModalHotel.code}</span>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-[10px] text-[#888] font-mono uppercase tracking-wider block mb-1">URL do Google Apps Script</label>
+              <input
+                type="url"
+                value={urlInput}
+                onChange={(e) => setUrlInput(e.target.value)}
+                placeholder="https://script.google.com/macros/s/.../exec"
+                className="w-full h-10 bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg px-3 text-sm text-[#F5F5F5] placeholder-[#555] focus:outline-none focus:border-[#F0D030] font-mono"
+                autoFocus
+              />
+            </div>
+
+            {urlToast && (
+              <p className={`text-xs font-mono ${urlToast.includes("✓") ? "text-[#7EAA6E]" : "text-[#C06060]"}`}>{urlToast}</p>
+            )}
+
+            <div className="flex gap-2">
+              <button
+                onClick={handleSaveUrl}
+                disabled={urlSaving || !urlInput.trim()}
+                className="flex-1 h-10 bg-[#F0D030] text-[#0A0A0A] font-bold text-sm rounded-lg hover:bg-[#D4B828] disabled:opacity-50 transition-colors cursor-pointer"
+              >
+                {urlSaving ? "A guardar..." : "Salvar URL"}
+              </button>
+              <button
+                onClick={() => setUrlModalHotel(null)}
+                className="h-10 px-4 bg-[#222] text-[#888] text-sm rounded-lg hover:text-[#F5F5F5] transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
