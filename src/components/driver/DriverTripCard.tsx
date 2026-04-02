@@ -398,11 +398,8 @@ export default function DriverTripCard({
                   <div className="flex items-center gap-3">
                     <span className="text-xl leading-none">🌍</span>
                     <div className="flex-1">
-                      <div className="h-4 rounded-full bg-[#222] flex items-center justify-center">
-                        <span className="font-mono text-[10px] text-[#666] italic">✈️ Acompanhamento do voo activa em breve</span>
-                      </div>
-                      <p className="text-center font-mono text-sm font-bold mt-1.5" style={{ color: c.hex }}>{viagem.flight}</p>
-                      <p className="text-center font-mono text-[9px] text-[#555] mt-0.5">Monitoramento inicia ~90min antes da decolagem</p>
+                      <p className="text-center font-mono text-sm font-bold mb-1.5" style={{ color: c.hex }}>{viagem.flight}</p>
+                      <p className="text-center font-mono text-[11px] italic font-medium text-[#E0E0E0]">✈️ Acompanhamento do voo activa em breve</p>
                     </div>
                     <div className="text-center min-w-[48px]">
                       <p className="text-xl leading-none mb-1">🇵🇹</p>
