@@ -402,7 +402,7 @@ export default function DriverTripCard({
                         <span className="font-mono text-[10px] text-[#666] italic">✈️ Acompanhamento do voo activa em breve</span>
                       </div>
                       <p className="text-center font-mono text-sm font-bold mt-1.5" style={{ color: c.hex }}>{viagem.flight}</p>
-                      <p className="text-center font-mono text-[9px] text-[#555] mt-0.5">Monitoramento inicia ~90min antes da descolagem</p>
+                      <p className="text-center font-mono text-[9px] text-[#555] mt-0.5">Monitoramento inicia ~90min antes da decolagem</p>
                     </div>
                     <div className="text-center min-w-[48px]">
                       <p className="text-xl leading-none mb-1">🇵🇹</p>
@@ -428,7 +428,7 @@ export default function DriverTripCard({
                           <p className="font-mono text-xs text-[#A0A0A0] mt-1">{viagem.depTime}</p>
                         )
                       )}
-                      <p className="font-mono text-[8px] text-[#555] mt-0.5 uppercase">Descolagem</p>
+                      <p className="font-mono text-[8px] text-[#555] mt-0.5 uppercase">Decolagem</p>
                     </div>
 
                     {/* CENTER: Progress bar + plane SVG → pointing RIGHT */}
