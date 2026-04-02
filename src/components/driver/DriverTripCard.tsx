@@ -300,56 +300,59 @@ export default function DriverTripCard({
             href={viagem.flight ? `https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}` : "#"}
             target="_blank" rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="block px-4 pb-2.5 pt-0 cursor-pointer hover:bg-[#151515] transition-colors rounded-b-2xl"
+            className="block px-4 pt-2 pb-3 cursor-pointer hover:bg-[#151515] transition-colors rounded-b-2xl"
           >
             {flight.noData ? (
-              /* No flight data yet — awaiting monitoring */
+              /* No flight data yet */
               <div className="flex items-center gap-2">
-                <span className="text-[10px] leading-none">🌍</span>
-                <div className="flex-1 h-[3px] rounded-full bg-[#222] relative">
-                  <p className="absolute inset-0 flex items-center justify-center">
-                    <span className="font-mono text-[8px] text-[#666] italic">{viagem.flight} · Dados em breve</span>
-                  </p>
+                <span className="text-sm leading-none">🌍</span>
+                <div className="flex-1">
+                  <span className="font-mono text-[#B0B0B0] italic" style={{ fontSize: "0.75rem" }}>{viagem.flight || "S/ numero"} · Dados em breve</span>
                 </div>
-                <span className="font-mono text-[10px] text-[#666]">{hora}</span>
-                <span className="text-[10px] leading-none">🇵🇹</span>
+                <span className="font-semibold font-mono text-[#E0E0E0]" style={{ fontSize: "0.85rem" }}>{hora}</span>
+                <span className="font-semibold font-mono text-[#B0B0B0]" style={{ fontSize: "0.75rem" }}>LIS</span>
+                <span className="text-sm leading-none">🇵🇹</span>
               </div>
             ) : (
               <>
-                {/* Bar with plane → pointing right */}
-                <div className="relative h-[3px] rounded-full bg-[#1A1A1A] overflow-visible">
+                {/* Progress bar — 6px height */}
+                <div className="relative rounded-[3px] overflow-visible" style={{ height: "6px", backgroundColor: "#333333" }}>
                   {flight.cancelled ? (
-                    <div className="absolute inset-0 rounded-full bg-[#EF4444]/20" />
+                    <div className="absolute inset-0 rounded-[3px] bg-[#EF4444]/25" />
                   ) : (
-                    <div className="h-full rounded-full transition-all duration-[2s] ease-in-out"
-                      style={{ width: `${Math.max(flight.progress, 2)}%`, backgroundColor: flight.color, opacity: 0.8 }} />
+                    <div className="h-full rounded-[3px] transition-all duration-[2s] ease-in-out"
+                      style={{ width: `${Math.max(flight.progress, 2)}%`, backgroundColor: flight.color }} />
                   )}
                   {!flight.cancelled && (
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill={flight.color}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill={flight.color}
                       className="absolute top-1/2 -translate-y-1/2 transition-all duration-[2s] ease-in-out"
-                      style={{ left: `calc(${Math.max(flight.progress, 2)}% - 5px)`, filter: "drop-shadow(0 0 2px rgba(0,0,0,.6))" }}>
+                      style={{ left: `calc(${Math.max(flight.progress, 2)}% - 7px)`, filter: "drop-shadow(0 0 3px rgba(0,0,0,.7))" }}>
                       <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" transform="rotate(90 12 12)"/>
                     </svg>
                   )}
                 </div>
-                {/* Info row */}
-                <div className="flex items-center justify-between mt-1">
-                  <div className="flex items-center gap-1">
-                    <span className="text-[10px] leading-none">{originFlag || "🌍"}</span>
-                    <span className="font-mono text-[9px] text-[#888]">{viagem.flight}</span>
+                {/* Info row below bar */}
+                <div className="flex items-center justify-between mt-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm leading-none">{originFlag || "🌍"}</span>
+                    <span className="font-mono font-semibold text-[#B0B0B0]" style={{ fontSize: "0.75rem" }}>{viagem.flight}</span>
                   </div>
-                  <span className="font-mono text-[9px]" style={{ color: flight.color }}>{flight.statusText}</span>
-                  <div className="flex items-center gap-0.5">
+                  <span className="font-mono" style={{ fontSize: "0.7rem", color: flight.color }}>{flight.statusText}</span>
+                  <div className="flex items-center gap-1">
                     {delayMin > 0 ? (
-                      <span className="font-mono text-[10px] font-bold text-[#F5C518]">{delayedHora}</span>
+                      <>
+                        <span className="font-mono line-through text-[#666]" style={{ fontSize: "0.7rem" }}>{hora}</span>
+                        <span className="font-mono font-semibold text-[#F5C518]" style={{ fontSize: "0.85rem" }}>{delayedHora}</span>
+                      </>
                     ) : (
-                      <span className="font-mono text-[10px]" style={{ color: flight.color }}>{viagem.arrTime || hora}</span>
+                      <span className="font-mono font-semibold text-[#E0E0E0]" style={{ fontSize: "0.85rem" }}>{viagem.arrTime || hora}</span>
                     )}
-                    <span className="text-[10px] leading-none">🇵🇹</span>
+                    <span className="font-mono font-semibold text-[#B0B0B0]" style={{ fontSize: "0.75rem" }}>LIS</span>
+                    <span className="text-sm leading-none">🇵🇹</span>
                   </div>
                 </div>
                 {flight.pulse && <style dangerouslySetInnerHTML={{ __html: `@keyframes fp{0%,100%{opacity:.8}50%{opacity:.4}}` }} />}
-                {flight.pulse && <div className="h-[3px] rounded-full mt-0.5" style={{ backgroundColor: flight.color, opacity: 0.3, animation: "fp 2s ease-in-out infinite" }} />}
+                {flight.pulse && <div className="rounded-[3px] mt-1" style={{ height: "6px", backgroundColor: flight.color, opacity: 0.25, animation: "fp 2s ease-in-out infinite" }} />}
               </>
             )}
           </a>
