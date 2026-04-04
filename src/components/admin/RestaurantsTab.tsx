@@ -179,7 +179,7 @@ export default function RestaurantsTab() {
                     <td className="px-2 py-2 font-mono text-zinc-400">{r.data}</td>
                     <td className="px-2 py-2 font-mono text-zinc-400">{r.hora}</td>
                     <td className="px-2 py-2 font-mono text-zinc-400 text-center">{r.pessoas}</td>
-                    <td className="px-2 py-2 text-zinc-400 truncate max-w-[140px]" title={r.hotel}>{r.hotel}</td>
+                    <td className="px-2 py-2 text-zinc-400 truncate max-w-[140px]" title={r.hotel || "Endereço livre"}>{r.hotel || <span className="text-[#666]">— livre —</span>}</td>
                     <td className="px-2 py-2">
                       <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold font-mono ${s.bg} ${s.text}`}>
                         {s.label}
@@ -205,8 +205,7 @@ export default function RestaurantsTab() {
         <NewReservationModal
           restaurantes={restaurantes}
           onClose={() => setModalOpen(false)}
-          onSuccess={(msg) => {
-            showToast(msg);
+          onSuccess={() => {
             setModalOpen(false);
             fetchReservas();
           }}
@@ -222,11 +221,22 @@ export default function RestaurantsTab() {
 interface ModalProps {
   restaurantes: Restaurante[];
   onClose: () => void;
-  onSuccess: (msg: string) => void;
+  onSuccess: () => void;
   onError: (msg: string) => void;
 }
 
-function NewReservationModal({ restaurantes, onClose, onSuccess, onError }: ModalProps) {
+interface ReservationSuccess {
+  idReserva: string | number;
+  idViagemIda: string | number;
+  idViagemVolta: string | number;
+  restaurante: string;
+  horaPickup: string;
+  horaVoltaEstimada: string;
+  origem: string;
+  destino: string;
+}
+
+function NewReservationModal({ restaurantes, onClose, onSuccess }: ModalProps) {
   const [cliente, setCliente] = useState("");
   const [telefone, setTelefone] = useState("");
   const [idioma, setIdioma] = useState("PT");
@@ -234,25 +244,48 @@ function NewReservationModal({ restaurantes, onClose, onSuccess, onError }: Moda
   const [data, setData] = useState("");
   const [hora, setHora] = useState("20:00");
   const [pessoas, setPessoas] = useState(2);
-  const [hotel, setHotel] = useState(HOTEIS[0]);
   const [observacoes, setObservacoes] = useState("");
+  // ─── Origem toggle state ───
+  const [origemTipo, setOrigemTipo] = useState<"hotel" | "outro">("hotel");
+  const [hotelSelecionado, setHotelSelecionado] = useState(HOTEIS[0]);
+  const [enderecoOrigem, setEnderecoOrigem] = useState("");
+  // ─── Destino state ───
+  const [destino, setDestino] = useState("");
+  const [destinoEditado, setDestinoEditado] = useState(false);
+  // ─── Feedback state ───
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState<ReservationSuccess | null>(null);
+
+  // Auto-fill destino with restaurant address when restaurant is selected
+  const restauranteSeleccionado = restaurantes.find((r) => String(r.id) === restauranteId);
+  useEffect(() => {
+    if (restauranteSeleccionado && !destinoEditado) {
+      const addr = `${restauranteSeleccionado.nome}${restauranteSeleccionado.endereco ? ", " + restauranteSeleccionado.endereco : ""}`;
+      setDestino(addr);
+    }
+    if (!restauranteSeleccionado && !destinoEditado) {
+      setDestino("");
+    }
+  }, [restauranteSeleccionado, destinoEditado]);
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (!cliente.trim() || !telefone.trim() || !restauranteId || !data || !hora) {
+    // Determinar origem e hotel
+    const origemFinal = origemTipo === "hotel" ? hotelSelecionado : enderecoOrigem.trim();
+    const hotelFinal = origemTipo === "hotel" ? hotelSelecionado : "";
+
+    if (!cliente.trim() || !telefone.trim() || !restauranteId || !data || !hora || !origemFinal) {
       setError("Preenche todos os campos obrigatórios");
       return;
     }
 
     setSubmitting(true);
     try {
-      // Convert date from YYYY-MM-DD (input type=date) to DD/MM/YYYY
-      const [yyyy, mm, dd] = data.split("-");
-      const dataFmt = `${dd}/${mm}/${yyyy}`;
+      // Convert date from YYYY-MM-DD (input type=date) to DD/MM/YYYY (GAS expects PT format)
+      const dataFormatada = data.split("-").reverse().join("/");
 
       const params = new URLSearchParams({
         action: "criarReservaRestaurante",
@@ -260,10 +293,12 @@ function NewReservationModal({ restaurantes, onClose, onSuccess, onError }: Moda
         telefone: telefone.trim(),
         idioma,
         restauranteId,
-        data: dataFmt,
+        data: dataFormatada,
         hora,
         pessoas: String(pessoas),
-        hotel,
+        origem: origemFinal,
+        destino: destino.trim(),
+        hotel: hotelFinal,
         observacoes: observacoes.trim(),
         t: String(Date.now()),
       });
@@ -273,27 +308,31 @@ function NewReservationModal({ restaurantes, onClose, onSuccess, onError }: Moda
       const json = await res.json();
 
       if (json?.success) {
-        const msg = [
-          `✅ Reserva criada com sucesso`,
-          `ID: ${json.idReserva}`,
-          `Restaurante: ${json.restaurante}`,
-          `Pickup: ${json.horaPickup} · Volta: ${json.horaVoltaEstimada}`,
-          `Viagens: ${json.idViagemIda} / ${json.idViagemVolta}`,
-        ].join("\n");
-        onSuccess(msg);
+        setSuccess({
+          idReserva: json.idReserva ?? "",
+          idViagemIda: json.idViagemIda ?? "",
+          idViagemVolta: json.idViagemVolta ?? "",
+          restaurante: json.restaurante ?? "",
+          horaPickup: json.horaPickup ?? "",
+          horaVoltaEstimada: json.horaVoltaEstimada ?? "",
+          origem: json.origem ?? origemFinal,
+          destino: json.destino ?? destino.trim(),
+        });
       } else {
         const msg = json?.message || json?.error || "Erro desconhecido";
         setError(msg);
-        onError("❌ " + msg);
       }
     } catch (err) {
       console.error("[NewReservationModal] submit error:", err);
       setError("Erro de conexão");
-      onError("❌ Erro de conexão");
     } finally {
       setSubmitting(false);
     }
-  }, [cliente, telefone, idioma, restauranteId, data, hora, pessoas, hotel, observacoes, onSuccess, onError]);
+  }, [cliente, telefone, idioma, restauranteId, data, hora, pessoas, origemTipo, hotelSelecionado, enderecoOrigem, destino, observacoes]);
+
+  const handleCloseSuccess = useCallback(() => {
+    onSuccess();
+  }, [onSuccess]);
 
   return (
     <div
@@ -301,7 +340,7 @@ function NewReservationModal({ restaurantes, onClose, onSuccess, onError }: Moda
       onClick={onClose}
     >
       <div
-        className="bg-[#0a0a0a] border border-[#D4A017]/30 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl"
+        className="relative bg-[#0a0a0a] border border-[#D4A017]/30 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal header */}
@@ -368,7 +407,7 @@ function NewReservationModal({ restaurantes, onClose, onSuccess, onError }: Moda
             <label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1 font-mono">Restaurante *</label>
             <select
               value={restauranteId}
-              onChange={(e) => setRestauranteId(e.target.value)}
+              onChange={(e) => { setRestauranteId(e.target.value); setDestinoEditado(false); }}
               required
               disabled={submitting || restaurantes.length === 0}
               className="w-full bg-[#1a1a2e] border border-zinc-800 rounded px-3 py-2 text-sm text-white focus:border-[#D4A017] focus:outline-none"
@@ -380,6 +419,77 @@ function NewReservationModal({ restaurantes, onClose, onSuccess, onError }: Moda
                 </option>
               ))}
             </select>
+            {restauranteSeleccionado?.endereco && (
+              <p className="text-[10px] text-[#666] mt-1 font-mono truncate" title={restauranteSeleccionado.endereco}>
+                📍 {restauranteSeleccionado.endereco}
+              </p>
+            )}
+          </div>
+
+          {/* Origem (Recolha) — toggle Hotel Parceiro / Outro Endereço */}
+          <div>
+            <label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1 font-mono">Origem (Recolha) *</label>
+            <div className="bg-[#1a1a2e] rounded p-1 flex gap-1 mb-2">
+              <button
+                type="button"
+                onClick={() => setOrigemTipo("hotel")}
+                disabled={submitting}
+                className={`flex-1 py-1.5 rounded text-xs font-mono font-bold transition-colors ${
+                  origemTipo === "hotel"
+                    ? "bg-[#D4A017] text-black"
+                    : "text-[#888] hover:text-white"
+                }`}
+              >
+                🏨 Hotel Parceiro
+              </button>
+              <button
+                type="button"
+                onClick={() => setOrigemTipo("outro")}
+                disabled={submitting}
+                className={`flex-1 py-1.5 rounded text-xs font-mono font-bold transition-colors ${
+                  origemTipo === "outro"
+                    ? "bg-[#D4A017] text-black"
+                    : "text-[#888] hover:text-white"
+                }`}
+              >
+                📍 Outro Endereço
+              </button>
+            </div>
+            {origemTipo === "hotel" ? (
+              <select
+                value={hotelSelecionado}
+                onChange={(e) => setHotelSelecionado(e.target.value)}
+                disabled={submitting}
+                className="w-full bg-[#1a1a2e] border border-zinc-800 rounded px-3 py-2 text-sm text-white focus:border-[#D4A017] focus:outline-none"
+              >
+                {HOTEIS.map((h) => <option key={h} value={h}>{h}</option>)}
+              </select>
+            ) : (
+              <input
+                type="text"
+                value={enderecoOrigem}
+                onChange={(e) => setEnderecoOrigem(e.target.value)}
+                disabled={submitting}
+                required
+                className="w-full bg-[#1a1a2e] border border-zinc-800 rounded px-3 py-2 text-sm text-white placeholder-zinc-600 focus:border-[#D4A017] focus:outline-none"
+                placeholder="Morada completa de recolha..."
+              />
+            )}
+          </div>
+
+          {/* Destino */}
+          <div>
+            <label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1 font-mono">Destino</label>
+            <input
+              type="text"
+              value={destino}
+              onChange={(e) => { setDestino(e.target.value); setDestinoEditado(true); }}
+              disabled={submitting || !restauranteId}
+              className={`w-full bg-[#1a1a2e] border border-zinc-800 rounded px-3 py-2 text-sm placeholder-zinc-600 focus:border-[#D4A017] focus:outline-none disabled:opacity-50 ${
+                destinoEditado ? "text-white" : "text-[#888]"
+              }`}
+              placeholder={restauranteId ? "Endereço do restaurante..." : "Seleccione um restaurante primeiro"}
+            />
           </div>
 
           {/* Data + Hora */}
@@ -408,31 +518,18 @@ function NewReservationModal({ restaurantes, onClose, onSuccess, onError }: Moda
             </div>
           </div>
 
-          {/* Pessoas + Hotel */}
-          <div className="grid grid-cols-[80px_1fr] gap-2">
-            <div>
-              <label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1 font-mono">Pax</label>
-              <input
-                type="number"
-                min={1}
-                max={20}
-                value={pessoas}
-                onChange={(e) => setPessoas(Math.max(1, Math.min(20, parseInt(e.target.value) || 1)))}
-                disabled={submitting}
-                className="w-full bg-[#1a1a2e] border border-zinc-800 rounded px-3 py-2 text-sm text-white focus:border-[#D4A017] focus:outline-none font-mono text-center"
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1 font-mono">Hotel</label>
-              <select
-                value={hotel}
-                onChange={(e) => setHotel(e.target.value)}
-                disabled={submitting}
-                className="w-full bg-[#1a1a2e] border border-zinc-800 rounded px-3 py-2 text-sm text-white focus:border-[#D4A017] focus:outline-none"
-              >
-                {HOTEIS.map((h) => <option key={h} value={h}>{h}</option>)}
-              </select>
-            </div>
+          {/* Pax */}
+          <div className="w-24">
+            <label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1 font-mono">Pax</label>
+            <input
+              type="number"
+              min={1}
+              max={20}
+              value={pessoas}
+              onChange={(e) => setPessoas(Math.max(1, Math.min(20, parseInt(e.target.value) || 1)))}
+              disabled={submitting}
+              className="w-full bg-[#1a1a2e] border border-zinc-800 rounded px-3 py-2 text-sm text-white focus:border-[#D4A017] focus:outline-none font-mono text-center"
+            />
           </div>
 
           {/* Observações */}
@@ -450,8 +547,8 @@ function NewReservationModal({ restaurantes, onClose, onSuccess, onError }: Moda
 
           {/* Error */}
           {error && (
-            <div className="bg-[#EF4444]/10 border border-[#EF4444]/30 text-[#EF4444] px-3 py-2 rounded text-xs font-mono">
-              {error}
+            <div className="bg-[#7f1d1d] border border-[#EF4444]/40 text-[#fecaca] px-3 py-2 rounded text-xs font-mono">
+              ❌ {error}
             </div>
           )}
 
@@ -476,11 +573,53 @@ function NewReservationModal({ restaurantes, onClose, onSuccess, onError }: Moda
                   A criar...
                 </>
               ) : (
-                "Criar Reserva"
+                <>🍽️ Criar Reserva</>
               )}
             </button>
           </div>
         </form>
+
+        {/* ═══ SUCCESS OVERLAY ═══ */}
+        {success && (
+          <div className="absolute inset-0 bg-[#0a0a0a] flex flex-col">
+            {/* Success header */}
+            <div className="sticky top-0 bg-[#0a0a0a] border-b border-[#22C55E]/30 px-5 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">✅</span>
+                <h3 className="text-white font-bold text-base">Reserva Criada</h3>
+              </div>
+              <button
+                type="button"
+                onClick={handleCloseSuccess}
+                className="text-zinc-500 hover:text-white transition-colors text-xl leading-none"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Success body */}
+            <div className="px-5 py-4 space-y-3 overflow-y-auto">
+              <div className="bg-[#064e3b] border border-[#22C55E]/30 rounded-lg px-4 py-4 space-y-2 text-sm">
+                <p className="text-[#22C55E] font-bold text-base">✅ Reserva criada!</p>
+                <div className="space-y-1.5 text-white font-mono text-xs">
+                  <p>🆔 <span className="text-[#22C55E]">{success.idReserva}</span></p>
+                  <p>🍽️ {success.restaurante}</p>
+                  <p>🚗 Ida #{success.idViagemIda} — Pickup: <span className="text-[#D4A017]">{success.horaPickup}</span></p>
+                  <p>🔄 Volta #{success.idViagemVolta} — Estimada: <span className="text-[#D4A017]">{success.horaVoltaEstimada}</span></p>
+                  <p className="pt-1 text-[#9ca3af] break-words">📍 {success.origem} → {success.destino}</p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleCloseSuccess}
+                className="w-full bg-[#D4A017] hover:bg-[#b8860b] text-black py-2.5 rounded text-sm font-mono font-bold transition-colors"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
