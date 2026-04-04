@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useTripsStore } from "@/hooks/useTripsStore";
 import TripCard from "@/components/driver/DriverTripCard";
 import DriverNameplate from "@/components/driver/DriverNameplate";
+import RestaurantsTab from "@/components/admin/RestaurantsTab";
 import type { TabType, HubViagem, TripService } from "@/lib/trips";
 import {
   HUB_CENTRAL_URL,
@@ -29,6 +30,7 @@ const TABS: { key: TabType; icon: string; label: string; mobileLabel: string }[]
   { key: "recolhas",  icon: "\u25B2",      label: "Recolhas",      mobileLabel: "Recolhas" },
   { key: "past",      icon: "\u{1F3C1}",  label: "Passadas",      mobileLabel: "Past" },
   { key: "cancelled", icon: "\u2715",      label: "Canceladas",    mobileLabel: "Cancelled" },
+  { key: "restaurantes", icon: "\u{1F37D}\uFE0F", label: "Restaurantes", mobileLabel: "Rest" },
 ];
 
 /* ================================================================== */
@@ -686,6 +688,9 @@ export default function TripsPage() {
             )}
           </div>
         )}
+
+        {/* ── RESTAURANTES TAB ── */}
+        {store.currentTab === "restaurantes" && <RestaurantsTab />}
       </main>
 
       {/* ─── MOBILE BOTTOM BAR ─── */}

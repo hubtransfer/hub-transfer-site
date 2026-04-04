@@ -85,7 +85,7 @@ export interface Driver {
   viatura: string;
 }
 
-export type TabType = 'current' | 'chegadas' | 'recolhas' | 'past' | 'cancelled' | 'dia';
+export type TabType = 'current' | 'chegadas' | 'recolhas' | 'past' | 'cancelled' | 'dia' | 'restaurantes';
 
 export interface ServicesState {
   current: TripService[];
@@ -123,6 +123,7 @@ export const TAB_INFO: Record<TabType, { title: string; sub: string; showPaste: 
   past:      { title: 'Past',      sub: 'Viagens concluídas',          showPaste: false, showFilter: false },
   cancelled: { title: 'Cancelled', sub: 'Viagens canceladas',          showPaste: false, showFilter: false },
   dia:       { title: 'Hoje',      sub: 'Plano do Dia — HUB Central',  showPaste: false, showFilter: false },
+  restaurantes: { title: 'Restaurantes', sub: 'Reservas em restaurantes parceiros', showPaste: false, showFilter: false },
 };
 
 // ── DDI → Language map ───────────────────────────────────────
