@@ -1,87 +1,138 @@
-/** IATA airport code → ISO country code */
+/** IATA airport code → ISO country code (alpha-2) */
 const AIRPORT_COUNTRY: Record<string, string> = {
-  // Sérvia
-  BEG: 'RS', NIS: 'RS',
   // Portugal
-  LIS: 'PT', OPO: 'PT', FAO: 'PT', FNC: 'PT', PDL: 'PT', TER: 'PT',
+  LIS: 'PT', OPO: 'PT', FAO: 'PT', FNC: 'PT', PDL: 'PT', TER: 'PT', HOR: 'PT', PXO: 'PT',
   // UK
-  LHR: 'GB', LGW: 'GB', STN: 'GB', LTN: 'GB', MAN: 'GB', EDI: 'GB',
-  BRS: 'GB', BHX: 'GB', GLA: 'GB', LCY: 'GB',
+  LHR: 'GB', LGW: 'GB', STN: 'GB', LTN: 'GB', MAN: 'GB', BHX: 'GB', EDI: 'GB', GLA: 'GB',
+  BRS: 'GB', EMA: 'GB', NCL: 'GB', LPL: 'GB', ABZ: 'GB', SOU: 'GB', LCY: 'GB', BFS: 'GB',
+  // Irlanda
+  DUB: 'IE', ORK: 'IE', SNN: 'IE',
   // França
-  CDG: 'FR', ORY: 'FR', NCE: 'FR', LYS: 'FR', MRS: 'FR', TLS: 'FR',
-  BOD: 'FR', NTE: 'FR',
+  CDG: 'FR', ORY: 'FR', LYS: 'FR', MRS: 'FR', NCE: 'FR', TLS: 'FR', BOD: 'FR', NTE: 'FR',
+  SXB: 'FR', MPL: 'FR', BIQ: 'FR',
   // Espanha
-  MAD: 'ES', BCN: 'ES', AGP: 'ES', PMI: 'ES', ALC: 'ES', SVQ: 'ES',
-  IBZ: 'ES', VLC: 'ES', BIO: 'ES', ACE: 'ES', TFS: 'ES', LPA: 'ES',
+  MAD: 'ES', BCN: 'ES', AGP: 'ES', ALC: 'ES', PMI: 'ES', IBZ: 'ES', TFS: 'ES', LPA: 'ES',
+  ACE: 'ES', FUE: 'ES', VLC: 'ES', SVQ: 'ES', BIO: 'ES', SCQ: 'ES', VGO: 'ES', ZAZ: 'ES',
   // Alemanha
   FRA: 'DE', MUC: 'DE', BER: 'DE', DUS: 'DE', HAM: 'DE', CGN: 'DE', STR: 'DE',
+  NUE: 'DE', HAJ: 'DE', LEJ: 'DE', DTM: 'DE',
   // Itália
-  FCO: 'IT', MXP: 'IT', CIA: 'IT', BGY: 'IT', NAP: 'IT', VCE: 'IT',
-  BLQ: 'IT', PSA: 'IT', LIN: 'IT',
+  FCO: 'IT', MXP: 'IT', LIN: 'IT', BGY: 'IT', VCE: 'IT', NAP: 'IT', BLQ: 'IT', PSA: 'IT',
+  CTA: 'IT', PMO: 'IT', FLR: 'IT', TRN: 'IT', BRI: 'IT', CAG: 'IT', CIA: 'IT',
   // Holanda
   AMS: 'NL', EIN: 'NL', RTM: 'NL',
   // Bélgica
   BRU: 'BE', CRL: 'BE',
+  // Luxemburgo
+  LUX: 'LU',
   // Suíça
   ZRH: 'CH', GVA: 'CH', BSL: 'CH',
   // Áustria
-  VIE: 'AT',
-  // Turquia
-  IST: 'TR', SAW: 'TR', AYT: 'TR',
-  // Grécia
-  ATH: 'GR', SKG: 'GR', HER: 'GR',
-  // Polónia
-  WAW: 'PL', KRK: 'PL', WRO: 'PL',
-  // Roménia
-  OTP: 'RO', CLJ: 'RO',
-  // Hungria
-  BUD: 'HU',
-  // República Checa
-  PRG: 'CZ',
+  VIE: 'AT', SZG: 'AT', INN: 'AT',
   // Dinamarca
   CPH: 'DK',
-  // Suécia
-  ARN: 'SE', GOT: 'SE',
   // Noruega
   OSL: 'NO', BGO: 'NO',
+  // Suécia
+  ARN: 'SE', GOT: 'SE',
   // Finlândia
-  HEL: 'FI',
-  // Irlanda
-  DUB: 'IE', SNN: 'IE', ORK: 'IE',
-  // Luxemburgo
-  LUX: 'LU',
-  // Croácia
-  ZAG: 'HR', SPU: 'HR', DBV: 'HR',
+  HEL: 'FI', TMP: 'FI',
+  // Polónia
+  WAW: 'PL', WMI: 'PL', KRK: 'PL', WRO: 'PL',
+  // República Checa
+  PRG: 'CZ',
+  // Hungria
+  BUD: 'HU',
+  // Roménia
+  OTP: 'RO', CLJ: 'RO',
   // Bulgária
   SOF: 'BG',
+  // Croácia
+  ZAG: 'HR', SPU: 'HR', DBV: 'HR',
+  // Eslovénia
+  LJU: 'SI',
+  // Sérvia
+  BEG: 'RS', NIS: 'RS',
+  // Macedónia do Norte
+  SKP: 'MK',
+  // Albânia
+  TIA: 'AL',
+  // Grécia
+  ATH: 'GR', SKG: 'GR', HER: 'GR', RHO: 'GR', CFU: 'GR', JMK: 'GR', JTR: 'GR',
+  // Turquia
+  IST: 'TR', SAW: 'TR', AYT: 'TR', ADB: 'TR',
+  // Chipre
+  LCA: 'CY', PFO: 'CY', ERN: 'CY',
+  // Malta
+  MLA: 'MT',
+  // Islândia
+  KEF: 'IS',
+  // Marrocos
+  CMN: 'MA', RAK: 'MA', FEZ: 'MA', AGA: 'MA', TNG: 'MA',
+  // Tunísia
+  TUN: 'TN',
+  // Argélia
+  ALG: 'DZ',
+  // Egito
+  CAI: 'EG',
   // Brasil
-  GRU: 'BR', GIG: 'BR', BSB: 'BR', FOR: 'BR', REC: 'BR', SSA: 'BR',
-  CNF: 'BR', CWB: 'BR', POA: 'BR',
+  GRU: 'BR', GIG: 'BR', BSB: 'BR', CNF: 'BR', SSA: 'BR', REC: 'BR', FOR: 'BR',
+  CWB: 'BR', POA: 'BR', VCP: 'BR', MAO: 'BR', BEL: 'BR',
   // EUA
-  JFK: 'US', EWR: 'US', MIA: 'US', ORD: 'US', LAX: 'US', ATL: 'US',
-  BOS: 'US', SFO: 'US', IAD: 'US',
+  JFK: 'US', EWR: 'US', BOS: 'US', IAD: 'US', MIA: 'US', ATL: 'US', ORD: 'US',
+  LAX: 'US', SFO: 'US', DFW: 'US', IAH: 'US', PHL: 'US', CLT: 'US',
   // Canadá
   YYZ: 'CA', YUL: 'CA', YVR: 'CA',
-  // Marrocos
-  CMN: 'MA', RAK: 'MA',
   // Emirados
   DXB: 'AE', AUH: 'AE',
   // Qatar
   DOH: 'QA',
+  // Arábia Saudita
+  RUH: 'SA', JED: 'SA',
   // Israel
   TLV: 'IL',
-  // Rússia
-  SVO: 'RU', DME: 'RU', LED: 'RU',
+  // Jordânia
+  AMM: 'JO',
+  // Kuwait
+  KWI: 'KW',
+  // Barém
+  BAH: 'BH',
+  // Omã
+  MCT: 'OM',
   // China
   PEK: 'CN', PVG: 'CN',
-  // Japão
-  NRT: 'JP', HND: 'JP',
+  // Hong Kong
+  HKG: 'HK',
   // Coreia do Sul
   ICN: 'KR',
+  // Japão
+  NRT: 'JP', KIX: 'JP', HND: 'JP',
+  // Singapura
+  SIN: 'SG',
+  // Tailândia
+  BKK: 'TH',
+  // Malásia
+  KUL: 'MY',
+  // Índia
+  DEL: 'IN', BOM: 'IN',
+  // Filipinas
+  MNL: 'PH',
+  // África do Sul
+  JNB: 'ZA', CPT: 'ZA',
+  // Nigéria
+  LOS: 'NG',
+  // Gana
+  ACC: 'GH',
+  // Senegal
+  DSS: 'SN',
   // Angola
   LAD: 'AO',
   // Moçambique
   MPM: 'MZ',
+  // Zâmbia
+  LUN: 'ZM',
+  // Quénia
+  NBO: 'KE',
   // Cabo Verde
   SID: 'CV', RAI: 'CV',
   // Argentina
@@ -90,36 +141,16 @@ const AIRPORT_COUNTRY: Record<string, string> = {
   BOG: 'CO',
   // México
   MEX: 'MX',
-  // Moldávia
-  KIV: 'MD', RMO: 'MD',
+  // Rússia
+  SVO: 'RU', DME: 'RU', LED: 'RU',
   // Ucrânia
   KBP: 'UA', IEV: 'UA',
+  // Moldávia
+  KIV: 'MD', RMO: 'MD',
   // Geórgia
   TBS: 'GE',
-  // Singapura
-  SIN: 'SG',
-  // Tailândia
-  BKK: 'TH',
-  // Índia
-  DEL: 'IN', BOM: 'IN',
-  // África do Sul
-  JNB: 'ZA', CPT: 'ZA',
   // Austrália
   SYD: 'AU', MEL: 'AU',
-  // Chipre
-  LCA: 'CY',
-  // Malta
-  MLA: 'MT',
-  // Egito
-  CAI: 'EG',
-  // Nigéria
-  LOS: 'NG',
-  // Islândia
-  KEF: 'IS',
-  // Eslovénia
-  LJU: 'SI',
-  // Quénia
-  NBO: 'KE',
   // Nova Zelândia
   AKL: 'NZ',
 };
