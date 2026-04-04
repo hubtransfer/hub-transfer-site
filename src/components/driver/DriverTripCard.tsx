@@ -18,6 +18,7 @@ import { generateDriverWhatsAppURL, generateDriverSmsURL } from "@/lib/driver-te
 import { getOriginFlag } from "@/lib/countryFlags";
 import { getDelayedTime, delayColor, computeFlightState } from "@/lib/flightUtils";
 import NoShowModal from "@/components/driver/NoShowModal";
+import SwipeBar from "@/components/driver/SwipeBar";
 
 
 
@@ -599,17 +600,30 @@ export default function DriverTripCard({
                 </button>
               )}
 
-              {/* Dar Baixa button (fallback for non-swipe) */}
-              {!isDone && (
-                <button type="button" onClick={() => onDarBaixa(viagem.id, viagem.rowIndex ?? "", cardId)}
-                  className="w-full h-14 rounded-2xl bg-[#7EAA6E]/15 border border-[#7EAA6E]/20 text-[#7EAA6E] font-mono text-base font-bold active:bg-[#7EAA6E]/25 transition-colors">
-                  ✅ Dar Baixa
-                </button>
-              )}
-              {isDone && (
-                <div className="w-full h-14 rounded-2xl bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-[#999] font-mono text-base">
-                  ✅ Concluída
-                </div>
+              {/* Swipe bar (driver mode) or Dar Baixa button (admin mode) */}
+              {mode === "driver" ? (
+                <SwipeBar
+                  tripId={cardId}
+                  rowIndex={viagem.rowIndex ?? ""}
+                  initialStatus={viagem.status}
+                  onStatusChange={(newStatus) => {
+                    if (newStatus === "FINALIZADO") onDarBaixa(viagem.id, viagem.rowIndex ?? "", cardId);
+                  }}
+                />
+              ) : (
+                <>
+                  {!isDone && (
+                    <button type="button" onClick={() => onDarBaixa(viagem.id, viagem.rowIndex ?? "", cardId)}
+                      className="w-full h-14 rounded-2xl bg-[#7EAA6E]/15 border border-[#7EAA6E]/20 text-[#7EAA6E] font-mono text-base font-bold active:bg-[#7EAA6E]/25 transition-colors">
+                      ✅ Dar Baixa
+                    </button>
+                  )}
+                  {isDone && (
+                    <div className="w-full h-14 rounded-2xl bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center text-[#999] font-mono text-base">
+                      ✅ Concluída
+                    </div>
+                  )}
+                </>
               )}
 
               {/* No-Show button */}
