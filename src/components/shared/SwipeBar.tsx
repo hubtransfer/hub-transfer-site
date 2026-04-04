@@ -10,7 +10,22 @@ interface SwipeBarProps {
   tripId: string;
   rowIndex: string;
   initialStatus?: string;
+  origin?: string;
+  destination?: string;
   onStatusChange?: (newStatus: TripStatus) => void;
+}
+
+/** Haversine distance in meters */
+function haversine(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function isAirport(text: string): boolean {
+  return /aeroporto|airport|aeropuerto|aéroport|flughafen/i.test(text || "");
 }
 
 const STEPS: { from: TripStatus; to: TripStatus; label: string; color: string; textColor: string }[] = [
@@ -58,12 +73,14 @@ const PlaneIcon = ({ size = 22, color = "#fff" }: { size?: number; color?: strin
   </svg>
 );
 
-export default function SwipeBar({ tripId, rowIndex, initialStatus, onStatusChange }: SwipeBarProps) {
+export default function SwipeBar({ tripId, rowIndex, initialStatus, origin, destination, onStatusChange }: SwipeBarProps) {
   const [status, setStatus] = useState<TripStatus>(() => mapInitialStatus(initialStatus || ""));
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [sending, setSending] = useState(false);
   const [flash, setFlash] = useState(false);
+  const [gpsBlocked, setGpsBlocked] = useState(false);
+  const [distanceConfirm, setDistanceConfirm] = useState<{ dist: number; cb: () => void } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const startXRef = useRef(0);
   const widthRef = useRef(0);
@@ -79,7 +96,11 @@ export default function SwipeBar({ tripId, rowIndex, initialStatus, onStatusChan
   // Request GPS permission on mount
   useEffect(() => {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(() => {}, () => {}, { enableHighAccuracy: false, timeout: 5000 });
+      navigator.geolocation.getCurrentPosition(
+        () => setGpsBlocked(false),
+        () => setGpsBlocked(true),
+        { enableHighAccuracy: false, timeout: 5000 }
+      );
     }
   }, []);
 
@@ -97,24 +118,32 @@ export default function SwipeBar({ tripId, rowIndex, initialStatus, onStatusChan
     setDragX(Math.max(0, Math.min(clientX - startXRef.current, widthRef.current)));
   }, [dragging]);
 
+  const doConfirm = useCallback(async () => {
+    if (!step) return;
+    setSending(true);
+    try { navigator.vibrate?.(200); } catch { /* */ }
+    setFlash(true);
+    setTimeout(() => setFlash(false), 400);
+    const coords = await getGPS();
+    await sendStatus(rowIndex, step.to, coords?.lat, coords?.lng);
+    setStatus(step.to);
+    onStatusChange?.(step.to);
+    setSending(false);
+  }, [step, rowIndex, onStatusChange]);
+
   const onEnd = useCallback(async () => {
     if (!dragging || !step) { setDragging(false); setDragX(0); return; }
     setDragging(false);
     const pct = dragX / widthRef.current;
 
     if (pct >= THRESHOLD) {
-      setSending(true);
-      try { navigator.vibrate?.(200); } catch { /* */ }
-      setFlash(true);
-      setTimeout(() => setFlash(false), 400);
-      const coords = await getGPS();
-      await sendStatus(rowIndex, step.to, coords?.lat, coords?.lng);
-      setStatus(step.to);
-      onStatusChange?.(step.to);
-      setSending(false);
+      // Distance validation for NO_LOCAL and FINALIZADO
+      // (We don't have reference coords from backend, so this is a soft check)
+      // For now, proceed directly — distance check requires coords in origin/destination fields
+      await doConfirm();
     }
     setDragX(0);
-  }, [dragging, dragX, step, rowIndex, onStatusChange]);
+  }, [dragging, dragX, step, doConfirm]);
 
   // Touch
   const onTouchStart = useCallback((e: React.TouchEvent) => onStart(e.touches[0].clientX), [onStart]);
@@ -151,8 +180,16 @@ export default function SwipeBar({ tripId, rowIndex, initialStatus, onStatusChan
 
   if (!step) return null;
 
+  const showGpsBanner = gpsBlocked && !isDone;
+
   return (
     <div className="space-y-1.5">
+      {/* GPS blocked banner */}
+      {showGpsBanner && (
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2 text-center">
+          <p className="text-xs text-amber-400 font-mono">📍 Localização necessária para confirmar viagens. Active o GPS.</p>
+        </div>
+      )}
       {/* Bar */}
       <div ref={containerRef} className="relative w-full h-12 rounded-full select-none overflow-hidden"
         style={{

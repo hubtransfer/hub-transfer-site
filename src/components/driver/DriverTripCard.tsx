@@ -298,9 +298,17 @@ export default function DriverTripCard({
       {/*  COLLAPSED VIEW (always visible)                */}
       {/* ════════════════════════════════════════════════ */}
       <div className="cursor-pointer" onClick={toggleExpand}>
-        {/* L1: Source · Tipo */}
-        <div className="px-4 pt-3">
+        {/* L1: Source · Tipo + Driver Status Badge */}
+        <div className="px-4 pt-3 flex items-center justify-between">
           <span className="font-semibold uppercase font-mono leading-none" style={{ fontSize: "0.65rem", letterSpacing: "0.5px", color: c.hex }}>{sourceLabel} · {tipo}</span>
+          {viagem.statusMotorista && viagem.statusMotorista !== "AGUARDANDO" && (
+            <span className="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded" style={{
+              backgroundColor: viagem.statusMotorista === "NO_LOCAL" ? "#3B82F620" : viagem.statusMotorista === "EM_VIAGEM" ? "#22C55E20" : viagem.statusMotorista === "FINALIZADO" ? "#D4A01720" : "#6B728020",
+              color: viagem.statusMotorista === "NO_LOCAL" ? "#3B82F6" : viagem.statusMotorista === "EM_VIAGEM" ? "#22C55E" : viagem.statusMotorista === "FINALIZADO" ? "#D4A017" : "#6B7280",
+            }}>
+              {viagem.statusMotorista === "NO_LOCAL" ? "📍 No local" : viagem.statusMotorista === "EM_VIAGEM" ? "🚗 Em viagem" : viagem.statusMotorista === "FINALIZADO" ? "✅ Concluído" : viagem.statusMotorista}
+            </span>
+          )}
         </div>
 
         {/* L2: ETA time | name (clickable→nameplate) | driver+price */}
@@ -604,7 +612,9 @@ export default function DriverTripCard({
               <SwipeBar
                 tripId={cardId}
                 rowIndex={viagem.rowIndex ?? ""}
-                initialStatus={viagem.status}
+                initialStatus={viagem.statusMotorista || viagem.status}
+                origin={viagem.origin}
+                destination={viagem.destination}
                 onStatusChange={(newStatus) => {
                   if (newStatus === "FINALIZADO") onDarBaixa(viagem.id, viagem.rowIndex ?? "", cardId);
                 }}

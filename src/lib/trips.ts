@@ -76,6 +76,7 @@ export interface HubViagem {
   platform: string;
   concluida: boolean;
   status?: string;
+  statusMotorista?: string;  // BD(56): AGUARDANDO/NO_LOCAL/EM_VIAGEM/FINALIZADO
 }
 
 export interface Driver {
