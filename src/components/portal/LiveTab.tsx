@@ -284,13 +284,7 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
                   )}
 
                   {/* Driver progress bar */}
-                  <DriverProgressBar
-                    statusMotorista={v.statusMotorista}
-                    depTime={depTime}
-                    depActual={depActual}
-                    arrOriginal={arrOriginal}
-                    etaChegada={etaChegada}
-                  />
+                  <DriverProgressBar statusMotorista={v.statusMotorista} />
 
                   {/* Pickup */}
                   <p className="text-center font-mono text-sm py-1" style={{ color: "#D4A017" }}>🚗 Pickup: {hora}</p>
