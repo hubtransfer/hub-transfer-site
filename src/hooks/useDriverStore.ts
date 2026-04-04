@@ -89,7 +89,7 @@ export function useDriverStore(): DriverStore {
     try {
       const dateParam = selectedDateRef.current || '';
       const url = `${gasUrl}?action=viagens&t=${Date.now()}${dateParam ? `&data=${encodeURIComponent(dateParam)}` : ''}`;
-      const res = await fetch(url, { redirect: 'follow' });
+      const res = await fetch(url, { redirect: 'follow', cache: 'no-store', headers: { 'Cache-Control': 'no-cache, no-store', 'Pragma': 'no-cache' } });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const json = await res.json();
       const raw: HubViagem[] = Array.isArray(json) ? json : (json.viagens || []);

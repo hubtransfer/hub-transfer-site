@@ -212,20 +212,16 @@ export function useTripsStore(): TripsStore {
       setHubCentralSyncMsg(`${drvCache.data.length} motoristas (cache)`);
     }
 
-    // Load viagens from cache immediately
+    // Load viagens from cache for instant display, then ALWAYS fetch fresh
     const dateKey = selectedDate || "today";
     const vCache = readCache<HubViagem[]>(LS_ADMIN_VIAGENS_CACHE, dateKey);
     if (vCache) {
       setHubViagens(vCache.data);
       setHubViagensSyncStatus("online");
       setHubViagensSyncMsg(`${vCache.data.length} viagens (cache)`);
-      // If cache is fresh (<2min), skip network fetch
-      if (vCache.ageMs < CACHE_FRESH) {
-        return;
-      }
     }
 
-    // Sync from network (drivers + viagens in parallel)
+    // Always sync from network — flight data changes every 5-15 min
     syncDriversImpl(false);
     if (storedUrl) {
       syncViagensImpl(false, storedUrl);
@@ -733,7 +729,10 @@ export function useTripsStore(): TripsStore {
         dateParam ? `&data=${encodeURIComponent(dateParam)}` : ""
       }`;
 
-      const res = await fetch(fetchUrl);
+      const res = await fetch(fetchUrl, {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache, no-store", "Pragma": "no-cache" },
+      });
       const data = await res.json();
 
       let viagens: HubViagem[] = [];
