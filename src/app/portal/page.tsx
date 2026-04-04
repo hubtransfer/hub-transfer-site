@@ -10,10 +10,11 @@ import FinancialSummary from "@/components/portal/FinancialSummary";
 import ConfigPanel from "@/components/portal/ConfigPanel";
 import ClearDataPanel from "@/components/portal/ClearDataPanel";
 import StatusToast from "@/components/portal/StatusToast";
+import LiveTab from "@/components/portal/LiveTab";
 import type { Transfer } from "@/lib/transfers";
 import { getSession, fetchHotelUrl, saveHotelUrl } from "@/lib/auth";
 
-type PortalTab = "form" | "viagens";
+type PortalTab = "form" | "viagens" | "live";
 
 export default function PortalPage() {
   const store = useTransferStore();
@@ -161,6 +162,19 @@ export default function PortalPage() {
               )}
               {activeTab === "viagens" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#F0D030]" />}
             </button>
+            <button
+              onClick={() => setActiveTab("live")}
+              className={`px-5 py-2.5 text-sm font-bold transition-colors relative flex items-center gap-1.5 ${
+                activeTab === "live" ? "text-[#F0D030]" : "text-[#666] hover:text-[#A0A0A0]"
+              }`}
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600" />
+              </span>
+              LIVE
+              {activeTab === "live" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#F0D030]" />}
+            </button>
           </div>
         </div>
       </header>
@@ -265,6 +279,15 @@ export default function PortalPage() {
             />
           </div>
         </div>
+      )}
+
+      {/* ─── TAB 3: LIVE ─── */}
+      {activeTab === "live" && (
+        <LiveTab
+          services={store.services}
+          onRefresh={() => store.loadFromSheets()}
+          hotelName={hotelName}
+        />
       )}
 
       {/* Admin Toggle */}
