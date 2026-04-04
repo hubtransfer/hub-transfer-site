@@ -19,6 +19,7 @@ import { getOriginFlag } from "@/lib/countryFlags";
 import { getDelayedTime, delayColor, computeFlightState } from "@/lib/flightUtils";
 import NoShowModal from "@/components/driver/NoShowModal";
 import SwipeBar from "@/components/shared/SwipeBar";
+import DriverProgressBar from "@/components/shared/DriverProgressBar";
 
 
 
@@ -341,8 +342,26 @@ export default function DriverTripCard({
                 <span className="font-mono text-[10px] text-[#EF4444] font-bold">❌ CANCELADO</span>
               </div>
             ) : (
-              <>
-                {/* Bar — flag+IATA left | thin bar+plane | flag+IATA right */}
+              <div className="space-y-1">
+                {/* L1: Times — dep left, arr right */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    {hasDepDiff ? (
+                      <><span className="font-mono text-xs line-through text-gray-500">{depTime}</span><span className="font-mono text-sm font-semibold text-white">→ {depActual}</span></>
+                    ) : depTime ? (
+                      <span className="font-mono text-xs text-gray-400">{depTime}</span>
+                    ) : null}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {hasArrDiff ? (
+                      <><span className="font-mono text-xs line-through text-gray-500">{arrOriginal}</span><span className="font-mono text-sm font-semibold text-white">→ {etaChegada}</span></>
+                    ) : (
+                      <span className="font-mono text-xs text-gray-400">{etaChegada || viagem.arrTime || ""}</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* L2: Flight bar — flag+IATA | progress | flag+IATA */}
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <span className="text-sm leading-none">{originFlag || "🌍"}</span>
@@ -362,29 +381,14 @@ export default function DriverTripCard({
                   </div>
                 </div>
 
-                {/* L5: Dep times left | Arr times right */}
-                <div className="flex items-center justify-between mt-1">
-                  <div className="flex items-center gap-1">
-                    {hasDepDiff ? (
-                      <><span className="font-mono text-xs line-through text-gray-500">{depTime}</span><span className="font-mono text-sm font-semibold text-white">→ {depActual}</span></>
-                    ) : depTime ? (
-                      <span className="font-mono text-xs text-gray-400">{depTime}</span>
-                    ) : null}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {hasArrDiff ? (
-                      <><span className="font-mono text-xs line-through text-gray-500">{arrOriginal}</span><span className="font-mono text-sm font-semibold text-white">→ {etaChegada}</span></>
-                    ) : (
-                      <span className="font-mono text-xs text-gray-400">{etaChegada || viagem.arrTime || ""}</span>
-                    )}
-                  </div>
-                </div>
+                {/* L3: Driver progress bar */}
+                <DriverProgressBar statusMotorista={viagem.statusMotorista} />
 
-                {/* L6: Pickup */}
+                {/* L4: Pickup */}
                 {hora && (
-                  <p className="text-center font-mono text-sm mt-1.5" style={{ color: "#D4A017" }}>🚗 Pickup: {adjustedPickup || hora}</p>
+                  <p className="text-center font-mono text-sm" style={{ color: "#D4A017" }}>🚗 Pickup: {adjustedPickup || hora}</p>
                 )}
-              </>
+              </div>
             )}
           </div>
         )}

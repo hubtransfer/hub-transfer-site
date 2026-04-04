@@ -245,9 +245,24 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
                     <span className="font-mono text-[10px]" style={{ color: flight.color }}>{flight.statusText}</span>
                   </div>
 
-                  {/* Bar: origin → progress → destination */}
+                  {/* Flight + driver bars block */}
                   {!flight.noData && !flight.cancelled && (
-                    <div className="px-4 pb-1">
+                    <div className="px-4 pb-1 space-y-1">
+                      {/* Times — dep left, arr right */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          {hasDepDiff ? (
+                            <><span className="font-mono text-xs line-through text-gray-500">{depTime}</span><span className="font-mono text-sm font-semibold text-white">→ {depActual}</span></>
+                          ) : depTime ? <span className="font-mono text-xs text-gray-400">{depTime}</span> : null}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {hasArrDiff ? (
+                            <><span className="font-mono text-xs line-through text-gray-500">{arrOriginal}</span><span className="font-mono text-sm font-semibold text-white">→ {etaChegada}</span></>
+                          ) : <span className="font-mono text-xs text-gray-400">{etaChegada || v.arrTime || ""}</span>}
+                        </div>
+                      </div>
+
+                      {/* Flight bar */}
                       <div className="flex items-center gap-2">
                         <div className="flex items-center gap-1 flex-shrink-0">
                           <span className="text-sm leading-none">{originFlag || "🌍"}</span>
@@ -268,23 +283,11 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
                           <span className="font-mono text-sm font-bold text-[#D4A017]">LIS</span>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between mt-1">
-                        <div className="flex items-center gap-1">
-                          {hasDepDiff ? (
-                            <><span className="font-mono text-xs line-through text-gray-500">{depTime}</span><span className="font-mono text-sm font-semibold text-white">→ {depActual}</span></>
-                          ) : depTime ? <span className="font-mono text-xs text-gray-400">{depTime}</span> : null}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          {hasArrDiff ? (
-                            <><span className="font-mono text-xs line-through text-gray-500">{arrOriginal}</span><span className="font-mono text-sm font-semibold text-white">→ {etaChegada}</span></>
-                          ) : <span className="font-mono text-xs text-gray-400">{etaChegada || v.arrTime || ""}</span>}
-                        </div>
-                      </div>
+
+                      {/* Driver progress bar */}
+                      <DriverProgressBar statusMotorista={v.statusMotorista} />
                     </div>
                   )}
-
-                  {/* Driver progress bar */}
-                  <DriverProgressBar statusMotorista={v.statusMotorista} />
 
                   {/* Pickup */}
                   <p className="text-center font-mono text-sm py-1" style={{ color: "#D4A017" }}>🚗 Pickup: {hora}</p>
