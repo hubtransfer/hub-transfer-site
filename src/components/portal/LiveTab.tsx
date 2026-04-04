@@ -2,120 +2,149 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import type { Transfer } from "@/lib/transfers";
+import type { HubViagem } from "@/lib/trips";
+import { HUB_CENTRAL_URL, detectTipo, cleanHora, todayStr } from "@/lib/trips";
 import { getOriginFlag } from "@/lib/countryFlags";
+import { computeFlightState, getDelayedTime, delayColor } from "@/lib/flightUtils";
 
 interface LiveTabProps {
-  services: Transfer[];
+  services: Transfer[];     // hotel's own transfer data
   onRefresh: () => void;
   hotelName: string;
+  hotelCode: string;
 }
 
-// Extract airline IATA from flight number (TP1351 → TP, EZY3321 → EZY)
-function extractAirline(flight: string): string {
-  if (!flight) return "";
-  const m = flight.trim().toUpperCase().match(/^([A-Z]{2,3})\d/);
-  return m ? m[1] : "";
-}
+// ─── Helpers ───
 
-// Detect if origin is airport (CHEGADA)
-function isArrival(origem: string): boolean {
-  return (origem || "").toLowerCase().includes("aeroporto") || (origem || "").toLowerCase().includes("airport");
-}
-
-// Trip type detection
 function getTripType(s: Transfer): "CHEGADA" | "RECOLHA" | "TOUR" {
   const tipo = (s.tipoServico || "").toLowerCase();
   if (tipo.includes("tour") || tipo.includes("private")) return "TOUR";
-  if (isArrival(s.origem)) return "CHEGADA";
+  if ((s.origem || "").toLowerCase().includes("aeroporto")) return "CHEGADA";
   return "RECOLHA";
 }
 
-const TYPE_COLORS = {
-  CHEGADA: "#F5C518",
-  RECOLHA: "#3B82F6",
-  TOUR: "#A855F7",
-};
+const TYPE_COLORS: Record<string, string> = { CHEGADA: "#F5C518", RECOLHA: "#3B82F6", TOUR: "#A855F7" };
 
-const STATUS_CONFIG: Record<string, { label: string; icon: string; color: string; order: number }> = {
-  Solicitado: { label: "Aguardando", icon: "⏳", color: "#6B7280", order: 2 },
-  Confirmado: { label: "Confirmado", icon: "✅", color: "#22C55E", order: 1 },
-  Finalizado: { label: "Concluído", icon: "🏁", color: "#3B82F6", order: 3 },
-  Cancelado: { label: "Cancelado", icon: "❌", color: "#EF4444", order: 4 },
-};
+const STATUS_ORDER: Record<string, number> = { Confirmado: 1, Solicitado: 2, Finalizado: 3, Cancelado: 4 };
 
-function getStatus(status: string) {
-  return STATUS_CONFIG[status] || { label: status, icon: "❓", color: "#888", order: 5 };
-}
-
-// WhatsApp message templates
-const MSG_TEMPLATES: Record<string, (name: string) => string> = {
+const MSG_TEMPLATES: Record<string, (n: string) => string> = {
   EN: (n) => `Dear ${n}, your transfer driver is ready! Please proceed to the arrivals exit. Welcome to Lisbon! 🇵🇹`,
   PT: (n) => `Olá ${n}, o seu motorista está pronto! Dirija-se à saída de chegadas. Bem-vindo a Lisboa! 🇵🇹`,
   ES: (n) => `Hola ${n}, su conductor está listo! Diríjase a la salida de llegadas. ¡Bienvenido a Lisboa! 🇵🇹`,
   FR: (n) => `Bonjour ${n}, votre chauffeur est prêt ! Rendez-vous à la sortie des arrivées. Bienvenue à Lisbonne ! 🇵🇹`,
   IT: (n) => `Ciao ${n}, il tuo autista è pronto! Dirigiti all'uscita arrivi. Benvenuto a Lisbona! 🇵🇹`,
-  DE: (n) => `Hallo ${n}, Ihr Fahrer ist bereit! Bitte gehen Sie zum Ankunftsausgang. Willkommen in Lissabon! 🇵🇹`,
+  DE: (n) => `Hallo ${n}, Ihr Fahrer ist bereit! Willkommen in Lissabon! 🇵🇹`,
 };
 
-function getWhatsAppUrl(phone: string, name: string, lang: string = "EN"): string {
+function waUrl(phone: string, name: string, lang: string = "EN"): string {
   const clean = phone.replace(/[^+\d]/g, "").replace(/^\+/, "");
-  const template = MSG_TEMPLATES[lang.toUpperCase()] || MSG_TEMPLATES.EN;
-  return `https://wa.me/${clean}?text=${encodeURIComponent(template(name.split(" ")[0]))}`;
+  const fn = MSG_TEMPLATES[lang.toUpperCase()] || MSG_TEMPLATES.EN;
+  return `https://wa.me/${clean}?text=${encodeURIComponent(fn(name.split(" ")[0]))}`;
 }
 
 // ─── Component ───
 
-export default function LiveTab({ services, onRefresh, hotelName }: LiveTabProps) {
+export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: LiveTabProps) {
   const [lastUpdate, setLastUpdate] = useState("");
   const [refreshing, setRefreshing] = useState(false);
-  const [qrModal, setQrModal] = useState<{ name: string; phone: string } | null>(null);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [qrModal, setQrModal] = useState<{ name: string; phone: string; lang: string } | null>(null);
 
-  // Today filter
-  const today = new Date().toISOString().slice(0, 10);
-  const todayParts = today.split("-");
-  const todayFmt = `${todayParts[2]}/${todayParts[1]}/${todayParts[0]}`;
+  // HUB Central flight data (separate fetch)
+  const [hubViagens, setHubViagens] = useState<HubViagem[]>([]);
+  const [hubLoading, setHubLoading] = useState(true);
 
-  const todayServices = useMemo(() =>
-    services.filter((s) => s.data === today || s.data === todayFmt),
-    [services, today, todayFmt]
-  );
+  // Tick for flight progress recalc
+  const [tick, setTick] = useState(0);
 
-  // Split: flights (CHEGADA with voo) vs other transfers
-  const flights = useMemo(() =>
-    todayServices
-      .filter((s) => s.numeroVoo?.trim() && getTripType(s) === "CHEGADA")
-      .sort((a, b) => {
-        const sa = getStatus(a.status).order;
-        const sb = getStatus(b.status).order;
-        return sa !== sb ? sa - sb : (a.horaPickup || "").localeCompare(b.horaPickup || "");
-      }),
-    [todayServices]
-  );
+  // Fetch from HUB Central
+  const fetchHubCentral = useCallback(async () => {
+    try {
+      const url = `${HUB_CENTRAL_URL}?action=viagens&t=${Date.now()}`;
+      const res = await fetch(url, { redirect: "follow" });
+      const data = await res.json();
+      let viagens: HubViagem[] = [];
+      if (Array.isArray(data)) viagens = data;
+      else if (data?.viagens && Array.isArray(data.viagens)) viagens = data.viagens;
+      setHubViagens(viagens);
+    } catch (err) {
+      console.error("[LiveTab] HUB Central fetch error:", err);
+    }
+  }, []);
 
-  const otherTransfers = useMemo(() =>
-    todayServices
-      .filter((s) => !s.numeroVoo?.trim() || getTripType(s) !== "CHEGADA")
-      .sort((a, b) => (a.horaPickup || "").localeCompare(b.horaPickup || "")),
-    [todayServices]
-  );
+  // Initial load + auto-refresh (60s) + flight tick (30s)
+  useEffect(() => {
+    setHubLoading(true);
+    fetchHubCentral().finally(() => setHubLoading(false));
+    onRefresh();
+    setLastUpdate(new Date().toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
 
-  // Stats
-  const totalGuests = todayServices.reduce((sum, s) => sum + (s.numeroPessoas || 1), 0);
+    const syncInterval = setInterval(async () => {
+      setRefreshing(true);
+      await fetchHubCentral();
+      await onRefresh();
+      setLastUpdate(new Date().toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+      setRefreshing(false);
+    }, 60000);
 
-  // Auto-refresh
+    const tickInterval = setInterval(() => setTick((t) => t + 1), 30000);
+
+    return () => { clearInterval(syncInterval); clearInterval(tickInterval); };
+  }, [fetchHubCentral, onRefresh]);
+
   const doRefresh = useCallback(async () => {
     setRefreshing(true);
+    await fetchHubCentral();
     await onRefresh();
     setLastUpdate(new Date().toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
     setRefreshing(false);
-  }, [onRefresh]);
+  }, [fetchHubCentral, onRefresh]);
 
-  useEffect(() => {
-    setLastUpdate(new Date().toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
-    intervalRef.current = setInterval(doRefresh, 60000);
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [doRefresh]);
+  // Filter HUB Central viagens: today + matching hotel
+  const hotelFlights = useMemo(() => {
+    const hName = (hotelName || "").toLowerCase();
+    const hCode = (hotelCode || "").toLowerCase();
+    const today = todayStr();
+    void tick; // force recalc
+
+    return hubViagens.filter((v) => {
+      // Must have flight number
+      if (!v.flight?.trim()) return false;
+      // Must be today
+      const vDate = (v.date || "").trim();
+      if (vDate && vDate !== today) {
+        // Also check ISO format
+        const [dd, mm, yy] = today.split("/");
+        if (vDate !== `${yy}-${mm}-${dd}`) return false;
+      }
+      // Must match this hotel (check destination, origin, platform, id)
+      const all = `${v.destination} ${v.origin} ${v.platform} ${v.id}`.toLowerCase();
+      if (hName && (all.includes(hName) || hName.includes("empire") && all.includes("empire"))) return true;
+      if (hCode && all.includes(hCode)) return true;
+      // Broad match for hotel names
+      if (hName.includes("empire lisbon") && all.includes("empire lisbon")) return true;
+      if (hName.includes("empire marques") && all.includes("empire marques")) return true;
+      if (hName.includes("gota") && all.includes("gota")) return true;
+      if (hName.includes("lioz") && all.includes("lioz")) return true;
+      return false;
+    }).sort((a, b) => (a.pickupTime || "").localeCompare(b.pickupTime || ""));
+  }, [hubViagens, hotelName, hotelCode, tick]);
+
+  // Hotel's own transfers (today)
+  const todayStr2 = new Date().toISOString().slice(0, 10);
+  const todayParts = todayStr2.split("-");
+  const todayFmt = `${todayParts[2]}/${todayParts[1]}/${todayParts[0]}`;
+  const todayTransfers = useMemo(() =>
+    services.filter((s) => s.data === todayStr2 || s.data === todayFmt)
+      .filter((s) => !s.numeroVoo?.trim() || getTripType(s) !== "CHEGADA")
+      .sort((a, b) => (a.horaPickup || "").localeCompare(b.horaPickup || "")),
+    [services, todayStr2, todayFmt]
+  );
+
+  const totalGuests = useMemo(() => {
+    const fromHub = hotelFlights.reduce((s, v) => s + (parseInt(v.pax || "1") || 1), 0);
+    const fromHotel = todayTransfers.reduce((s, t) => s + (t.numeroPessoas || 1), 0);
+    return fromHub + fromHotel;
+  }, [hotelFlights, todayTransfers]);
 
   return (
     <div className="w-full px-4 py-5 animate-[fadeSlideIn_200ms_ease]">
@@ -130,118 +159,152 @@ export default function LiveTab({ services, onRefresh, hotelName }: LiveTabProps
           <span className="text-xs text-[#666] font-mono">{hotelName}</span>
         </div>
         <div className="flex items-center gap-3">
-          {refreshing && <span className="w-3 h-3 border-2 border-[#F0D030]/30 border-t-[#F0D030] rounded-full animate-spin" />}
-          <span className="text-[10px] text-[#888] font-mono">Actualizado: {lastUpdate}</span>
-          <button onClick={doRefresh} className="text-[10px] text-[#F0D030] font-mono hover:text-[#D4B828] cursor-pointer font-bold">↻ Sync</button>
+          {(refreshing || hubLoading) && <span className="w-3 h-3 border-2 border-[#F0D030]/30 border-t-[#F0D030] rounded-full animate-spin" />}
+          <span className="text-[10px] text-[#888] font-mono">Sync: {lastUpdate}</span>
+          <button onClick={doRefresh} className="text-[10px] text-[#F0D030] font-mono hover:text-[#D4B828] cursor-pointer font-bold">↻</button>
         </div>
       </div>
 
-      {/* ═══ VOOS ═══ */}
-      {flights.length > 0 && (
-        <div className="mb-8">
-          <h3 className="text-[#D4A017] uppercase tracking-wider text-xs font-bold mb-3 font-mono">✈️ Voos de hoje — {flights.length}</h3>
+      {/* ═══ VOOS (from HUB Central) ═══ */}
+      <div className="mb-8">
+        <h3 className="text-[#D4A017] uppercase tracking-wider text-xs font-bold mb-3 font-mono">✈️ Voos — {hotelFlights.length}</h3>
+        {hubLoading ? (
+          <div className="space-y-2">{[1,2].map(i => <div key={i} className="h-24 bg-[#1A1A1A] rounded-xl animate-pulse" />)}</div>
+        ) : hotelFlights.length === 0 ? (
+          <p className="text-[#666] text-sm font-mono text-center py-6">Nenhum voo para hoje</p>
+        ) : (
           <div className="space-y-2">
-            {flights.map((f) => {
-              const st = getStatus(f.status);
-              const airline = extractAirline(f.numeroVoo);
-              const originFlag = airline ? getOriginFlag(airline === "TP" ? "LIS" : "") : "";
-              // Shorten destination for display
-              const destShort = (f.destino || "").replace("Aeroporto de Lisboa", "Aeroporto").replace(/,.*$/, "");
-              const isComplete = f.status === "Finalizado";
+            {hotelFlights.map((v) => {
+              const tipo = detectTipo(v.origin || "", v.flight || "", v.type);
+              const hora = cleanHora(v.pickupTime || "");
+              const depIata = (v.depIata || "").toUpperCase().trim();
+              const originFlag = getOriginFlag(depIata);
+              const delayMin = parseInt(v.atrasoMin || "0", 10) || 0;
+              const depDelayMin = parseInt(v.depDelay || "0", 10) || 0;
+              const etaChegada = (v.etaChegada || "").trim();
+              const arrOriginal = (v.arrOriginal || "").trim();
+              const depTime = (v.depTime || "").trim();
+              const depActual = (v.depActual || "").trim();
+              const hasDepDiff = depActual && depTime && depActual !== depTime;
+              const hasArrDiff = arrOriginal && etaChegada && arrOriginal !== etaChegada;
+              const isLanded = (v.statusVoo || "").toUpperCase().includes("ATERRISADO") || (v.statusVoo || "").toUpperCase().includes("LANDED");
+              const displayTime = isLanded ? (v.arrTime || etaChegada || hora) : (etaChegada || arrOriginal || v.arrTime || hora);
+
+              const flight = computeFlightState(
+                v.depTime || "", v.arrTime || "", hora, v.statusVoo || "",
+                delayMin, v.etaChegada || "", v.depActualFull || v.depTimeFull || "", v.etaChegadaFull || ""
+              );
 
               return (
-                <div key={f.id}
-                  className={`bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl overflow-hidden ${isComplete ? "opacity-60" : ""}`}
-                  style={{ borderLeftWidth: "3px", borderLeftColor: st.color }}>
+                <div key={v.id || v.client} className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl overflow-hidden"
+                  style={{ borderLeftWidth: "3px", borderLeftColor: flight.cancelled ? "#EF4444" : isLanded ? "#22C55E" : "#F5C518" }}>
 
-                  {/* Row 1: Type + Status */}
-                  <div className="px-4 pt-3 flex items-center justify-between">
-                    <span className="text-[10px] font-bold uppercase font-mono" style={{ color: TYPE_COLORS.CHEGADA }}>CHEGADA</span>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] font-mono" style={{ color: st.color }}>{st.icon} {st.label}</span>
-                    </div>
+                  {/* Type */}
+                  <div className="px-4 pt-3">
+                    <span className="text-[10px] font-bold uppercase font-mono" style={{ color: TYPE_COLORS[tipo] || "#F5C518" }}>
+                      {tipo}
+                    </span>
                   </div>
 
-                  {/* Row 2: Time + Name + Pax */}
+                  {/* Time + Name + Pax */}
                   <div className="flex items-center gap-3 px-4 py-1">
-                    <span className="flex-shrink-0 font-bold font-mono text-2xl" style={{ color: st.color === "#22C55E" ? "#22C55E" : TYPE_COLORS.CHEGADA }}>
-                      {f.horaPickup}
+                    <span className="flex-shrink-0 font-bold font-mono text-2xl" style={{ color: isLanded ? "#22C55E" : "#F5C518" }}>
+                      {displayTime}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xl font-bold text-white truncate">{f.nomeCliente}</p>
-                      <p className="text-xs text-[#888] truncate">→ {destShort}</p>
+                      <p className="text-xl font-bold text-white truncate">{v.client}</p>
                     </div>
-                    <div className="flex-shrink-0 text-right">
-                      <span className="text-xs text-[#D0D0D0] font-mono">{f.numeroPessoas} pax</span>
-                      {f.numeroBagagens > 0 && <span className="text-xs text-[#888] font-mono block">{f.numeroBagagens} bag</span>}
-                    </div>
+                    <span className="text-xs text-[#D0D0D0] font-mono flex-shrink-0">{v.pax || "1"} pax</span>
                   </div>
 
-                  {/* Row 3: Flight number + link */}
-                  <div className="px-4 py-2 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {originFlag && <span className="text-sm">{originFlag}</span>}
-                      <a href={`https://www.google.com/search?q=flight+${encodeURIComponent(f.numeroVoo)}`}
-                        target="_blank" rel="noopener noreferrer"
-                        className="font-mono text-sm text-amber-400 hover:text-amber-300 font-bold underline cursor-pointer">
-                        {f.numeroVoo}
-                      </a>
+                  {/* Flight info */}
+                  <div className="px-4 py-1 flex items-center gap-2">
+                    <a href={`https://www.google.com/search?q=flight+${encodeURIComponent(v.flight)}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="font-mono text-sm text-amber-400 hover:text-amber-300 font-bold underline cursor-pointer">{v.flight}</a>
+                    {depDelayMin > 0 && (
+                      <span className="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded text-xs font-mono font-bold">+{depDelayMin}min partida</span>
+                    )}
+                    <span className="font-mono text-[10px]" style={{ color: flight.color }}>{flight.statusText}</span>
+                  </div>
+
+                  {/* Bar: origin → progress → destination */}
+                  {!flight.noData && !flight.cancelled && (
+                    <div className="px-4 pb-1">
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <span className="text-sm leading-none">{originFlag || "🌍"}</span>
+                          <span className="font-mono text-sm font-bold text-[#D4A017]">{depIata || "???"}</span>
+                        </div>
+                        <div className="flex-1 relative" style={{ height: "3px", borderRadius: "2px", backgroundColor: "#333" }}>
+                          <div className="h-full transition-all duration-[2s] ease-in-out" style={{ width: `${Math.max(flight.progress, 2)}%`, backgroundColor: flight.color, borderRadius: "2px" }} />
+                          {!flight.cancelled && flight.progress > 0 && flight.progress < 100 && (
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill={flight.color}
+                              className="absolute top-1/2 -translate-y-1/2 transition-all duration-[2s] ease-in-out"
+                              style={{ left: `calc(${Math.max(flight.progress, 2)}% - 6px)`, filter: "drop-shadow(0 0 2px rgba(0,0,0,.7))" }}>
+                              <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" transform="rotate(90 12 12)"/>
+                            </svg>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <span className="text-sm leading-none">🇵🇹</span>
+                          <span className="font-mono text-sm font-bold text-[#D4A017]">LIS</span>
+                        </div>
+                      </div>
+                      {/* Times under bar */}
+                      <div className="flex items-center justify-between mt-1">
+                        <div className="flex items-center gap-1">
+                          {hasDepDiff ? (
+                            <><span className="font-mono text-xs line-through text-gray-500">{depTime}</span><span className="font-mono text-sm font-semibold text-white">→ {depActual}</span></>
+                          ) : depTime ? (
+                            <span className="font-mono text-xs text-gray-400">{depTime}</span>
+                          ) : null}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {hasArrDiff ? (
+                            <><span className="font-mono text-xs line-through text-gray-500">{arrOriginal}</span><span className="font-mono text-sm font-semibold text-white">→ {etaChegada}</span></>
+                          ) : (
+                            <span className="font-mono text-xs text-gray-400">{etaChegada || v.arrTime || ""}</span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    {/* WhatsApp button */}
-                    {f.contacto && (f.status === "Confirmado" || f.status === "Finalizado") && (
-                      <button
-                        onClick={() => setQrModal({ name: f.nomeCliente, phone: f.contacto })}
-                        className="flex items-center gap-1 bg-[#25d366]/15 text-[#25d366] px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer hover:bg-[#25d366]/25 transition-colors">
+                  )}
+
+                  {/* Pickup + WhatsApp */}
+                  <div className="px-4 pb-3 pt-1 flex items-center justify-between">
+                    <span className="font-mono text-sm" style={{ color: "#D4A017" }}>🚗 Pickup: {hora}</span>
+                    {v.phone && (isLanded || (v.statusVoo || "").toUpperCase().includes("APROXIM")) && (
+                      <button onClick={() => setQrModal({ name: v.client, phone: v.phone, lang: v.language || "EN" })}
+                        className="flex items-center gap-1 bg-[#25d366]/15 text-[#25d366] px-3 py-1 rounded-lg text-xs font-bold cursor-pointer hover:bg-[#25d366]/25 transition-colors">
                         📱 WhatsApp
                       </button>
                     )}
-                  </div>
-
-                  {/* Row 4: Progress bar placeholder (visual only — no tracking data in Transfer type) */}
-                  <div className="px-4 pb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs leading-none">{originFlag || "🌍"}</span>
-                      <div className="flex-1 relative" style={{ height: "3px", borderRadius: "2px", backgroundColor: "#333" }}>
-                        <div className="h-full" style={{
-                          width: f.status === "Finalizado" ? "100%" : f.status === "Confirmado" ? "60%" : "10%",
-                          backgroundColor: st.color,
-                          borderRadius: "2px",
-                          transition: "width 2s ease-in-out",
-                        }} />
-                      </div>
-                      <span className="text-xs leading-none">🇵🇹</span>
-                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* ═══ OTHER TRANSFERS ═══ */}
-      {otherTransfers.length > 0 && (
+      {/* ═══ OTHER TRANSFERS (from hotel's own data) ═══ */}
+      {todayTransfers.length > 0 && (
         <div className="mb-8">
-          <h3 className="text-[#D4A017] uppercase tracking-wider text-xs font-bold mb-3 font-mono">🚗 Transfers — {otherTransfers.length}</h3>
+          <h3 className="text-[#D4A017] uppercase tracking-wider text-xs font-bold mb-3 font-mono">🚗 Outros Transfers — {todayTransfers.length}</h3>
           <div className="space-y-1.5">
-            {otherTransfers.map((s) => {
+            {todayTransfers.map((s) => {
               const tipo = getTripType(s);
               const typeColor = TYPE_COLORS[tipo];
-              const st = getStatus(s.status);
-              const destShort = (s.destino || "").replace("Aeroporto de Lisboa", "Aeroporto").replace(/,.*$/, "");
               return (
-                <div key={s.id}
-                  className="bg-[#111] border border-[#2A2A2A] rounded-lg px-4 py-2.5 flex items-center gap-3"
+                <div key={s.id} className="bg-[#111] border border-[#2A2A2A] rounded-lg px-4 py-2.5 flex items-center gap-3"
                   style={{ borderLeftWidth: "3px", borderLeftColor: typeColor }}>
                   <span className="font-mono text-sm font-bold w-[48px]" style={{ color: typeColor }}>{s.horaPickup}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-white font-semibold truncate">{s.nomeCliente}</p>
-                    <p className="text-[10px] text-[#888] truncate">→ {destShort}</p>
+                    <p className="text-[10px] text-[#888] truncate">→ {(s.destino || "").replace(/,.*$/, "")}</p>
                   </div>
-                  <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded flex-shrink-0" style={{ backgroundColor: `${typeColor}20`, color: typeColor }}>
-                    {tipo}
-                  </span>
-                  <span className="text-xs font-mono flex-shrink-0" style={{ color: st.color }}>{st.icon}</span>
+                  <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded flex-shrink-0" style={{ backgroundColor: `${typeColor}20`, color: typeColor }}>{tipo}</span>
                   <span className="text-[10px] text-[#888] font-mono flex-shrink-0">{s.numeroPessoas}p</span>
                 </div>
               );
@@ -251,7 +314,7 @@ export default function LiveTab({ services, onRefresh, hotelName }: LiveTabProps
       )}
 
       {/* Empty state */}
-      {todayServices.length === 0 && (
+      {hotelFlights.length === 0 && todayTransfers.length === 0 && !hubLoading && (
         <div className="text-center py-16">
           <p className="text-4xl mb-3 opacity-30">🏨</p>
           <p className="text-[#666] text-sm font-mono">Nenhum transfer para hoje</p>
@@ -260,14 +323,14 @@ export default function LiveTab({ services, onRefresh, hotelName }: LiveTabProps
 
       {/* ═══ FOOTER STATS ═══ */}
       <div className="flex items-center justify-center gap-6 py-4 border-t border-[#2A2A2A] text-xs text-[#888] font-mono">
-        <span>Hoje: <span className="text-white font-bold">{totalGuests}</span> hóspedes</span>
+        <span><span className="text-white font-bold">{totalGuests}</span> hóspedes</span>
         <span className="text-[#2A2A2A]">|</span>
-        <span><span className="text-white font-bold">{flights.length}</span> voos</span>
+        <span><span className="text-white font-bold">{hotelFlights.length}</span> voos</span>
         <span className="text-[#2A2A2A]">|</span>
-        <span><span className="text-white font-bold">{todayServices.length}</span> transfers</span>
+        <span><span className="text-white font-bold">{hotelFlights.length + todayTransfers.length}</span> transfers</span>
       </div>
 
-      {/* ═══ QR WHATSAPP MODAL ═══ */}
+      {/* ═══ QR MODAL ═══ */}
       {qrModal && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.85)" }}
           onClick={() => setQrModal(null)}>
@@ -275,17 +338,13 @@ export default function LiveTab({ services, onRefresh, hotelName }: LiveTabProps
             <p className="text-sm text-gray-500 mb-1">Enviar mensagem para</p>
             <p className="text-xl font-bold text-black mb-4">{qrModal.name}</p>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={`https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${encodeURIComponent(getWhatsAppUrl(qrModal.phone, qrModal.name))}&choe=UTF-8`}
-              alt="QR Code" className="mx-auto mb-4 rounded-lg" width={200} height={200} />
-            <p className="text-[10px] text-gray-400 mb-4">Aponte a câmara para o QR code</p>
-            <a href={getWhatsAppUrl(qrModal.phone, qrModal.name)} target="_blank" rel="noopener noreferrer"
+            <img src={`https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${encodeURIComponent(waUrl(qrModal.phone, qrModal.name, qrModal.lang))}&choe=UTF-8`}
+              alt="QR" className="mx-auto mb-4 rounded-lg" width={200} height={200} />
+            <a href={waUrl(qrModal.phone, qrModal.name, qrModal.lang)} target="_blank" rel="noopener noreferrer"
               className="inline-block bg-[#25d366] text-white font-bold px-6 py-2.5 rounded-lg text-sm hover:bg-[#1ea952] transition-colors">
               Abrir WhatsApp
             </a>
-            <button onClick={() => setQrModal(null)} className="block mx-auto mt-4 text-xs text-gray-400 hover:text-gray-600 cursor-pointer">
-              Fechar
-            </button>
+            <button onClick={() => setQrModal(null)} className="block mx-auto mt-4 text-xs text-gray-400 hover:text-gray-600 cursor-pointer">Fechar</button>
           </div>
         </div>
       )}

@@ -287,6 +287,7 @@ export default function PortalPage() {
           services={store.services}
           onRefresh={() => store.loadFromSheets()}
           hotelName={hotelName}
+          hotelCode={hotelCode}
         />
       )}
 
