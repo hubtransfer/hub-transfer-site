@@ -6,6 +6,7 @@ import type { HubViagem } from "@/lib/trips";
 import { HUB_CENTRAL_URL, detectTipo, cleanHora, todayStr } from "@/lib/trips";
 import { getOriginFlag } from "@/lib/countryFlags";
 import { computeFlightState, getDelayedTime, delayColor } from "@/lib/flightUtils";
+import DriverProgressBar from "@/components/shared/DriverProgressBar";
 
 interface LiveTabProps {
   services: Transfer[];     // hotel's own transfer data
@@ -282,18 +283,17 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
                     </div>
                   )}
 
-                  {/* Pickup + driver status */}
-                  <div className="px-4 py-1 flex items-center justify-center gap-3">
-                    <span className="font-mono text-sm" style={{ color: "#D4A017" }}>🚗 Pickup: {hora}</span>
-                    {v.statusMotorista && v.statusMotorista !== "AGUARDANDO" && (
-                      <span className="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded" style={{
-                        backgroundColor: v.statusMotorista === "NO_LOCAL" ? "#3B82F620" : v.statusMotorista === "EM_VIAGEM" ? "#22C55E20" : v.statusMotorista === "FINALIZADO" ? "#D4A01720" : "#6B728020",
-                        color: v.statusMotorista === "NO_LOCAL" ? "#3B82F6" : v.statusMotorista === "EM_VIAGEM" ? "#22C55E" : v.statusMotorista === "FINALIZADO" ? "#D4A017" : "#6B7280",
-                      }}>
-                        {v.statusMotorista === "NO_LOCAL" ? "📍 No local" : v.statusMotorista === "EM_VIAGEM" ? "🚗 Em viagem" : v.statusMotorista === "FINALIZADO" ? "✅ Concluído" : v.statusMotorista}
-                      </span>
-                    )}
-                  </div>
+                  {/* Driver progress bar */}
+                  <DriverProgressBar
+                    statusMotorista={v.statusMotorista}
+                    depTime={depTime}
+                    depActual={depActual}
+                    arrOriginal={arrOriginal}
+                    etaChegada={etaChegada}
+                  />
+
+                  {/* Pickup */}
+                  <p className="text-center font-mono text-sm py-1" style={{ color: "#D4A017" }}>🚗 Pickup: {hora}</p>
 
                   {/* WhatsApp button */}
                   {v.phone && (isLanded || (v.statusVoo || "").toUpperCase().includes("APROXIM")) && (
