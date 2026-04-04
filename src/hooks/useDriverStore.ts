@@ -69,6 +69,7 @@ export function useDriverStore(): DriverStore {
 
   // Track previous payload to only re-render on real changes
   const prevViagensKeyRef = useRef('');
+  const lastChangeRef = useRef('');
 
   // Keep refs so the interval callback always reads the latest values
   const driverNameRef = useRef(driverName);
@@ -243,11 +244,19 @@ export function useDriverStore(): DriverStore {
       syncViagens();
     }
 
-    // Silent auto-sync every 60s, only when tab is visible (no spinner, no flicker)
-    const interval = setInterval(() => {
-      if (driverNameRef.current && document.visibilityState === 'visible') {
-        syncViagensSilent();
+    // Ping leve a cada 60s — só faz fetch completo se lastChange mudou
+    const interval = setInterval(async () => {
+      if (!driverNameRef.current || document.visibilityState !== 'visible') return;
+      try {
+        const pingRes = await fetch(`${gasUrl}?action=lastChange&t=${Date.now()}`, { redirect: 'follow' });
+        const pingJson = await pingRes.json();
+        const lc = (pingJson?.lastChange || '').toString();
+        if (lc && lc === lastChangeRef.current) return;
+        lastChangeRef.current = lc;
+      } catch {
+        // Fallback: se ping falhar, faz sync completo
       }
+      syncViagensSilent();
     }, 60_000);
 
     // Sync immediately when tab becomes visible again (silent)

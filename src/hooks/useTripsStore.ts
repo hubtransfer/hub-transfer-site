@@ -200,6 +200,7 @@ export function useTripsStore(): TripsStore {
   // ─── Silent refresh state ───
   const [backgroundRefreshing, setBackgroundRefreshing] = useState(false);
   const prevViagensKeyRef = useRef("");
+  const lastChangeRef = useRef("");
 
   // ──────────────────────────────────────────────
   // On Mount
@@ -244,10 +245,21 @@ export function useTripsStore(): TripsStore {
   selectedDateRef.current = selectedDate;
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
       if (document.visibilityState !== "visible") return;
-      if (!hubViagensUrlRef.current) return;
-      syncViagensImpl(false, hubViagensUrlRef.current, selectedDateRef.current, true);
+      const url = hubViagensUrlRef.current;
+      if (!url) return;
+      // Ping leve primeiro — só faz fetch completo se lastChange mudou
+      try {
+        const pingRes = await fetch(`${url}?action=lastChange&t=${ts()}`, { redirect: "follow" });
+        const pingJson = await pingRes.json();
+        const lc = (pingJson?.lastChange || "").toString();
+        if (lc && lc === lastChangeRef.current) return;
+        lastChangeRef.current = lc;
+      } catch {
+        // Fallback: se o ping falhar, faz fetch completo
+      }
+      syncViagensImpl(false, url, selectedDateRef.current, true);
     }, 30_000);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps

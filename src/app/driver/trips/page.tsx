@@ -21,7 +21,6 @@ import type { HubViagem } from "@/lib/trips";
 /* ================================================================== */
 
 const LS_DRIVER_NAME = "hub_driver_name"; // legacy key for backward compat
-const SYNC_INTERVAL = 60 * 1000;
 
 
 /* ================================================================== */
@@ -61,14 +60,7 @@ export default function DriverTripsPage() {
     setIsLoggedIn(true);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  /* ── Auto-sync silencioso (60s, sem spinner) ── */
-  useEffect(() => {
-    if (!isLoggedIn) return;
-    const id = setInterval(() => {
-      if (document.visibilityState === "visible") store.syncViagensSilent();
-    }, SYNC_INTERVAL);
-    return () => clearInterval(id);
-  }, [isLoggedIn, store]);
+  /* ── Auto-sync silencioso: intervalo gerido pelo useDriverStore com ping lastChange ── */
 
   /* ── Logout ── */
   const handleLogout = useCallback(() => {

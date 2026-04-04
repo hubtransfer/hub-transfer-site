@@ -63,6 +63,7 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
   const onRefreshRef = useRef(onRefresh);
   onRefreshRef.current = onRefresh;
   const prevDataRef = useRef("");
+  const lastChangeRef = useRef("");
 
   // Fetch from HUB Central (stable — no deps). Returns true if data actually changed.
   const fetchHubCentral = useCallback(async (): Promise<boolean> => {
@@ -96,10 +97,24 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
     onRefreshRef.current();
     setLastUpdate(new Date().toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
 
-    // Auto-refresh silencioso a cada 15s — só actualiza timestamp se os dados mudarem
+    // Ping leve a cada 15s — só faz fetch completo se lastChange mudou
     const syncId = setInterval(async () => {
       if (document.visibilityState !== "visible") return;
       setBgSync(true);
+      try {
+        const pingUrl = `${HUB_CENTRAL_URL}?action=lastChange&t=${Date.now()}`;
+        const pingRes = await fetch(pingUrl, { redirect: "follow" });
+        const pingJson = await pingRes.json();
+        const lc = (pingJson?.lastChange || "").toString();
+        if (lc && lc === lastChangeRef.current) {
+          // Nada mudou — saltar fetch completo
+          setBgSync(false);
+          return;
+        }
+        lastChangeRef.current = lc;
+      } catch {
+        // Em caso de erro no ping, cai para fetch completo como fallback
+      }
       const changed = await fetchHubCentral();
       try { onRefreshRef.current(); } catch { /* */ }
       if (changed) {
