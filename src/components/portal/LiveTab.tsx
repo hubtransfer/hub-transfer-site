@@ -48,6 +48,7 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
   const [lastUpdate, setLastUpdate] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [qrModal, setQrModal] = useState<{ name: string; phone: string; lang: string } | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   // HUB Central flight data (separate fetch)
   const [hubViagens, setHubViagens] = useState<HubViagem[]>([]);
@@ -208,32 +209,34 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
                 delayMin, v.etaChegada || "", v.depActualFull || v.depTimeFull || "", v.etaChegadaFull || ""
               );
 
-              return (
-                <div key={v.id || v.client} className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl overflow-hidden"
-                  style={{ borderLeftWidth: "3px", borderLeftColor: flight.cancelled ? "#EF4444" : isLanded ? "#22C55E" : "#F5C518" }}>
+              const cardKey = v.id || v.client || String(Math.random());
+              const isExpanded = expandedId === cardKey;
 
-                  {/* Type */}
-                  <div className="px-4 pt-3">
-                    <span className="text-[10px] font-bold uppercase font-mono" style={{ color: TYPE_COLORS[tipo] || "#F5C518" }}>
-                      {tipo}
-                    </span>
+              return (
+                <div key={cardKey}
+                  className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl overflow-hidden cursor-pointer hover:bg-[#1A1A1A]/80 transition-all duration-200"
+                  style={{ borderLeftWidth: "3px", borderLeftColor: flight.cancelled ? "#EF4444" : isLanded ? "#22C55E" : "#F5C518" }}
+                  onClick={() => setExpandedId(isExpanded ? null : cardKey)}>
+
+                  {/* Type + arrow */}
+                  <div className="px-4 pt-3 flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase font-mono" style={{ color: TYPE_COLORS[tipo] || "#F5C518" }}>{tipo}</span>
+                    <span className="text-[10px] text-[#555] transition-transform duration-300" style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
                   </div>
 
                   {/* Time + Name + Pax */}
                   <div className="flex items-center gap-3 px-4 py-1">
-                    <span className="flex-shrink-0 font-bold font-mono text-2xl" style={{ color: isLanded ? "#22C55E" : "#F5C518" }}>
-                      {displayTime}
-                    </span>
+                    <span className="flex-shrink-0 font-bold font-mono text-2xl" style={{ color: isLanded ? "#22C55E" : "#F5C518" }}>{displayTime}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-xl font-bold text-white truncate">{v.client}</p>
                     </div>
                     <span className="text-xs text-[#D0D0D0] font-mono flex-shrink-0">{v.pax || "1"} pax</span>
                   </div>
 
-                  {/* Flight info */}
-                  <div className="px-4 py-1 flex items-center gap-2">
+                  {/* Flight info — centered */}
+                  <div className="px-4 py-1 flex items-center justify-center gap-2 flex-wrap">
                     <a href={`https://www.google.com/search?q=flight+${encodeURIComponent(v.flight)}`}
-                      target="_blank" rel="noopener noreferrer"
+                      target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
                       className="font-mono text-sm text-amber-400 hover:text-amber-300 font-bold underline cursor-pointer">{v.flight}</a>
                     {depDelayMin > 0 && (
                       <span className="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded text-xs font-mono font-bold">+{depDelayMin}min partida</span>
@@ -251,7 +254,7 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
                         </div>
                         <div className="flex-1 relative" style={{ height: "3px", borderRadius: "2px", backgroundColor: "#333" }}>
                           <div className="h-full transition-all duration-[2s] ease-in-out" style={{ width: `${Math.max(flight.progress, 2)}%`, backgroundColor: flight.color, borderRadius: "2px" }} />
-                          {!flight.cancelled && flight.progress > 0 && flight.progress < 100 && (
+                          {flight.progress > 0 && flight.progress < 100 && (
                             <svg width="12" height="12" viewBox="0 0 24 24" fill={flight.color}
                               className="absolute top-1/2 -translate-y-1/2 transition-all duration-[2s] ease-in-out"
                               style={{ left: `calc(${Math.max(flight.progress, 2)}% - 6px)`, filter: "drop-shadow(0 0 2px rgba(0,0,0,.7))" }}>
@@ -264,35 +267,85 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
                           <span className="font-mono text-sm font-bold text-[#D4A017]">LIS</span>
                         </div>
                       </div>
-                      {/* Times under bar */}
                       <div className="flex items-center justify-between mt-1">
                         <div className="flex items-center gap-1">
                           {hasDepDiff ? (
                             <><span className="font-mono text-xs line-through text-gray-500">{depTime}</span><span className="font-mono text-sm font-semibold text-white">→ {depActual}</span></>
-                          ) : depTime ? (
-                            <span className="font-mono text-xs text-gray-400">{depTime}</span>
-                          ) : null}
+                          ) : depTime ? <span className="font-mono text-xs text-gray-400">{depTime}</span> : null}
                         </div>
                         <div className="flex items-center gap-1">
                           {hasArrDiff ? (
                             <><span className="font-mono text-xs line-through text-gray-500">{arrOriginal}</span><span className="font-mono text-sm font-semibold text-white">→ {etaChegada}</span></>
-                          ) : (
-                            <span className="font-mono text-xs text-gray-400">{etaChegada || v.arrTime || ""}</span>
-                          )}
+                          ) : <span className="font-mono text-xs text-gray-400">{etaChegada || v.arrTime || ""}</span>}
                         </div>
                       </div>
                     </div>
                   )}
 
-                  {/* Pickup + WhatsApp */}
-                  <div className="px-4 pb-3 pt-1 flex items-center justify-between">
-                    <span className="font-mono text-sm" style={{ color: "#D4A017" }}>🚗 Pickup: {hora}</span>
-                    {v.phone && (isLanded || (v.statusVoo || "").toUpperCase().includes("APROXIM")) && (
-                      <button onClick={() => setQrModal({ name: v.client, phone: v.phone, lang: v.language || "EN" })}
-                        className="flex items-center gap-1 bg-[#25d366]/15 text-[#25d366] px-3 py-1 rounded-lg text-xs font-bold cursor-pointer hover:bg-[#25d366]/25 transition-colors">
+                  {/* Pickup — centered */}
+                  <p className="text-center font-mono text-sm py-1" style={{ color: "#D4A017" }}>🚗 Pickup: {hora}</p>
+
+                  {/* WhatsApp button */}
+                  {v.phone && (isLanded || (v.statusVoo || "").toUpperCase().includes("APROXIM")) && (
+                    <div className="px-4 pb-2 text-center">
+                      <button onClick={(e) => { e.stopPropagation(); setQrModal({ name: v.client, phone: v.phone, lang: v.language || "EN" }); }}
+                        className="inline-flex items-center gap-1 bg-[#25d366]/15 text-[#25d366] px-4 py-1.5 rounded-lg text-xs font-bold cursor-pointer hover:bg-[#25d366]/25 transition-colors">
                         📱 WhatsApp
                       </button>
-                    )}
+                    </div>
+                  )}
+
+                  {/* ═══ EXPANDED DETAILS ═══ */}
+                  <div className="transition-all duration-300 ease-in-out overflow-hidden" style={{ maxHeight: isExpanded ? "400px" : "0", opacity: isExpanded ? 1 : 0 }}>
+                    <div className="border-t border-[#2A2A2A] bg-[#161616] px-4 py-4">
+                      <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                        {/* Left column */}
+                        <div>
+                          <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-0.5">ID Viagem</p>
+                          <p className="text-sm text-white font-medium font-mono">{v.id || "—"}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-0.5">Data</p>
+                          <p className="text-sm text-white font-medium">{v.date || v.flightDate || "—"}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-0.5">Cliente</p>
+                          <p className="text-sm text-white font-medium">{v.client}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-0.5">Hora Pick-up</p>
+                          <p className="text-sm text-white font-medium font-mono">{hora}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-0.5">Contacto</p>
+                          {v.phone ? (
+                            <a href={`tel:${v.phone}`} onClick={(e) => e.stopPropagation()} className="text-sm text-amber-400 hover:text-amber-300 font-medium font-mono underline">{v.phone}</a>
+                          ) : <p className="text-sm text-gray-500">—</p>}
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-0.5">Pessoas / Bagagens</p>
+                          <p className="text-sm text-white font-medium">{v.pax || "1"} pax · {v.bags || "0"} bag</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-0.5">Voo</p>
+                          <p className="text-sm text-white font-medium font-mono">{v.flight}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-0.5">Idioma</p>
+                          <p className="text-sm text-white font-medium">{v.language || "—"}</p>
+                        </div>
+                        <div className="col-span-2">
+                          <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-0.5">Rota</p>
+                          <p className="text-sm text-white font-medium">{v.origin || "—"} → {v.destination || "—"}</p>
+                        </div>
+                        {v.notes && (
+                          <div className="col-span-2">
+                            <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-0.5">Observações</p>
+                            <p className="text-sm text-[#D0D0D0]">{v.notes}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               );
