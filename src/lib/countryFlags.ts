@@ -12,7 +12,7 @@ const AIRPORT_COUNTRY: Record<string, string> = {
   BOD: 'FR', NTE: 'FR',
   // Espanha
   MAD: 'ES', BCN: 'ES', AGP: 'ES', PMI: 'ES', ALC: 'ES', SVQ: 'ES',
-  IBZ: 'ES', VLC: 'ES', BIO: 'ES', ACE: 'ES', TFS: 'ES',
+  IBZ: 'ES', VLC: 'ES', BIO: 'ES', ACE: 'ES', TFS: 'ES', LPA: 'ES',
   // Alemanha
   FRA: 'DE', MUC: 'DE', BER: 'DE', DUS: 'DE', HAM: 'DE', CGN: 'DE', STR: 'DE',
   // Itália

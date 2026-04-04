@@ -132,6 +132,12 @@ export default function DriverTripCard({
   const depIata = (viagem.depIata || "").toUpperCase().trim();
   const originFlag = getOriginFlag(depIata);
 
+  // Departure delay + arrival original vs ETA
+  const depDelayMin = parseInt(viagem.depDelay || "0", 10) || 0;
+  const arrOriginal = (viagem.arrOriginal || "").trim();
+  const etaChegada = (viagem.etaChegada || "").trim();
+  const hasArrDiff = arrOriginal && etaChegada && arrOriginal !== etaChegada;
+
 
   /* ─ No-Show modal ─ */
   const [noShowOpen, setNoShowOpen] = useState(false);
@@ -344,10 +350,24 @@ export default function DriverTripCard({
               </div>
             </div>
 
-            {/* Text below bar */}
-            <p className="text-center font-mono mt-1" style={{ fontSize: "0.75rem", color: flight.noData ? "#B0B0B0" : flight.color }}>
-              {flight.noData ? `${viagem.flight || "S/ numero"} · Dados em breve` : flight.statusText}
-            </p>
+            {/* Text below bar: flag + flight + depDelay badge + status */}
+            <div className="flex items-center justify-center gap-1.5 mt-1 flex-wrap">
+              {originFlag && <span className="text-[14px] leading-none">{originFlag}</span>}
+              <span className="font-mono font-semibold" style={{ fontSize: "0.75rem", color: flight.noData ? "#B0B0B0" : flight.color }}>
+                {flight.noData ? `${viagem.flight || "S/ numero"} · Dados em breve` : flight.statusText}
+              </span>
+              {depDelayMin > 0 && !flight.noData && (
+                <span className="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded text-xs font-mono font-bold">+{depDelayMin}min partida</span>
+              )}
+            </div>
+            {/* Arrival original vs ETA */}
+            {hasArrDiff && !flight.noData && (
+              <p className="text-center font-mono mt-0.5" style={{ fontSize: "0.7rem" }}>
+                <span className="line-through text-[#666]">{arrOriginal}</span>
+                <span className="text-[#666] mx-1">→</span>
+                <span className="text-[#F5C518] font-semibold">{etaChegada}</span>
+              </p>
+            )}
 
             {flight.pulse && <style dangerouslySetInnerHTML={{ __html: `@keyframes fp{0%,100%{opacity:.8}50%{opacity:.4}}` }} />}
             {flight.pulse && <div className="mt-1" style={{ height: "8px", borderRadius: "4px", backgroundColor: flight.color, opacity: 0.2, animation: "fp 2s ease-in-out infinite" }} />}
@@ -435,17 +455,29 @@ export default function DriverTripCard({
                           </div>
                         )}
                       </div>
+                      {/* Flight number with flag */}
                       {viagem.flight && (
-                        <p className="text-center font-mono text-sm font-bold mt-1.5 cursor-pointer hover:text-[#F0D030] transition-colors"
-                          style={{ color: c.hex }}
+                        <div className="flex items-center justify-center gap-1.5 mt-1.5 cursor-pointer hover:opacity-80 transition-opacity"
                           onClick={() => window.open(`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`, "_blank")}>
-                          {viagem.flight}
-                        </p>
+                          {originFlag && <span className="text-[20px] leading-none">{originFlag}</span>}
+                          <span className="font-mono text-sm font-bold" style={{ color: c.hex }}>{viagem.flight}</span>
+                          {depDelayMin > 0 && (
+                            <span className="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded text-xs font-mono font-bold">+{depDelayMin}min partida</span>
+                          )}
+                        </div>
                       )}
                       <p className="text-center font-mono text-[10px] mt-1" style={{ color: flight.color }}>
                         {flight.statusText}
                       </p>
-                      {delayMin > 0 && (
+                      {/* Arrival original vs ETA */}
+                      {hasArrDiff && (
+                        <p className="text-center font-mono text-xs mt-1">
+                          <span className="line-through text-[#666]">{arrOriginal}</span>
+                          <span className="text-[#666] mx-1">→</span>
+                          <span className="text-[#F5C518] font-bold">{etaChegada}</span>
+                        </p>
+                      )}
+                      {delayMin > 0 && !depDelayMin && (
                         <div className="text-center mt-1">
                           <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: `${dColor}15`, color: dColor }}>⚠️ +{delayMin}min atraso</span>
                         </div>

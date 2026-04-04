@@ -63,6 +63,11 @@ export interface HubViagem {
   etaChegada?: string;     // estimated arrival time
   etaChegadaFull?: string;  // full ETA string from backend
   depTimeFull?: string;     // full departure time string from backend
+  depActual?: string;       // HH:MM — actual departure time
+  depActualFull?: string;   // YYYY-MM-DD HH:MM
+  depDelay?: string;        // departure delay minutes
+  arrOriginal?: string;     // HH:MM — original scheduled arrival
+  arrOriginalFull?: string; // YYYY-MM-DD HH:MM
   language: string;
   pax: string;
   bags?: string;
