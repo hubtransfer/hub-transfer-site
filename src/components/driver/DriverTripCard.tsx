@@ -302,11 +302,15 @@ export default function DriverTripCard({
           <span className="font-semibold uppercase font-mono leading-none" style={{ fontSize: "0.65rem", letterSpacing: "0.5px", color: c.hex }}>{sourceLabel} · {tipo}</span>
         </div>
 
-        {/* L2: ETA time | name | driver+price */}
+        {/* L2: ETA time | name (clickable→nameplate) | driver+price */}
         <div className="flex items-center gap-3 px-4 py-1">
           <span className="flex-shrink-0 font-bold font-mono" style={{ fontSize: "1.5rem", color: isLanded ? "#22C55E" : c.hex }}>{displayTime}</span>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-[#F5F5F5] truncate" style={{ fontSize: "1.1rem" }}>{viagem.client}</p>
+            <p className="font-semibold text-[#F5F5F5] truncate cursor-pointer hover:text-[#D4A017] transition-colors"
+              style={{ fontSize: "1.1rem" }}
+              onClick={(e) => { e.stopPropagation(); onShowNameplate(viagem.client, viagem.destination); }}>
+              📋 {viagem.client}
+            </p>
           </div>
           <div className="flex-shrink-0 text-right flex flex-col items-end">
             {mode === "admin" && (
@@ -330,8 +334,21 @@ export default function DriverTripCard({
               </div>
             ) : (
               <>
-                {/* L3: Bar — flag+IATA left | thin bar+plane | flag+IATA right */}
-                <div className="flex items-center gap-2">
+                {/* L3: Flight info + status (ABOVE bar) */}
+                <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                  {originFlag && <span className="text-xs leading-none">{originFlag}</span>}
+                  <a href={`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`}
+                    target="_blank" rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="font-mono text-xs text-amber-400 hover:text-amber-300 font-bold underline cursor-pointer">{viagem.flight}</a>
+                  {depDelayMin > 0 && (
+                    <span className="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded text-xs font-mono font-bold">+{depDelayMin}min partida</span>
+                  )}
+                  <span className="font-mono text-[10px]" style={{ color: flight.color }}>{flight.statusText}</span>
+                </div>
+
+                {/* L4: Bar — flag+IATA left | thin bar+plane | flag+IATA right */}
+                <div className="flex items-center gap-2 mt-1.5">
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <span className="text-sm leading-none">{originFlag || "🌍"}</span>
                     <span className="font-mono text-sm font-bold text-[#D4A017]">{depIata}</span>
@@ -350,7 +367,7 @@ export default function DriverTripCard({
                   </div>
                 </div>
 
-                {/* L4: Dep times left | Arr times right */}
+                {/* L5: Dep times left | Arr times right */}
                 <div className="flex items-center justify-between mt-1">
                   <div className="flex items-center gap-1">
                     {hasDepDiff ? (
@@ -366,16 +383,6 @@ export default function DriverTripCard({
                       <span className="font-mono text-xs text-gray-400">{etaChegada || viagem.arrTime || ""}</span>
                     )}
                   </div>
-                </div>
-
-                {/* L5: Flight info + status */}
-                <div className="flex items-center justify-center gap-1.5 mt-1.5 flex-wrap">
-                  {originFlag && <span className="text-xs leading-none">{originFlag}</span>}
-                  <span className="font-mono text-xs text-[#D4A017] font-bold">{viagem.flight}</span>
-                  {depDelayMin > 0 && (
-                    <span className="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded text-xs font-mono font-bold">+{depDelayMin}min partida</span>
-                  )}
-                  <span className="font-mono text-[10px]" style={{ color: flight.color }}>{flight.statusText}</span>
                 </div>
 
                 {/* L6: Pickup */}
@@ -420,7 +427,7 @@ export default function DriverTripCard({
                   <div className="flex items-center gap-3">
                     <span className="text-xl leading-none">🌍</span>
                     <div className="flex-1">
-                      <p className="text-center font-mono text-sm font-bold mb-1.5" style={{ color: c.hex }}>{viagem.flight}</p>
+                      <p className="text-center mb-1.5"><a href={`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="font-mono text-sm text-amber-400 hover:text-amber-300 font-bold underline cursor-pointer">{viagem.flight}</a></p>
                       <p className="text-center font-mono text-[11px] italic font-medium text-[#E0E0E0]">✈️ Acompanhamento do voo activa em breve</p>
                     </div>
                     <div className="text-center min-w-[48px]">
@@ -433,10 +440,12 @@ export default function DriverTripCard({
                     {/* ETA big time + flight number */}
                     <div className="flex items-center justify-center gap-2 mb-2">
                       {originFlag && <span className="text-[20px] leading-none">{originFlag}</span>}
-                      <span className="font-mono text-sm font-bold cursor-pointer hover:opacity-80" style={{ color: c.hex }}
-                        onClick={() => viagem.flight && window.open(`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`, "_blank")}>
+                      <a href={`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`}
+                        target="_blank" rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="font-mono text-sm text-amber-400 hover:text-amber-300 font-bold underline cursor-pointer">
                         {viagem.flight}
-                      </span>
+                      </a>
                       {depDelayMin > 0 && (
                         <span className="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded text-xs font-mono font-bold">+{depDelayMin}min partida</span>
                       )}
