@@ -432,3 +432,22 @@ Indicador: dot verde pulsante discreto.
 - Feedback: 30min após FINALIZADO → avaliação 1-5 → se 5★ Google Reviews
 - Commits: mensagens em português
 - GAS: Junior cola manualmente no script.google.com, depois Ctrl+S → Implantar → Nova versão
+
+---
+
+## ANTI-FRAUDE GPS — IMPLEMENTADO 04/04/2026
+
+Handler updateDriverStatus no doGet valida distância GPS:
+- NO_LOCAL: compara coords motorista vs DL(116) origem. Aeroporto=2000m, outros=200m
+- FINALIZADO: compara coords motorista vs DM(117) destino. Sempre 200m
+- Resultado gravado em DN(118) e DO(119): "150m ✅" ou "8137m ⚠️ FORA (2000m max)"
+- Se fora da margem: WhatsApp automático para Junior (351968698138) e Roberta (351910880046)
+- Mensagem inclui reverse geocoding (endereço real do motorista vs onde deveria estar)
+- Função enviarAlertaGPSEquipe() usa Client-Token da Z-API
+- Colunas: I(9)=Origem, J(10)=Destino, DL(116)=Coords Origem, DM(117)=Coords Destino
+
+## POLLING POR EVENTOS — IMPLEMENTADO 04/04/2026
+
+- case lastChange no doGet: lê célula CZ1 (coluna 104) com timestamp última alteração
+- touchLastChange() actualiza CZ1 após updateDriverStatus e resetTrip
+- Frontend faz ping leve a lastChange, só busca dados completos se timestamp mudou
