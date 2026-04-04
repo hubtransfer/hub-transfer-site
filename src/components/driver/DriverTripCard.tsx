@@ -452,62 +452,56 @@ export default function DriverTripCard({
                       {flight.statusText}
                     </p>
 
-                    {/* Progress bar: Origin → bar → Destination */}
-                    <div className="flex items-start gap-3">
-                      {/* LEFT: Origin */}
-                      <div className="flex-shrink-0 text-center min-w-[52px]">
-                        <p className="text-xl leading-none mb-1">{originFlag || "🌍"}</p>
-                        <p className="font-mono text-xs font-bold" style={{ color: c.hex }}>{depIata || "???"}</p>
-                        {viagem.depTime && (
-                          viagem.depActual && viagem.depActual !== viagem.depTime ? (
-                            <div className="mt-1">
-                              <p className="font-mono text-[10px] line-through text-[#666]">{viagem.depTime}</p>
-                              <p className="font-mono text-xs font-bold text-[#F5C518]">{viagem.depActual}</p>
-                            </div>
+                    {/* Compact: times + bar + times in one horizontal block */}
+                    <div className="space-y-0.5">
+                      {/* Times row */}
+                      <div className="flex items-center justify-between">
+                        <div>
+                          {viagem.depActual && viagem.depActual !== viagem.depTime ? (
+                            <span className="font-mono text-xs"><span className="line-through text-gray-500">{viagem.depTime}</span> <span className="text-white font-semibold">→ {viagem.depActual}</span></span>
+                          ) : viagem.depTime ? (
+                            <span className="font-mono text-xs text-gray-400">{viagem.depTime}</span>
+                          ) : null}
+                          <p className="font-mono text-[8px] text-[#555] uppercase">Decolagem</p>
+                        </div>
+                        <div className="text-right">
+                          {hasArrDiff ? (
+                            <span className="font-mono text-xs"><span className="line-through text-gray-500">{arrOriginal}</span> <span className="text-white font-semibold">→ {etaChegada}</span></span>
                           ) : (
-                            <p className="font-mono text-xs text-[#A0A0A0] mt-1">{viagem.depTime}</p>
-                          )
-                        )}
-                        <p className="font-mono text-[8px] text-[#555] mt-0.5 uppercase">Decolagem</p>
+                            <span className="font-mono text-xs text-gray-400">{etaChegada || viagem.arrTime || ""}</span>
+                          )}
+                          <p className="font-mono text-[8px] text-[#555] uppercase text-right">Aterragem</p>
+                        </div>
                       </div>
 
-                      {/* CENTER: Thin progress bar */}
-                      <div className="flex-1 flex items-center">
-                        <div className="w-full cursor-pointer"
+                      {/* Flight bar — same as minimised */}
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <span className="text-sm leading-none">{originFlag || "🌍"}</span>
+                          <span className="font-mono text-sm font-bold text-[#D4A017]">{depIata || "???"}</span>
+                        </div>
+                        <div className="flex-1 relative cursor-pointer" style={{ height: "3px", borderRadius: "2px", backgroundColor: "#333" }}
                           onClick={() => viagem.flight && window.open(`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`, "_blank")}>
-                          {flight.cancelled ? (
-                            <div className="h-[3px] rounded bg-[#EF4444]/25" />
-                          ) : (
-                            <div className="relative w-full overflow-visible" style={{ height: "3px", borderRadius: "2px", backgroundColor: "#333" }}>
+                          {!flight.cancelled && (
+                            <>
                               <div className="h-full transition-all duration-[2s] ease-in-out" style={{ width: `${Math.max(flight.progress, 2)}%`, backgroundColor: flight.color, borderRadius: "2px" }} />
                               <svg width="14" height="14" viewBox="0 0 24 24" fill={flight.color}
                                 className="absolute top-1/2 -translate-y-1/2 transition-all duration-[2s] ease-in-out"
                                 style={{ left: `calc(${Math.max(flight.progress, 2)}% - 7px)`, filter: "drop-shadow(0 1px 3px rgba(0,0,0,.5))" }}>
                                 <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" transform="rotate(90 12 12)"/>
                               </svg>
-                            </div>
+                            </>
                           )}
                         </div>
-                      </div>
-
-                      {/* RIGHT: Destination */}
-                      <div className="flex-shrink-0 text-center min-w-[52px]">
-                        <p className="text-xl leading-none mb-1">🇵🇹</p>
-                        <p className="font-mono text-xs font-bold" style={{ color: c.hex }}>LIS</p>
-                        {hasArrDiff ? (
-                          <div className="mt-1">
-                            <p className="font-mono text-[10px] line-through text-[#666]">{arrOriginal}</p>
-                            <p className="font-mono text-xs font-bold text-[#F5C518]">{etaChegada}</p>
-                          </div>
-                        ) : (
-                          <p className="font-mono text-xs text-[#A0A0A0] mt-1">{etaChegada || viagem.arrTime || ""}</p>
-                        )}
-                        <p className="font-mono text-[8px] text-[#555] mt-0.5 uppercase">Aterragem</p>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <span className="text-sm leading-none">🇵🇹</span>
+                          <span className="font-mono text-sm font-bold text-[#D4A017]">LIS</span>
+                        </div>
                       </div>
                     </div>
 
                     {(viagem.depTerminal || viagem.arrTerminal) && (
-                      <div className="flex justify-between font-mono text-[10px] text-[#999] mt-2 px-1">
+                      <div className="flex justify-between font-mono text-[10px] text-[#999] mt-1 px-1">
                         {viagem.depTerminal && <span>T{viagem.depTerminal}</span>}
                         {viagem.arrTerminal && <span>T{viagem.arrTerminal}</span>}
                       </div>

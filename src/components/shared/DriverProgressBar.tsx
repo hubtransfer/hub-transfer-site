@@ -90,23 +90,27 @@ export default function DriverProgressBar({ statusMotorista }: DriverProgressBar
         })}
       </div>
 
-      {/* Labels below dots — offset for mobile alignment */}
-      <div className="flex justify-between mt-0.5" style={{ paddingLeft: "0px", paddingRight: "0px" }}>
+      {/* Labels below dots — positioned to center under each dot */}
+      <div className="relative flex justify-between mt-0.5">
         {STEPS.map((s, i) => {
           const stepNum = i + 1;
           const isActive = activeStep >= stepNum;
-          // Mobile: spread labels — first left, last right, middle offset
-          const align = i === 0 ? "text-left pl-0" : i === 3 ? "text-right pr-0" : i === 1 ? "text-center -ml-1 sm:ml-0" : "text-center ml-1 sm:ml-0";
+          // Position: 0%, 33.33%, 66.66%, 100% — then offset by half label width
+          const pos = (i / 3) * 100;
+          const anchor = i === 0 ? "left" : i === 3 ? "right" : "center";
           return (
-            <span key={s.key} className={`font-mono transition-colors duration-500 ${align}`} style={{
+            <span key={s.key} className="absolute font-mono transition-colors duration-500" style={{
               fontSize: "9px",
               color: isDone ? CLR_GREEN : isActive ? "#D0D0D0" : "#4B5563",
-              flex: i === 0 || i === 3 ? "0 0 auto" : "1 1 0",
+              left: `${pos}%`,
+              transform: anchor === "left" ? "translateX(0)" : anchor === "right" ? "translateX(-100%)" : "translateX(-50%)",
             }}>
               {s.label}
             </span>
           );
         })}
+        {/* Invisible spacer for height */}
+        <span className="invisible font-mono" style={{ fontSize: "9px" }}>X</span>
       </div>
     </div>
   );
