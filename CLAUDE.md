@@ -1,294 +1,434 @@
-# HUB TRANSFER — PROJETO COMPLETO
-## CLAUDE.md — Manual de Regras para Claude Code
+# HUB Transfer — Projecto Completo
+## Este ficheiro é lido automaticamente pelo Claude Code em cada sessão nova.
 
 ---
 
-## 🎯 VISÃO DO PROJETO
-
-A HUB Transfer é uma empresa de transfers aeroporto/hotel baseada em Lisboa (Amadora).
-O objetivo é criar um ecossistema digital completo e profissional que inclui:
-
-1. **Website institucional** — Landing page para clientes diretos (multilíngue)
-2. **Portal de hotéis** — Interface para hotéis parceiros fazerem reservas
-3. **Dashboard operacional** — Painel de gestão para Junior e Roberta
-4. **App motoristas** — Interface mobile para os drivers (futuro React Native)
-5. **Tracking público** — Página para clientes acompanharem o motorista
+## QUEM
+Junior Gutierez, CEO da HUB Transfer (Jornadas e Possibilidades, Unipessoal Lda). Amadora, Lisboa. Constrói o ecossistema tech inteiro com IA. Workflow: Claude.ai prepara prompts → Junior cola no Claude Code → PowerShell push → Vercel auto-deploy.
 
 ---
 
-## 🏗️ STACK TECNOLÓGICA
+## STACK TÉCNICO
 
+| Componente | Tecnologia | Localização |
+|---|---|---|
+| Backend | Google Apps Script (~89k linhas, 13 ficheiros .gs) | script.google.com (projecto 85) |
+| Frontend | Next.js 15 + TypeScript + Tailwind CSS v4 | Vercel: hub-transfer-site.vercel.app |
+| Repo | GitHub: hubtransfer/hub-transfer-site | Branch: master |
+| Spreadsheet | HUB-Central | ID: 1SDQKKo1DerpO9IHnbbOtYLjkfn9s4bK0VTUt7a-dBQQ |
+| WhatsApp | Z-API | Instância: 3DC8E250141ED020B95796155CBF9532 |
+| VPS | Hetzner 89.167.125.139 | noVNC porta 6080, Chrome + Talixo + World Transfer |
+| Extensão | HUB Sync v2 | Monitora booking states 24/7, 0 créditos |
+| API Voos | GoFlightLabs | Base URL: goflightlabs.com |
+
+---
+
+## DESIGN SYSTEM
+- Fundo: escuro/preto
+- Cor principal: dourado #D4A017 / amber
+- Logo: barra com 3 pontos/traços + texto "HUB TRANSFER"
+- Fontes: Bodoni Moda (display), Plus Jakarta Sans (body)
+- Cards: bg-gray-900, border-gray-800
+- Badges: CHEGADA=verde, RECOLHA=azul, TOUR=roxo
+
+---
+
+## FRONTEND — PÁGINAS E COMPONENTES CHAVE
+
+### Páginas
+- `/admin/trips` — Painel admin com trip cards, flight tracking, SwipeBar
+- `/portal` — Portal do hotel (Novo Transfer + Viagens + LIVE)
+- `/driver` — Painel motorista com SwipeBar
+
+### Componentes Importantes
+- `src/components/shared/SwipeBar.tsx` — Barra arraste estilo Uber (3 estados)
+- `src/components/shared/DriverProgressBar.tsx` — Barra progresso carro (4 pontos)
+- `src/components/driver/DriverTripCard.tsx` — Card viagem motorista
+- `src/lib/flightUtils.ts` — computeFlightState
+- `src/lib/countryFlags.ts` — 217 aeroportos → bandeiras
+- `src/lib/trips.ts` — Interface HubViagem (com statusMotorista)
+- `src/lib/airports.ts` — Dicionário IATA
+
+---
+
+## SWIPEBAR — Sistema de Confirmação do Motorista
+
+### 3 Estados Sequenciais
+1. "Estou no local" → status = NO_LOCAL → grava coords GPS + timestamp
+2. "Cliente comigo" → status = EM_VIAGEM → grava coords GPS + timestamp
+3. "Cheguei ao destino" → status = FINALIZADO → grava coords GPS + timestamp + R=CONCLUIDA
+
+### Design
+- Linha pontilhada inspirada na logo HUB (3 pontos)
+- Avião SVG arrastável da esquerda para a direita
+- Texto descritivo abaixo da barra
+- Cores mudam por estado: cinza→azul→verde→dourado
+- Vibração do telemóvel ao confirmar
+- Aparece no admin E no motorista (componente partilhado)
+
+### Botão Reactivar (admin only)
+- Na aba Passadas, botão "🔄 Reactivar" com autenticação por senha admin
+- Usa validateLogin(session.name, pwd) — mesma autenticação do login
+- Limpa colunas R(18) + BD-BJ(56-62)
+
+---
+
+## MAPEAMENTO DE COLUNAS BD-BJ (SwipeBar v2.0) — ACTUALIZADO 04/04/2026
+
+| Coluna | Índice | Header | Uso |
+|---|---|---|---|
+| BD | 56 | Status Motorista | AGUARDANDO / NO_LOCAL / EM_VIAGEM / FINALIZADO |
+| BE | 57 | Timestamp No Local | "NO_LOCAL \| 2026-04-04T16:46:43" |
+| BF | 58 | Coords No Local | lat,lng do motorista ao chegar |
+| BG | 59 | Timestamp Em Viagem | "EM_VIAGEM \| 2026-04-04T16:47:02" |
+| BH | 60 | Coords Em Viagem | lat,lng ao iniciar viagem |
+| BI | 61 | Timestamp Entrega | "FINALIZADO \| 2026-04-04T16:47:38" |
+| BJ | 62 | Coords Entrega | lat,lng ao entregar cliente |
+
+### Geocoding Referência (já existente)
+- DL(116) = Coords Origem geocoded
+- DM(117) = Coords Destino geocoded
+
+### Status antigos → novos (conversão feita em todos os .gs)
+- AGUARDANDO → AGUARDANDO (mantém)
+- A_CAMINHO → removido, substituído por NO_LOCAL
+- INICIOU → EM_VIAGEM
+- FINALIZOU → FINALIZADO
+- STATUS_OK → STATUS_MOTORISTA
+
+---
+
+## HANDLERS GAS NO doGet (CONFIG_E_CONSTANTES.gs)
+
+### updateDriverStatus
 ```
-Frontend:  Next.js 15 (App Router) + TypeScript + Tailwind CSS v4 + shadcn/ui
-Backend:   Supabase (PostgreSQL + Auth + Realtime + Storage)
-Existente: Google Apps Script (~89.000 linhas, "Roberta HUB v2.0")
-           Google Sheets (HUB-Central como database operacional)
-           GitHub Pages (HUB Transfer OPS)
-Deploy:    Vercel (frontend) + Supabase (backend)
-Futuro:    React Native (app motoristas iOS/Android)
+?action=updateDriverStatus&rowIndex=735&status=NO_LOCAL&lat=38.76&lng=-9.22&timestamp=ISO
+```
+- Grava BD(56)=status, BE-BJ conforme estado, R(18)=CONCLUIDA se FINALIZADO
+
+### resetTrip
+```
+?action=resetTrip&rowIndex=735
+```
+- Limpa R(18) + BD-BJ(56-62)
+
+### getViagens
+```
+?action=viagens&data=04/04/2026
+```
+- Retorna array de viagens com todos os campos incluindo statusMotorista (BD:56)
+
+---
+
+## FLIGHT TRACKING v4.1
+
+### Colunas de Voo
+- AF(32) = Hora Aterragem Real
+- AG(33) = Status Voo (AGUARDANDO/MONITORANDO/EN_VOO/APROXIMACAO/ATERRISADO)
+- AH(34) = Atraso em Minutos
+- BX-CC = Dados avançados de voo
+
+### Campos no getViagens (frontend recebe)
+- depIata, depTime, depActual, depDelay, arrOriginal, etaChegada, statusVoo, arrTime, atrasoMin
+
+### Protecção de Créditos API
+- analisarDataVoo: HOJE/AMANHA/NAO_PROCESSAR/FUTURO_DISTANTE
+- Só processa voos de HOJE
+- 4 camadas: AGUARDANDO → MONITORANDO → EN_VOO → APROXIMACAO → ATERRISADO
+
+### GoFlightLabs
+- Base URL: goflightlabs.com (NÃO app.goflightlabs.com)
+- Campo retorno: flight_iata (NÃO flight.iataNumber)
+- /advanced-flights-schedules: requer iataCode + type=arrival + access_key
+- /flights: usa arr_iata
+
+---
+
+## DRIVER PROGRESS BAR — Barra do Carro (4 pontos)
+
+Componente: `src/components/shared/DriverProgressBar.tsx`
+
+### Layout Visual
+```
+🚗 ●─────●─────●─────● 🏁
+A caminho  No local  Com cliente  Chegou
+```
+
+### Comportamento
+- AGUARDANDO: tudo cinza, carro no ponto 1
+- NO_LOCAL: linha dourada até ponto 2, carro no ponto 2
+- EM_VIAGEM: linha dourada até ponto 3, carro no ponto 3
+- FINALIZADO: tudo verde, carro no ponto 4
+
+### Onde Aparece
+- Admin trips (card minimizado e expandido)
+- Driver panel (DriverTripCard)
+- Hotel LIVE (abaixo da barra de voo)
+
+---
+
+## SISTEMA LIVE — Portal do Hotel
+
+### Aba LIVE no /portal
+- Botão vermelho pulsante "🔴 LIVE"
+- Auto-refresh silencioso a cada 15 segundos
+- Refresh silencioso: compara dados novos com anteriores, só re-render se mudou
+
+### Secções
+1. VOOS — Cards com barra progresso voo (bandeiras) + barra carro (4 pontos)
+2. Card expandível com: ID, Referência, Cliente, Data, Hora, Pax, Bags, Contacto, Voo, Rota
+3. Botão WhatsApp (SVG real, verde #25D366)
+4. Rodapé: X hóspedes | Y voos | Z transfers
+
+### Segurança
+- Hotel NUNCA vê localização do motorista
+- Hotel NUNCA vê nome do motorista
+- Hotel NUNCA vê preços/comissões
+
+---
+
+## SISTEMA ANTI-FRAUDE GPS (em implementação)
+
+### Regras de Margem
+- Origem é aeroporto (detecta por "aeroporto/airport/aeropuerto/aéroport/flughafen"): raio 2000m
+- Qualquer outro local de origem: raio 200m
+- Destino: sempre 200m
+
+### Colunas Propostas
+- DN(118) = Distância Swipe 1 vs Origem (ex: "150m ✅")
+- DO(119) = Distância Swipe 3 vs Destino (ex: "85m ✅")
+- DP(120) = Flag Fraude (OK / ⚠️ FORA_MARGEM)
+
+### Geocoding na Criação
+- Quando viagem é criada, geocodificar origem e destino
+- Gravar em DL(116) e DM(117)
+- Já existe função geocodificarEndereco() no Tracking_automatico_motoristas.gs
+
+---
+
+## REFRESH SILENCIOSO (implementado/em implementação)
+
+- useRef para guardar dados anteriores
+- Compara JSON.stringify antes de setState
+- Frequências: Hotel LIVE 15s, Admin 30s, Driver 60s
+- Refresh imediato após swipe via callback onStatusChange
+- Indicador: dot verde pulsante discreto, sem spinner
+
+---
+
+## SINCRONIZAÇÃO HOTEL ↔ HUB
+
+### Hotels Activos
+- Empire Lisbon Hotel (ELH) — GAS URL: AKfycbzt67...
+- Empire Marques Hotel (EMH) — GAS URL: AKfycbxiEN9...
+- Gota d'Água (GDA) — pendente
+- Teste Sistema Validado — para testes
+
+### Arquitectura
+- Cada hotel: spreadsheet própria + Codigo.gs + Sincronizacao.gs + Conector.gs
+- Sincronização bidirecional v5.0 com anti-loop
+- HUB Central GAS URL: AKfycbwwr4...
+
+---
+
+## WHATSAPP (Z-API)
+
+### Templates Multilingues (PT/EN/ES/FR/IT)
+- Confirmação de viagem
+- Alerta de atraso
+- Notificação de aterragem
+- Follow-up + feedback
+
+### Detecção Idioma
+- Por DDI do telefone: +351/+55=PT, +44/+1=EN, +34=ES, +33=FR, +39=IT
+
+### Feedback Inteligente
+- 30min após FINALIZADO → pedido avaliação 1-5
+- Se 5★ → link Google Reviews
+- Se 1-4★ → pergunta como melhorar
+
+---
+
+## COL_TRACKING_AUTO (Tracking_automatico_motoristas.gs) — ACTUALIZADO
+
+```javascript
+STATUS_MOTORISTA: 56,         // BD (56)
+TIMESTAMP_NO_LOCAL: 57,       // BE (57)
+COORDS_NO_LOCAL: 58,          // BF (58)
+TIMESTAMP_EM_VIAGEM: 59,      // BG (59)
+COORDS_EM_VIAGEM: 60,         // BH (60)
+TIMESTAMP_ENTREGA: 61,        // BI (61)
+COORDS_ENTREGA: 62,           // BJ (62)
+COORDS_ORIGEM: 116,           // DL (116)
+COORDS_DESTINO: 117,          // DM (117)
 ```
 
 ---
 
-## 🎨 DESIGN SYSTEM — "Luxury meets Technology"
+## FICHEIROS GAS DO HUB CENTRAL
 
-### Estilo Visual
-- Tom: Premium, luxo, confiável — como marca de carros premium
-- Aesthetic: Dark-first, dourado accent, elegância minimalista, animações subtis
-- Sensação: Um software que parece ter custado 1 milhão de euros
-- NUNCA: Inter/Arial/Roboto, gradientes roxos, cards genéricos, "AI slop"
-- NUNCA: Botões coloridos (azul/verde/laranja/vermelho). Usar apenas a paleta da marca.
-
-### Cores da Marca (baseadas no logo oficial)
-```
-Primary (Dourado HUB):    #F5C518 → #D4A017 → #B8860B (amarelo/dourado do logo)
-Dark (Preto Premium):     #000000 → #111111 → #1A1A1A (fundo principal)
-Light (Branco):           #FFFFFF → #F5F5F5 → #E5E5E5 (texto e cards)
-Neutral (Cinza):          #9CA3AF → #6B7280 → #374151 (texto secundário)
-Success:                  #22C55E (confirmado)
-Warning:                  #F59E0B (pendente)
-Error:                    #EF4444 (cancelado)
-```
-
-A interface deve ser DARK-FIRST: fundo preto/cinza escuro com acentos dourados.
-O dourado (#F5C518) é a cor principal de destaque — botões, links, badges, hover.
-Cards em cinza escuro (#1A1A1A / #222222) sobre fundo preto.
-Texto principal em branco, secundário em cinza claro.
-
-### Dados da empresa (usar no site)
-```
-Nome: HUB Transfer
-Slogan: "Transfer and Tourism"
-Site: www.hubtransferencia.com
-Email: juniorguitierez@hubtransferencia.com
-WhatsApp: +351 968 698 138
-Diretor: Junior Gutierez
-Localização: Amadora, Lisboa, Portugal
-Logo: Preto e dourado (ficheiro: Assinatura_digital_Hub_Transfer.jpg)
-```
-
-### Tipografia
-NÃO usar fontes genéricas (Inter, Roboto, Arial, system-ui, Geist).
-USAR a skill frontend-design instalada para escolher tipografia premium.
-A skill deve selecionar fontes que sejam:
-- Distintivas e memoráveis (não as mesmas que todos os sites AI usam)
-- Premium e sofisticadas (combinar com estética preto + dourado)
-- Um display font impactante para headings (bold, luxo)
-- Um body font elegante e legível para texto
-- Um mono font para IDs, códigos e dados operacionais
-Importar via Google Fonts ou Fontsource. Nunca system fonts como fallback primário.
-
-### Princípios
-- Dark-first design (fundo escuro com accent dourado)
-- Light mode como alternativa (inversão clean)
-- Mobile-first SEMPRE
-- Framer Motion para animações (subtis mas premium)
-- Cards com bordas subtis e sombras suaves sobre fundo escuro
-- Botões em dourado (#F5C518) com hover para dourado mais escuro
-- rounded-2xl cards, rounded-xl inputs
+| Ficheiro | Linhas | Responsabilidade Principal |
+|---|---|---|
+| CONFIG_E_CONSTANTES.gs | ~35k | Core: CONFIG, doGet, doPost, getViagens, processarFlightTrackingLinha |
+| FLIGHT_TRACKING_COMPLETO.gs | ~10.7k | obterLinhasHojeAmanha, flight tracking helpers |
+| LOGISTICA_E_ECOSSISTEMA.gs | ~10k | GPS tracking, detecção automática, viabilidade |
+| NOTIFICACOES_E_COMUNICACAO.gs | ~9.4k | Alertas atraso, notificações WhatsApp |
+| TEMPLATES_MULTILINGUES.gs | ~7.5k | Templates PT/EN/ES/FR/IT |
+| SETUP_E_MANUTENCAO.gs | ~5.1k | Setup colunas, triggers |
+| Tracking_automatico_motoristas.gs | ~4.3k | Tracking GPS, geofencing, COL_TRACKING_AUTO |
+| DASHBOARD_E_MONITORAMENTO.gs | ~540 | Dashboard web |
 
 ---
 
-## 📂 ESTRUTURA DO PROJETO
+## VISÃO ESTRATÉGICA — HUB CONCIERGE
 
-```
-hub-transfer-site/
-├── CLAUDE.md
-├── src/
-│   ├── app/
-│   │   ├── (site)/               ← Website público
-│   │   │   ├── page.tsx          ← Landing page
-│   │   │   ├── booking/          ← Reserva direta
-│   │   │   ├── tracking/[id]/    ← Tracking público
-│   │   │   └── about/
-│   │   ├── (portal)/             ← Portal hotéis (auth)
-│   │   │   ├── dashboard/
-│   │   │   ├── new-booking/
-│   │   │   ├── bookings/
-│   │   │   └── history/
-│   │   ├── (admin)/              ← Dashboard operacional (auth)
-│   │   │   ├── dashboard/
-│   │   │   ├── trips/
-│   │   │   ├── drivers/
-│   │   │   ├── hotels/
-│   │   │   ├── finance/
-│   │   │   └── settings/
-│   │   └── api/
-│   ├── components/
-│   │   ├── ui/                   ← shadcn/ui + premium
-│   │   ├── layout/
-│   │   ├── booking/
-│   │   ├── dashboard/
-│   │   └── tracking/
-│   ├── lib/
-│   │   ├── supabase/
-│   │   ├── utils.ts
-│   │   └── constants.ts
-│   ├── hooks/
-│   ├── styles/globals.css
-│   └── i18n/ (pt, en, es, fr, de)
-├── public/
-├── tailwind.config.ts
-└── next.config.ts
-```
+A HUB Transfer transforma-se em plataforma de concierge digital de Lisboa.
+Transfer = produto de entrada. Restaurantes + tours + mapa interactivo = receita recorrente.
+
+### Triângulo de Ouro
+- Hotel → dependente do sistema LIVE
+- Restaurante → paga comissão por cliente
+- Cliente → experiência completa via WhatsApp/QR
+
+### Sistema Multi-Agentes (6 agentes, todos aparecem como "Roberta HUB")
+- ROBERTA HUB — Central, routing, 5 idiomas
+- LAURA — Logística, distribuição motoristas
+- MATEUS — Turismo, 500 pontos turísticos
+- PEDRO — Vendedor, pricing, upsell, restaurantes
+- ASAFE — Relatórios, KPIs
+- OSÉIAS — Gerente CEO, estratégia
 
 ---
 
-## 🔗 INTEGRAÇÃO COM SISTEMA EXISTENTE
+## REGRAS DE NEGÓCIO IMPORTANTES
 
-### Backend GAS ativo (~89.000 linhas):
-- Flight tracking (GoFlightLabs API)
-- GPS tracking motoristas (v2.1)
-- WhatsApp automático (Z-API, 5 idiomas)
-- Sincronização bilateral hotel↔HUB Central
-- Comissões por motorista
-- Dashboard monitoramento
-
-### Estratégia:
-```
-FASE 1: Frontend novo ↔ Google Sheets (via Apps Script API)
-FASE 2: Migrar dados para Supabase
-FASE 3: Frontend ↔ Supabase direto
-```
-
-### Dados do negócio:
-- Hotéis: Empire Lisbon (elh), Empire Marques (emh), Lioz, Gota d'Água (gda)
-- Motoristas: Victor/Igor (€9), Gustavo/Henrique/Danielle/Éder (€10)
-- Rotas: Lisboa↔Aeroporto €9, Cascais/Sintra €20, Tour Sintra €75, Tour Fátima €95
+1. Driver default password: hub2026
+2. Admin usa localStorage bridge para autenticação
+3. Motorista NUNCA deve ter localização exposta ao hotel/cliente
+4. Viagem concluída: SwipeBar mostra "Parabéns pelo seu empenho!" + ícones CheckCircle + Target (lucide-react)
+5. GPS: aeroporto 2km margem, outros locais 200m margem
+6. Feedback: 30min após FINALIZADO
+7. O hotel portal tem campo Config GAS URL configurável
 
 ---
 
-## 🌍 i18n — 5 idiomas: PT, EN, ES, FR, DE
+## NOTAS PARA CLAUDE CODE
 
-Usar next-intl. Detecção por DDI do telefone.
-Landing: idioma do browser. Portal hotel: PT default.
-
----
-
-## 📋 REGRAS DE CÓDIGO
-
-1. TypeScript strict — sem `any`
-2. Componentes funcionais com hooks
-3. Código inglês, conteúdo PT + i18n
-4. Imports absolutos (@/components, @/lib)
-5. Tailwind — NUNCA CSS inline
-6. Framer Motion para animações
-7. shadcn/ui customizado
-8. Zod + React Hook Form
-9. Mobile-first todos os componentes
-10. WCAG 2.1 AA
-11. Core Web Vitals: LCP <2.5s, INP <200ms, CLS <0.1
+- Sempre usar `view` no SKILL.md relevante antes de criar ficheiros
+- Frontend: criar em /home/claude, mover para /mnt/user-data/outputs/ quando pronto
+- GAS: preparar código aqui, Junior cola manualmente no script.google.com
+- Após cada alteração GAS: Ctrl+S → Implantar → Nova versão → Implantar
+- Commits: mensagens em português, descritivas
+- Push: git push origin master
 
 ---
 
-## 🚀 FASES DE IMPLEMENTAÇÃO
-
-### Fase 1 — Fundação (Semana 1)
-Setup Next.js, design system, layout master, landing page
-
-### Fase 2 — Portal Hotéis (Semana 2-3)
-Auth hotel, formulário reserva premium, lista reservas, sync GSheets
-
-### Fase 3 — Dashboard Admin (Semana 3-4)
-KPIs, gestão viagens, motoristas, finanças
-
-### Fase 4 — Avançado (Semana 5-6)
-Tracking público, flight tracking visual, realtime, Supabase
-
-### Fase 5 — App Motoristas (Semana 7-11)
-React Native, GPS nativo, placa digital, navegação Waze/Google Maps
+## ACTUALIZAÇÕES 04/04/2026
 
 ---
 
-## 📐 PORTAL HOTÉIS — SPEC EXACTA (MANTER NOMES E ORGANIZAÇÃO)
+## SWIPEBAR v2.0 — Sistema de Confirmação do Motorista
 
-O frontend atual funciona bem em lógica. Manter TODA a organização e nomes.
-Apenas elevar o visual para premium.
+Componente: src/components/shared/SwipeBar.tsx
+Aparece no admin E no motorista. Design com linha pontilhada (inspirada na logo HUB) + avião SVG arrastável.
 
-### Secção 1: "📝 Solicitar Novo Transfer" (formulário)
+3 Estados: "Estou no local" (NO_LOCAL) → "Cliente comigo" (EM_VIAGEM) → "Cheguei ao destino" (FINALIZADO)
+Estado concluído: CheckCircle + Target (lucide-react) + "Parabéns pelo seu empenho!"
+Vibração do telemóvel ao confirmar. GPS obrigatório antes de cada swipe.
 
-Campos na ordem exacta:
-1. 👤 Nome do Cliente * (text)
-2. 📋 Referência da Reserva (text, ex: Booking.com)
-3. 🚗 Tipo de Serviço (3 toggle buttons: Transfer / Tour / Privado)
-4. 🎯 Selecione o Tour (dropdown, só se tipo=Tour)
-5. 👥 Número de Pessoas * (botões: 👤1, 👥2, 3, 4, 5, 6, 7, 8+)
-6. 🧳 Número de Bagagens (botões: 🎒0, 🧳1, 2, 3, 4, 5, 6+)
-7. 📅 Data do Transfer * (date picker + botões: 📅Hoje, 🗓️Amanhã)
-8. 🕐 Hora de Pick-up * (botões rápidos 06:00-18:00 com emoji + input manual)
-9. 📱 Contacto do Cliente * (tel internacional com DDI)
-10. ✈️ Número do Voo (text, ex: TP1234)
-11. 📍 Local de Origem * (Google Maps autocomplete + botões: Aeroporto, Hotel)
-12. 🎯 Local de Destino * (Google Maps autocomplete + botões: Aeroporto, Hotel)
-13. 💰 Valor do Serviço € * (botões rápidos: €25, €35, €45, €60, €75, €100 + manual)
-14. 💳 Forma de Pagamento * (select: Dinheiro, Cartão, Transferência)
-15. 👨‍💼 Pago Para * (select: Recepção, Motorista, Personalizado)
-16. 📝 Observações (textarea)
+Botão Reactivar na aba Passadas do admin com autenticação validateLogin(session.name, pwd).
 
-Campos Admin (visíveis apenas em modo Admin):
-- 🏨 Valor Hotel (30%) — calculado automaticamente
-- 🚗 Valor HUB Transfer — calculado automaticamente
-- 👨‍💼 Comissão Recepção — calculado automaticamente
+---
 
-Botões de ação do formulário: 📋 Solicitar Transfer (botão dourado primary) + 🧹 Limpar (botão outline)
+## MAPEAMENTO COLUNAS BD-BJ (SwipeBar) — ACTUALIZADO 04/04/2026
 
-### Barra de acções globais (topo da página)
+COLUNAS ANTIGAS (removidas): BD=MsgID Template, BE=MsgID Dados, BF=Lacuna, BG=Status OK
 
-5 botões em linha (usar paleta da marca — dourado para primary, outline para secundários):
-- 📋 **SOLICITAR TRANSFER** (dourado, destaque) — scroll para o formulário
-- 🧹 **LIMPAR** (outline) — reset do formulário
-- 📊 **EXPORTAR CSV** (outline) — exporta tabela filtrada
-- ⚙️ **CONFIGURAR** (outline) — abre painel de configuração da URL do GAS
-- 🗑️ **LIMPAR DADOS** (outline com hover vermelho) — limpa dados locais (com confirmação)
+COLUNAS NOVAS:
+- BD(56) = Status Motorista: AGUARDANDO/NO_LOCAL/EM_VIAGEM/FINALIZADO
+- BE(57) = Timestamp No Local: "NO_LOCAL | 2026-04-04T16:46:43"
+- BF(58) = Coords No Local: lat,lng
+- BG(59) = Timestamp Em Viagem: "EM_VIAGEM | 2026-04-04T16:47:02"
+- BH(60) = Coords Em Viagem: lat,lng
+- BI(61) = Timestamp Entrega: "FINALIZADO | 2026-04-04T16:47:38"
+- BJ(62) = Coords Entrega: lat,lng
 
-### Secção 2: KPIs de Status (4 cards em linha)
+Geocoding referência: DL(116)=Coords Origem, DM(117)=Coords Destino (já existente)
 
-- 📊 **TOTAL DE SERVIÇOS** (número: 291)
-- ⏳ **SOLICITADOS** (número: 288)
-- ✅ **CONFIRMADOS** (número: 3)
-- 🏁 **FINALIZADOS** (número: 0)
+Status antigos convertidos: A_CAMINHO→removido, INICIOU→EM_VIAGEM, FINALIZOU→FINALIZADO, STATUS_OK→STATUS_MOTORISTA
 
-### Secção 3: "💰 Resumo Financeiro" (4 cards em fundo azul gradiente)
+---
 
-- 💵 **Receita Total** (€6061.32)
-- ⏳ **Valor Pendente** (€5986.32)
-- ✅ **Valor Confirmado** (€75.00)
-- 🏁 **Valor Finalizado** (€0.00)
+## HANDLERS GAS NO doGet
 
-### Secção 4: "🚗 Serviços de Transfer" (tabela com filtros)
+updateDriverStatus: ?action=updateDriverStatus&rowIndex=X&status=NO_LOCAL&lat=X&lng=X&timestamp=ISO
+- Grava BD(56)=status, BE-BJ conforme estado, R(18)=CONCLUIDA se FINALIZADO
 
-**Barra de filtros:**
-- 📅 Data Início (date picker)
-- 📅 Data Fim (date picker)
-- ⚡ Períodos Rápidos (dropdown: Personalizado, Hoje, Ontem, Esta Semana, Semana Passada, Este Mês, Mês Passado, Últimos 7 Dias)
-- 🏷️ Status (dropdown: Todos, Solicitado, Confirmado, Finalizado)
-- 🔍 Cliente (text search)
-- 🚗 Tipo Serviço (dropdown: Todos, Transfer, Tour, Privado)
+resetTrip: ?action=resetTrip&rowIndex=X
+- Limpa R(18) + BD-BJ(56-62)
 
-**Botões de filtro:**
-- 🔍 **APLICAR FILTROS** (verde)
-- 🧹 **LIMPAR FILTROS** (cinza)
-- 🚗 **CARREGAR TRANSFERS** (laranja) — sincroniza com Google Sheets
-- 🔧 **TESTAR CONEXÃO** (verde escuro) — testa API do GAS
+getViagens retorna campo statusMotorista de BD(56).
 
-**Colunas da tabela (16 colunas visíveis + admin):**
-🆔ID, 📋Ref, 👤Cliente, 🚗Tipo, 👥Pessoas, 🧳Bagagens,
-📅Data, 🕐Hora Pick-up, 📱Contacto, ✈️Voo, 🗺️Rota,
-💰Valor Total, 💳Pagamento, 👨‍💼Pago Para, 🏷️Status, ⚙️Ações
+---
 
-Colunas admin (visíveis só em modo admin):
-🏨Valor Hotel, 🚗Valor HUB, 👨‍💼Comissão Recepção
+## DRIVER PROGRESS BAR — Barra do Carro
 
-**Links clicáveis na tabela (CRÍTICO — manter):**
-- 📱 Número de telefone → abre WhatsApp (wa.me/{numero})
-- ✈️ Número do voo → abre Google Search (google.com/search?q=flight+{voo})
+Componente: src/components/shared/DriverProgressBar.tsx
+4 pontos: "A caminho" → "No local" → "Com cliente" → "Chegou"
+Linha dourada preenche conforme status. Carro SVG move-se entre pontos.
+Aparece em: admin trips, driver panel, hotel LIVE.
 
-**Acções por linha (3 botões):**
-- ✏️ Editar — carrega dados no formulário para edição
-- 🔄 Alterar Status — cicla: Solicitado → Confirmado → Finalizado
-- 🗑️ Excluir — pede password do hotel (elh/emh/gda/hubtransfer)
+---
 
-**Paginação:** Items por página + navegação de páginas
+## SISTEMA LIVE — Portal do Hotel
 
-### Botão flutuante: 👨‍💻 Admin (canto inferior direito)
-Toggle que mostra/esconde campos e colunas admin (valores hotel, HUB, comissão)
+Aba LIVE no /portal com botão vermelho pulsante.
+Cards expandíveis com: ID, Referência, Cliente, Data, Hora, Pax, Bags, Contacto, Voo, Rota.
+Barra voo (bandeiras LHR→LIS) + barra carro (4 pontos) por viagem.
+Botão WhatsApp com SVG real verde.
+Hotel NUNCA vê: localização motorista, nome motorista, preços/comissões.
+
+---
+
+## ANTI-FRAUDE GPS
+
+Margem aeroporto (detecta "aeroporto/airport/aeropuerto/aéroport/flughafen"): 2000m
+Margem outros locais: 200m
+Margem destino: sempre 200m
+Colunas propostas: DN(118)=distância swipe vs origem, DO(119)=distância vs destino, DP(120)=flag fraude
+
+---
+
+## FLIGHT TRACKING v4.1
+
+analisarDataVoo retorna: HOJE/AMANHA/NAO_PROCESSAR/FUTURO_DISTANTE
+getViagens envia: depIata, depTime, depActual, depDelay, arrOriginal, etaChegada, statusVoo, statusMotorista
+GoFlightLabs: base URL goflightlabs.com, campo flight_iata, /advanced-flights-schedules com iataCode+type=arrival
+217 aeroportos mapeados para bandeiras em src/lib/countryFlags.ts
+
+---
+
+## COL_TRACKING_AUTO (Tracking_automatico_motoristas.gs)
+
+STATUS_MOTORISTA: 56 (BD), TIMESTAMP_NO_LOCAL: 57 (BE), COORDS_NO_LOCAL: 58 (BF),
+TIMESTAMP_EM_VIAGEM: 59 (BG), COORDS_EM_VIAGEM: 60 (BH), TIMESTAMP_ENTREGA: 61 (BI),
+COORDS_ENTREGA: 62 (BJ), COORDS_ORIGEM: 116 (DL), COORDS_DESTINO: 117 (DM)
+
+---
+
+## REFRESH SILENCIOSO (a implementar)
+
+useRef para dados anteriores, compara JSON.stringify, só setState se mudou.
+Frequências: Hotel LIVE 15s, Admin 30s, Driver 60s.
+Refresh imediato após swipe via callback onStatusChange.
+Indicador: dot verde pulsante discreto.
+
+---
+
+## REGRAS IMPORTANTES
+
+- Driver default password: hub2026
+- Admin: localStorage bridge para autenticação
+- Feedback: 30min após FINALIZADO → avaliação 1-5 → se 5★ Google Reviews
+- Commits: mensagens em português
+- GAS: Junior cola manualmente no script.google.com, depois Ctrl+S → Implantar → Nova versão
