@@ -120,7 +120,7 @@ export default function DriverTripCard({
   const flight = useMemo(() => {
     if (!hasFlight) return null;
     void flightTick; // dependency to force recalc
-    return computeFlightState(viagem.depTime || "", viagem.arrTime || "", hora, viagem.statusVoo || "", parseInt(viagem.atrasoMin || "0", 10) || 0, viagem.etaChegada || "");
+    return computeFlightState(viagem.depTime || "", viagem.arrTime || "", hora, viagem.statusVoo || "", parseInt(viagem.atrasoMin || "0", 10) || 0, viagem.etaChegada || "", viagem.depActualFull || viagem.depTimeFull || "", viagem.etaChegadaFull || "");
   }, [hasFlight, viagem.depTime, viagem.arrTime, hora, viagem.statusVoo, viagem.atrasoMin, flightTick]);
 
   const arrTime = cleanHora(viagem.arrTime || "");

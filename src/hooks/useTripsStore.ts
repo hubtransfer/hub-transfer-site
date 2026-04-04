@@ -729,10 +729,7 @@ export function useTripsStore(): TripsStore {
         dateParam ? `&data=${encodeURIComponent(dateParam)}` : ""
       }`;
 
-      const res = await fetch(fetchUrl, {
-        cache: "no-store",
-        headers: { "Cache-Control": "no-cache, no-store", "Pragma": "no-cache" },
-      });
+      const res = await fetch(fetchUrl, { redirect: "follow" });
       const data = await res.json();
 
       let viagens: HubViagem[] = [];

@@ -6,9 +6,18 @@
 /** Parse HH:MM to minutes since midnight */
 function toMin(t: string): number | null {
   if (!t) return null;
-  const [h, m] = t.split(':').map(Number);
+  // Handle "YYYY-MM-DD HH:MM" format → extract HH:MM
+  const timePart = t.includes(' ') ? t.split(' ').pop()! : t;
+  const [h, m] = timePart.split(':').map(Number);
   if (isNaN(h) || isNaN(m)) return null;
   return h * 60 + m;
+}
+
+/** Parse full datetime "YYYY-MM-DD HH:MM" to epoch ms. Returns null if invalid. */
+function toEpoch(full: string): number | null {
+  if (!full || !full.includes(' ')) return null;
+  const d = new Date(full.replace(' ', 'T') + ':00');
+  return isNaN(d.getTime()) ? null : d.getTime();
 }
 
 /** Minutes since midnight for Lisbon NOW */
@@ -70,6 +79,8 @@ export function computeFlightState(
   statusVoo: string,
   atrasoMin: number,
   etaChegada?: string,
+  depActualFull?: string,
+  etaChegadaFull?: string,
 ): FlightState {
   const st = norm(statusVoo);
   if (st === 'CANCELADO' || st === 'CANCELLED' || st === 'CANCELED') {
@@ -100,10 +111,26 @@ export function computeFlightState(
     const mm = remaining % 60;
     return { progress: 40, color: CLR_BLUE, pulse: false, cancelled: false, noData: false, statusText: hh > 0 ? `Em voo · Chega em ${hh}h ${String(mm).padStart(2, '0')}min` : `Em voo · Chega em ${mm}min` };
   }
-  const duration = Math.max((arrM ?? depM! + 120) - depM!, 1);
-  const elapsed = now - depM!;
-  const remaining = (arrM ?? depM! + 120) - now;
-  const pct = Math.max(0, Math.min(100, (elapsed / duration) * 100));
+  // Precision calculation: use full datetime strings when available (epoch-based)
+  const depFull = depActualFull || '';
+  const arrFull = etaChegadaFull || '';
+  const depEpoch = toEpoch(depFull) ?? (depTime.length > 10 ? toEpoch(depTime) : null);
+  const arrEpoch = toEpoch(arrFull) ?? ((etaChegada || '').length > 10 ? toEpoch(etaChegada || '') : null);
+  let pct: number;
+  let remaining: number;
+  if (depEpoch && arrEpoch) {
+    // Precise epoch-based progress
+    const nowMs = Date.now();
+    const totalMs = Math.max(arrEpoch - depEpoch, 60000);
+    pct = Math.max(0, Math.min(100, ((nowMs - depEpoch) / totalMs) * 100));
+    remaining = Math.max(0, Math.round((arrEpoch - nowMs) / 60000));
+  } else {
+    // Fallback: minute-based
+    const duration = Math.max((arrM ?? depM! + 120) - depM!, 1);
+    const elapsed = now - depM!;
+    remaining = (arrM ?? depM! + 120) - now;
+    pct = Math.max(0, Math.min(100, (elapsed / duration) * 100));
+  }
   if (st === 'AGUARDANDO' || st === 'PENDENTE FT' || st === 'AGENDADO' || st === 'SCHEDULED' || now < depM!) {
     const untilDep = depM! - now;
     if (untilDep <= 0) {
