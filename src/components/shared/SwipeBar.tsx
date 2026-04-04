@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import { CheckCircle, Target } from "lucide-react";
 import { HUB_CENTRAL_URL } from "@/lib/trips";
 
 type TripStatus = "PENDENTE" | "NO_LOCAL" | "EM_VIAGEM" | "FINALIZADO";
@@ -129,15 +130,12 @@ export default function SwipeBar({ tripId, rowIndex, initialStatus, onStatusChan
   // Done state
   if (isDone) {
     return (
-      <div className="space-y-1.5">
-        <div className="relative w-full h-12 rounded-full bg-[#1A1A0A] border border-[#D4A017]/30 flex items-center justify-center overflow-hidden">
-          {/* All dots gold */}
-          <div className="absolute inset-0 flex items-center justify-evenly px-6 pointer-events-none">
-            {Array.from({ length: DOT_COUNT }).map((_, i) => (
-              <div key={i} className="w-2 h-2 rounded-full" style={{ backgroundColor: "#D4A017" }} />
-            ))}
-          </div>
-          <span className="relative z-10 font-mono text-sm font-bold text-[#D4A017]">✅ Viagem concluída</span>
+      <div className="w-full rounded-2xl py-5 px-4 text-center space-y-2" style={{ background: "linear-gradient(135deg, #1A1A0A 0%, #1A1500 100%)", border: "1px solid rgba(212,160,23,0.2)" }}>
+        <CheckCircle className="w-10 h-10 text-green-400 mx-auto animate-[scaleIn_0.3s_ease]" />
+        <p className="text-lg font-bold text-amber-400">Viagem concluída com sucesso!</p>
+        <div className="flex items-center justify-center gap-1.5">
+          <Target className="w-5 h-5 text-amber-400" />
+          <span className="text-sm text-gray-300">Parabéns pelo seu empenho!</span>
         </div>
       </div>
     );
