@@ -297,46 +297,17 @@ export default function DriverTripCard({
       {/*  COLLAPSED VIEW (always visible)                */}
       {/* ════════════════════════════════════════════════ */}
       <div className="cursor-pointer" onClick={toggleExpand}>
-        {/* Main row: source+tipo+ETA | name | driver+price */}
-        <div className="flex items-center gap-3 px-4 py-3">
-          {/* Left: source + tipo + display time (ETA or pickup) */}
-          <div className="flex-shrink-0 min-w-[56px]">
-            <span className="block font-semibold uppercase font-mono leading-none mb-1" style={{ fontSize: "0.65rem", letterSpacing: "0.5px", color: c.hex }}>{sourceLabel} · {tipo}</span>
-            <span className="font-bold font-mono" style={{ fontSize: "1.5rem", color: isLanded ? "#22C55E" : c.hex }}>{displayTime}</span>
-          </div>
-          {/* Client name + flight timeline */}
+        {/* L1: Source · Tipo */}
+        <div className="px-4 pt-3">
+          <span className="font-semibold uppercase font-mono leading-none" style={{ fontSize: "0.65rem", letterSpacing: "0.5px", color: c.hex }}>{sourceLabel} · {tipo}</span>
+        </div>
+
+        {/* L2: ETA time | name | driver+price */}
+        <div className="flex items-center gap-3 px-4 py-1">
+          <span className="flex-shrink-0 font-bold font-mono" style={{ fontSize: "1.5rem", color: isLanded ? "#22C55E" : c.hex }}>{displayTime}</span>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-[#F5F5F5] truncate" style={{ fontSize: "1.1rem" }}>
-              {viagem.client}
-            </p>
-            {/* Compact flight timeline (collapsed only, CHEGADA) */}
-            {!expanded && hasFlight && flight && tipo === "CHEGADA" && !flight.noData && (
-              <div className="flex items-center gap-1 mt-0.5 flex-wrap">
-                {/* Origin dep */}
-                {originFlag && <span className="text-xs leading-none">{originFlag}</span>}
-                {hasDepDiff ? (
-                  <><span className="font-mono text-xs line-through text-gray-500">{depTime}</span><span className="font-mono text-xs text-white font-medium">→{depActual}</span></>
-                ) : depTime ? (
-                  <span className="font-mono text-xs text-gray-400">{depTime}</span>
-                ) : null}
-                {/* Flight number */}
-                <span className="font-mono text-xs text-[#888]">· ✈️ {viagem.flight} ·</span>
-                {/* Destination arr */}
-                {isLanded ? (
-                  <><span className="font-mono text-xs text-[#22C55E] font-medium">✅ Aterrisou {etaChegada || viagem.arrTime}</span><span className="text-xs leading-none">🇵🇹</span></>
-                ) : hasArrDiff ? (
-                  <><span className="font-mono text-xs line-through text-gray-500">{arrOriginal}</span><span className="font-mono text-xs text-white font-medium">→{etaChegada}</span><span className="text-xs leading-none">🇵🇹</span></>
-                ) : etaChegada ? (
-                  <><span className="font-mono text-xs text-gray-400">{etaChegada}</span><span className="text-xs leading-none">🇵🇹</span></>
-                ) : null}
-              </div>
-            )}
-            {/* No data message */}
-            {!expanded && hasFlight && flight && tipo === "CHEGADA" && flight.noData && (
-              <p className="font-mono text-xs text-[#888] italic mt-0.5">✈️ {viagem.flight} · Dados em breve</p>
-            )}
+            <p className="font-semibold text-[#F5F5F5] truncate" style={{ fontSize: "1.1rem" }}>{viagem.client}</p>
           </div>
-          {/* Right: driver + price */}
           <div className="flex-shrink-0 text-right flex flex-col items-end">
             {mode === "admin" && (
               viagem.driver
@@ -347,33 +318,24 @@ export default function DriverTripCard({
           </div>
         </div>
 
-        {/* Collapsed thin flight bar — always shows for CHEGADA with flight */}
+        {/* L3-L6: Flight block (collapsed, CHEGADA only) */}
         {!expanded && hasFlight && flight && tipo === "CHEGADA" && (
-          <div className="px-4 pb-3">
+          <div className="px-4 pb-3 pt-1">
             {flight.noData ? (
-              /* No tracking data yet */
-              <p className="font-mono text-[10px] text-[#888] italic">✈️ {viagem.flight} · Dados em breve</p>
+              <p className="font-mono text-xs text-[#888] italic">✈️ {viagem.flight} · Dados em breve</p>
             ) : flight.cancelled ? (
-              /* Cancelled */
               <div className="flex items-center gap-2">
                 <div className="flex-1" style={{ height: "3px", borderRadius: "2px", backgroundColor: "#EF4444", opacity: 0.3 }} />
                 <span className="font-mono text-[10px] text-[#EF4444] font-bold">❌ CANCELADO</span>
               </div>
             ) : (
               <>
-                {/* Thin bar with origin/destination at ends */}
+                {/* L3: Bar — flag+IATA left | thin bar+plane | flag+IATA right */}
                 <div className="flex items-center gap-2">
-                  {/* Left: flag + IATA + dep time */}
                   <div className="flex items-center gap-1 flex-shrink-0">
-                    <span className="text-xs leading-none">{originFlag || "🌍"}</span>
-                    <span className="font-mono text-[10px] text-[#888]">{depIata}</span>
-                    {hasDepDiff ? (
-                      <><span className="font-mono text-[9px] line-through text-[#555]">{depTime}</span><span className="font-mono text-[10px] text-white font-medium">{depActual}</span></>
-                    ) : depTime ? (
-                      <span className="font-mono text-[10px] text-[#666]">{depTime}</span>
-                    ) : null}
+                    <span className="text-sm leading-none">{originFlag || "🌍"}</span>
+                    <span className="font-mono text-sm font-bold text-[#D4A017]">{depIata}</span>
                   </div>
-                  {/* Thin progress bar — color from computeFlightState */}
                   <div className="flex-1 relative" style={{ height: "3px", borderRadius: "2px", backgroundColor: "#333" }}>
                     <div className="h-full transition-all duration-[2s] ease-in-out" style={{ width: `${Math.max(flight.progress, 2)}%`, backgroundColor: flight.color, borderRadius: "2px" }} />
                     <svg width="12" height="12" viewBox="0 0 24 24" fill={flight.color}
@@ -382,21 +344,52 @@ export default function DriverTripCard({
                       <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" transform="rotate(90 12 12)"/>
                     </svg>
                   </div>
-                  {/* Right: arr time + flag */}
                   <div className="flex items-center gap-1 flex-shrink-0">
-                    {hasArrDiff ? (
-                      <><span className="font-mono text-[9px] line-through text-[#555]">{arrOriginal}</span><span className="font-mono text-[10px] text-white font-medium">{etaChegada}</span></>
-                    ) : (
-                      <span className="font-mono text-[10px] text-[#888]">{etaChegada || viagem.arrTime || ""}</span>
-                    )}
-                    <span className="text-xs leading-none">🇵🇹</span>
+                    <span className="text-sm leading-none">🇵🇹</span>
+                    <span className="font-mono text-sm font-bold text-[#D4A017]">LIS</span>
                   </div>
                 </div>
-                {/* Status text — color matches bar */}
-                <p className="font-mono text-[10px] mt-1 text-center" style={{ color: flight.color }}>{flight.statusText}</p>
+
+                {/* L4: Dep times left | Arr times right */}
+                <div className="flex items-center justify-between mt-1">
+                  <div className="flex items-center gap-1">
+                    {hasDepDiff ? (
+                      <><span className="font-mono text-xs line-through text-gray-500">{depTime}</span><span className="font-mono text-sm font-semibold text-white">→ {depActual}</span></>
+                    ) : depTime ? (
+                      <span className="font-mono text-xs text-gray-400">{depTime}</span>
+                    ) : null}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {hasArrDiff ? (
+                      <><span className="font-mono text-xs line-through text-gray-500">{arrOriginal}</span><span className="font-mono text-sm font-semibold text-white">→ {etaChegada}</span></>
+                    ) : (
+                      <span className="font-mono text-xs text-gray-400">{etaChegada || viagem.arrTime || ""}</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* L5: Flight info + status */}
+                <div className="flex items-center justify-center gap-1.5 mt-1.5 flex-wrap">
+                  {originFlag && <span className="text-xs leading-none">{originFlag}</span>}
+                  <span className="font-mono text-xs text-[#D4A017] font-bold">{viagem.flight}</span>
+                  {depDelayMin > 0 && (
+                    <span className="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded text-xs font-mono font-bold">+{depDelayMin}min partida</span>
+                  )}
+                  <span className="font-mono text-[10px]" style={{ color: flight.color }}>{flight.statusText}</span>
+                </div>
+
+                {/* L6: Pickup */}
+                {hora && (
+                  <p className="text-center font-mono text-sm mt-1.5" style={{ color: "#D4A017" }}>🚗 Pickup: {adjustedPickup || hora}</p>
+                )}
               </>
             )}
           </div>
+        )}
+
+        {/* Non-flight cards: just pickup below name */}
+        {!expanded && (!hasFlight || !flight || tipo !== "CHEGADA") && hora && (
+          <div className="px-4 pb-2" />
         )}
       </div>
 
