@@ -35,7 +35,8 @@ function getGPS(): Promise<{ lat: number; lng: number } | null> {
 
 async function sendStatus(rowIndex: string, status: string, lat?: number, lng?: number) {
   try {
-    const url = `${HUB_CENTRAL_URL}?action=updateDriverStatus&rowIndex=${encodeURIComponent(rowIndex)}&status=${encodeURIComponent(status)}&lat=${lat ?? ""}&lng=${lng ?? ""}&t=${Date.now()}`;
+    const timestamp = new Date().toISOString();
+    const url = `${HUB_CENTRAL_URL}?action=updateDriverStatus&rowIndex=${encodeURIComponent(rowIndex)}&status=${encodeURIComponent(status)}&lat=${lat ?? ""}&lng=${lng ?? ""}&timestamp=${encodeURIComponent(timestamp)}&t=${Date.now()}`;
     await fetch(url, { redirect: "follow" });
   } catch (err) {
     console.error("[SwipeBar] sendStatus error:", err);
@@ -74,6 +75,13 @@ export default function SwipeBar({ tripId, rowIndex, initialStatus, onStatusChan
   useEffect(() => {
     setStatus(mapInitialStatus(initialStatus || ""));
   }, [initialStatus]);
+
+  // Request GPS permission on mount
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(() => {}, () => {}, { enableHighAccuracy: false, timeout: 5000 });
+    }
+  }, []);
 
   const onStart = useCallback((clientX: number) => {
     if (!step || sending || isDone) return;
