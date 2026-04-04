@@ -125,8 +125,23 @@ export default function DriverTripCard({
 
   const arrTime = cleanHora(viagem.arrTime || "");
   const delayMin = parseInt(viagem.atrasoMin || "0", 10) || 0;
-  const delayedHora = delayMin > 0 ? getDelayedTime(hora, delayMin) : "";
   const dColor = delayMin > 0 ? delayColor(delayMin) : "";
+
+  // Adjusted pickup: only change if etaChegada+15min > original pickupTime
+  const adjustedPickup = useMemo(() => {
+    const eta = (viagem.etaChegada || viagem.arrTime || "").trim();
+    if (!eta || !hora) return "";
+    const etaM = (() => { const [h, m] = eta.split(":").map(Number); return isNaN(h) || isNaN(m) ? null : h * 60 + m; })();
+    const pickM = (() => { const [h, m] = hora.split(":").map(Number); return isNaN(h) || isNaN(m) ? null : h * 60 + m; })();
+    if (etaM === null || pickM === null) return "";
+    const needed = etaM + 15; // ETA + 15min for disembark/baggage
+    if (needed > pickM) {
+      const h = Math.floor(needed / 60) % 24;
+      const m = needed % 60;
+      return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+    }
+    return ""; // original pickup is fine
+  }, [viagem.etaChegada, viagem.arrTime, hora]);
 
   // Origin flag + IATA code from depIata
   const depIata = (viagem.depIata || "").toUpperCase().trim();
@@ -273,11 +288,11 @@ export default function DriverTripCard({
           {/* Left: source + tipo + time */}
           <div className="flex-shrink-0 min-w-[56px]">
             <span className="block font-semibold uppercase font-mono leading-none mb-1" style={{ fontSize: "0.65rem", letterSpacing: "0.5px", color: c.hex }}>{sourceLabel} · {tipo}</span>
-            {delayedHora ? (
+            {adjustedPickup ? (
               <div className="flex items-center gap-1">
                 <span className="font-bold font-mono line-through opacity-40 text-[#999]" style={{ fontSize: "1.1rem" }}>{hora}</span>
                 <span className="text-[9px] text-[#666]">→</span>
-                <span className="font-black font-mono" style={{ fontSize: "1.5rem", color: dColor }}>{delayedHora}</span>
+                <span className="font-black font-mono" style={{ fontSize: "1.5rem", color: dColor }}>{adjustedPickup}</span>
               </div>
             ) : (
               <span className="font-bold font-mono" style={{ fontSize: "1.5rem", color: c.hex }}>{hora}</span>
@@ -341,7 +356,7 @@ export default function DriverTripCard({
                 {delayMin > 0 ? (
                   <div className="flex items-center gap-1">
                     <span className="font-mono line-through text-[#666]" style={{ fontSize: "0.7rem" }}>{hora}</span>
-                    <span className="font-mono font-semibold text-[#F5C518]" style={{ fontSize: "0.85rem" }}>{delayedHora}</span>
+                    <span className="font-mono font-semibold text-[#F5C518]" style={{ fontSize: "0.85rem" }}>{adjustedPickup}</span>
                   </div>
                 ) : (
                   <p className="font-mono font-semibold text-[#E0E0E0]" style={{ fontSize: "0.85rem" }}>{viagem.arrTime || hora}</p>
@@ -491,7 +506,7 @@ export default function DriverTripCard({
                       {delayMin > 0 ? (
                         <div className="mt-1">
                           <p className="font-mono text-[10px] line-through text-[#666]">{hora}</p>
-                          <p className="font-mono text-xs font-bold text-[#F5C518]">{delayedHora}</p>
+                          <p className="font-mono text-xs font-bold text-[#F5C518]">{adjustedPickup}</p>
                         </div>
                       ) : !viagem.arrTime ? (
                         <div className="mt-1">
