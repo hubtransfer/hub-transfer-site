@@ -347,42 +347,55 @@ export default function DriverTripCard({
           </div>
         </div>
 
-        {/* Collapsed thin flight bar */}
-        {!expanded && hasFlight && flight && tipo === "CHEGADA" && !flight.noData && !flight.cancelled && (
+        {/* Collapsed thin flight bar — always shows for CHEGADA with flight */}
+        {!expanded && hasFlight && flight && tipo === "CHEGADA" && (
           <div className="px-4 pb-3">
-            {/* Thin bar with origin/destination at ends */}
-            <div className="flex items-center gap-2">
-              {/* Left: flag + IATA + dep time */}
-              <div className="flex items-center gap-1 flex-shrink-0">
-                <span className="text-xs leading-none">{originFlag || "🌍"}</span>
-                <span className="font-mono text-[10px] text-[#888]">{depIata}</span>
-                {hasDepDiff ? (
-                  <><span className="font-mono text-[9px] line-through text-[#555]">{depTime}</span><span className="font-mono text-[10px] text-white font-medium">{depActual}</span></>
-                ) : depTime ? (
-                  <span className="font-mono text-[10px] text-[#666]">{depTime}</span>
-                ) : null}
+            {flight.noData ? (
+              /* No tracking data yet */
+              <p className="font-mono text-[10px] text-[#888] italic">✈️ {viagem.flight} · Dados em breve</p>
+            ) : flight.cancelled ? (
+              /* Cancelled */
+              <div className="flex items-center gap-2">
+                <div className="flex-1" style={{ height: "3px", borderRadius: "2px", backgroundColor: "#EF4444", opacity: 0.3 }} />
+                <span className="font-mono text-[10px] text-[#EF4444] font-bold">❌ CANCELADO</span>
               </div>
-              {/* Thin progress bar */}
-              <div className="flex-1 relative" style={{ height: "3px", borderRadius: "2px", backgroundColor: "#333" }}>
-                <div className="h-full transition-all duration-[2s] ease-in-out" style={{ width: `${Math.max(flight.progress, 2)}%`, backgroundColor: flight.color, borderRadius: "2px" }} />
-                <svg width="12" height="12" viewBox="0 0 24 24" fill={flight.color}
-                  className="absolute top-1/2 -translate-y-1/2 transition-all duration-[2s] ease-in-out"
-                  style={{ left: `calc(${Math.max(flight.progress, 2)}% - 6px)`, filter: "drop-shadow(0 0 2px rgba(0,0,0,.7))" }}>
-                  <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" transform="rotate(90 12 12)"/>
-                </svg>
-              </div>
-              {/* Right: arr time + flag */}
-              <div className="flex items-center gap-1 flex-shrink-0">
-                {hasArrDiff ? (
-                  <><span className="font-mono text-[9px] line-through text-[#555]">{arrOriginal}</span><span className="font-mono text-[10px] text-white font-medium">{etaChegada}</span></>
-                ) : (
-                  <span className="font-mono text-[10px] text-[#888]">{etaChegada || viagem.arrTime || ""}</span>
-                )}
-                <span className="text-xs leading-none">🇵🇹</span>
-              </div>
-            </div>
-            {/* Status text */}
-            <p className="font-mono text-[10px] mt-1 text-center" style={{ color: flight.color }}>{flight.statusText}</p>
+            ) : (
+              <>
+                {/* Thin bar with origin/destination at ends */}
+                <div className="flex items-center gap-2">
+                  {/* Left: flag + IATA + dep time */}
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <span className="text-xs leading-none">{originFlag || "🌍"}</span>
+                    <span className="font-mono text-[10px] text-[#888]">{depIata}</span>
+                    {hasDepDiff ? (
+                      <><span className="font-mono text-[9px] line-through text-[#555]">{depTime}</span><span className="font-mono text-[10px] text-white font-medium">{depActual}</span></>
+                    ) : depTime ? (
+                      <span className="font-mono text-[10px] text-[#666]">{depTime}</span>
+                    ) : null}
+                  </div>
+                  {/* Thin progress bar — color from computeFlightState */}
+                  <div className="flex-1 relative" style={{ height: "3px", borderRadius: "2px", backgroundColor: "#333" }}>
+                    <div className="h-full transition-all duration-[2s] ease-in-out" style={{ width: `${Math.max(flight.progress, 2)}%`, backgroundColor: flight.color, borderRadius: "2px" }} />
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill={flight.color}
+                      className="absolute top-1/2 -translate-y-1/2 transition-all duration-[2s] ease-in-out"
+                      style={{ left: `calc(${Math.max(flight.progress, 2)}% - 6px)`, filter: "drop-shadow(0 0 2px rgba(0,0,0,.7))" }}>
+                      <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" transform="rotate(90 12 12)"/>
+                    </svg>
+                  </div>
+                  {/* Right: arr time + flag */}
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    {hasArrDiff ? (
+                      <><span className="font-mono text-[9px] line-through text-[#555]">{arrOriginal}</span><span className="font-mono text-[10px] text-white font-medium">{etaChegada}</span></>
+                    ) : (
+                      <span className="font-mono text-[10px] text-[#888]">{etaChegada || viagem.arrTime || ""}</span>
+                    )}
+                    <span className="text-xs leading-none">🇵🇹</span>
+                  </div>
+                </div>
+                {/* Status text — color matches bar */}
+                <p className="font-mono text-[10px] mt-1 text-center" style={{ color: flight.color }}>{flight.statusText}</p>
+              </>
+            )}
           </div>
         )}
       </div>
