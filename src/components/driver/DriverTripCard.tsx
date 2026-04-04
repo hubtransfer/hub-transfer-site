@@ -333,21 +333,8 @@ export default function DriverTripCard({
               </div>
             ) : (
               <>
-                {/* L3: Flight info + status (ABOVE bar) */}
-                <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                  {originFlag && <span className="text-xs leading-none">{originFlag}</span>}
-                  <a href={`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`}
-                    target="_blank" rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="font-mono text-xs text-amber-400 hover:text-amber-300 font-bold underline cursor-pointer">{viagem.flight}</a>
-                  {depDelayMin > 0 && (
-                    <span className="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded text-xs font-mono font-bold">+{depDelayMin}min partida</span>
-                  )}
-                  <span className="font-mono text-[10px]" style={{ color: flight.color }}>{flight.statusText}</span>
-                </div>
-
-                {/* L4: Bar — flag+IATA left | thin bar+plane | flag+IATA right */}
-                <div className="flex items-center gap-2 mt-1.5">
+                {/* Bar — flag+IATA left | thin bar+plane | flag+IATA right */}
+                <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <span className="text-sm leading-none">{originFlag || "🌍"}</span>
                     <span className="font-mono text-sm font-bold text-[#D4A017]">{depIata}</span>
@@ -438,7 +425,6 @@ export default function DriverTripCard({
                   <>
                     {/* ETA big time + flight number */}
                     <div className="flex items-center justify-center gap-2 mb-2">
-                      {originFlag && <span className="text-[20px] leading-none">{originFlag}</span>}
                       <a href={`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`}
                         target="_blank" rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
