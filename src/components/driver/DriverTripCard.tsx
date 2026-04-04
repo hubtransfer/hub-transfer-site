@@ -342,7 +342,7 @@ export default function DriverTripCard({
                 <span className="font-mono text-[10px] text-[#EF4444] font-bold">❌ CANCELADO</span>
               </div>
             ) : (
-              <div className="space-y-1">
+              <div className="space-y-0.5 sm:space-y-1">
                 {/* L1: Times — dep left, arr right */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
@@ -513,8 +513,11 @@ export default function DriverTripCard({
                       </div>
                     )}
 
-                    {/* Pickup time — separate below flight block */}
-                    <div className="mt-2 pt-2 border-t border-[#2A2A2A]/50 text-center">
+                    {/* Driver progress bar (expanded) */}
+                    <DriverProgressBar statusMotorista={viagem.statusMotorista} />
+
+                    {/* Pickup time */}
+                    <div className="mt-1 pt-1 border-t border-[#2A2A2A]/50 text-center">
                       <span className="font-mono text-xs" style={{ color: "#D4A017" }}>🚗 Pickup: {adjustedPickup || hora}</span>
                     </div>
                   </>

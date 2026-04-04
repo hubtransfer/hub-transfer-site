@@ -5,10 +5,10 @@ interface DriverProgressBarProps {
 }
 
 const STEPS = [
-  { key: "A_CAMINHO", label: "A caminho", align: "text-left" },
-  { key: "NO_LOCAL", label: "No local", align: "text-center" },
-  { key: "EM_VIAGEM", label: "Com cliente", align: "text-center" },
-  { key: "FINALIZADO", label: "Chegou", align: "text-right" },
+  { key: "A_CAMINHO", label: "A caminho" },
+  { key: "NO_LOCAL", label: "No local" },
+  { key: "EM_VIAGEM", label: "Com cliente" },
+  { key: "FINALIZADO", label: "Chegou" },
 ];
 
 function statusToStep(s: string): number {
@@ -44,7 +44,7 @@ export default function DriverProgressBar({ statusMotorista }: DriverProgressBar
   const linePct = Math.max(0, ((activeStep - 1) / 3) * 100);
 
   return (
-    <div className="w-full px-4 py-2">
+    <div className="w-full px-2 sm:px-4 py-1 sm:py-2">
       {/* Dots + lines */}
       <div className="relative flex items-center justify-between" style={{ height: "24px" }}>
         {/* Background dashed line (full width between dots) */}
@@ -90,16 +90,18 @@ export default function DriverProgressBar({ statusMotorista }: DriverProgressBar
         })}
       </div>
 
-      {/* Labels below dots */}
-      <div className="flex justify-between mt-0.5">
+      {/* Labels below dots — offset for mobile alignment */}
+      <div className="flex justify-between mt-0.5" style={{ paddingLeft: "0px", paddingRight: "0px" }}>
         {STEPS.map((s, i) => {
           const stepNum = i + 1;
           const isActive = activeStep >= stepNum;
+          // Mobile: spread labels — first left, last right, middle offset
+          const align = i === 0 ? "text-left pl-0" : i === 3 ? "text-right pr-0" : i === 1 ? "text-center -ml-1 sm:ml-0" : "text-center ml-1 sm:ml-0";
           return (
-            <span key={s.key} className={`font-mono transition-colors duration-500 ${s.align}`} style={{
+            <span key={s.key} className={`font-mono transition-colors duration-500 ${align}`} style={{
               fontSize: "9px",
               color: isDone ? CLR_GREEN : isActive ? "#D0D0D0" : "#4B5563",
-              width: "25%",
+              flex: i === 0 || i === 3 ? "0 0 auto" : "1 1 0",
             }}>
               {s.label}
             </span>
