@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useTripsStore } from "@/hooks/useTripsStore";
 import TripCard from "@/components/driver/DriverTripCard";
 import DriverNameplate from "@/components/driver/DriverNameplate";
 import type { TabType, HubViagem, TripService } from "@/lib/trips";
 import {
+  HUB_CENTRAL_URL,
   TAB_INFO,
   TEMPLATES,
   detectTipo,
@@ -16,6 +17,7 @@ import {
   todayStr,
   dateToISO,
 } from "@/lib/trips";
+import { validateLogin } from "@/lib/auth";
 
 /* ================================================================== */
 /*  TAB DEFINITIONS                                                    */
@@ -57,6 +59,46 @@ function syncDot(status: string) {
 
 export default function TripsPage() {
   const store = useTripsStore();
+
+  // Reset trip modal
+  const [resetTrip, setResetTrip] = useState<HubViagem | null>(null);
+  const [resetPwd, setResetPwd] = useState("");
+  const [resetError, setResetError] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetToast, setResetToast] = useState("");
+
+  const handleResetTrip = useCallback(async () => {
+    if (!resetTrip || !resetPwd) return;
+    setResetError("");
+    setResetLoading(true);
+
+    // Validate admin password via same GAS backend as login
+    const check = await validateLogin("admin", resetPwd);
+    if (!check.success) {
+      setResetError("Senha incorrecta");
+      setResetLoading(false);
+      return;
+    }
+
+    // Send reset to GAS
+    try {
+      const url = `${HUB_CENTRAL_URL}?action=resetTrip&rowIndex=${encodeURIComponent(resetTrip.rowIndex || "")}&t=${Date.now()}`;
+      const res = await fetch(url, { redirect: "follow" });
+      const data = await res.json();
+      if (data.success) {
+        setResetToast("Viagem reactivada com sucesso");
+        setResetTrip(null);
+        setResetPwd("");
+        store.syncViagens(true);
+        setTimeout(() => setResetToast(""), 3000);
+      } else {
+        setResetError(data.message || "Erro ao resetar");
+      }
+    } catch {
+      setResetError("Erro de conexão");
+    }
+    setResetLoading(false);
+  }, [resetTrip, resetPwd, store]);
 
   // Local URL input
   const [urlInput, setUrlInput] = useState("");
@@ -480,6 +522,10 @@ export default function TripsPage() {
                       </div>
                       <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded" style={{ backgroundColor: `${typeColor}15`, color: typeColor }}>{tipo}</span>
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#22C55E]/10 text-[#22C55E]">CONCLUÍDA</span>
+                      <button onClick={() => { setResetTrip(viagem); setResetPwd(""); setResetError(""); }}
+                        className="text-[10px] font-mono bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-amber-400 hover:border-amber-400/30 px-2 py-0.5 rounded cursor-pointer transition-colors">
+                        🔄 Reactivar
+                      </button>
                     </div>
                   );
                 })}
@@ -511,6 +557,10 @@ export default function TripsPage() {
                         </div>
                         <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded" style={{ backgroundColor: `${typeColor}15`, color: typeColor }}>{tipo}</span>
                         {isDone && <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#22C55E]/10 text-[#22C55E]">CONCLUÍDA</span>}
+                        <button onClick={() => { setResetTrip(viagem); setResetPwd(""); setResetError(""); }}
+                          className="text-[10px] font-mono bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-amber-400 hover:border-amber-400/30 px-2 py-0.5 rounded cursor-pointer transition-colors">
+                          🔄 Reactivar
+                        </button>
                       </div>
                     );
                   })
@@ -655,6 +705,47 @@ export default function TripsPage() {
         destination={store.nameplateDestination}
         onClose={store.closeNameplate}
       />
+
+      {/* ─── RESET TRIP MODAL ─── */}
+      {resetTrip && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.8)" }}
+          onClick={() => setResetTrip(null)}>
+          <div className="w-full max-w-sm bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-5 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-base font-bold text-amber-400">🔄 Reactivar viagem</h3>
+            <p className="text-xs text-zinc-400">
+              <span className="text-white font-semibold">{resetTrip.client}</span> — {cleanHora(resetTrip.pickupTime || "")} — {resetTrip.flight || "sem voo"}
+            </p>
+            <p className="text-xs text-zinc-500">Insira a senha de administrador para confirmar.</p>
+            <input
+              type="password"
+              value={resetPwd}
+              onChange={(e) => { setResetPwd(e.target.value); setResetError(""); }}
+              placeholder="Senha admin"
+              autoFocus
+              className="w-full h-10 bg-[#0A0A0A] border border-amber-500/30 rounded-lg px-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-amber-500 font-mono"
+              onKeyDown={(e) => { if (e.key === "Enter") handleResetTrip(); }}
+            />
+            {resetError && <p className="text-xs text-red-400 font-mono">{resetError}</p>}
+            <div className="flex gap-2">
+              <button onClick={handleResetTrip} disabled={resetLoading || !resetPwd}
+                className="flex-1 h-9 bg-amber-500/20 text-amber-400 font-bold text-sm rounded-lg hover:bg-amber-500/30 disabled:opacity-50 cursor-pointer transition-colors">
+                {resetLoading ? "A verificar..." : "Confirmar"}
+              </button>
+              <button onClick={() => setResetTrip(null)}
+                className="h-9 px-4 bg-zinc-800 text-zinc-400 text-sm rounded-lg hover:text-white cursor-pointer transition-colors">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast */}
+      {resetToast && (
+        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[9999] bg-[#22C55E] text-black text-sm font-bold px-5 py-2.5 rounded-lg shadow-lg">
+          {resetToast}
+        </div>
+      )}
     </div>
   );
 }
