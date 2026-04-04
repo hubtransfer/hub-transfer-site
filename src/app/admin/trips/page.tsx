@@ -17,7 +17,7 @@ import {
   todayStr,
   dateToISO,
 } from "@/lib/trips";
-import { validateLogin } from "@/lib/auth";
+import { validateLogin, getSession } from "@/lib/auth";
 
 /* ================================================================== */
 /*  TAB DEFINITIONS                                                    */
@@ -72,8 +72,10 @@ export default function TripsPage() {
     setResetError("");
     setResetLoading(true);
 
-    // Validate admin password via same GAS backend as login
-    const check = await validateLogin("admin", resetPwd);
+    // Validate admin password via same GAS backend as login — use actual session name
+    const session = getSession();
+    const adminName = session?.name || "admin";
+    const check = await validateLogin(adminName, resetPwd);
     if (!check.success) {
       setResetError("Senha incorrecta");
       setResetLoading(false);
