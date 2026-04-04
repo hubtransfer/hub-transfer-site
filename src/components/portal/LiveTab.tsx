@@ -56,7 +56,12 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
   // Tick for flight progress recalc
   const [tick, setTick] = useState(0);
 
-  // Fetch from HUB Central
+  // Stable refs for callbacks (avoid re-render loops)
+  const onRefreshRef = useRef(onRefresh);
+  onRefreshRef.current = onRefresh;
+  const prevDataRef = useRef("");
+
+  // Fetch from HUB Central (stable — no deps)
   const fetchHubCentral = useCallback(async () => {
     try {
       const url = `${HUB_CENTRAL_URL}?action=viagens&t=${Date.now()}`;
@@ -65,39 +70,47 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
       let viagens: HubViagem[] = [];
       if (Array.isArray(data)) viagens = data;
       else if (data?.viagens && Array.isArray(data.viagens)) viagens = data.viagens;
-      setHubViagens(viagens);
+      // Only update state if data actually changed
+      const key = JSON.stringify(viagens.map((v) => v.id + (v.statusVoo || "") + (v.etaChegada || "")));
+      if (key !== prevDataRef.current) {
+        prevDataRef.current = key;
+        setHubViagens(viagens);
+      }
     } catch (err) {
       console.error("[LiveTab] HUB Central fetch error:", err);
     }
   }, []);
 
-  // Initial load + auto-refresh (60s) + flight tick (30s)
+  // Initial load + intervals — runs ONCE on mount
   useEffect(() => {
     setHubLoading(true);
     fetchHubCentral().finally(() => setHubLoading(false));
-    onRefresh();
+    onRefreshRef.current();
     setLastUpdate(new Date().toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
 
-    const syncInterval = setInterval(async () => {
+    // Auto-refresh every 60 seconds
+    const syncId = setInterval(async () => {
       setRefreshing(true);
       await fetchHubCentral();
-      await onRefresh();
+      try { onRefreshRef.current(); } catch { /* */ }
       setLastUpdate(new Date().toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
       setRefreshing(false);
     }, 60000);
 
-    const tickInterval = setInterval(() => setTick((t) => t + 1), 30000);
+    // Flight progress tick every 30 seconds
+    const tickId = setInterval(() => setTick((t) => t + 1), 30000);
 
-    return () => { clearInterval(syncInterval); clearInterval(tickInterval); };
-  }, [fetchHubCentral, onRefresh]);
+    return () => { clearInterval(syncId); clearInterval(tickId); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const doRefresh = useCallback(async () => {
     setRefreshing(true);
     await fetchHubCentral();
-    await onRefresh();
+    try { onRefreshRef.current(); } catch { /* */ }
     setLastUpdate(new Date().toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
     setRefreshing(false);
-  }, [fetchHubCentral, onRefresh]);
+  }, [fetchHubCentral]);
 
   // Filter HUB Central viagens: today + matching hotel
   const hotelFlights = useMemo(() => {
