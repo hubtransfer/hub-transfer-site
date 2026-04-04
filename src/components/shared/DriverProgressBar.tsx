@@ -5,10 +5,10 @@ interface DriverProgressBarProps {
 }
 
 const STEPS = [
-  { key: "A_CAMINHO", label: "A caminho", short: "A cam." },
-  { key: "NO_LOCAL", label: "No local", short: "Local" },
-  { key: "EM_VIAGEM", label: "Cliente", short: "Client." },
-  { key: "FINALIZADO", label: "Destino", short: "Dest." },
+  { key: "A_CAMINHO", label: "A caminho", align: "text-left" },
+  { key: "NO_LOCAL", label: "No local", align: "text-center" },
+  { key: "EM_VIAGEM", label: "Com cliente", align: "text-center" },
+  { key: "FINALIZADO", label: "Chegou", align: "text-right" },
 ];
 
 function statusToStep(s: string): number {
@@ -96,13 +96,12 @@ export default function DriverProgressBar({ statusMotorista }: DriverProgressBar
           const stepNum = i + 1;
           const isActive = activeStep >= stepNum;
           return (
-            <span key={s.key} className="text-center font-mono transition-colors duration-500" style={{
+            <span key={s.key} className={`font-mono transition-colors duration-500 ${s.align}`} style={{
               fontSize: "9px",
               color: isDone ? CLR_GREEN : isActive ? "#D0D0D0" : "#4B5563",
               width: "25%",
             }}>
-              <span className="hidden sm:inline">{s.label}</span>
-              <span className="sm:hidden">{s.short}</span>
+              {s.label}
             </span>
           );
         })}
