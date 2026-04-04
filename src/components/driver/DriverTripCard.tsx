@@ -306,10 +306,9 @@ export default function DriverTripCard({
         <div className="flex items-center gap-3 px-4 py-1">
           <span className="flex-shrink-0 font-bold font-mono" style={{ fontSize: "1.5rem", color: isLanded ? "#22C55E" : c.hex }}>{displayTime}</span>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-[#F5F5F5] truncate cursor-pointer hover:text-[#D4A017] transition-colors"
-              style={{ fontSize: "1.1rem" }}
+            <p className="text-xl font-bold text-white truncate cursor-pointer hover:text-[#D4A017] transition-colors"
               onClick={(e) => { e.stopPropagation(); onShowNameplate(viagem.client, viagem.destination); }}>
-              📋 {viagem.client}
+              {viagem.client}
             </p>
           </div>
           <div className="flex-shrink-0 text-right flex flex-col items-end">
