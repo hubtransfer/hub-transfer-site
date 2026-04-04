@@ -41,9 +41,11 @@ interface DriverStore {
   nameplateName: string;
   stats: DriverStats;
   sortedViagens: HubViagem[];
+  backgroundRefreshing: boolean;
   setDriverName: (name: string) => void;
   loadDate: (dateStr: string) => void;
   syncViagens: () => Promise<void>;
+  syncViagensSilent: () => Promise<void>;
   darBaixa: (id: string, rowIndex: string, cardId: string) => Promise<void>;
   showNameplate: (name: string) => void;
   closeNameplate: () => void;
@@ -61,8 +63,12 @@ export function useDriverStore(): DriverStore {
   const [cacheAge, setCacheAge] = useState<string | null>(null);
   const [nameplateOpen, setNameplateOpen] = useState(false);
   const [nameplateName, setNameplateName] = useState('');
+  const [backgroundRefreshing, setBackgroundRefreshing] = useState(false);
 
   const gasUrl = HUB_CENTRAL_URL;
+
+  // Track previous payload to only re-render on real changes
+  const prevViagensKeyRef = useRef('');
 
   // Keep refs so the interval callback always reads the latest values
   const driverNameRef = useRef(driverName);
@@ -72,20 +78,24 @@ export function useDriverStore(): DriverStore {
 
   // ── Sync ────────────────────────────────────────────────
 
-  const syncViagens = useCallback(async () => {
+  const syncViagensInternal = useCallback(async (silent: boolean) => {
     const name = driverNameRef.current;
     if (!name) return;
 
-    // Load from cache first (instant)
+    // Load from cache first (instant) — only on initial load
     const dateKey = selectedDateRef.current || 'today';
-    const cached = getCachedTrips<HubViagem[]>(dateKey + ':' + normalize(name));
-    if (cached && viagens.length === 0) {
-      setViagens(cached.data);
-      setIsFromCache(true);
-      setCacheAge(cached.age);
+    if (!silent) {
+      const cached = getCachedTrips<HubViagem[]>(dateKey + ':' + normalize(name));
+      if (cached && viagens.length === 0) {
+        setViagens(cached.data);
+        setIsFromCache(true);
+        setCacheAge(cached.age);
+      }
     }
 
-    setIsLoading(true);
+    if (silent) setBackgroundRefreshing(true);
+    else setIsLoading(true);
+
     try {
       const dateParam = selectedDateRef.current || '';
       const url = `${gasUrl}?action=viagens&t=${Date.now()}${dateParam ? `&data=${encodeURIComponent(dateParam)}` : ''}`;
@@ -100,26 +110,37 @@ export function useDriverStore(): DriverStore {
         return d === me || d.includes(me) || me.includes(d);
       });
 
-      setViagens(filtered);
-      setIsFromCache(false);
-      setCacheAge(null);
+      // Only update state if data actually changed
+      const key = JSON.stringify(
+        filtered.map((v) => `${v.id}|${v.statusMotorista || ''}|${v.status || ''}|${v.statusVoo || ''}|${v.etaChegada || ''}`)
+      );
+      const changed = key !== prevViagensKeyRef.current;
 
-      // Save to cache
-      setCachedTrips(filtered, dateKey + ':' + normalize(name));
+      if (changed) {
+        prevViagensKeyRef.current = key;
+        setViagens(filtered);
+        setIsFromCache(false);
+        setCacheAge(null);
+        setCachedTrips(filtered, dateKey + ':' + normalize(name));
 
-      const now = new Date().toLocaleTimeString('pt-PT', {
-        timeZone: 'Europe/Lisbon',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-      setLastSyncTime(now);
-      try { localStorage.setItem('hub_driver_last_sync', now); } catch { /* */ }
+        const now = new Date().toLocaleTimeString('pt-PT', {
+          timeZone: 'Europe/Lisbon',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+        setLastSyncTime(now);
+        try { localStorage.setItem('hub_driver_last_sync', now); } catch { /* */ }
+      }
     } catch (err) {
       console.error('[useDriverStore] sync error:', err);
     } finally {
-      setIsLoading(false);
+      if (silent) setBackgroundRefreshing(false);
+      else setIsLoading(false);
     }
   }, [gasUrl, viagens.length]);
+
+  const syncViagens = useCallback(() => syncViagensInternal(false), [syncViagensInternal]);
+  const syncViagensSilent = useCallback(() => syncViagensInternal(true), [syncViagensInternal]);
 
   // ── Actions ─────────────────────────────────────────────
 
@@ -222,17 +243,17 @@ export function useDriverStore(): DriverStore {
       syncViagens();
     }
 
-    // Auto-sync every 3 minutes, only when tab is visible
+    // Silent auto-sync every 60s, only when tab is visible (no spinner, no flicker)
     const interval = setInterval(() => {
       if (driverNameRef.current && document.visibilityState === 'visible') {
-        syncViagens();
+        syncViagensSilent();
       }
-    }, 180_000);
+    }, 60_000);
 
-    // Sync immediately when tab becomes visible again
+    // Sync immediately when tab becomes visible again (silent)
     const onVisibility = () => {
       if (document.visibilityState === 'visible' && driverNameRef.current) {
-        syncViagens();
+        syncViagensSilent();
       }
     };
     document.addEventListener('visibilitychange', onVisibility);
@@ -241,7 +262,7 @@ export function useDriverStore(): DriverStore {
       clearInterval(interval);
       document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, [syncViagens]);
+  }, [syncViagens, syncViagensSilent]);
 
   // ── Return ──────────────────────────────────────────────
 
@@ -258,9 +279,11 @@ export function useDriverStore(): DriverStore {
     nameplateName,
     stats,
     sortedViagens,
+    backgroundRefreshing,
     setDriverName,
     loadDate,
     syncViagens,
+    syncViagensSilent,
     darBaixa,
     showNameplate,
     closeNameplate,

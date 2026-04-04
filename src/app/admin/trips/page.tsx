@@ -230,8 +230,13 @@ export default function TripsPage() {
           <span className="hidden sm:inline-flex items-center gap-1 bg-[#8B9DAF]/10 text-[#8B9DAF] text-xs font-bold px-2 py-0.5 rounded-full">
             <span className="text-[10px]">{"\u25B2"}</span> {store.counts.recolhas}
           </span>
-          {/* Last sync */}
-          <span className="text-xs text-zinc-400 tabular-nums font-mono">{store.lastSyncTime ? `Sync: ${store.lastSyncTime}` : "Sync: --:--:--"}</span>
+          {/* Last sync + dot silencioso */}
+          <span className="text-xs text-zinc-400 tabular-nums font-mono flex items-center gap-1.5">
+            {store.backgroundRefreshing && (
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" title="A sincronizar em segundo plano" />
+            )}
+            {store.lastSyncTime ? `Sync: ${store.lastSyncTime}` : "Sync: --:--:--"}
+          </span>
         </div>
       </header>
 
@@ -471,6 +476,7 @@ export default function TripsPage() {
                     onClientMsg={handleClientMsg}
                     onSmsMsg={handleSmsMsg}
                     onShowNameplate={store.showNameplate}
+                    onRefresh={store.syncViagensSilent}
                     mode="admin"
                     isHistorical={!store.isViewingToday}
                   />

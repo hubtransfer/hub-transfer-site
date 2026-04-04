@@ -67,6 +67,7 @@ interface DriverTripCardProps {
   onSmsMsg?: (cid: string, type: string, client: string, lang: string, origin: string, hora: string, phone: string) => void;
   driverName?: string;  // logged-in driver name (driver mode) or selected driver (admin mode)
   onNoShow?: (tripId: string) => void;  // called after no-show proofs submitted
+  onRefresh?: () => void;  // triggered after each swipe to re-fetch fresh data
   mode?: "driver" | "admin";
   isNext?: boolean;     // first non-done trip gets hero treatment
   isHistorical?: boolean; // viewing past date — don't dim completed trips
@@ -81,6 +82,7 @@ export default function DriverTripCard({
   onSetDriver, onDispatch, onClientMsg, onSmsMsg,
   driverName: driverNameProp,
   onNoShow,
+  onRefresh,
   mode = "driver",
   isNext = false,
   isHistorical = false,
@@ -618,6 +620,7 @@ export default function DriverTripCard({
                 destination={viagem.destination}
                 onStatusChange={(newStatus) => {
                   if (newStatus === "FINALIZADO") onDarBaixa(viagem.id, viagem.rowIndex ?? "", cardId);
+                  onRefresh?.();
                 }}
               />
 

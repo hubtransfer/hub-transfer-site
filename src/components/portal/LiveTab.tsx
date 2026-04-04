@@ -48,6 +48,7 @@ function waUrl(phone: string, name: string, lang: string = "EN"): string {
 export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: LiveTabProps) {
   const [lastUpdate, setLastUpdate] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [bgSync, setBgSync] = useState(false);
   const [qrModal, setQrModal] = useState<{ name: string; phone: string; lang: string } | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -63,8 +64,8 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
   onRefreshRef.current = onRefresh;
   const prevDataRef = useRef("");
 
-  // Fetch from HUB Central (stable — no deps)
-  const fetchHubCentral = useCallback(async () => {
+  // Fetch from HUB Central (stable — no deps). Returns true if data actually changed.
+  const fetchHubCentral = useCallback(async (): Promise<boolean> => {
     try {
       const url = `${HUB_CENTRAL_URL}?action=viagens&t=${Date.now()}`;
       const res = await fetch(url, { redirect: "follow" });
@@ -72,14 +73,19 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
       let viagens: HubViagem[] = [];
       if (Array.isArray(data)) viagens = data;
       else if (data?.viagens && Array.isArray(data.viagens)) viagens = data.viagens;
-      // Only update state if data actually changed
-      const key = JSON.stringify(viagens.map((v) => v.id + (v.statusVoo || "") + (v.etaChegada || "")));
+      // Only update state if data actually changed (include statusMotorista for driver progress bar)
+      const key = JSON.stringify(
+        viagens.map((v) => `${v.id}|${v.statusMotorista || ""}|${v.statusVoo || ""}|${v.etaChegada || ""}|${v.depActual || ""}|${v.depDelay || ""}`)
+      );
       if (key !== prevDataRef.current) {
         prevDataRef.current = key;
         setHubViagens(viagens);
+        return true;
       }
+      return false;
     } catch (err) {
       console.error("[LiveTab] HUB Central fetch error:", err);
+      return false;
     }
   }, []);
 
@@ -90,14 +96,17 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
     onRefreshRef.current();
     setLastUpdate(new Date().toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
 
-    // Auto-refresh every 60 seconds
+    // Auto-refresh silencioso a cada 15s — só actualiza timestamp se os dados mudarem
     const syncId = setInterval(async () => {
-      setRefreshing(true);
-      await fetchHubCentral();
+      if (document.visibilityState !== "visible") return;
+      setBgSync(true);
+      const changed = await fetchHubCentral();
       try { onRefreshRef.current(); } catch { /* */ }
-      setLastUpdate(new Date().toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
-      setRefreshing(false);
-    }, 180000);
+      if (changed) {
+        setLastUpdate(new Date().toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+      }
+      setBgSync(false);
+    }, 15000);
 
     // Flight progress tick every 30 seconds
     const tickId = setInterval(() => setTick((t) => t + 1), 30000);
@@ -108,8 +117,10 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
 
   const doRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchHubCentral();
+    const changed = await fetchHubCentral();
     try { onRefreshRef.current(); } catch { /* */ }
+    // Manual refresh: always update timestamp so user sees feedback
+    void changed;
     setLastUpdate(new Date().toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
     setRefreshing(false);
   }, [fetchHubCentral]);
@@ -175,7 +186,12 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
         </div>
         <div className="flex items-center gap-3">
           {(refreshing || hubLoading) && <span className="w-3 h-3 border-2 border-[#F0D030]/30 border-t-[#F0D030] rounded-full animate-spin" />}
-          <span className="text-[10px] text-[#888] font-mono">Sync: {lastUpdate}</span>
+          <span className="text-[10px] text-[#888] font-mono flex items-center gap-1.5">
+            {bgSync && !refreshing && !hubLoading && (
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" title="A sincronizar em segundo plano" />
+            )}
+            Sync: {lastUpdate}
+          </span>
           <button onClick={doRefresh} className="text-[10px] text-[#F0D030] font-mono hover:text-[#D4B828] cursor-pointer font-bold">↻</button>
         </div>
       </div>

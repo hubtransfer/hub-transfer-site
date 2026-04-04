@@ -92,6 +92,7 @@ interface TripsStore {
   hubCentralSyncMsg: string;
   hubCentralInfo: string;
   lastSyncTime: string;
+  backgroundRefreshing: boolean;
 
   // Config
   hubViagensUrl: string;
@@ -139,6 +140,7 @@ interface TripsStore {
 
   // Sync
   syncViagens: (manual?: boolean) => Promise<void>;
+  syncViagensSilent: () => Promise<void>;
   syncDrivers: (manual?: boolean) => Promise<void>;
   saveViagensUrl: (url: string) => void;
 
@@ -195,6 +197,10 @@ export function useTripsStore(): TripsStore {
   // ─── Next ID ref ───
   const nextIdRef = useRef(1);
 
+  // ─── Silent refresh state ───
+  const [backgroundRefreshing, setBackgroundRefreshing] = useState(false);
+  const prevViagensKeyRef = useRef("");
+
   // ──────────────────────────────────────────────
   // On Mount
   // ──────────────────────────────────────────────
@@ -226,6 +232,24 @@ export function useTripsStore(): TripsStore {
     if (storedUrl) {
       syncViagensImpl(false, storedUrl);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ──────────────────────────────────────────────
+  // Auto-refresh silencioso: every 30s, tab visible, no visual spinner
+  // ──────────────────────────────────────────────
+  const hubViagensUrlRef = useRef(hubViagensUrl);
+  hubViagensUrlRef.current = hubViagensUrl;
+  const selectedDateRef = useRef(selectedDate);
+  selectedDateRef.current = selectedDate;
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (document.visibilityState !== "visible") return;
+      if (!hubViagensUrlRef.current) return;
+      syncViagensImpl(false, hubViagensUrlRef.current, selectedDateRef.current, true);
+    }, 30_000);
+    return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -711,17 +735,24 @@ export function useTripsStore(): TripsStore {
   async function syncViagensImpl(
     manual: boolean,
     urlOverride?: string,
-    dateOverride?: string
+    dateOverride?: string,
+    silent: boolean = false
   ) {
     const url = urlOverride || hubViagensUrl;
     if (!url) {
-      setHubViagensSyncStatus("offline");
-      setHubViagensSyncMsg("URL não configurado");
+      if (!silent) {
+        setHubViagensSyncStatus("offline");
+        setHubViagensSyncMsg("URL não configurado");
+      }
       return;
     }
 
-    setHubViagensSyncStatus("loading");
-    setHubViagensSyncMsg(manual ? "A sincronizar viagens..." : "A carregar...");
+    if (silent) {
+      setBackgroundRefreshing(true);
+    } else {
+      setHubViagensSyncStatus("loading");
+      setHubViagensSyncMsg(manual ? "A sincronizar viagens..." : "A carregar...");
+    }
 
     try {
       const dateParam = dateOverride ?? selectedDate;
@@ -739,25 +770,49 @@ export function useTripsStore(): TripsStore {
         viagens = data.viagens;
       }
 
-      setHubViagens(viagens);
-      writeCache(LS_ADMIN_VIAGENS_CACHE, viagens, dateParam || "today");
-      setHubViagensSyncStatus("online");
-      setHubViagensSyncMsg(`${viagens.length} viagens carregadas`);
+      // Silent refresh: only update state if data actually changed (prevent re-renders)
+      const key = JSON.stringify(
+        viagens.map((v) => `${v.id}|${v.statusMotorista || ""}|${v.status || ""}|${v.statusVoo || ""}|${v.etaChegada || ""}|${v.driver || ""}`)
+      );
+      const changed = key !== prevViagensKeyRef.current;
 
-      // Update last sync time
-      const now = new Date().toLocaleString("pt-PT");
-      setLastSyncTime(now);
-      localStorage.setItem(LS_LAST_SYNC, now);
+      if (changed) {
+        prevViagensKeyRef.current = key;
+        setHubViagens(viagens);
+        writeCache(LS_ADMIN_VIAGENS_CACHE, viagens, dateParam || "today");
+
+        // Update last sync time only when data changes
+        const now = new Date().toLocaleString("pt-PT");
+        setLastSyncTime(now);
+        try { localStorage.setItem(LS_LAST_SYNC, now); } catch { /* */ }
+      }
+
+      if (!silent) {
+        setHubViagensSyncStatus("online");
+        setHubViagensSyncMsg(`${viagens.length} viagens carregadas`);
+      }
     } catch (err) {
       console.error("syncViagens error:", err);
-      setHubViagensSyncStatus("offline");
-      setHubViagensSyncMsg("Erro ao carregar viagens");
+      if (!silent) {
+        setHubViagensSyncStatus("offline");
+        setHubViagensSyncMsg("Erro ao carregar viagens");
+      }
+    } finally {
+      if (silent) setBackgroundRefreshing(false);
     }
   }
 
   const syncViagens = useCallback(
     async (manual = false) => {
       await syncViagensImpl(manual);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [hubViagensUrl, selectedDate]
+  );
+
+  const syncViagensSilent = useCallback(
+    async () => {
+      await syncViagensImpl(false, undefined, undefined, true);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [hubViagensUrl, selectedDate]
@@ -803,6 +858,7 @@ export function useTripsStore(): TripsStore {
     hubCentralSyncMsg,
     hubCentralInfo,
     lastSyncTime,
+    backgroundRefreshing,
 
     // Config
     hubViagensUrl,
@@ -850,6 +906,7 @@ export function useTripsStore(): TripsStore {
 
     // Sync
     syncViagens,
+    syncViagensSilent,
     syncDrivers,
     saveViagensUrl,
 

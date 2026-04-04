@@ -21,7 +21,7 @@ import type { HubViagem } from "@/lib/trips";
 /* ================================================================== */
 
 const LS_DRIVER_NAME = "hub_driver_name"; // legacy key for backward compat
-const SYNC_INTERVAL = 3 * 60 * 1000;
+const SYNC_INTERVAL = 60 * 1000;
 
 
 /* ================================================================== */
@@ -61,10 +61,12 @@ export default function DriverTripsPage() {
     setIsLoggedIn(true);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  /* ── Auto-sync ── */
+  /* ── Auto-sync silencioso (60s, sem spinner) ── */
   useEffect(() => {
     if (!isLoggedIn) return;
-    const id = setInterval(() => store.syncViagens(), SYNC_INTERVAL);
+    const id = setInterval(() => {
+      if (document.visibilityState === "visible") store.syncViagensSilent();
+    }, SYNC_INTERVAL);
     return () => clearInterval(id);
   }, [isLoggedIn, store]);
 
@@ -170,7 +172,10 @@ export default function DriverTripsPage() {
           ) : store.isFromCache ? (
             <span className="text-xs text-[#D4D4D4] font-mono">Cache · {store.cacheAge}</span>
           ) : null}
-          <span className="text-xs text-white/50 tabular-nums font-mono">
+          <span className="text-xs text-white/50 tabular-nums font-mono flex items-center gap-1.5">
+            {store.backgroundRefreshing && (
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" title="A sincronizar em segundo plano" />
+            )}
             {store.lastSyncTime ? `Sync: ${store.lastSyncTime}` : "Sync: --:--:--"}
           </span>
         </div>
@@ -291,6 +296,7 @@ export default function DriverTripsPage() {
                     driverName={store.driverName}
                     onDarBaixa={store.darBaixa}
                     onShowNameplate={openNameplate}
+                    onRefresh={store.syncViagensSilent}
                     isNext={i === 0}
                   />
                 </React.Fragment>
