@@ -347,10 +347,42 @@ export default function DriverTripCard({
           </div>
         </div>
 
-        {/* Collapsed status text (below timeline) */}
+        {/* Collapsed thin flight bar */}
         {!expanded && hasFlight && flight && tipo === "CHEGADA" && !flight.noData && !flight.cancelled && (
-          <div className="px-4 pb-2">
-            <p className="font-mono text-[10px]" style={{ color: flight.color }}>{flight.statusText}</p>
+          <div className="px-4 pb-3">
+            {/* Thin bar with origin/destination at ends */}
+            <div className="flex items-center gap-2">
+              {/* Left: flag + IATA + dep time */}
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <span className="text-xs leading-none">{originFlag || "🌍"}</span>
+                <span className="font-mono text-[10px] text-[#888]">{depIata}</span>
+                {hasDepDiff ? (
+                  <><span className="font-mono text-[9px] line-through text-[#555]">{depTime}</span><span className="font-mono text-[10px] text-white font-medium">{depActual}</span></>
+                ) : depTime ? (
+                  <span className="font-mono text-[10px] text-[#666]">{depTime}</span>
+                ) : null}
+              </div>
+              {/* Thin progress bar */}
+              <div className="flex-1 relative" style={{ height: "3px", borderRadius: "2px", backgroundColor: "#333" }}>
+                <div className="h-full transition-all duration-[2s] ease-in-out" style={{ width: `${Math.max(flight.progress, 2)}%`, backgroundColor: flight.color, borderRadius: "2px" }} />
+                <svg width="12" height="12" viewBox="0 0 24 24" fill={flight.color}
+                  className="absolute top-1/2 -translate-y-1/2 transition-all duration-[2s] ease-in-out"
+                  style={{ left: `calc(${Math.max(flight.progress, 2)}% - 6px)`, filter: "drop-shadow(0 0 2px rgba(0,0,0,.7))" }}>
+                  <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" transform="rotate(90 12 12)"/>
+                </svg>
+              </div>
+              {/* Right: arr time + flag */}
+              <div className="flex items-center gap-1 flex-shrink-0">
+                {hasArrDiff ? (
+                  <><span className="font-mono text-[9px] line-through text-[#555]">{arrOriginal}</span><span className="font-mono text-[10px] text-white font-medium">{etaChegada}</span></>
+                ) : (
+                  <span className="font-mono text-[10px] text-[#888]">{etaChegada || viagem.arrTime || ""}</span>
+                )}
+                <span className="text-xs leading-none">🇵🇹</span>
+              </div>
+            </div>
+            {/* Status text */}
+            <p className="font-mono text-[10px] mt-1 text-center" style={{ color: flight.color }}>{flight.statusText}</p>
           </div>
         )}
       </div>
@@ -426,21 +458,18 @@ export default function DriverTripCard({
                         <p className="font-mono text-[8px] text-[#555] mt-0.5 uppercase">Decolagem</p>
                       </div>
 
-                      {/* CENTER: Progress bar */}
-                      <div className="flex-1 pt-3">
-                        <div className="cursor-pointer"
+                      {/* CENTER: Thin progress bar */}
+                      <div className="flex-1 flex items-center">
+                        <div className="w-full cursor-pointer"
                           onClick={() => viagem.flight && window.open(`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`, "_blank")}>
                           {flight.cancelled ? (
-                            <div className="h-4 rounded-full bg-[#EF4444]/15 flex items-center justify-center">
-                              <span className="text-[9px] font-mono font-bold text-[#EF4444]">CANCELADO</span>
-                            </div>
+                            <div className="h-[3px] rounded bg-[#EF4444]/25" />
                           ) : (
-                            <div className="relative w-full h-4 rounded-full bg-[#222222] overflow-visible">
-                              <div className="h-full rounded-full transition-all duration-[2s] ease-in-out"
-                                style={{ width: `${Math.max(flight.progress, 2)}%`, backgroundColor: flight.color }} />
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill={flight.color}
+                            <div className="relative w-full overflow-visible" style={{ height: "3px", borderRadius: "2px", backgroundColor: "#333" }}>
+                              <div className="h-full transition-all duration-[2s] ease-in-out" style={{ width: `${Math.max(flight.progress, 2)}%`, backgroundColor: flight.color, borderRadius: "2px" }} />
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill={flight.color}
                                 className="absolute top-1/2 -translate-y-1/2 transition-all duration-[2s] ease-in-out"
-                                style={{ left: `calc(${Math.max(flight.progress, 2)}% - 8px)`, filter: "drop-shadow(0 1px 3px rgba(0,0,0,.5))" }}>
+                                style={{ left: `calc(${Math.max(flight.progress, 2)}% - 7px)`, filter: "drop-shadow(0 1px 3px rgba(0,0,0,.5))" }}>
                                 <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" transform="rotate(90 12 12)"/>
                               </svg>
                             </div>
