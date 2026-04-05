@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { HUB_CENTRAL_URL } from "@/lib/trips";
+import AddressAutocomplete from "@/components/shared/AddressAutocomplete";
 
 // ─── Types ───
 
@@ -245,11 +246,8 @@ function NewReservationModal({ restaurantes, onClose, onSuccess }: ModalProps) {
   const [hora, setHora] = useState("20:00");
   const [pessoas, setPessoas] = useState(2);
   const [observacoes, setObservacoes] = useState("");
-  // ─── Origem toggle state ───
-  const [origemTipo, setOrigemTipo] = useState<"hotel" | "outro">("hotel");
-  const [hotelSelecionado, setHotelSelecionado] = useState(HOTEIS[0]);
-  const [enderecoOrigem, setEnderecoOrigem] = useState("");
-  // ─── Destino state ───
+  // ─── Origem / Destino (autocomplete) ───
+  const [origem, setOrigem] = useState("");
   const [destino, setDestino] = useState("");
   const [destinoEditado, setDestinoEditado] = useState(false);
   // ─── Feedback state ───
@@ -273,9 +271,9 @@ function NewReservationModal({ restaurantes, onClose, onSuccess }: ModalProps) {
     e.preventDefault();
     setError("");
 
-    // Determinar origem e hotel
-    const origemFinal = origemTipo === "hotel" ? hotelSelecionado : enderecoOrigem.trim();
-    const hotelFinal = origemTipo === "hotel" ? hotelSelecionado : "";
+    const origemFinal = origem.trim();
+    // Se origem é um hotel parceiro exacto, envia no param hotel (para notificações)
+    const hotelFinal = HOTEIS.includes(origemFinal) ? origemFinal : "";
 
     if (!cliente.trim() || !telefone.trim() || !restauranteId || !data || !hora || !origemFinal) {
       setError("Preenche todos os campos obrigatórios");
@@ -328,7 +326,7 @@ function NewReservationModal({ restaurantes, onClose, onSuccess }: ModalProps) {
     } finally {
       setSubmitting(false);
     }
-  }, [cliente, telefone, idioma, restauranteId, data, hora, pessoas, origemTipo, hotelSelecionado, enderecoOrigem, destino, observacoes]);
+  }, [cliente, telefone, idioma, restauranteId, data, hora, pessoas, origem, destino, observacoes]);
 
   const handleCloseSuccess = useCallback(() => {
     onSuccess();
@@ -426,69 +424,29 @@ function NewReservationModal({ restaurantes, onClose, onSuccess }: ModalProps) {
             )}
           </div>
 
-          {/* Origem (Recolha) — toggle Hotel Parceiro / Outro Endereço */}
-          <div>
-            <label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1 font-mono">Origem (Recolha) *</label>
-            <div className="bg-[#1a1a2e] rounded p-1 flex gap-1 mb-2">
-              <button
-                type="button"
-                onClick={() => setOrigemTipo("hotel")}
-                disabled={submitting}
-                className={`flex-1 py-1.5 rounded text-xs font-mono font-bold transition-colors ${
-                  origemTipo === "hotel"
-                    ? "bg-[#D4A017] text-black"
-                    : "text-[#888] hover:text-white"
-                }`}
-              >
-                🏨 Hotel Parceiro
-              </button>
-              <button
-                type="button"
-                onClick={() => setOrigemTipo("outro")}
-                disabled={submitting}
-                className={`flex-1 py-1.5 rounded text-xs font-mono font-bold transition-colors ${
-                  origemTipo === "outro"
-                    ? "bg-[#D4A017] text-black"
-                    : "text-[#888] hover:text-white"
-                }`}
-              >
-                📍 Outro Endereço
-              </button>
-            </div>
-            {origemTipo === "hotel" ? (
-              <select
-                value={hotelSelecionado}
-                onChange={(e) => setHotelSelecionado(e.target.value)}
-                disabled={submitting}
-                className="w-full bg-[#1a1a2e] border border-zinc-800 rounded px-3 py-2 text-sm text-white focus:border-[#D4A017] focus:outline-none"
-              >
-                {HOTEIS.map((h) => <option key={h} value={h}>{h}</option>)}
-              </select>
-            ) : (
-              <input
-                type="text"
-                value={enderecoOrigem}
-                onChange={(e) => setEnderecoOrigem(e.target.value)}
-                disabled={submitting}
-                required
-                className="w-full bg-[#1a1a2e] border border-zinc-800 rounded px-3 py-2 text-sm text-white placeholder-zinc-600 focus:border-[#D4A017] focus:outline-none"
-                placeholder="Morada completa de recolha..."
-              />
-            )}
-          </div>
+          {/* Origem (Recolha) — autocomplete com hotéis + restaurantes */}
+          <AddressAutocomplete
+            label="Origem (Recolha) *"
+            value={origem}
+            onChange={(v) => setOrigem(v)}
+            placeholder="Onde buscar o cliente..."
+            required
+            disabled={submitting}
+            hotels={HOTEIS}
+            restaurantes={restaurantes}
+          />
 
-          {/* Destino */}
+          {/* Destino — autocomplete, auto-preenchido quando restaurante seleccionado */}
           <div>
-            <label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1 font-mono">Destino</label>
-            <input
-              type="text"
+            <AddressAutocomplete
+              label="Destino"
               value={destino}
-              onChange={(e) => { setDestino(e.target.value); setDestinoEditado(true); }}
-              disabled={submitting || !restauranteId}
-              className={`w-full bg-[#1a1a2e] border border-zinc-800 rounded px-3 py-2 text-sm placeholder-zinc-600 focus:border-[#D4A017] focus:outline-none disabled:opacity-50 ${
-                destinoEditado ? "text-white" : "text-[#888]"
-              }`}
-              placeholder={restauranteId ? "Endereço do restaurante..." : "Seleccione um restaurante primeiro"}
+              onChange={(v, opt) => { setDestino(v); setDestinoEditado(true); void opt; }}
+              placeholder="Endereço de entrega..."
+              disabled={submitting}
+              hotels={HOTEIS}
+              restaurantes={restaurantes}
+              faded={!destinoEditado && !!destino}
             />
           </div>
 
