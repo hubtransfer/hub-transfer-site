@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { validateLogin, setSession, getRedirectPath } from "@/lib/auth";
+import ForgotPasswordModal from "@/components/shared/ForgotPasswordModal";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,6 +12,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [forgotOpen, setForgotOpen] = useState(false);
 
   const handleLogin = useCallback(
     async (e: React.FormEvent) => {
@@ -104,6 +106,11 @@ export default function LoginPage() {
               </span>
             ) : "Entrar"}
           </button>
+
+          <button type="button" onClick={() => setForgotOpen(true)}
+            className="w-full text-center text-xs text-[#888] hover:text-[#F0D030] transition-colors font-mono cursor-pointer py-1">
+            Esqueceu a senha?
+          </button>
         </form>
 
         {/* Back */}
@@ -113,6 +120,8 @@ export default function LoginPage() {
           </a>
         </div>
       </div>
+
+      <ForgotPasswordModal isOpen={forgotOpen} onClose={() => setForgotOpen(false)} tipo="admin" />
     </div>
   );
 }

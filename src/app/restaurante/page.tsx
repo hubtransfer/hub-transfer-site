@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { HUB_CENTRAL_URL } from "@/lib/trips";
 import AddressAutocomplete from "@/components/shared/AddressAutocomplete";
+import ForgotPasswordModal from "@/components/shared/ForgotPasswordModal";
 
 // ─── Types ───
 
@@ -140,6 +141,7 @@ function LoginScreen({ onLogin }: { onLogin: (s: RestauranteSession) => void }) 
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [forgotOpen, setForgotOpen] = useState(false);
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -223,8 +225,15 @@ function LoginScreen({ onLogin }: { onLogin: (s: RestauranteSession) => void }) 
               "Entrar"
             )}
           </button>
+
+          <button type="button" onClick={() => setForgotOpen(true)}
+            className="w-full text-center text-xs text-[#888] hover:text-[#D4A017] transition-colors font-mono cursor-pointer py-1">
+            Esqueceu a senha?
+          </button>
         </form>
       </div>
+
+      <ForgotPasswordModal isOpen={forgotOpen} onClose={() => setForgotOpen(false)} tipo="restaurante" />
     </div>
   );
 }
