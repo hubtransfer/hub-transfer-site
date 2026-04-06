@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { HUB_CENTRAL_URL } from "@/lib/trips";
+import { getSession, clearSession as clearMainSession } from "@/lib/auth";
 import AddressAutocomplete from "@/components/shared/AddressAutocomplete";
-import ForgotPasswordModal from "@/components/shared/ForgotPasswordModal";
 import ChangePasswordModal from "@/components/shared/ChangePasswordModal";
 
 // ─── Types ───
@@ -103,25 +104,35 @@ function clearRestSession() {
 // ════════════════════════════════════════════════════════════════
 
 export default function RestaurantePage() {
-  const [session, setSession] = useState<RestauranteSession | null>(null);
+  const router = useRouter();
+  const [session, setSessionState] = useState<RestauranteSession | null>(null);
   const [checkingSession, setCheckingSession] = useState(true);
 
   useEffect(() => {
-    setSession(loadSession());
-    setCheckingSession(false);
-  }, []);
-
-  const handleLogin = useCallback((s: RestauranteSession) => {
-    saveSession(s);
-    setSession(s);
-  }, []);
+    // Check main auth session first (unified login)
+    const mainSession = getSession();
+    if (!mainSession || mainSession.role !== "restaurante") {
+      router.replace("/login");
+      return;
+    }
+    // Load restaurant-specific data
+    const restData = loadSession();
+    if (restData) {
+      setSessionState(restData);
+      setCheckingSession(false);
+    } else {
+      // Main session exists but no restaurant data — redirect to re-login
+      router.replace("/login");
+    }
+  }, [router]);
 
   const handleLogout = useCallback(() => {
     clearRestSession();
-    setSession(null);
-  }, []);
+    clearMainSession();
+    router.replace("/login");
+  }, [router]);
 
-  if (checkingSession) {
+  if (checkingSession || !session) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
         <span className="w-5 h-5 border-2 border-[#D4A017]/30 border-t-[#D4A017] rounded-full animate-spin" />
@@ -129,114 +140,7 @@ export default function RestaurantePage() {
     );
   }
 
-  if (!session) return <LoginScreen onLogin={handleLogin} />;
   return <Dashboard session={session} onLogout={handleLogout} />;
-}
-
-// ════════════════════════════════════════════════════════════════
-//  LOGIN SCREEN
-// ════════════════════════════════════════════════════════════════
-
-function LoginScreen({ onLogin }: { onLogin: (s: RestauranteSession) => void }) {
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [forgotOpen, setForgotOpen] = useState(false);
-
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim() || !senha.trim()) return;
-    setLoading(true);
-    setError("");
-    try {
-      const params = new URLSearchParams({ action: "validateLoginRestaurante", email: email.trim(), senha: senha.trim(), t: String(Date.now()) });
-      const res = await fetch(`${HUB_CENTRAL_URL}?${params}`, { redirect: "follow" });
-      const data = await res.json();
-      if (data?.success && data.role === "restaurante") {
-        onLogin({
-          restauranteId: data.restauranteId,
-          nome: data.nome || "",
-          endereco: data.endereco || "",
-          comissao: Number(data.comissao) || 0,
-          comissaoFixa: Number(data.comissaoFixa) || 5,
-        });
-      } else {
-        setError(data?.message || "Email ou senha incorrectos");
-      }
-    } catch {
-      setError("Erro de conexão");
-    } finally {
-      setLoading(false);
-    }
-  }, [email, senha, onLogin]);
-
-  return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <img src="/images/logo.png" alt="HUB Transfer" className="h-10 mx-auto mb-4 opacity-80" />
-          <h1 className="text-xl font-bold text-white">Portal Restaurante</h1>
-          <p className="text-xs text-[#888] mt-1 font-mono">Acesso para parceiros</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="bg-[#111827] border border-[#D4A017]/20 rounded-xl p-6 space-y-4">
-          <div>
-            <label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1 font-mono">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={loading}
-              autoComplete="email"
-              className="w-full bg-[#16213e] border border-zinc-800 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:border-[#D4A017] focus:outline-none"
-              placeholder="restaurante@email.com"
-            />
-          </div>
-          <div>
-            <label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1 font-mono">Senha</label>
-            <input
-              type="password"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              required
-              disabled={loading}
-              autoComplete="current-password"
-              className="w-full bg-[#16213e] border border-zinc-800 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:border-[#D4A017] focus:outline-none"
-              placeholder="••••••••"
-            />
-          </div>
-
-          {error && (
-            <div className="bg-[#7f1d1d] border border-[#EF4444]/40 text-[#fecaca] px-3 py-2 rounded text-xs font-mono">
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-[#D4A017] hover:bg-[#b8860b] text-black py-2.5 rounded-lg text-sm font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <><span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" /> A entrar...</>
-            ) : (
-              "Entrar"
-            )}
-          </button>
-
-          <button type="button" onClick={() => setForgotOpen(true)}
-            className="w-full text-center text-xs text-[#888] hover:text-[#D4A017] transition-colors font-mono cursor-pointer py-1">
-            Esqueceu a senha?
-          </button>
-        </form>
-      </div>
-
-      <ForgotPasswordModal isOpen={forgotOpen} onClose={() => setForgotOpen(false)} tipo="restaurante" />
-    </div>
-  );
 }
 
 // ════════════════════════════════════════════════════════════════

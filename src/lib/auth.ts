@@ -4,7 +4,7 @@ import { HUB_CENTRAL_URL } from "./trips";
 
 export interface AuthSession {
   name: string;
-  role: "admin" | "driver" | "hotel";
+  role: "admin" | "driver" | "hotel" | "restaurante";
   code?: string;
   phone?: string;
   expiresAt?: number; // timestamp — session expires after 8 hours
@@ -31,7 +31,7 @@ export function getSession(): AuthSession | null {
 }
 
 /** Check session exists AND has the correct role for a route */
-export function requireSession(expectedRole: "admin" | "driver" | "hotel"): AuthSession | null {
+export function requireSession(expectedRole: "admin" | "driver" | "hotel" | "restaurante"): AuthSession | null {
   const session = getSession();
   if (!session) return null;
   if (session.role !== expectedRole) return null;
@@ -59,6 +59,7 @@ export function clearSession(): void {
     localStorage.removeItem("hub_driver_name");
     localStorage.removeItem("hub_hotel_name");
     localStorage.removeItem("hub_hotel_code");
+    localStorage.removeItem("hub_restaurante_session");
   } catch { /* */ }
 }
 
@@ -74,6 +75,7 @@ export function getRedirectPath(role: string): string {
     case "admin": return "/admin/trips";
     case "driver": return "/driver/trips";
     case "hotel": return "/portal";
+    case "restaurante": return "/restaurante";
     default: return "/login";
   }
 }

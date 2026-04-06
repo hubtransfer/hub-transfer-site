@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { validateLogin, setSession, getRedirectPath } from "@/lib/auth";
+import { HUB_CENTRAL_URL } from "@/lib/trips";
 import ForgotPasswordModal from "@/components/shared/ForgotPasswordModal";
 
 export default function LoginPage() {
@@ -26,16 +27,44 @@ export default function LoginPage() {
       if (!trimmedPwd) { setError("Insira a senha."); return; }
 
       setLoading(true);
-      const result = await validateLogin(trimmedName, trimmedPwd);
-      setLoading(false);
 
+      // Attempt 1: admin/driver/hotel
+      const result = await validateLogin(trimmedName, trimmedPwd);
       if (result.success && result.session) {
         setSession(result.session);
         router.push(getRedirectPath(result.session.role));
-      } else {
-        setError(result.message || "Nome ou senha incorrectos");
-        setPassword("");
+        return;
       }
+
+      // Attempt 2: restaurant (uses email + senha)
+      try {
+        const params = new URLSearchParams({
+          action: "validateLoginRestaurante",
+          email: trimmedName,
+          senha: trimmedPwd,
+          t: String(Date.now()),
+        });
+        const res = await fetch(`${HUB_CENTRAL_URL}?${params}`, { redirect: "follow" });
+        const data = await res.json();
+        if (data?.success && data.role === "restaurante") {
+          // Store main session for auth guards
+          setSession({ name: data.nome || trimmedName, role: "restaurante" });
+          // Store restaurant-specific data for dashboard
+          localStorage.setItem("hub_restaurante_session", JSON.stringify({
+            restauranteId: data.restauranteId,
+            nome: data.nome || "",
+            endereco: data.endereco || "",
+            comissao: Number(data.comissao) || 0,
+            comissaoFixa: Number(data.comissaoFixa) || 5,
+          }));
+          router.push("/restaurante");
+          return;
+        }
+      } catch { /* network error — fall through to error message */ }
+
+      setLoading(false);
+      setError("Nome ou senha incorrectos");
+      setPassword("");
     },
     [name, password, router],
   );
@@ -62,13 +91,13 @@ export default function LoginPage() {
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-[10px] text-[#F0D030] mb-1.5 tracking-wider uppercase font-mono">
-              Nome
+              Nome ou Email
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => { setName(e.target.value); setError(""); }}
-              placeholder="Ex: Filipe Ventura"
+              placeholder="Nome do hotel ou email"
               autoFocus
               autoComplete="name"
               className="w-full h-12 bg-white/[0.06] border border-[#2A2A2A] rounded-lg px-4 text-[#F5F5F5] text-base placeholder-[#666] focus:outline-none focus:border-[#F0D030] transition-colors"
