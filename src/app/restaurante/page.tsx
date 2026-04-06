@@ -473,6 +473,8 @@ function TransferTab({ session }: { session: RestauranteSession }) {
   const [telefone, setTelefone] = useState("");
   const [idioma, setIdioma] = useState("PT");
   const [origem, setOrigem] = useState("");
+  const [destino, setDestino] = useState("");
+  const [destinoEditado, setDestinoEditado] = useState(false);
   const [data, setData] = useState("");
   const [hora, setHora] = useState("");
   const [pessoas, setPessoas] = useState(2);
@@ -489,7 +491,12 @@ function TransferTab({ session }: { session: RestauranteSession }) {
       .catch(() => {});
   }, []);
 
-  const destino = `${session.nome}${session.endereco ? ", " + session.endereco : ""}`;
+  const defaultDestino = `${session.nome}${session.endereco ? ", " + session.endereco : ""}`;
+
+  // Auto-fill destino with restaurant address on mount
+  useEffect(() => {
+    if (!destinoEditado) setDestino(defaultDestino);
+  }, [defaultDestino, destinoEditado]);
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -512,7 +519,7 @@ function TransferTab({ session }: { session: RestauranteSession }) {
         hora,
         pessoas: String(pessoas),
         origem: origem.trim(),
-        destino,
+        destino: destino.trim() || defaultDestino,
         hotel: hotelParam,
         fonte: "RESTAURANTE",
         observacoes: "",
@@ -525,6 +532,7 @@ function TransferTab({ session }: { session: RestauranteSession }) {
         setCliente("");
         setTelefone("");
         setOrigem("");
+        setDestinoEditado(false);
         setData("");
         setHora("");
         setPessoas(2);
@@ -575,24 +583,29 @@ function TransferTab({ session }: { session: RestauranteSession }) {
           </div>
         </div>
 
-        {/* Origem — autocomplete */}
+        {/* Origem — autocomplete com Google Places */}
         <AddressAutocomplete
           label="Origem (Recolha) *"
           value={origem}
           onChange={(v) => { setOrigem(v); setSuccessMsg(""); }}
-          placeholder="Onde buscar o cliente..."
+          placeholder="Onde buscar o cliente? (hotel, morada, local...)"
           required
           disabled={submitting}
           hotels={HOTEIS}
           restaurantes={restaurantes}
         />
 
-        {/* Destino — readonly, auto-preenchido com restaurante */}
-        <div>
-          <label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1 font-mono">Destino</label>
-          <input type="text" value={destino} readOnly disabled
-            className="w-full bg-[#16213e] border border-zinc-800 rounded px-3 py-2 text-sm text-[#888] focus:outline-none cursor-not-allowed" />
-        </div>
+        {/* Destino — editável, pré-preenchido com restaurante */}
+        <AddressAutocomplete
+          label="Destino"
+          value={destino}
+          onChange={(v) => { setDestino(v); setDestinoEditado(true); }}
+          placeholder={defaultDestino}
+          disabled={submitting}
+          hotels={HOTEIS}
+          restaurantes={restaurantes}
+          faded={!destinoEditado && !!destino}
+        />
 
         <div className="grid grid-cols-2 gap-2">
           <div>
