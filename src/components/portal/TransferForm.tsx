@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   User, FileText, Car, Users, Briefcase, Calendar, Clock,
   Phone, Plane, MapPin, Navigation, DollarSign, CreditCard, MessageSquare,
 } from "lucide-react";
 import PhoneInput from "@/components/PhoneInput";
+import AddressAutocomplete from "@/components/shared/AddressAutocomplete";
 import {
   Transfer, TOURS_DATA, getTourPrice, getTourUnitPrice,
   calculatePrices, formatDateForInput,
@@ -73,31 +74,7 @@ export default function TransferForm({
   const [pagoParaQuem, setPagoParaQuem] = useState("");
   const [observacoes, setObservacoes] = useState("");
 
-  // Refs for Google Places autocomplete
-  const origemInputRef = useRef<HTMLInputElement>(null);
-  const destinoInputRef = useRef<HTMLInputElement>(null);
-
-  // Google Places Autocomplete setup
-  useEffect(() => {
-    const g = window as unknown as { google?: { maps?: { places?: { Autocomplete: new (el: HTMLInputElement, opts: Record<string, unknown>) => { addListener: (event: string, cb: () => void) => void; getPlace: () => { formatted_address?: string } } } } } };
-    if (!g.google?.maps?.places) return;
-    const opts = { componentRestrictions: { country: "pt" }, fields: ["formatted_address"] };
-
-    if (origemInputRef.current) {
-      const ac = new g.google.maps.places.Autocomplete(origemInputRef.current, opts);
-      ac.addListener("place_changed", () => {
-        const place = ac.getPlace();
-        if (place.formatted_address) setOrigem(place.formatted_address);
-      });
-    }
-    if (destinoInputRef.current) {
-      const ac = new g.google.maps.places.Autocomplete(destinoInputRef.current, opts);
-      ac.addListener("place_changed", () => {
-        const place = ac.getPlace();
-        if (place.formatted_address) setDestino(place.formatted_address);
-      });
-    }
-  }, []);
+  // Google Places autocomplete now handled by AddressAutocomplete component
 
   // Hotel address for quick buttons
   const hotelAddress = useMemo(() => getHotelAddress(hotelName || ""), [hotelName]);
@@ -301,7 +278,12 @@ export default function TransferForm({
               <button type="button" onClick={() => setOrigem("Aeroporto de Lisboa, 1700-008 Lisboa, Portugal")} className={chip(origem.includes("Aeroporto"))}>Aeroporto</button>
               <button type="button" onClick={() => setOrigem(hotelAddress)} className={chip(origem === hotelAddress)}>Hotel</button>
             </div>
-            <input ref={origemInputRef} type="text" value={origem} onChange={(e) => setOrigem(e.target.value)} className={inp} placeholder="Pesquisar endereço..." required />
+            <AddressAutocomplete
+              value={origem}
+              onChange={(v) => setOrigem(v)}
+              placeholder="Pesquisar endereço..."
+              required
+            />
           </div>
           <div>
             <label className={lbl}><Navigation className={iconCls} /> Destino <span className="text-[#C06060]">*</span></label>
@@ -309,7 +291,12 @@ export default function TransferForm({
               <button type="button" onClick={() => setDestino(hotelAddress)} className={chip(destino === hotelAddress)}>Hotel</button>
               <button type="button" onClick={() => setDestino("Aeroporto de Lisboa, 1700-008 Lisboa, Portugal")} className={chip(destino.includes("Aeroporto"))}>Aeroporto</button>
             </div>
-            <input ref={destinoInputRef} type="text" value={destino} onChange={(e) => setDestino(e.target.value)} className={inp} placeholder="Pesquisar endereço..." required />
+            <AddressAutocomplete
+              value={destino}
+              onChange={(v) => setDestino(v)}
+              placeholder="Pesquisar endereço..."
+              required
+            />
           </div>
         </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useGoogleMaps } from "@/hooks/useGoogleMaps";
 
 // ─── Google Maps types ───
 declare global {
@@ -43,37 +44,22 @@ interface AutocompleteRestaurant {
 }
 
 interface AddressAutocompleteProps {
-  label: string;
+  label?: string;
   value: string;
   onChange: (value: string, selected?: AddressOption) => void;
   placeholder?: string;
   required?: boolean;
-  hotels: string[];
-  restaurantes: AutocompleteRestaurant[];
+  hotels?: string[];
+  restaurantes?: AutocompleteRestaurant[];
   disabled?: boolean;
   faded?: boolean;
   enableGooglePlaces?: boolean;
+  googlePlacesCountry?: string;
+  className?: string;
 }
 
-const GOOGLE_MAPS_API_KEY = "AIzaSyBe4UwnVYRP5KAUOtHg3diD6kPTif3VN30";
-
-// Remove acentos e normaliza para match parcial
 const normalize = (s: string): string =>
   s.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-// Load Google Maps script once globally
-let googleScriptLoaded = false;
-function ensureGoogleScript() {
-  if (googleScriptLoaded || typeof window === "undefined") return;
-  if (window.google?.maps?.places) { googleScriptLoaded = true; return; }
-  const existing = document.querySelector(`script[src*="maps.googleapis.com/maps/api/js"]`);
-  if (existing) { googleScriptLoaded = true; return; }
-  const script = document.createElement("script");
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
-  script.async = true;
-  document.head.appendChild(script);
-  googleScriptLoaded = true;
-}
 
 export default function AddressAutocomplete({
   label,
@@ -81,23 +67,21 @@ export default function AddressAutocomplete({
   onChange,
   placeholder,
   required,
-  hotels,
-  restaurantes,
+  hotels = [],
+  restaurantes = [],
   disabled,
   faded,
   enableGooglePlaces = true,
+  googlePlacesCountry = "pt",
+  className,
 }: AddressAutocompleteProps) {
+  const isGoogleLoaded = useGoogleMaps();
   const [isOpen, setIsOpen] = useState(false);
   const [highlightIndex, setHighlightIndex] = useState(-1);
   const [googleSuggestions, setGoogleSuggestions] = useState<AddressOption[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const serviceRef = useRef<InstanceType<NonNullable<NonNullable<NonNullable<Window["google"]>["maps"]>["places"]>["AutocompleteService"]> | null>(null);
-
-  // Load Google Maps script
-  useEffect(() => {
-    if (enableGooglePlaces) ensureGoogleScript();
-  }, [enableGooglePlaces]);
 
   // ─── Filter hotels + restaurants (local) ───
   const { filteredHotels, filteredRestaurantes } = useMemo(() => {
@@ -111,19 +95,16 @@ export default function AddressAutocomplete({
 
   // ─── Google Places fetch with debounce ───
   const fetchGoogleSuggestions = useCallback((input: string) => {
-    if (!enableGooglePlaces || input.length < 3) {
+    if (!enableGooglePlaces || !isGoogleLoaded || input.length < 3) {
       setGoogleSuggestions([]);
       return;
     }
-    if (!window.google?.maps?.places) {
-      setGoogleSuggestions([]);
-      return;
-    }
+    if (!window.google?.maps?.places) { setGoogleSuggestions([]); return; }
     if (!serviceRef.current) {
       serviceRef.current = new window.google.maps.places.AutocompleteService();
     }
     serviceRef.current.getPlacePredictions(
-      { input, componentRestrictions: { country: "pt" }, types: ["establishment", "geocode"] },
+      { input, componentRestrictions: { country: googlePlacesCountry }, types: ["establishment", "geocode"] },
       (predictions, status) => {
         if (status === "OK" && predictions) {
           setGoogleSuggestions(
@@ -140,15 +121,11 @@ export default function AddressAutocomplete({
         }
       },
     );
-  }, [enableGooglePlaces]);
+  }, [enableGooglePlaces, isGoogleLoaded, googlePlacesCountry]);
 
-  // Debounced google fetch when value changes
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (!isOpen || !enableGooglePlaces || value.length < 3) {
-      setGoogleSuggestions([]);
-      return;
-    }
+    if (!isOpen || !enableGooglePlaces || value.length < 3) { setGoogleSuggestions([]); return; }
     debounceRef.current = setTimeout(() => fetchGoogleSuggestions(value), 300);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [value, isOpen, enableGooglePlaces, fetchGoogleSuggestions]);
@@ -181,7 +158,6 @@ export default function AddressAutocomplete({
 
   // ─── Handlers ───
   const handleSelect = useCallback((opt: AddressOption) => {
-    // Google suggestions: use full description as value
     const val = opt.type === "google" ? (opt.address || opt.name) : opt.name;
     onChange(val, opt);
     setIsOpen(false);
@@ -189,11 +165,7 @@ export default function AddressAutocomplete({
   }, [onChange]);
 
   const handleFocus = useCallback(() => setIsOpen(true), []);
-
-  const handleBlur = useCallback(() => {
-    // Delay to allow click on suggestion before closing
-    setTimeout(() => setIsOpen(false), 200);
-  }, []);
+  const handleBlur = useCallback(() => { setTimeout(() => setIsOpen(false), 200); }, []);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Escape") { setIsOpen(false); setHighlightIndex(-1); return; }
@@ -203,14 +175,13 @@ export default function AddressAutocomplete({
     else if (e.key === "Enter" && highlightIndex >= 0) { e.preventDefault(); handleSelect(flatOptions[highlightIndex]); }
   }, [isOpen, flatOptions, highlightIndex, handleSelect]);
 
-  // ─── Render helpers ───
   const hotelStartIdx = 0;
   const restStartIdx = filteredHotels.length;
   const googleStartIdx = filteredHotels.length + filteredRestaurantes.length;
 
   return (
-    <div ref={containerRef} className="relative">
-      <label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1 font-mono">{label}</label>
+    <div ref={containerRef} className={`relative ${className || ""}`}>
+      {label && <label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1 font-mono">{label}</label>}
       <input
         type="text"
         value={value}
@@ -227,7 +198,6 @@ export default function AddressAutocomplete({
 
       {isOpen && totalCount > 0 && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-[#16213e] border border-[#D4A017] rounded-lg shadow-2xl z-50 max-h-[250px] overflow-y-auto">
-          {/* Hotels */}
           {filteredHotels.length > 0 && (
             <>
               <div className="px-4 py-2 text-[11px] uppercase tracking-[1px] text-[#D4A017] font-mono font-bold select-none bg-[#0f1626]">🏨 Hotéis Parceiros</div>
@@ -245,7 +215,6 @@ export default function AddressAutocomplete({
             </>
           )}
 
-          {/* Restaurants */}
           {filteredRestaurantes.length > 0 && (
             <>
               {filteredHotels.length > 0 && <div className="border-t border-[#333]" />}
@@ -269,7 +238,6 @@ export default function AddressAutocomplete({
             </>
           )}
 
-          {/* Google Places */}
           {googleSuggestions.length > 0 && (
             <>
               {(filteredHotels.length > 0 || filteredRestaurantes.length > 0) && <div className="border-t border-[#333]" />}
