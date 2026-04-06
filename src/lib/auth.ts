@@ -16,7 +16,7 @@ const SESSION_TTL = 8 * 60 * 60 * 1000; // 8 hours
 export function getSession(): AuthSession | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = sessionStorage.getItem(SESSION_KEY);
+    const raw = localStorage.getItem(SESSION_KEY);
     if (!raw) return null;
     const session: AuthSession = JSON.parse(raw);
     // Validate required fields
@@ -43,7 +43,7 @@ export function setSession(session: AuthSession): void {
   if (!session.expiresAt) {
     session.expiresAt = Date.now() + SESSION_TTL;
   }
-  sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  localStorage.setItem(SESSION_KEY, JSON.stringify(session));
   // Also set legacy keys for backward compatibility
   if (session.role === "driver") {
     localStorage.setItem("hub_driver_name", session.name);
@@ -54,7 +54,7 @@ export function setSession(session: AuthSession): void {
 }
 
 export function clearSession(): void {
-  try { sessionStorage.removeItem(SESSION_KEY); } catch { /* */ }
+  try { localStorage.removeItem(SESSION_KEY); } catch { /* */ }
   try {
     localStorage.removeItem("hub_driver_name");
     localStorage.removeItem("hub_hotel_name");

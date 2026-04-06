@@ -83,17 +83,17 @@ function statusBadge(status: string): { bg: string; text: string; label: string 
 
 function loadSession(): RestauranteSession | null {
   try {
-    const raw = sessionStorage.getItem(SESSION_KEY);
+    const raw = localStorage.getItem(SESSION_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch { return null; }
 }
 
 function saveSession(s: RestauranteSession) {
-  try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(s)); } catch { /* */ }
+  try { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); } catch { /* */ }
 }
 
 function clearRestSession() {
-  try { sessionStorage.removeItem(SESSION_KEY); } catch { /* */ }
+  try { localStorage.removeItem(SESSION_KEY); } catch { /* */ }
 }
 
 // ════════════════════════════════════════════════════════════════
