@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useTransferStore } from "@/hooks/useTransferStore";
 import TransferForm from "@/components/portal/TransferForm";
@@ -18,10 +19,12 @@ type PortalTab = "form" | "viagens" | "live";
 
 export default function PortalPage() {
   const store = useTransferStore();
+  const router = useRouter();
   const formRef = useRef<HTMLDivElement>(null);
   const [showConfig, setShowConfig] = useState(false);
   const [showClearData, setShowClearData] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
   const [hotelName, setHotelName] = useState("");
   const [hotelCode, setHotelCode] = useState("");
   const [noUrl, setNoUrl] = useState(false);
@@ -30,15 +33,20 @@ export default function PortalPage() {
   const [urlToast, setUrlToast] = useState("");
   const [activeTab, setActiveTab] = useState<PortalTab>("form");
 
-  // Auto-configure GAS URL
+  // Auth guard + Auto-configure GAS URL
   useEffect(() => {
     const session = getSession();
+    if (!session || (session.role !== "hotel" && session.role !== "admin")) {
+      router.replace("/login");
+      return;
+    }
     const code = session?.code || "";
     if (session?.role === "admin") setIsAdmin(true);
     if (code) {
       setHotelCode(code);
       setHotelName(session?.name || code);
     }
+    setAuthChecked(true);
     (async () => {
       if (!code) { store.loadFromSheets(); return; }
       const url = await fetchHotelUrl(code);
@@ -83,6 +91,14 @@ export default function PortalPage() {
   const filterIndicator = hasActiveFilters
     ? { filtered: store.filteredServices.length, total: store.services.length }
     : null;
+
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+        <div className="w-5 h-5 border-2 border-[#D4A017]/30 border-t-[#D4A017] rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0A0A0A]">

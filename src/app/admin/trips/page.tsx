@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useTripsStore } from "@/hooks/useTripsStore";
 import TripCard from "@/components/driver/DriverTripCard";
 import DriverNameplate from "@/components/driver/DriverNameplate";
@@ -61,6 +62,18 @@ function syncDot(status: string) {
 
 export default function TripsPage() {
   const store = useTripsStore();
+  const router = useRouter();
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // ── Auth guard ──
+  useEffect(() => {
+    const session = getSession();
+    if (!session || session.role !== "admin") {
+      router.replace("/login");
+      return;
+    }
+    setAuthChecked(true);
+  }, [router]);
 
   // Reset trip modal
   const [resetTrip, setResetTrip] = useState<HubViagem | null>(null);
@@ -215,6 +228,14 @@ export default function TripsPage() {
   /* ================================================================ */
 
   const info = TAB_INFO[store.currentTab];
+
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+        <div className="w-5 h-5 border-2 border-[#D4A017]/30 border-t-[#D4A017] rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-hub-black text-white font-mono">
