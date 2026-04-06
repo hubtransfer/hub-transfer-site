@@ -111,19 +111,26 @@ export default function RestaurantePage() {
   useEffect(() => {
     // Check main auth session first (unified login)
     const mainSession = getSession();
-    if (!mainSession || mainSession.role !== "restaurante") {
-      router.replace("/login");
-      return;
-    }
-    // Load restaurant-specific data
+
+    // Also check restaurant-specific session directly (covers legacy logins)
     const restData = loadSession();
-    if (restData) {
+
+    if (mainSession?.role === "restaurante" && restData) {
+      // Unified login path — both sessions present
       setSessionState(restData);
       setCheckingSession(false);
-    } else {
-      // Main session exists but no restaurant data — redirect to re-login
-      router.replace("/login");
+      return;
     }
+
+    if (restData && !mainSession) {
+      // Legacy: restaurant session exists but no main session — still allow
+      setSessionState(restData);
+      setCheckingSession(false);
+      return;
+    }
+
+    // No valid session — redirect to login
+    router.replace("/login");
   }, [router]);
 
   const handleLogout = useCallback(() => {
@@ -175,12 +182,13 @@ function Dashboard({ session, onLogout }: { session: RestauranteSession; onLogou
       </header>
 
       {/* Tabs */}
-      <nav className="flex border-b border-zinc-800 bg-[#111827]">
+      <nav className="sticky top-[52px] z-40 flex border-b border-zinc-800 bg-[#111827]">
         {TABS.map((t) => (
           <button
             key={t.key}
+            type="button"
             onClick={() => setTab(t.key)}
-            className={`flex-1 py-3 text-xs font-mono font-bold transition-colors ${
+            className={`flex-1 py-3 text-xs font-mono font-bold transition-colors cursor-pointer ${
               tab === t.key
                 ? "text-[#D4A017] border-b-2 border-[#D4A017]"
                 : "text-[#888] hover:text-white"
