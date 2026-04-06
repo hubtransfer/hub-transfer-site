@@ -7,6 +7,7 @@ import DriverTripCard from "@/components/driver/DriverTripCard";
 import DriverNameplate from "@/components/driver/DriverNameplate";
 import { SkeletonList } from "@/components/trips/SkeletonCard";
 import { getSession, clearSession } from "@/lib/auth";
+import ChangePasswordModal from "@/components/shared/ChangePasswordModal";
 import {
   detectTipo,
   calcDriverPrice,
@@ -36,6 +37,8 @@ export default function DriverTripsPage() {
   const router = useRouter();
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const [changePwdOpen, setChangePwdOpen] = useState(false);
 
   /* ── Nameplate ── */
   const [nameplateOpen, setNameplateOpen] = useState(false);
@@ -170,6 +173,7 @@ export default function DriverTripsPage() {
             )}
             {store.lastSyncTime ? `Sync: ${store.lastSyncTime}` : "Sync: --:--:--"}
           </span>
+          <button onClick={() => setChangePwdOpen(true)} title="Alterar senha" className="text-white/40 hover:text-[#F0D030] transition-colors">⚙️</button>
         </div>
       </header>
 
@@ -344,6 +348,8 @@ export default function DriverTripsPage() {
         destination={nameplateDest}
         onClose={closeNameplate}
       />
+
+      <ChangePasswordModal isOpen={changePwdOpen} onClose={() => setChangePwdOpen(false)} tipo="motorista" userId={store.driverName} />
     </div>
   );
 }

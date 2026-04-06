@@ -20,6 +20,7 @@ import {
   dateToISO,
 } from "@/lib/trips";
 import { validateLogin, getSession } from "@/lib/auth";
+import ChangePasswordModal from "@/components/shared/ChangePasswordModal";
 
 /* ================================================================== */
 /*  TAB DEFINITIONS                                                    */
@@ -64,6 +65,8 @@ export default function TripsPage() {
   const store = useTripsStore();
   const router = useRouter();
   const [authChecked, setAuthChecked] = useState(false);
+  const [changePwdOpen, setChangePwdOpen] = useState(false);
+  const [adminName, setAdminName] = useState("");
 
   // ── Auth guard ──
   useEffect(() => {
@@ -72,6 +75,7 @@ export default function TripsPage() {
       router.replace("/login");
       return;
     }
+    setAdminName(session.name);
     setAuthChecked(true);
   }, [router]);
 
@@ -260,6 +264,9 @@ export default function TripsPage() {
             )}
             {store.lastSyncTime ? `Sync: ${store.lastSyncTime}` : "Sync: --:--:--"}
           </span>
+          <button onClick={() => setChangePwdOpen(true)} title="Alterar senha" className="text-zinc-500 hover:text-[#D4A017] transition-colors">
+            ⚙️
+          </button>
         </div>
       </header>
 
@@ -780,6 +787,8 @@ export default function TripsPage() {
           {resetToast}
         </div>
       )}
+
+      <ChangePasswordModal isOpen={changePwdOpen} onClose={() => setChangePwdOpen(false)} tipo="admin" userId={adminName} />
     </div>
   );
 }

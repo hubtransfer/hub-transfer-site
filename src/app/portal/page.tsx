@@ -14,6 +14,7 @@ import StatusToast from "@/components/portal/StatusToast";
 import LiveTab from "@/components/portal/LiveTab";
 import type { Transfer } from "@/lib/transfers";
 import { getSession, fetchHotelUrl, saveHotelUrl } from "@/lib/auth";
+import ChangePasswordModal from "@/components/shared/ChangePasswordModal";
 
 type PortalTab = "form" | "viagens" | "live";
 
@@ -25,6 +26,7 @@ export default function PortalPage() {
   const [showClearData, setShowClearData] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
+  const [changePwdOpen, setChangePwdOpen] = useState(false);
   const [hotelName, setHotelName] = useState("");
   const [hotelCode, setHotelCode] = useState("");
   const [noUrl, setNoUrl] = useState(false);
@@ -151,6 +153,7 @@ export default function PortalPage() {
               {store.lastSyncTime && (
                 <span className="text-[10px] text-[#666] font-mono">Sync {store.lastSyncTime}</span>
               )}
+              <button onClick={() => setChangePwdOpen(true)} title="Alterar senha" className="text-[#666] hover:text-[#F0D030] transition-colors">⚙️</button>
             </div>
           </div>
           {/* Tabs */}
@@ -326,6 +329,8 @@ export default function PortalPage() {
           to { opacity: 1; transform: translateY(0); }
         }
       `}} />
+
+      <ChangePasswordModal isOpen={changePwdOpen} onClose={() => setChangePwdOpen(false)} tipo="hotel" userId={hotelCode || hotelName} />
     </div>
   );
 }

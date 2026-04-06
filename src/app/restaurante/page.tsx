@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { HUB_CENTRAL_URL } from "@/lib/trips";
 import AddressAutocomplete from "@/components/shared/AddressAutocomplete";
 import ForgotPasswordModal from "@/components/shared/ForgotPasswordModal";
+import ChangePasswordModal from "@/components/shared/ChangePasswordModal";
 
 // ─── Types ───
 
@@ -244,6 +245,7 @@ function LoginScreen({ onLogin }: { onLogin: (s: RestauranteSession) => void }) 
 
 function Dashboard({ session, onLogout }: { session: RestauranteSession; onLogout: () => void }) {
   const [tab, setTab] = useState<TabKey>("reservas");
+  const [changePwdOpen, setChangePwdOpen] = useState(false);
 
   const TABS: { key: TabKey; icon: string; label: string }[] = [
     { key: "reservas", icon: "📋", label: "Reservas" },
@@ -262,9 +264,10 @@ function Dashboard({ session, onLogout }: { session: RestauranteSession; onLogou
             <p className="text-[10px] text-[#888] font-mono truncate">{session.endereco}</p>
           </div>
         </div>
-        <button onClick={onLogout} className="text-xs text-[#888] hover:text-[#D4A017] font-mono transition-colors flex-shrink-0">
-          Sair
-        </button>
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <button onClick={() => setChangePwdOpen(true)} title="Alterar senha" className="text-[#888] hover:text-[#D4A017] transition-colors">⚙️</button>
+          <button onClick={onLogout} className="text-xs text-[#888] hover:text-[#D4A017] font-mono transition-colors">Sair</button>
+        </div>
       </header>
 
       {/* Tabs */}
@@ -290,6 +293,8 @@ function Dashboard({ session, onLogout }: { session: RestauranteSession; onLogou
         {tab === "transfer" && <TransferTab session={session} />}
         {tab === "comissoes" && <ComissoesTab session={session} />}
       </main>
+
+      <ChangePasswordModal isOpen={changePwdOpen} onClose={() => setChangePwdOpen(false)} tipo="restaurante" userId={String(session.restauranteId)} />
     </div>
   );
 }
