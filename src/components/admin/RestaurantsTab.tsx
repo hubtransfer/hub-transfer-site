@@ -297,6 +297,7 @@ function NewReservationModal({ restaurantes, onClose, onSuccess }: ModalProps) {
         origem: origemFinal,
         destino: destino.trim(),
         hotel: hotelFinal,
+        fonte: "HUB",
         observacoes: observacoes.trim(),
         t: String(Date.now()),
       });
