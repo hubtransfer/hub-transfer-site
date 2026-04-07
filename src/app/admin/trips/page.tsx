@@ -67,6 +67,7 @@ export default function TripsPage() {
   const [authChecked, setAuthChecked] = useState(false);
   const [changePwdOpen, setChangePwdOpen] = useState(false);
   const [adminName, setAdminName] = useState("");
+  const [filtroTipo, setFiltroTipo] = useState("TODOS");
 
   // ── Auth guard ──
   useEffect(() => {
@@ -413,23 +414,27 @@ export default function TripsPage() {
         {/* ── DIA TAB ── */}
         {store.currentTab === "dia" && (
           <div className="px-4 sm:px-6 space-y-3">
-            {/* Stats bar */}
-            <div className="flex flex-wrap gap-2">
+            {/* Type filter badges (clickable) */}
+            <div className="flex gap-2 flex-wrap">
               {[
-                { label: "Total", value: store.diaStats.total, color: "text-white", labelColor: "text-zinc-500" },
-                { label: "Chegadas", value: store.diaStats.chegadas, color: "text-[#D4A847]", labelColor: "text-[#D4A847]" },
-                { label: "Recolhas", value: store.diaStats.recolhas, color: "text-[#8B9DAF]", labelColor: "text-[#8B9DAF]" },
-                { label: "Tours", value: store.diaStats.tours, color: "text-[#C17E4A]", labelColor: "text-[#C17E4A]" },
-              ].map((s) => (
-                <div
-                  key={s.label}
-                  className="bg-hub-black-card border border-hub-gold/5 rounded-lg px-3 py-2 text-center min-w-[70px]"
+                { key: "TODOS", label: `📊 ${store.diaStats.total}`, cor: "text-white" },
+                { key: "CHEGADA", label: `✈️ ${store.diaStats.chegadas}`, cor: "text-[#D4A847]" },
+                { key: "RECOLHA", label: `🏨 ${store.diaStats.recolhas}`, cor: "text-[#8B9DAF]" },
+                { key: "TOUR", label: `🗺️ ${store.diaStats.tours}`, cor: "text-[#C17E4A]" },
+                { key: "RESTAURANTE", label: `🍽️ ${store.diaActiveList.filter((v) => (v.type || "").toUpperCase().includes("RESTAURANTE")).length}`, cor: "text-[#C084FC]" },
+              ].map((c) => (
+                <button
+                  key={c.key}
+                  type="button"
+                  onClick={() => setFiltroTipo(c.key)}
+                  className={`text-xs px-3 py-1.5 rounded-full border transition-all cursor-pointer font-mono font-bold ${
+                    filtroTipo === c.key
+                      ? `border-hub-gold bg-hub-gold/20 ${c.cor}`
+                      : "border-zinc-700 bg-[#16213e]/50 text-zinc-500 hover:border-zinc-500"
+                  }`}
                 >
-                  <div className={`text-lg font-bold ${s.color}`}>{s.value}</div>
-                  <div className={`text-[10px] uppercase tracking-wider ${s.labelColor}`}>
-                    {s.label}
-                  </div>
-                </div>
+                  {c.label}
+                </button>
               ))}
             </div>
 
@@ -513,19 +518,27 @@ export default function TripsPage() {
               </div>
             )}
 
-            {/* Timeline / Cards — active trips only */}
+            {/* Timeline / Cards — active trips only, filtered by type */}
             <div className="space-y-2 pb-4">
-              {store.diaActiveList.length === 0 && store.diaDoneList.length === 0 ? (
-                <div className="text-center py-16">
-                  <div className="text-4xl mb-3 opacity-30">{"\u{1F5D3}"}</div>
-                  <p className="text-zinc-500 text-sm">Nenhuma viagem para esta data</p>
-                </div>
-              ) : store.diaActiveList.length === 0 ? (
-                <div className="text-center py-10">
-                  <p className="text-zinc-500 text-sm">Todas as viagens foram concluídas</p>
-                </div>
-              ) : (
-                store.diaActiveList.map((viagem) => (
+              {(() => {
+                const filtered = filtroTipo === "TODOS"
+                  ? store.diaActiveList
+                  : store.diaActiveList.filter((v) => {
+                      const t = detectTipo(v.origin || "", v.flight || "", v.type);
+                      return t === filtroTipo;
+                    });
+                if (store.diaActiveList.length === 0 && store.diaDoneList.length === 0) return (
+                  <div className="text-center py-16">
+                    <div className="text-4xl mb-3 opacity-30">{"\u{1F5D3}"}</div>
+                    <p className="text-zinc-500 text-sm">Nenhuma viagem para esta data</p>
+                  </div>
+                );
+                if (filtered.length === 0) return (
+                  <div className="text-center py-10">
+                    <p className="text-zinc-500 text-sm">{filtroTipo === "TODOS" ? "Todas as viagens foram concluídas" : `Nenhuma viagem do tipo ${filtroTipo}`}</p>
+                  </div>
+                );
+                return filtered.map((viagem) => (
                   <TripCard
                     key={viagem.id || (viagem.client || "x").replace(/\W/g, "")}
                     viagem={viagem}
@@ -542,8 +555,8 @@ export default function TripsPage() {
                     mode="admin"
                     isHistorical={!store.isViewingToday}
                   />
-                ))
-              )}
+                ));
+              })()}
             </div>
           </div>
         )}

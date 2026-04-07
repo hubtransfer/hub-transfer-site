@@ -74,12 +74,13 @@ type TabKey = "reservas" | "transfer" | "comissoes";
 
 function statusBadge(status: string): { bg: string; text: string; label: string } {
   const s = (status || "").toUpperCase();
-  if (s === "CONFIRMADA") return { bg: "bg-[#22C55E]/15", text: "text-[#22C55E]", label: "CONFIRMADA" };
-  if (s === "RECUSADA") return { bg: "bg-[#EF4444]/15", text: "text-[#EF4444]", label: "RECUSADA" };
-  if (s === "CONCLUIDA") return { bg: "bg-[#3B82F6]/15", text: "text-[#3B82F6]", label: "CONCLUÍDA" };
-  if (s === "CANCELADA") return { bg: "bg-[#6B7280]/15", text: "text-[#6B7280]", label: "CANCELADA" };
-  if (s.includes("PENDENTE_HUB")) return { bg: "bg-[#F97316]/15", text: "text-[#F97316]", label: "PENDENTE HUB" };
-  return { bg: "bg-[#F59E0B]/15", text: "text-[#F59E0B]", label: "PENDENTE" };
+  if (s === "CONFIRMADA") return { bg: "bg-green-500/20", text: "text-green-400", label: "✅ Confirmada" };
+  if (s === "RECUSADA") return { bg: "bg-red-500/20", text: "text-red-400", label: "❌ Recusada" };
+  if (s === "RECUSADA_HUB") return { bg: "bg-red-500/20", text: "text-red-400", label: "❌ Recusada HUB" };
+  if (s === "CONCLUIDA") return { bg: "bg-[#3B82F6]/15", text: "text-[#3B82F6]", label: "✅ Concluída" };
+  if (s === "CANCELADA") return { bg: "bg-[#6B7280]/15", text: "text-[#6B7280]", label: "Cancelada" };
+  if (s.includes("PENDENTE_HUB")) return { bg: "bg-orange-500/20", text: "text-orange-400", label: "⏳ Aguarda HUB" };
+  return { bg: "bg-yellow-500/20", text: "text-yellow-400", label: "⏳ Pendente" };
 }
 
 // ─── Session helpers ───
@@ -225,8 +226,9 @@ function ReservasTab({ session }: { session: RestauranteSession }) {
   const [contaResult, setContaResult] = useState("");
   const [contaError, setContaError] = useState("");
 
+  const hasLoadedOnce = useRef(false);
   const fetchReservas = useCallback(async () => {
-    setLoading(true);
+    if (!hasLoadedOnce.current) setLoading(true);
     try {
       const now = new Date();
       const params = new URLSearchParams({
@@ -245,10 +247,17 @@ function ReservasTab({ session }: { session: RestauranteSession }) {
       console.error("[ReservasTab] error:", err);
     } finally {
       setLoading(false);
+      hasLoadedOnce.current = true;
     }
   }, [session.restauranteId]);
 
-  useEffect(() => { fetchReservas(); }, [fetchReservas]);
+  useEffect(() => {
+    fetchReservas();
+    const interval = setInterval(() => {
+      if (document.visibilityState === "visible") fetchReservas();
+    }, 30_000);
+    return () => clearInterval(interval);
+  }, [fetchReservas]);
 
   const handleLancarConta = useCallback(async () => {
     if (!contaModal || !contaValor) return;
@@ -394,10 +403,28 @@ function ReservasTab({ session }: { session: RestauranteSession }) {
 //  TRANSFER TAB (restaurant creates a booking)
 // ════════════════════════════════════════════════════════════════
 
+const DDI_IDIOMA: Record<string, string> = {
+  "351": "PT", "55": "PT", "244": "PT",
+  "44": "EN", "1": "EN", "61": "EN", "353": "EN",
+  "34": "ES", "54": "ES", "56": "ES",
+  "33": "FR",
+  "39": "IT",
+  "49": "DE",
+};
+
+function detectarIdiomaPorDDI(telefone: string): string {
+  const limpo = telefone.replace(/\D/g, "");
+  if (DDI_IDIOMA[limpo.slice(0, 3)]) return DDI_IDIOMA[limpo.slice(0, 3)];
+  if (DDI_IDIOMA[limpo.slice(0, 2)]) return DDI_IDIOMA[limpo.slice(0, 2)];
+  if (DDI_IDIOMA[limpo.slice(0, 1)]) return DDI_IDIOMA[limpo.slice(0, 1)];
+  return "";
+}
+
 function TransferTab({ session }: { session: RestauranteSession }) {
   const [cliente, setCliente] = useState("");
   const [telefone, setTelefone] = useState("");
   const [idioma, setIdioma] = useState("PT");
+  const [idiomaManual, setIdiomaManual] = useState(false);
   const [origem, setOrigem] = useState("");
   const [destino, setDestino] = useState("");
   const [destinoEditado, setDestinoEditado] = useState(false);
@@ -457,6 +484,8 @@ function TransferTab({ session }: { session: RestauranteSession }) {
         setSuccessMsg(`Pedido enviado! Pickup: ${json.horaPickup || hora}`);
         setCliente("");
         setTelefone("");
+        setIdioma("PT");
+        setIdiomaManual(false);
         setOrigem("");
         setDestinoEditado(false);
         setData("");
@@ -497,12 +526,15 @@ function TransferTab({ session }: { session: RestauranteSession }) {
         <div className="grid grid-cols-2 gap-2">
           <div>
             <label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1 font-mono">Telefone *</label>
-            <input type="tel" value={telefone} onChange={(e) => setTelefone(e.target.value)} required disabled={submitting}
+            <input type="tel" value={telefone} onChange={(e) => {
+              setTelefone(e.target.value);
+              if (!idiomaManual) { const det = detectarIdiomaPorDDI(e.target.value); if (det) setIdioma(det); }
+            }} required disabled={submitting}
               className="w-full bg-[#16213e] border border-zinc-800 rounded px-3 py-2 text-sm text-white placeholder-zinc-600 focus:border-[#D4A017] focus:outline-none font-mono" placeholder="+351 ..." />
           </div>
           <div>
             <label className="block text-[10px] text-zinc-400 uppercase tracking-wider mb-1 font-mono">Idioma</label>
-            <select value={idioma} onChange={(e) => setIdioma(e.target.value)} disabled={submitting}
+            <select value={idioma} onChange={(e) => { setIdioma(e.target.value); setIdiomaManual(true); }} disabled={submitting}
               className="w-full bg-[#16213e] border border-zinc-800 rounded px-3 py-2 text-sm text-white focus:border-[#D4A017] focus:outline-none font-mono">
               {IDIOMAS.map((l) => <option key={l} value={l}>{l}</option>)}
             </select>

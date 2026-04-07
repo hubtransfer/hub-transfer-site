@@ -338,9 +338,10 @@ const PLACE_KEYWORDS = [
  * based on whether the origin mentions an airport and a flight exists.
  */
 export function detectTipo(origin: string, flight: string, backendType?: string): string {
-  // 1. If backend explicitly says TOUR, respect it
+  // 1. If backend says TOUR or RESTAURANTE, respect it
   const bt = (backendType || '').toUpperCase().trim();
   if (bt === 'TOUR') return 'TOUR';
+  if (bt.includes('RESTAURANTE') || bt.includes('RESTAURANT')) return 'RESTAURANTE';
 
   // 2. If origin is the airport → CHEGADA (arrival)
   const o = (origin || '').toLowerCase();

@@ -45,9 +45,10 @@ const PhoneIcon = () => (
 /* ─── Color config ─── */
 
 const TYPE_COLORS = {
-  CHEGADA: { text: "text-[#F5C518]", bg: "bg-[#F5C518]/15", border: "border-l-[#F5C518]", hex: "#F5C518" },
-  RECOLHA: { text: "text-[#3B82F6]", bg: "bg-[#3B82F6]/15", border: "border-l-[#3B82F6]", hex: "#3B82F6" },
-  TOUR:    { text: "text-[#A855F7]", bg: "bg-[#A855F7]/15", border: "border-l-[#A855F7]", hex: "#A855F7" },
+  CHEGADA:      { text: "text-[#F5C518]", bg: "bg-[#F5C518]/15", border: "border-l-[#F5C518]", hex: "#F5C518" },
+  RECOLHA:      { text: "text-[#3B82F6]", bg: "bg-[#3B82F6]/15", border: "border-l-[#3B82F6]", hex: "#3B82F6" },
+  TOUR:         { text: "text-[#A855F7]", bg: "bg-[#A855F7]/15", border: "border-l-[#A855F7]", hex: "#A855F7" },
+  RESTAURANTE:  { text: "text-[#C084FC]", bg: "bg-[#C084FC]/15", border: "border-l-[#C084FC]", hex: "#C084FC" },
 } as const;
 function ts(tipo: string) { return TYPE_COLORS[tipo as keyof typeof TYPE_COLORS] ?? { text: "text-gray-400", bg: "bg-gray-500/10", border: "border-l-gray-500", hex: "#999" }; }
 
