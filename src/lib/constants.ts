@@ -4,11 +4,16 @@ export const COMPANY = {
   name: "HUB Transfer",
   slogan: "Transfer and Tourism",
   website: "www.hubtransferencia.com",
-  email: "juniorguitierez@hubtransferencia.com",
+  email: "contacto@hubtransfer.pt",
   whatsapp: "+351968698138",
   whatsappFormatted: "+351 968 698 138",
   director: "Junior Gutierez",
-  location: "Amadora, Lisboa, Portugal",
+  location: "Lisboa, Portugal",
+  rnavt: "12529",
+  nif: "PT518649903",
+  legalName: "Jornadas e Possibilidades, Unipessoal Lda",
+  instagram: "https://www.instagram.com/hubtransfer.pt/",
+  facebook: "https://www.facebook.com/hubtransferpt",
 } as const;
 
 export const ROUTES = {
