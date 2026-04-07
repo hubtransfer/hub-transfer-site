@@ -759,7 +759,7 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  FOOTER                                                     */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <footer className="bg-[#0a0a1a] border-t border-[#D4A017]/20">
+        <footer className="border-t border-[#D4A017]/20">
           <div className="max-w-6xl mx-auto px-6 py-14 md:py-16">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
               {/* Col 1 — Brand */}
