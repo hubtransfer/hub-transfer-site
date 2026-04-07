@@ -68,6 +68,7 @@ interface DriverTripCardProps {
   driverName?: string;  // logged-in driver name (driver mode) or selected driver (admin mode)
   onNoShow?: (tripId: string) => void;  // called after no-show proofs submitted
   onRefresh?: () => void;  // triggered after each swipe to re-fetch fresh data
+  onDelete?: (viagem: HubViagem) => void;  // admin only — opens delete confirmation
   mode?: "driver" | "admin";
   isNext?: boolean;     // first non-done trip gets hero treatment
   isHistorical?: boolean; // viewing past date — don't dim completed trips
@@ -83,6 +84,7 @@ export default function DriverTripCard({
   driverName: driverNameProp,
   onNoShow,
   onRefresh,
+  onDelete,
   mode = "driver",
   isNext = false,
   isHistorical = false,
@@ -301,9 +303,14 @@ export default function DriverTripCard({
       {/*  COLLAPSED VIEW (always visible)                */}
       {/* ════════════════════════════════════════════════ */}
       <div className="cursor-pointer" onClick={toggleExpand}>
-        {/* L1: Source · Tipo + Driver Status Badge */}
+        {/* L1: Source · Tipo + Driver Status Badge + Delete */}
         <div className="px-4 pt-3 flex items-center justify-between">
           <span className="font-semibold uppercase font-mono leading-none" style={{ fontSize: "0.65rem", letterSpacing: "0.5px", color: c.hex }}>{sourceLabel} · {tipo}</span>
+          <div className="flex items-center gap-2">
+          {mode === "admin" && onDelete && (
+            <button type="button" onClick={(e) => { e.stopPropagation(); onDelete(viagem); }} title="Apagar viagem"
+              className="text-[#666] hover:text-[#EF4444] transition-colors text-sm cursor-pointer">🗑️</button>
+          )}
           {viagem.statusMotorista && viagem.statusMotorista !== "AGUARDANDO" && (
             <span className="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded" style={{
               backgroundColor: viagem.statusMotorista === "NO_LOCAL" ? "#3B82F620" : viagem.statusMotorista === "EM_VIAGEM" ? "#22C55E20" : viagem.statusMotorista === "FINALIZADO" ? "#D4A01720" : "#6B728020",
@@ -312,6 +319,7 @@ export default function DriverTripCard({
               {viagem.statusMotorista === "NO_LOCAL" ? "📍 No local" : viagem.statusMotorista === "EM_VIAGEM" ? "🚗 Em viagem" : viagem.statusMotorista === "FINALIZADO" ? "✅ Concluído" : viagem.statusMotorista}
             </span>
           )}
+          </div>
         </div>
 
         {/* L2: ETA time | name (clickable→nameplate) | driver+price */}
