@@ -77,6 +77,8 @@ export interface HubViagem {
   concluida: boolean;
   status?: string;
   statusMotorista?: string;  // BD(56): AGUARDANDO/NO_LOCAL/EM_VIAGEM/FINALIZADO
+  coordsOrigem?: string;   // "lat,lng" geocoded do pickup (DL/116)
+  coordsDestino?: string;  // "lat,lng" geocoded do destino (DM/117)
 }
 
 export interface Driver {

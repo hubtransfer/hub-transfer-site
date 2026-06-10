@@ -12,6 +12,8 @@ interface SwipeBarProps {
   initialStatus?: string;
   origin?: string;
   destination?: string;
+  coordsOrigem?: string;
+  coordsDestino?: string;
   onStatusChange?: (newStatus: TripStatus) => void;
 }
 
@@ -73,7 +75,7 @@ const PlaneIcon = ({ size = 22, color = "#fff" }: { size?: number; color?: strin
   </svg>
 );
 
-export default function SwipeBar({ tripId, rowIndex, initialStatus, origin, destination, onStatusChange }: SwipeBarProps) {
+export default function SwipeBar({ tripId, rowIndex, initialStatus, origin, destination, coordsOrigem, coordsDestino, onStatusChange }: SwipeBarProps) {
   const [status, setStatus] = useState<TripStatus>(() => mapInitialStatus(initialStatus || ""));
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);

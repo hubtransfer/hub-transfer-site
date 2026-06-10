@@ -627,6 +627,8 @@ export default function DriverTripCard({
                 initialStatus={viagem.statusMotorista || viagem.status}
                 origin={viagem.origin}
                 destination={viagem.destination}
+                coordsOrigem={viagem.coordsOrigem}
+                coordsDestino={viagem.coordsDestino}
                 onStatusChange={(newStatus) => {
                   if (newStatus === "FINALIZADO") onDarBaixa(viagem.id, viagem.rowIndex ?? "", cardId);
                   onRefresh?.();
