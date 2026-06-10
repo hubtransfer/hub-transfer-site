@@ -4,7 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { CheckCircle, Target } from "lucide-react";
 import { HUB_CENTRAL_URL } from "@/lib/trips";
 
-type TripStatus = "PENDENTE" | "NO_LOCAL" | "EM_VIAGEM" | "FINALIZADO";
+type TripStatus = "PENDENTE" | "A_CAMINHO" | "NO_LOCAL" | "EM_VIAGEM" | "FINALIZADO";
 
 interface SwipeBarProps {
   tripId: string;
@@ -31,7 +31,8 @@ function isAirport(text: string): boolean {
 }
 
 const STEPS: { from: TripStatus; to: TripStatus; label: string; color: string; textColor: string }[] = [
-  { from: "PENDENTE",   to: "NO_LOCAL",   label: "Arraste para confirmar chegada",  color: "#D4A017", textColor: "text-gray-400" },
+  { from: "PENDENTE",   to: "A_CAMINHO",  label: "Arraste ao sair para o cliente",  color: "#9CA3AF", textColor: "text-gray-400" },
+  { from: "A_CAMINHO",  to: "NO_LOCAL",   label: "Arraste para confirmar chegada",  color: "#D4A017", textColor: "text-gray-400" },
   { from: "NO_LOCAL",   to: "EM_VIAGEM",  label: "Arraste quando o cliente entrar", color: "#3B82F6", textColor: "text-blue-400" },
   { from: "EM_VIAGEM",  to: "FINALIZADO", label: "Arraste ao chegar no destino",    color: "#22C55E", textColor: "text-green-400" },
 ];
@@ -62,9 +63,10 @@ async function sendStatus(rowIndex: string, status: string, lat?: number, lng?: 
 
 function mapInitialStatus(s: string): TripStatus {
   const u = (s || "").toUpperCase().replace(/[_\s]+/g, "_");
-  if (u === "NO_LOCAL" || u.includes("NO LOCAL") || u.includes("CHEGOU")) return "NO_LOCAL";
-  if (u === "EM_VIAGEM" || u.includes("EM VIAGEM") || u.includes("A CAMINHO")) return "EM_VIAGEM";
   if (u === "FINALIZADO" || u === "CONCLUIDA" || u.includes("FINALIZOU")) return "FINALIZADO";
+  if (u.includes("EM_VIAGEM")) return "EM_VIAGEM";
+  if (u.includes("NO_LOCAL") || u.includes("CHEGOU")) return "NO_LOCAL";
+  if (u.includes("A_CAMINHO")) return "A_CAMINHO";
   return "PENDENTE";
 }
 

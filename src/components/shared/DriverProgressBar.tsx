@@ -14,9 +14,10 @@ const STEPS = [
 function statusToStep(s: string): number {
   const u = (s || "").toUpperCase().replace(/[_\s]+/g, "_");
   if (u === "FINALIZADO" || u === "CONCLUIDA" || u.includes("FINALIZOU")) return 4;
-  if (u === "EM_VIAGEM" || u.includes("EM VIAGEM")) return 3;
-  if (u === "NO_LOCAL" || u.includes("NO LOCAL") || u.includes("CHEGOU")) return 2;
-  return 1; // AGUARDANDO or empty → car at first dot
+  if (u.includes("EM_VIAGEM")) return 3;
+  if (u.includes("NO_LOCAL") || u.includes("CHEGOU")) return 2;
+  if (u.includes("A_CAMINHO")) return 1;
+  return 0; // AGUARDANDO or empty → car before the first dot
 }
 
 const CLR_GOLD = "#D4A017";
@@ -77,6 +78,12 @@ export default function DriverProgressBar({ statusMotorista }: DriverProgressBar
               {isCurrent && !isDone && (
                 <div className="absolute -top-[18px] transition-all duration-500">
                   <CarIcon color={color} />
+                </div>
+              )}
+              {/* Step 0 (AGUARDANDO): car waits before the first dot, nothing active */}
+              {activeStep === 0 && i === 0 && (
+                <div className="absolute -top-[18px] right-full transition-all duration-500">
+                  <CarIcon color={CLR_GREY} />
                 </div>
               )}
               {/* Flag on last dot when done */}

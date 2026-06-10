@@ -314,10 +314,10 @@ export default function DriverTripCard({
           )}
           {viagem.statusMotorista && viagem.statusMotorista !== "AGUARDANDO" && (
             <span className="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded" style={{
-              backgroundColor: viagem.statusMotorista === "NO_LOCAL" ? "#3B82F620" : viagem.statusMotorista === "EM_VIAGEM" ? "#22C55E20" : viagem.statusMotorista === "FINALIZADO" ? "#D4A01720" : "#6B728020",
-              color: viagem.statusMotorista === "NO_LOCAL" ? "#3B82F6" : viagem.statusMotorista === "EM_VIAGEM" ? "#22C55E" : viagem.statusMotorista === "FINALIZADO" ? "#D4A017" : "#6B7280",
+              backgroundColor: viagem.statusMotorista === "A_CAMINHO" ? "#9CA3AF20" : viagem.statusMotorista === "NO_LOCAL" ? "#3B82F620" : viagem.statusMotorista === "EM_VIAGEM" ? "#22C55E20" : viagem.statusMotorista === "FINALIZADO" ? "#D4A01720" : "#6B728020",
+              color: viagem.statusMotorista === "A_CAMINHO" ? "#9CA3AF" : viagem.statusMotorista === "NO_LOCAL" ? "#3B82F6" : viagem.statusMotorista === "EM_VIAGEM" ? "#22C55E" : viagem.statusMotorista === "FINALIZADO" ? "#D4A017" : "#6B7280",
             }}>
-              {viagem.statusMotorista === "NO_LOCAL" ? "📍 No local" : viagem.statusMotorista === "EM_VIAGEM" ? "🚗 Em viagem" : viagem.statusMotorista === "FINALIZADO" ? "✅ Concluído" : viagem.statusMotorista}
+              {viagem.statusMotorista === "A_CAMINHO" ? "🚗 A caminho" : viagem.statusMotorista === "NO_LOCAL" ? "📍 No local" : viagem.statusMotorista === "EM_VIAGEM" ? "🚗 Em viagem" : viagem.statusMotorista === "FINALIZADO" ? "✅ Concluído" : viagem.statusMotorista}
             </span>
           )}
           </div>
