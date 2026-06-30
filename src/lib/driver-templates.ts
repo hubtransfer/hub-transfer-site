@@ -50,15 +50,15 @@ export const DRIVER_TEMPLATES: Record<TripType, Record<SupportedLang, TemplateFn
   },
   RECOLHA: {
     PT: (c, m, o, h) =>
-      `Olá, ${c}! 👋 Sou o ${m}, da HUB Transfer, o seu motorista de hoje.\n\n📍 Estarei em *${o || "o local combinado"}* à hora combinada: *${h}*.\n\nMando-lhe uma mensagem assim que chegar. Se precisar de alguma coisa ou houver qualquer alteração, é só escrever-me por aqui.`,
+      `Olá, ${c}! 👋 Sou o ${m}, da HUB Transfer, o seu motorista de hoje.\n\n📍 Estarei em *${o || "o local combinado"}* à hora combinada: *${h}*.\n\nMando-lhe uma mensagem assim que chegar. Se precisar de alguma coisa, é só escrever-me por aqui.`,
     EN: (c, m, o, h) =>
-      `Hello, ${c}! 👋 I'm ${m}, your driver today from HUB Transfer.\n\n📍 I'll be at *${o || "the agreed location"}* at the agreed time: *${h}*.\n\nI'll message you as soon as I arrive. If you need anything or there's any change, just write to me here.`,
+      `Hello, ${c}! 👋 I'm ${m}, your driver today from HUB Transfer.\n\n📍 I'll be at *${o || "the agreed location"}* at the agreed time: *${h}*.\n\nI'll message you as soon as I arrive. If you need anything, just write to me here.`,
     ES: (c, m, o, h) =>
-      `¡Hola, ${c}! 👋 Soy ${m}, tu conductor de hoy de HUB Transfer.\n\n📍 Estaré en *${o || "el lugar acordado"}* a la hora acordada: *${h}*.\n\nTe escribo en cuanto llegue. Si necesitas algo o hay algún cambio, escríbeme por aquí.`,
+      `¡Hola, ${c}! 👋 Soy ${m}, tu conductor de hoy de HUB Transfer.\n\n📍 Estaré en *${o || "el lugar acordado"}* a la hora acordada: *${h}*.\n\nTe escribo en cuanto llegue. Si necesitas algo, escríbeme por aquí.`,
     FR: (c, m, o, h) =>
-      `Bonjour ${c} ! 👋 C'est ${m}, votre chauffeur du jour, de HUB Transfer.\n\n📍 Je serai à *${o || "le lieu convenu"}* à l'heure convenue : *${h}*.\n\nJe vous écris dès que j'arrive. Si vous avez besoin de quoi que ce soit ou en cas de changement, écrivez-moi ici.`,
+      `Bonjour ${c} ! 👋 C'est ${m}, votre chauffeur du jour, de HUB Transfer.\n\n📍 Je serai à *${o || "le lieu convenu"}* à l'heure convenue : *${h}*.\n\nJe vous écris dès que j'arrive. Si vous avez besoin de quoi que ce soit, écrivez-moi ici.`,
     IT: (c, m, o, h) =>
-      `Ciao ${c}! 👋 Sono ${m}, il tuo autista di oggi, di HUB Transfer.\n\n📍 Sarò a *${o || "il luogo concordato"}* all'orario concordato: *${h}*.\n\nTi scrivo appena arrivo. Se hai bisogno di qualcosa o c'è qualche cambiamento, scrivimi qui.`,
+      `Ciao ${c}! 👋 Sono ${m}, il tuo autista di oggi, di HUB Transfer.\n\n📍 Sarò a *${o || "il luogo concordato"}* all'orario concordato: *${h}*.\n\nTi scrivo appena arrivo. Se hai bisogno di qualcosa, scrivimi qui.`,
   },
 };
 
