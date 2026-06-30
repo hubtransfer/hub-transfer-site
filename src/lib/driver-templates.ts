@@ -38,27 +38,27 @@ export function getDriverLanguage(language?: string): SupportedLang {
 export const DRIVER_TEMPLATES: Record<TripType, Record<SupportedLang, TemplateFn>> = {
   CHEGADA: {
     PT: (c, m) =>
-      `Oi, ${c}! 👋 Aqui é o ${m}, da HUB Transfer.\nBem-vindo(a) a Portugal! 🇵🇹 Espero que o voo tenha sido tranquilo.\nVou te ajudar a sair do aeroporto sem stress.\n\nEstou enviando a foto abaixo para facilitar chegar no nosso ponto de encontro.\n\nPor favor, me avisa quando:\n1️⃣ Passar pelo controle de passaportes\n2️⃣ Estiver com as malas na mão\n\nTe vejo em breve! Se precisar de algo, pode me enviar uma mensagem. 👍`,
+      `Olá, ${c}! 👋 Sou o ${m}, da HUB Transfer, o seu motorista de hoje.\nBoas-vindas a Portugal! 🇵🇹 Espero que tenha tido um bom voo.\n\nEnvio-lhe abaixo uma foto do nosso ponto de encontro, para que chegue facilmente até mim.\n\nQuando puder, avise-me assim que:\n1️⃣ Passar o controlo de passaportes\n2️⃣ Tiver as malas consigo\n\nAté já! Se precisar de alguma coisa, é só escrever-me por aqui.`,
     EN: (c, m) =>
-      `Hi ${c}! 👋 I'm ${m}, from HUB Transfer.\nWelcome to Portugal! 🇵🇹 I hope you had a pleasant flight.\nI'm here to make your arrival stress-free.\n\nI'm sending the photo below to help you find our meeting point.\n\nPlease let me know when:\n1️⃣ You pass through passport control\n2️⃣ You have your luggage ready\n\nSee you soon! If you need anything, just send me a message. 👍`,
+      `Hi ${c}! 👋 I'm ${m}, your driver today from HUB Transfer.\nWelcome to Portugal! 🇵🇹 I hope you had a pleasant flight.\n\nI'm sending a photo of our meeting point below, so you can find your way to me easily.\n\nWhen you can, just let me know once you've:\n1️⃣ Cleared passport control\n2️⃣ Got your luggage with you\n\nSee you very soon! If you need anything, just message me here.`,
     ES: (c, m) =>
-      `¡Hola, ${c}! 👋 Soy ${m}, de HUB Transfer.\n¡Bienvenido(a) a Portugal! 🇵🇹 Espero que el vuelo haya sido tranquilo.\nTe ayudaré a salir del aeropuerto sin estrés.\n\nTe envío la foto abajo para facilitar que llegues a nuestro punto de encuentro.\n\nPor favor, avísame cuando:\n1️⃣ Pases el control de pasaportes\n2️⃣ Tengas tus maletas contigo\n\n¡Te veo pronto! Si necesitas algo, puedes enviarme un mensaje. 👍`,
+      `¡Hola, ${c}! 👋 Soy ${m}, tu conductor de hoy de HUB Transfer.\n¡Bienvenido(a) a Portugal! 🇵🇹 Espero que hayas tenido un buen vuelo.\n\nTe envío abajo una foto de nuestro punto de encuentro, para que llegues fácilmente hasta mí.\n\nCuando puedas, avísame en cuanto:\n1️⃣ Pases el control de pasaportes\n2️⃣ Tengas tus maletas contigo\n\n¡Nos vemos muy pronto! Si necesitas algo, escríbeme por aquí.`,
     FR: (c, m) =>
-      `Bonjour ${c} ! 👋 C'est ${m}, de HUB Transfer.\nBienvenue au Portugal ! 🇵🇹 J'espère que vous avez fait un bon vol.\nJe vais vous aider à quitter l'aéroport sans stress.\n\nJe vous envoie la photo ci-dessous pour vous aider à trouver notre point de rencontre.\n\nMerci de me prévenir quand :\n1️⃣ Vous passez le contrôle des passeports\n2️⃣ Vous avez récupéré vos bagages\n\nÀ très vite ! Si vous avez besoin de quelque chose, envoyez-moi un message. 👍`,
+      `Bonjour ${c} ! 👋 C'est ${m}, votre chauffeur du jour, de HUB Transfer.\nBienvenue au Portugal ! 🇵🇹 J'espère que vous avez fait un bon vol.\n\nJe vous envoie ci-dessous une photo de notre point de rencontre, pour que vous me trouviez facilement.\n\nQuand vous pourrez, prévenez-moi dès que :\n1️⃣ Vous avez passé le contrôle des passeports\n2️⃣ Vous avez récupéré vos bagages\n\nÀ très vite ! Si vous avez besoin de quoi que ce soit, écrivez-moi ici.`,
     IT: (c, m) =>
-      `Ciao ${c}! 👋 Sono ${m}, di HUB Transfer.\nBenvenuto(a) in Portogallo! 🇵🇹 Spero che il volo sia stato tranquillo.\nTi aiuterò a uscire dall'aeroporto senza stress.\n\nTi invio la foto qui sotto per aiutarti a trovare il nostro punto di incontro.\n\nPer favore, avvisami quando:\n1️⃣ Passi il controllo passaporti\n2️⃣ Hai preso i bagagli\n\nCi vediamo presto! Se hai bisogno di qualcosa, mandami un messaggio. 👍`,
+      `Ciao ${c}! 👋 Sono ${m}, il tuo autista di oggi, di HUB Transfer.\nBenvenuto(a) in Portogallo! 🇵🇹 Spero che tu abbia fatto un buon volo.\n\nTi invio qui sotto una foto del nostro punto d'incontro, così mi trovi facilmente.\n\nQuando puoi, avvisami appena:\n1️⃣ Hai passato il controllo passaporti\n2️⃣ Hai ritirato i bagagli\n\nA prestissimo! Se hai bisogno di qualcosa, scrivimi qui.`,
   },
   RECOLHA: {
     PT: (c, m, o, h) =>
-      `Olá, ${c}! 👋 Aqui é o ${m}, da HUB Transfer.\nSou o motorista responsável pelo seu transfer de hoje.\n\n📍 Estarei em *${o || "o local combinado"}* no horário combinado: *${h || "—"}*\n\nQuando eu chegar, vou te avisar por aqui! 😄\n\nSe precisar de algo ou houver qualquer alteração, me avise por aqui. 👍`,
+      `Olá, ${c}! 👋 Sou o ${m}, da HUB Transfer, o seu motorista de hoje.\n\n📍 Estarei em *${o}* à hora combinada: *${h}*.\n\nMando-lhe uma mensagem assim que chegar. Se precisar de alguma coisa ou houver qualquer alteração, é só escrever-me por aqui.`,
     EN: (c, m, o, h) =>
-      `Hello, ${c}! 👋 I'm ${m}, from HUB Transfer.\nI'm the driver for your transfer today.\n\n📍 I'll be at *${o || "the agreed location"}* at the scheduled time: *${h || "—"}*\n\nI'll let you know when I arrive! 😄\n\nIf you need anything or there are any changes, just message me here. 👍`,
+      `Hello, ${c}! 👋 I'm ${m}, your driver today from HUB Transfer.\n\n📍 I'll be at *${o}* at the agreed time: *${h}*.\n\nI'll message you as soon as I arrive. If you need anything or there's any change, just write to me here.`,
     ES: (c, m, o, h) =>
-      `¡Hola, ${c}! 👋 Soy ${m}, de HUB Transfer.\nSoy el conductor de su transfer de hoy.\n\n📍 Estaré en *${o || "el lugar acordado"}* a la hora acordada: *${h || "—"}*\n\n¡Te avisaré cuando llegue! 😄\n\nSi necesita algo o hay algún cambio, escríbame por aquí. 👍`,
+      `¡Hola, ${c}! 👋 Soy ${m}, tu conductor de hoy de HUB Transfer.\n\n📍 Estaré en *${o}* a la hora acordada: *${h}*.\n\nTe escribo en cuanto llegue. Si necesitas algo o hay algún cambio, escríbeme por aquí.`,
     FR: (c, m, o, h) =>
-      `Bonjour ${c} ! 👋 C'est ${m}, de HUB Transfer.\nJe suis le chauffeur pour votre transfert aujourd'hui.\n\n📍 Je serai à *${o || "le lieu convenu"}* à l'heure prévue : *${h || "—"}*\n\nJe vous préviendrai quand j'arriverai ! 😄\n\nSi vous avez besoin de quoi que ce soit, envoyez-moi un message ici. 👍`,
+      `Bonjour ${c} ! 👋 C'est ${m}, votre chauffeur du jour, de HUB Transfer.\n\n📍 Je serai à *${o}* à l'heure convenue : *${h}*.\n\nJe vous écris dès que j'arrive. Si vous avez besoin de quoi que ce soit ou en cas de changement, écrivez-moi ici.`,
     IT: (c, m, o, h) =>
-      `Ciao ${c}! 👋 Sono ${m}, di HUB Transfer.\nSono l'autista per il tuo transfer di oggi.\n\n📍 Sarò a *${o || "il luogo concordato"}* all'orario previsto: *${h || "—"}*\n\nTi avviserò quando arrivo! 😄\n\nSe hai bisogno di qualcosa o ci sono cambiamenti, scrivimi qui. 👍`,
+      `Ciao ${c}! 👋 Sono ${m}, il tuo autista di oggi, di HUB Transfer.\n\n📍 Sarò a *${o}* all'orario concordato: *${h}*.\n\nTi scrivo appena arrivo. Se hai bisogno di qualcosa o c'è qualche cambiamento, scrivimi qui.`,
   },
 };
 
