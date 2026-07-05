@@ -14,7 +14,8 @@ import { FEATURED_REVIEW, GRID_REVIEWS, LANG_NAMES, GOOGLE_PROFILE_URL, siteLang
 const LANGS: LandingLang[] = ["PT", "EN", "ES", "FR", "IT"];
 
 /* ─── ATC Flight Radar — all animations via CSS classes, zero JS ─── */
-function RadarIllustration() {
+function RadarIllustration({ variant = "default", states }: { variant?: "default" | "hero"; states?: readonly [string, string, string] }) {
+  const isHero = variant === "hero";
   /* Fixed plane positions — first 5 shown on mobile, all 8 on desktop */
   const allPlanes = [
     { cx: 80,  cy: 70,  code: "TP1923", sz: 14, moveCls: "radar-move-1", blipCls: "radar-blip-1", trail: true },
@@ -28,7 +29,7 @@ function RadarIllustration() {
   ] as const;
 
   return (
-    <div className="relative w-[260px] md:w-[320px] lg:w-[420px] aspect-square select-none mx-auto">
+    <div className={`relative aspect-square select-none mx-auto ${isHero ? "radar-hero w-[300px] md:w-[400px] lg:w-[500px]" : "w-[260px] md:w-[320px] lg:w-[420px]"}`}>
       {/* LIVE indicator */}
       <div className="absolute top-2 right-3 flex items-center gap-1.5 z-10">
         <span className="w-1.5 h-1.5 rounded-full bg-[var(--hub-gold)] radar-live" />
@@ -118,6 +119,15 @@ function RadarIllustration() {
         <p className="text-[var(--hub-gold)] text-[7px] lg:text-[9px] tracking-[0.15em] uppercase opacity-60 font-mono">
           SYNC EVERY 30s
         </p>
+        {isHero && states && (
+          <div className="relative h-4 mt-1.5" aria-live="off">
+            {states.map((s, i) => (
+              <p key={i} className={`rstate rstate-${i + 1} absolute inset-x-0 text-[var(--hub-gold)] text-[8px] lg:text-[10px] tracking-[0.1em] uppercase font-mono`}>
+                {s}
+              </p>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Inline keyframes — immune to Tailwind purging */}
@@ -146,6 +156,18 @@ function RadarIllustration() {
         @keyframes _rmv3{0%{transform:translate(0,0)}50%{transform:translate(-6px,-10px)}100%{transform:translate(0,0)}}
         @keyframes _rmv4{0%{transform:translate(0,0)}50%{transform:translate(10px,-4px)}100%{transform:translate(0,0)}}
         @keyframes _rmv5{0%{transform:translate(0,0)}50%{transform:translate(-10px,5px)}100%{transform:translate(0,0)}}
+        .rstate{opacity:0;animation:_rcycle 9s ease-in-out infinite}
+        .rstate-1{animation-delay:0s}
+        .rstate-2{animation-delay:3s}
+        .rstate-3{animation-delay:6s}
+        @keyframes _rcycle{0%{opacity:0}4%{opacity:1}29%{opacity:1}33%{opacity:0}100%{opacity:0}}
+        @media(prefers-reduced-motion:reduce){
+          .radar-hero .radar-sweep{animation:none}
+          .radar-hero [class*="radar-blip"]{animation:none;opacity:.7}
+          .radar-hero .radar-live{animation:none}
+          .radar-hero .rstate{animation:none;opacity:0}
+          .radar-hero .rstate-1{opacity:1}
+        }
       `}} />
     </div>
   );
@@ -403,20 +425,6 @@ export default function LandingPage() {
 
   const scrollTo = (id: string) => { setMenuOpen(false); setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }), 150); };
 
-  /* ── Typewriter ── */
-  const [typed, setTyped] = useState("");
-  const [showHighlight, setShowHighlight] = useState(false);
-  const fullText = t.headline;
-  useEffect(() => {
-    setTyped(""); setShowHighlight(false);
-    let i = 0;
-    const iv = setInterval(() => {
-      if (i < fullText.length) { setTyped(fullText.slice(0, i + 1)); i++; }
-      else { clearInterval(iv); setTimeout(() => setShowHighlight(true), 300); }
-    }, 55);
-    return () => clearInterval(iv);
-  }, [fullText]);
-
   /* ── Nav scroll background ── */
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
@@ -506,69 +514,30 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  HERO                                                       */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section className="relative min-h-screen flex items-center justify-center">
-          <div className="absolute inset-0">
-            <picture className="contents">
-              <source srcSet="/images/rua01.webp" type="image/webp" />
-              <img src="/images/rua01.jpg" alt="Rua de Lisboa com transfer privado HUB Transfer" className="w-full h-full object-cover" loading="eager" />
-            </picture>
-            <div className="absolute inset-0 bg-[var(--hub-black)]/75" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[var(--hub-black)] via-transparent to-[var(--hub-black)]/40" />
-          </div>
-
-          <div className="relative z-10 max-w-3xl mx-auto px-6 text-center pt-20 pb-32">
-            <div className="min-h-[120px] md:min-h-[160px]">
-              <h1 className="text-[2.8rem] md:text-[4.5rem] leading-[1.05] font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>
-                {typed}
-                {!showHighlight && <span className="inline-block w-[2px] h-[0.9em] bg-white/80 ml-1 animate-pulse align-middle" />}
+        <section className="relative min-h-screen flex items-start lg:items-center" style={{ background: "radial-gradient(ellipse 85% 65% at 50% 42%, var(--hub-graphite) 0%, var(--hub-black) 68%)" }}>
+          <div className="relative z-10 w-full max-w-6xl mx-auto px-6 pt-24 pb-16 lg:py-0 grid lg:grid-cols-2 gap-8 lg:gap-10 items-center">
+            {/* Left — text (control-room readout) */}
+            <div className="text-center lg:text-left">
+              <p className="text-[var(--hub-gold)] text-[10px] md:text-xs tracking-[0.28em] uppercase font-mono mb-5">{t.heroEyebrow}</p>
+              <h1 className="font-bold text-white" style={{ fontFamily: "var(--font-display)", fontSize: "clamp(2.6rem, 7vw, 7rem)", lineHeight: 1.02, letterSpacing: "-0.02em" }}>
+                {t.headline}
+                <span className="block" style={{ color: "var(--hub-gold)" }}>{t.headlineHighlight}</span>
               </h1>
-              {showHighlight && (
-                <motion.span
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
-                  className="block text-[2.8rem] md:text-[4.5rem] leading-[1.05] font-bold"
-                  style={{ fontFamily: "var(--font-display)", color: "var(--hub-gold)" }}
-                >
-                  {t.headlineHighlight}
-                </motion.span>
-              )}
+              <p className="mt-6 text-white/85 text-base md:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0">{t.subheadline}</p>
+              <div className="mt-8">
+                <button onClick={() => setDrawerOpen(true)}
+                  className="inline-flex items-center gap-2 bg-[var(--hub-gold)] text-black text-[13px] font-semibold tracking-[0.15em] uppercase px-8 py-4 hover:bg-[var(--hub-gold)]/90 transition-colors duration-300 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--hub-gold)]">
+                  {t.ctaBook}
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+                <p className="mt-4 text-[var(--hub-dim)] text-xs tracking-wide">{t.ctaSupport}</p>
+              </div>
             </div>
-
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: showHighlight ? 1 : 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="mt-8 text-white/90 text-base md:text-lg leading-relaxed max-w-xl mx-auto"
-            >
-              {t.subheadline}
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: showHighlight ? 1 : 0 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
-              className="mt-10"
-            >
-              <button onClick={() => setDrawerOpen(true)}
-                className="inline-flex items-center gap-2 bg-[var(--hub-gold)] text-black text-[13px] font-semibold tracking-[0.15em] uppercase px-8 py-4 hover:bg-[var(--hub-gold)]/90 transition-colors duration-300 cursor-pointer">
-                {t.ctaBook}
-                <ArrowRight className="w-4 h-4" />
-              </button>
-              <p className="mt-4 text-[#D0D0D0] text-xs tracking-wide">{t.ctaSupport}</p>
-            </motion.div>
+            {/* Right — radar (the single hero animation) */}
+            <div className="flex justify-center lg:justify-end mt-6 lg:mt-0" aria-hidden="true">
+              <RadarIllustration variant="hero" states={[t.heroRadarState1, t.heroRadarState2, t.heroRadarState3]} />
+            </div>
           </div>
-
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: showHighlight ? 0.6 : 0 }}
-            transition={{ delay: 2 }}
-            whileHover={{ opacity: 1 }}
-            onClick={() => scrollTo("stats")}
-            className="absolute bottom-8 left-1/2 -translate-x-1/2 mt-4 cursor-pointer"
-          >
-            <ChevronDown className="w-9 h-9 text-white" style={{ animation: "heroArrow 2s ease-in-out infinite" }} />
-          </motion.button>
         </section>
 
         {/* ═══════════════════════════════════════════════════════════ */}

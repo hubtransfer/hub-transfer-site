@@ -2,11 +2,15 @@ export type LandingLang = 'PT' | 'EN' | 'ES' | 'FR' | 'IT';
 
 export interface LandingTranslations {
   // Hero
+  heroEyebrow: string;
   headline: string;
   headlineHighlight: string;
   subheadline: string;
   ctaBook: string;
   ctaSupport: string;
+  heroRadarState1: string;
+  heroRadarState2: string;
+  heroRadarState3: string;
 
   // Partners
   partnersTitle: string;
@@ -118,12 +122,16 @@ export interface LandingTranslations {
 export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
   PT: {
     // Hero
+    heroEyebrow: 'MONITORIZAÇÃO ATIVA · LISBOA · PORTO · FARO',
     headline: 'O seu voo atrasa.',
     headlineHighlight: 'Nós não.',
     subheadline:
       'Enquanto outras empresas esperam que avise do atraso, o nosso sistema já reagendou o seu motorista. Desembarca e já lá estamos. Sem stress, sem esperas.',
     ctaBook: 'GARANTIR O MEU TRANSFER AGORA',
     ctaSupport: 'Leva menos de 2 minutos e fica logo tranquilo.',
+    heroRadarState1: 'TP 1234 · GRU→LIS · A MONITORIZAR',
+    heroRadarState2: 'ATERRAGEM PREVISTA · 14:35',
+    heroRadarState3: 'MOTORISTA NOTIFICADO ✓',
 
     // Partners
     partnersTitle: 'Conectados a todos os sinais que cruzam o céu de Portugal.',
@@ -245,12 +253,16 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
   EN: {
     // Hero
+    heroEyebrow: 'LIVE MONITORING · LISBON · PORTO · FARO',
     headline: 'Flights delay.',
     headlineHighlight: "We don't.",
     subheadline:
       'Our system tracks your flight in real-time. If the schedule changes, we handle everything automatically. You land, and we\'re already there waiting.',
     ctaBook: 'Book my stress-free ride',
     ctaSupport: 'Instant confirmation. We track your flight.',
+    heroRadarState1: 'TP 1234 · GRU→LIS · MONITORING',
+    heroRadarState2: 'LANDING EXPECTED · 14:35',
+    heroRadarState3: 'DRIVER NOTIFIED ✓',
 
     // Partners
     partnersTitle: 'Connected to every signal crossing Portugal\'s skies.',
@@ -372,12 +384,16 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
   ES: {
     // Hero
+    heroEyebrow: 'MONITORIZACIÓN ACTIVA · LISBOA · OPORTO · FARO',
     headline: 'Tu vuelo se atrasa.',
     headlineHighlight: 'Nosotros no.',
     subheadline:
       'Nuestro sistema vigila tu vuelo en tiempo real. Si el horario cambia, ajustamos todo automáticamente para que nunca te quedes tirado. Tú aterrizas y nosotros ya estamos ahí.',
     ctaBook: 'Reservar mi transfer ahora',
     ctaSupport: 'Confirmación inmediata y sin esperas.',
+    heroRadarState1: 'TP 1234 · GRU→LIS · MONITORIZANDO',
+    heroRadarState2: 'ATERRIZAJE PREVISTO · 14:35',
+    heroRadarState3: 'CONDUCTOR NOTIFICADO ✓',
 
     // Partners
     partnersTitle: 'Conectados a todas las señales que cruzan el cielo de Portugal.',
@@ -499,12 +515,16 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
   FR: {
     // Hero
+    heroEyebrow: 'SURVEILLANCE ACTIVE · LISBONNE · PORTO · FARO',
     headline: 'Votre vol est en retard.',
     headlineHighlight: 'Pas nous.',
     subheadline:
       "Notre système surveille votre vol en temps réel. Si l'horaire change, on ajuste tout automatiquement pour vous éviter l'attente. Vous atterrissez, on est déjà là.",
     ctaBook: 'Réserver mon transfert maintenant',
     ctaSupport: 'Confirmation immédiate. Sans stress.',
+    heroRadarState1: 'TP 1234 · GRU→LIS · SURVEILLANCE',
+    heroRadarState2: 'ATTERRISSAGE PRÉVU · 14:35',
+    heroRadarState3: 'CHAUFFEUR NOTIFIÉ ✓',
 
     // Partners
     partnersTitle: 'Connectés à tous les signaux qui traversent le ciel du Portugal.',
@@ -626,12 +646,16 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
   IT: {
     // Hero
+    heroEyebrow: 'MONITORAGGIO ATTIVO · LISBONA · PORTO · FARO',
     headline: 'Il tuo volo ritarda.',
     headlineHighlight: 'Noi no.',
     subheadline:
       'Il nostro sistema monitora il tuo volo in tempo reale. Se l\'orario cambia, riorganizziamo tutto noi. Tu atterri e noi siamo già lì ad aspettarti.',
     ctaBook: 'Prenota il mio transfer ora',
     ctaSupport: 'Nessuna attesa, monitoraggio incluso.',
+    heroRadarState1: 'TP 1234 · GRU→LIS · MONITORAGGIO',
+    heroRadarState2: 'ATTERRAGGIO PREVISTO · 14:35',
+    heroRadarState3: 'AUTISTA NOTIFICATO ✓',
 
     // Partners
     partnersTitle: 'Connessi a tutti i segnali che attraversano il cielo del Portogallo.',
