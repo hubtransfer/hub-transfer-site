@@ -70,7 +70,6 @@ export interface LandingTranslations {
   labelFleet: string;
   labelHow: string;
   labelWhyUs: string;
-  labelReviews: string;
 
   // Steps
   step1Title: string;
@@ -80,20 +79,29 @@ export interface LandingTranslations {
   step3Title: string;
   step3Desc: string;
 
-  // Social proof
-  socialProofText: string;
-  socialProofRating: string;
-
   // Stats strip (legacy)
   statClients: string;
   statPunctuality: string;
   statWait: string;
   statSupport: string;
 
-  // Reviews
-  review1: string;
-  review2: string;
-  review3: string;
+  // Reviews section (real Google reviews)
+  reviewsEyebrow: string;
+  reviewsTitle: string;
+  reviewsAggregate: string;      // "5,0 no Google"
+  reviewsSeeAll: string;         // "Ver todas as avaliações →"
+  reviewsFootnote: string;
+  reviewTranslationLabel: string; // "Tradução"
+  reviewStarsAria: string;        // "5 de 5 estrelas"
+  reviewWrittenIn: string;        // prefixo "Avaliação escrita em"
+  factsBar: string;               // faixa fina de factos verificáveis
+
+  // Review objection labels (eyebrow dourado)
+  reviewObjFeatured: string;
+  reviewObjAirport: string;
+  reviewObjRoundtrip: string;
+  reviewObjSafe: string;
+  reviewObjPunctual: string;
 
   // Guarantee badges
   badgePrice: string;
@@ -191,7 +199,6 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     labelFleet: 'Porquê nós',
     labelHow: 'Como funciona',
     labelWhyUs: 'Porquê nós',
-    labelReviews: 'Avaliações',
 
     // Steps
     step1Title: 'Reserve em 2 minutos',
@@ -201,20 +208,29 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     step3Title: 'Motorista à sua espera',
     step3Desc: 'Desembarca e o seu motorista já está lá. Sem filas. Sem stress.',
 
-    // Social proof
-    socialProofText: 'passageiros já chegaram a Lisboa sem stress. Você é o próximo.',
-    socialProofRating: 'Avaliação média: 4.9/5',
-
     // Stats strip
     statClients: 'Clientes satisfeitos',
     statPunctuality: 'Pontualidade',
     statWait: 'Tempo de espera',
     statSupport: 'Suporte disponível',
 
-    // Reviews
-    review1: 'O meu voo atrasou 3 horas e quando desembarquei o motorista já estava à minha espera. Incrível.',
-    review2: 'Serviço pontual e profissional. O melhor transfer que já usei em Portugal.',
-    review3: 'Reservei às 23h e às 23h02 já tinha confirmação. E o motorista foi impecável.',
+    // Reviews section
+    reviewsEyebrow: 'AVALIAÇÕES REAIS',
+    reviewsTitle: 'Clientes que já chegaram connosco',
+    reviewsAggregate: '5,0 no Google',
+    reviewsSeeAll: 'Ver todas as avaliações →',
+    reviewsFootnote: 'Avaliações verificadas, publicadas no Google. Exibidas na língua original do cliente.',
+    reviewTranslationLabel: 'Tradução',
+    reviewStarsAria: '5 de 5 estrelas',
+    reviewWrittenIn: 'Avaliação escrita em',
+    factsBar: '★ 5,0 no Google · Licença RNAVT 12529 · Seguro de passageiros',
+
+    // Review objection labels
+    reviewObjFeatured: 'O VOO ATRASOU. O MOTORISTA ESTAVA LÁ.',
+    reviewObjAirport: 'ENCONTRO NO AEROPORTO',
+    reviewObjRoundtrip: 'IDA E VOLTA, SEM STRESS',
+    reviewObjSafe: 'CONDUÇÃO SEGURA',
+    reviewObjPunctual: 'PONTUALIDADE',
 
     // Guarantee badges
     badgePrice: 'Preço fixo',
@@ -311,7 +327,6 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     labelFleet: 'Why us',
     labelHow: 'How it works',
     labelWhyUs: 'Why us',
-    labelReviews: 'Reviews',
 
     // Steps
     step1Title: 'Book in 2 minutes',
@@ -321,20 +336,29 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     step3Title: 'Driver waiting for you',
     step3Desc: 'You land and your driver is already there. No queues. No stress.',
 
-    // Social proof
-    socialProofText: 'passengers have already arrived in Lisbon stress-free. You\'re next.',
-    socialProofRating: 'Average rating: 4.9/5',
-
     // Stats strip
     statClients: 'Happy clients',
     statPunctuality: 'Punctuality',
     statWait: 'Wait time',
     statSupport: 'Support available',
 
-    // Reviews
-    review1: 'My flight was delayed 3 hours and when I landed the driver was already waiting. Incredible.',
-    review2: 'Punctual and professional service. The best transfer I have used in Portugal.',
-    review3: 'I booked at 11pm and by 11:02pm I had confirmation. The driver was impeccable.',
+    // Reviews section
+    reviewsEyebrow: 'REAL REVIEWS',
+    reviewsTitle: "Guests who've already arrived with us",
+    reviewsAggregate: '5.0 on Google',
+    reviewsSeeAll: 'See all reviews →',
+    reviewsFootnote: "Verified reviews published on Google. Shown in each guest's original language.",
+    reviewTranslationLabel: 'Translation',
+    reviewStarsAria: '5 out of 5 stars',
+    reviewWrittenIn: 'Review written in',
+    factsBar: '★ 5.0 on Google · RNAVT License 12529 · Passenger insurance',
+
+    // Review objection labels
+    reviewObjFeatured: 'THE FLIGHT WAS DELAYED. THE DRIVER WAS THERE.',
+    reviewObjAirport: 'MEETING AT THE AIRPORT',
+    reviewObjRoundtrip: 'ROUND TRIP, STRESS-FREE',
+    reviewObjSafe: 'SAFE DRIVING',
+    reviewObjPunctual: 'PUNCTUALITY',
 
     // Guarantee badges
     badgePrice: 'Fixed price',
@@ -431,7 +455,6 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     labelFleet: 'Por qué nosotros',
     labelHow: 'Cómo funciona',
     labelWhyUs: 'Por qué nosotros',
-    labelReviews: 'Opiniones',
 
     // Steps
     step1Title: 'Reserva en 2 minutos',
@@ -441,20 +464,29 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     step3Title: 'Conductor esperándote',
     step3Desc: 'Aterrizas y tu conductor ya está ahí. Sin colas. Sin estrés.',
 
-    // Social proof
-    socialProofText: 'pasajeros ya llegaron a Lisboa sin estrés. Tú eres el próximo.',
-    socialProofRating: 'Valoración media: 4.9/5',
-
     // Stats strip
     statClients: 'Clientes satisfechos',
     statPunctuality: 'Puntualidad',
     statWait: 'Tiempo de espera',
     statSupport: 'Soporte disponible',
 
-    // Reviews
-    review1: 'Mi vuelo se retrasó 3 horas y cuando desembarqué el conductor ya me esperaba. Increíble.',
-    review2: 'Servicio puntual y profesional. El mejor transfer que he usado en Portugal.',
-    review3: 'Reservé a las 23h y a las 23h02 ya tenía confirmación. El conductor fue impecable.',
+    // Reviews section
+    reviewsEyebrow: 'RESEÑAS REALES',
+    reviewsTitle: 'Clientes que ya llegaron con nosotros',
+    reviewsAggregate: '5,0 en Google',
+    reviewsSeeAll: 'Ver todas las reseñas →',
+    reviewsFootnote: 'Reseñas verificadas publicadas en Google. Mostradas en el idioma original del cliente.',
+    reviewTranslationLabel: 'Traducción',
+    reviewStarsAria: '5 de 5 estrellas',
+    reviewWrittenIn: 'Reseña escrita en',
+    factsBar: '★ 5,0 en Google · Licencia RNAVT 12529 · Seguro de pasajeros',
+
+    // Review objection labels
+    reviewObjFeatured: 'EL VUELO SE RETRASÓ. EL CONDUCTOR ESTABA ALLÍ.',
+    reviewObjAirport: 'ENCUENTRO EN EL AEROPUERTO',
+    reviewObjRoundtrip: 'IDA Y VUELTA, SIN ESTRÉS',
+    reviewObjSafe: 'CONDUCCIÓN SEGURA',
+    reviewObjPunctual: 'PUNTUALIDAD',
 
     // Guarantee badges
     badgePrice: 'Precio fijo',
@@ -551,7 +583,6 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     labelFleet: 'Pourquoi nous',
     labelHow: 'Comment ça marche',
     labelWhyUs: 'Pourquoi nous',
-    labelReviews: 'Avis',
 
     // Steps
     step1Title: 'Réservez en 2 minutes',
@@ -561,20 +592,29 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     step3Title: 'Chauffeur à votre arrivée',
     step3Desc: 'Vous atterrissez et votre chauffeur est déjà là. Sans file. Sans stress.',
 
-    // Social proof
-    socialProofText: 'passagers sont déjà arrivés à Lisbonne sans stress. Vous êtes le prochain.',
-    socialProofRating: 'Note moyenne : 4,9/5',
-
     // Stats strip
     statClients: 'Clients satisfaits',
     statPunctuality: 'Ponctualité',
     statWait: "Temps d'attente",
     statSupport: 'Support disponible',
 
-    // Reviews
-    review1: "Mon vol a eu 3 heures de retard et à l'atterrissage le chauffeur était déjà là. Incroyable.",
-    review2: 'Service ponctuel et professionnel. Le meilleur transfert que j\'ai utilisé au Portugal.',
-    review3: "J'ai réservé à 23h et à 23h02 j'avais déjà la confirmation. Le chauffeur était impeccable.",
+    // Reviews section
+    reviewsEyebrow: 'AVIS RÉELS',
+    reviewsTitle: 'Des clients déjà arrivés avec nous',
+    reviewsAggregate: '5,0 sur Google',
+    reviewsSeeAll: 'Voir tous les avis →',
+    reviewsFootnote: "Avis vérifiés publiés sur Google. Affichés dans la langue d'origine du client.",
+    reviewTranslationLabel: 'Traduction',
+    reviewStarsAria: '5 étoiles sur 5',
+    reviewWrittenIn: 'Avis rédigé en',
+    factsBar: '★ 5,0 sur Google · Licence RNAVT 12529 · Assurance passagers',
+
+    // Review objection labels
+    reviewObjFeatured: 'LE VOL A ÉTÉ RETARDÉ. LE CHAUFFEUR ÉTAIT LÀ.',
+    reviewObjAirport: "RENCONTRE À L'AÉROPORT",
+    reviewObjRoundtrip: 'ALLER-RETOUR, SANS STRESS',
+    reviewObjSafe: 'CONDUITE SÛRE',
+    reviewObjPunctual: 'PONCTUALITÉ',
 
     // Guarantee badges
     badgePrice: 'Prix fixe',
@@ -671,7 +711,6 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     labelFleet: 'Perché noi',
     labelHow: 'Come funziona',
     labelWhyUs: 'Perché noi',
-    labelReviews: 'Recensioni',
 
     // Steps
     step1Title: 'Prenota in 2 minuti',
@@ -681,20 +720,29 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     step3Title: 'Autista ad aspettarti',
     step3Desc: 'Atterri e il tuo autista è già lì. Senza code. Senza stress.',
 
-    // Social proof
-    socialProofText: 'passeggeri sono già arrivati a Lisbona senza stress. Il prossimo sei tu.',
-    socialProofRating: 'Valutazione media: 4,9/5',
-
     // Stats strip
     statClients: 'Clienti soddisfatti',
     statPunctuality: 'Puntualità',
     statWait: 'Tempo di attesa',
     statSupport: 'Supporto disponibile',
 
-    // Reviews
-    review1: 'Il mio volo ha avuto 3 ore di ritardo e quando sono sbarcato il conducente era già lì. Incredibile.',
-    review2: 'Servizio puntuale e professionale. Il miglior transfer che abbia usato in Portogallo.',
-    review3: 'Ho prenotato alle 23 e alle 23:02 avevo già la conferma. L\'autista era impeccabile.',
+    // Reviews section
+    reviewsEyebrow: 'RECENSIONI REALI',
+    reviewsTitle: 'Clienti già arrivati con noi',
+    reviewsAggregate: '5,0 su Google',
+    reviewsSeeAll: 'Vedi tutte le recensioni →',
+    reviewsFootnote: 'Recensioni verificate pubblicate su Google. Mostrate nella lingua originale del cliente.',
+    reviewTranslationLabel: 'Traduzione',
+    reviewStarsAria: '5 stelle su 5',
+    reviewWrittenIn: 'Recensione scritta in',
+    factsBar: '★ 5,0 su Google · Licenza RNAVT 12529 · Assicurazione passeggeri',
+
+    // Review objection labels
+    reviewObjFeatured: "IL VOLO ERA IN RITARDO. L'AUTISTA ERA LÌ.",
+    reviewObjAirport: 'INCONTRO IN AEROPORTO',
+    reviewObjRoundtrip: 'ANDATA E RITORNO, SENZA STRESS',
+    reviewObjSafe: 'GUIDA SICURA',
+    reviewObjPunctual: 'PUNTUALITÀ',
 
     // Guarantee badges
     badgePrice: 'Prezzo fisso',

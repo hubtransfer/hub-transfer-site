@@ -8,6 +8,7 @@ import Image from "next/image";
 import PhoneInput from "@/components/PhoneInput";
 import { COMPANY } from "@/lib/constants";
 import { getLandingT, type LandingLang } from "@/lib/landing-translations";
+import { FEATURED_REVIEW, GRID_REVIEWS, LANG_NAMES, GOOGLE_PROFILE_URL, siteLangToReviewLang, type ReviewItem } from "@/lib/reviews";
 // import ThemeToggle, { useTheme } from "@/components/ThemeToggle";
 
 const LANGS: LandingLang[] = ["PT", "EN", "ES", "FR", "IT"];
@@ -231,6 +232,114 @@ function Reveal({ children, className = "", delay = 0 }: { children: React.React
     >
       {children}
     </motion.div>
+  );
+}
+
+/* ─── Reviews reveal — IntersectionObserver + CSS (SSR-safe, respeita
+   prefers-reduced-motion via media query em .rv). Uma única animação
+   orquestrada, com stagger por transition-delay. ─── */
+function ScrollReveal({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          obs.disconnect();
+        }
+      },
+      { rootMargin: "0px 0px -60px 0px" }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return (
+    <div ref={ref} className={`rv ${visible ? "rv-in" : ""} ${className}`} style={{ transitionDelay: `${delay}s` }}>
+      {children}
+    </div>
+  );
+}
+
+/* ─── Google reviews — section helpers ─── */
+function GoogleG({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
+      <path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z" />
+      <path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z" />
+      <path fill="#FBBC05" d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24s.85 6.91 2.34 9.88l7.35-5.7z" />
+      <path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z" />
+    </svg>
+  );
+}
+
+function Stars({ label, className = "" }: { label: string; className?: string }) {
+  return (
+    <span role="img" aria-label={label} className={`inline-flex gap-0.5 ${className}`}>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <svg key={i} viewBox="0 0 20 20" className="w-4 h-4 fill-[#F0D030]" aria-hidden="true">
+          <path d="M10 1.5l2.47 5.01 5.53.8-4 3.9.94 5.5L10 14.6l-4.95 2.6.94-5.5-4-3.9 5.53-.8L10 1.5z" />
+        </svg>
+      ))}
+    </span>
+  );
+}
+
+function ReviewAvatar({ initials, size = "md" }: { initials: string; size?: "md" | "lg" }) {
+  const dim = size === "lg" ? "w-12 h-12 text-base" : "w-10 h-10 text-sm";
+  return (
+    <div className={`${dim} rounded-full border border-[#F0D030]/60 flex items-center justify-center text-[#F0D030] font-semibold shrink-0`} aria-hidden="true">
+      {initials}
+    </div>
+  );
+}
+
+function ReviewCard({ review, t, lang, featured = false }: { review: ReviewItem; t: ReturnType<typeof getLandingT>; lang: LandingLang; featured?: boolean }) {
+  const siteLang = siteLangToReviewLang(lang);
+  const objLabel = review.objKey ? (t[review.objKey] as string) : review.objFixed ?? "";
+  const translation = siteLang !== review.lang ? review.translations[siteLang] : undefined;
+  const writtenInAria = `${t.reviewWrittenIn} ${LANG_NAMES[lang][review.lang]}`;
+
+  return (
+    <article className={`h-full flex flex-col rounded-2xl border border-[#2A2A2A] bg-[#141414] ${featured ? "p-7 md:p-9" : "p-6"}`}>
+      {/* Objection eyebrow */}
+      <p className="text-[#F0D030] text-[10px] md:text-xs tracking-[0.2em] uppercase font-semibold font-body mb-4">{objLabel}</p>
+
+      {/* Original text — the star of the card */}
+      <div className="relative">
+        {featured && (
+          <span aria-hidden="true" className="absolute -top-8 -left-1 text-[#F0D030]/20 leading-none select-none" style={{ fontFamily: "var(--font-display)", fontSize: "5.5rem" }}>&ldquo;</span>
+        )}
+        <p className={`relative text-[#EDEDED] ${featured ? "text-lg md:text-xl leading-relaxed" : "text-sm md:text-base leading-relaxed"}`}>
+          {review.text}
+        </p>
+      </div>
+
+      {/* Conditional translation block — original is the star, translation is a courtesy */}
+      {translation && (
+        <div className="mt-4 pt-3 border-t border-[#242424]">
+          <p className="text-[#8A8A8A] text-[10px] tracking-wider uppercase mb-1">{t.reviewTranslationLabel}</p>
+          <p className="text-[#9A9A9A] text-xs md:text-sm italic leading-relaxed">{translation}</p>
+        </div>
+      )}
+
+      {/* Footer */}
+      <div className="mt-auto pt-5 flex items-center gap-3">
+        <ReviewAvatar initials={review.initials} size={featured ? "lg" : "md"} />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <p className="text-white text-sm font-medium truncate">{review.name}</p>
+            <img src={`/flags/${review.lang}.jpg`} alt="" role="img" aria-label={writtenInAria} className="w-5 h-3.5 rounded-sm object-cover shrink-0" />
+          </div>
+          <div className="flex items-center gap-2 mt-1">
+            <Stars label={t.reviewStarsAria} />
+            <span className="text-[#8A8A8A] text-xs">via Google</span>
+          </div>
+        </div>
+      </div>
+    </article>
   );
 }
 
@@ -462,16 +571,9 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  SOCIAL PROOF — Human + impactful                          */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section id="stats" className="bg-[#1A1A1A]">
-          <div className="max-w-2xl mx-auto px-6 py-10 md:py-14 text-center">
-            <Reveal>
-              <div className="text-5xl md:text-6xl font-extrabold text-[#F0D030] tracking-tight" style={{ fontFamily: "var(--font-mono)" }}>4.387+</div>
-              <p className="text-lg md:text-xl text-[#D0D0D0] mt-3 leading-relaxed">{t.socialProofText}</p>
-              <div className="flex items-center justify-center gap-2 mt-5">
-                <span className="text-[#F0D030] text-xl tracking-widest">★★★★★</span>
-                <span className="text-[#B0B0B0] text-sm">{t.socialProofRating}</span>
-              </div>
-            </Reveal>
+        <section id="stats" className="bg-[#1A1A1A] border-y border-[#2A2A2A]">
+          <div className="max-w-4xl mx-auto px-6 py-4 text-center">
+            <p className="text-[#B0B0B0] text-xs md:text-sm tracking-wide font-body">{t.factsBar}</p>
           </div>
         </section>
 
@@ -663,31 +765,57 @@ export default function LandingPage() {
         </section>
 
         {/* ═══════════════════════════════════════════════════════════ */}
-        {/*  TESTIMONIALS                                               */}
+        {/*  AVALIAÇÕES REAIS — Google reviews (curadoria por objeção)  */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section className="py-16 md:py-24 px-6 border-t border-[#2A2A2A]">
-          <div className="max-w-5xl mx-auto">
-            <Reveal>
-              <p className="text-[#F0D030] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelReviews}</p>
-            </Reveal>
-            <div className="mt-12 grid md:grid-cols-3 gap-12">
-              {[
-                { name: "Sarah Mitchell", from: "London, UK", text: t.review1 },
-                { name: "Thomas Weber", from: "München, DE", text: t.review2 },
-                { name: "Marie Dupont", from: "Paris, FR", text: t.review3 },
-              ].map((r, i) => (
-                <Reveal key={i} delay={i * 0.1}>
-                  <article>
-                    <p className="text-[#D0D0D0] text-sm leading-relaxed italic">&ldquo;{r.text}&rdquo;</p>
-                    <div className="mt-5">
-                      <p className="text-white text-sm font-medium">{r.name}</p>
-                      <p className="text-[#D0D0D0] text-xs">{r.from}</p>
-                    </div>
-                  </article>
-                </Reveal>
+        <section id="avaliacoes" className="py-16 md:py-24 px-6 border-t border-[#2A2A2A]">
+          <div className="max-w-6xl mx-auto">
+            {/* Header */}
+            <ScrollReveal>
+              <p className="text-[#F0D030] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.reviewsEyebrow}</p>
+              <h2 className="text-3xl md:text-5xl font-bold leading-tight" style={{ fontFamily: "var(--font-display)" }}>{t.reviewsTitle}</h2>
+              <div className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2">
+                <Stars label={t.reviewStarsAria} />
+                <span className="inline-flex items-center gap-1.5 text-white text-sm md:text-base">
+                  <GoogleG className="w-4 h-4" />
+                  <span className="font-semibold">{t.reviewsAggregate}</span>
+                </span>
+                <a
+                  href={GOOGLE_PROFILE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#F0D030] text-sm hover:underline rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F0D030]"
+                >
+                  {t.reviewsSeeAll}
+                </a>
+              </div>
+            </ScrollReveal>
+
+            {/* Featured card */}
+            <ScrollReveal delay={0.05} className="block mt-10">
+              <ReviewCard review={FEATURED_REVIEW} t={t} lang={lang} featured />
+            </ScrollReveal>
+
+            {/* Grid — cards 5-7 (Patrizia/Ruth/Zoë) juntos na última fila do desktop */}
+            <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {GRID_REVIEWS.filter((r) => r.active).map((r, i) => (
+                <ScrollReveal key={r.id} delay={i * 0.08} className="h-full">
+                  <ReviewCard review={r} t={t} lang={lang} />
+                </ScrollReveal>
               ))}
             </div>
+
+            {/* Footnote */}
+            <ScrollReveal delay={0.1}>
+              <p className="mt-10 text-[#7A7A7A] text-xs text-center max-w-2xl mx-auto leading-relaxed">{t.reviewsFootnote}</p>
+            </ScrollReveal>
           </div>
+          <style dangerouslySetInnerHTML={{ __html: `
+            #avaliacoes .rv { opacity: 0; transform: translateY(24px); transition: opacity .7s cubic-bezier(.25,.1,.25,1), transform .7s cubic-bezier(.25,.1,.25,1); will-change: opacity, transform; }
+            #avaliacoes .rv.rv-in { opacity: 1; transform: none; }
+            @media (prefers-reduced-motion: reduce) {
+              #avaliacoes .rv { opacity: 1 !important; transform: none !important; transition: none !important; }
+            }
+          `}} />
         </section>
 
         {/* ═══════════════════════════════════════════════════════════ */}

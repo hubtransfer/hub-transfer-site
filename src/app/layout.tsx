@@ -23,7 +23,7 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["400", "500", "600", "700"],
 });
 
-const SITE_URL = "https://hub-transfer-site.vercel.app";
+const SITE_URL = "https://hubtransfer.pt";
 
 export const metadata: Metadata = {
   title: "Transfer Aeroporto Lisboa | Motorista à Sua Espera | HUB Transfer",
@@ -105,12 +105,6 @@ export default function RootLayout({
                 longitude: -9.1393,
               },
               areaServed: { "@type": "City", name: "Lisboa" },
-              aggregateRating: {
-                "@type": "AggregateRating",
-                ratingValue: "4.9",
-                reviewCount: "4387",
-                bestRating: "5",
-              },
               priceRange: "€€",
               openingHoursSpecification: {
                 "@type": "OpeningHoursSpecification",
