@@ -48,8 +48,8 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Transfer Aeroporto Lisboa | HUB Transfer",
     description:
-      "Monitorização de voo em tempo real. Seu motorista já está lá quando você desembarca. Preço fixo, sem surpresas.",
-    images: [{ url: "/images/mercedes.png", width: 1200, height: 630 }],
+      "Monitorização de voo em tempo real. O seu motorista já lá está quando desembarca. Preço fixo, sem surpresas.",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     url: SITE_URL,
     siteName: "HUB Transfer",
     locale: "pt_PT",
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     title: "Transfer Aeroporto Lisboa | HUB Transfer",
     description:
       "Monitorização de voo em tempo real. Motorista sempre pontual.",
-    images: ["/images/mercedes.png"],
+    images: ["/og-image.png"],
   },
   icons: {
     icon: "/favicon.ico",
