@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Menu, X, Phone, Mail, MapPin, Facebook, Instagram, ExternalLink, ArrowRight, ChevronDown, Crosshair, Radar, Headphones, Radio, BellRing, MessageSquareOff, Lock, Clock, ShieldCheck } from "lucide-react";
 import Script from "next/script";
 import Image from "next/image";
@@ -433,6 +433,22 @@ export default function LandingPage() {
     return () => window.removeEventListener("scroll", h);
   }, []);
 
+  /* ── Sticky mobile CTA: só aparece quando o CTA do hero sai do viewport ──
+     SSR-safe: estado inicial escondido, ativação só no cliente (padrão ScrollReveal). */
+  const reduceMotion = useReducedMotion();
+  const heroCtaRef = useRef<HTMLButtonElement>(null);
+  const [showStickyCta, setShowStickyCta] = useState(false);
+  useEffect(() => {
+    const el = heroCtaRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setShowStickyCta(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
   /* ================================================================ */
 
   return (
@@ -518,14 +534,14 @@ export default function LandingPage() {
           <div className="relative z-10 w-full max-w-6xl mx-auto px-6 pt-24 pb-16 lg:py-0 grid lg:grid-cols-2 gap-8 lg:gap-10 items-center">
             {/* Left — text (control-room readout) */}
             <div className="text-center lg:text-left">
-              <p className="text-[var(--hub-gold)] text-[10px] md:text-xs tracking-[0.28em] uppercase font-mono mb-5">{t.heroEyebrow}</p>
+              <p className="text-[var(--hub-gold)] text-[9px] md:text-xs tracking-[0.14em] md:tracking-[0.28em] whitespace-nowrap md:whitespace-normal uppercase font-mono mb-5">{t.heroEyebrow}</p>
               <h1 className="font-bold text-white" style={{ fontFamily: "var(--font-display)", fontSize: "clamp(2.6rem, 7vw, 7rem)", lineHeight: 1.02, letterSpacing: "-0.02em" }}>
                 {t.headline}
                 <span className="block" style={{ color: "var(--hub-gold)" }}>{t.headlineHighlight}</span>
               </h1>
               <p className="mt-6 text-white/85 text-base md:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0">{t.subheadline}</p>
               <div className="mt-8">
-                <button onClick={() => setDrawerOpen(true)}
+                <button ref={heroCtaRef} onClick={() => setDrawerOpen(true)}
                   className="inline-flex items-center gap-2 bg-[var(--hub-gold)] text-black text-[13px] font-semibold tracking-[0.15em] uppercase px-8 py-4 hover:bg-[var(--hub-gold)]/90 transition-colors duration-300 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--hub-gold)]">
                   {t.ctaBook}
                   <ArrowRight className="w-4 h-4" />
@@ -935,15 +951,25 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  STICKY BOTTOM CTA                                          */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <div className="fixed bottom-0 left-0 right-0 z-40 p-4 md:hidden">
-          <button
-            onClick={() => setDrawerOpen(true)}
-            className="w-full flex items-center justify-center gap-2 bg-[var(--hub-gold)] text-black text-[13px] font-semibold tracking-[0.15em] uppercase py-4 animate-[subtlePulse_3s_ease-in-out_infinite] cursor-pointer"
-          >
-            {t.ctaBook}
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
+        <AnimatePresence>
+          {showStickyCta && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: reduceMotion ? 0 : 0.25 }}
+              className="fixed bottom-0 left-0 right-0 z-40 p-4 md:hidden"
+            >
+              <button
+                onClick={() => setDrawerOpen(true)}
+                className="w-full flex items-center justify-center gap-2 bg-[var(--hub-gold)] text-black text-[13px] font-semibold tracking-[0.15em] uppercase py-4 animate-[subtlePulse_3s_ease-in-out_infinite] cursor-pointer"
+              >
+                {t.ctaBook}
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* spacer for sticky button on mobile */}
         <div className="h-16 md:hidden" />
