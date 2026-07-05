@@ -23,7 +23,7 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["400", "500", "600", "700"],
 });
 
-const SITE_URL = "https://hub-transfer-site.vercel.app";
+const SITE_URL = "https://hubtransfer.pt";
 
 export const metadata: Metadata = {
   title: "Transfer Aeroporto Lisboa | Motorista à Sua Espera | HUB Transfer",
