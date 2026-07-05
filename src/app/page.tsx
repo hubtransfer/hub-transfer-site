@@ -713,8 +713,7 @@ export default function LandingPage() {
         <section className="py-10 md:py-14 border-y border-[#2A2A2A] overflow-hidden">
           <div className="max-w-6xl mx-auto px-4 md:px-6 text-center mb-8">
             <Reveal>
-              <p className="text-[#F0D030] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-3">{t.partnersLabel}</p>
-              <p className="text-[#B0B0B0] text-sm max-w-xl mx-auto">{t.partnersSub}</p>
+              <p className="text-[#F0D030] text-sm md:text-base font-semibold font-body">{t.partnersLabel}</p>
             </Reveal>
           </div>
           <div
@@ -728,32 +727,30 @@ export default function LandingPage() {
             <div className="absolute left-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-r from-[#0A0A0A] to-transparent z-10 pointer-events-none" />
             <div className="absolute right-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-l from-[#0A0A0A] to-transparent z-10 pointer-events-none" />
             <div data-carousel="" className="flex items-center w-max gap-7 md:gap-12" style={{ animation: "scroll 35s linear infinite" }}>
+              {/* Apenas companhias aéreas — uso descritivo/factual, sem implicar parceria */}
               {[...Array(2)].flatMap(() => [
-                { name: "TAP Portugal", src: "/images/Logos/logo_TAP.png", w: 57 },
-                { name: "Emirates", src: "/logos/emirates.png", w: 80 },
-                { name: "British Airways", src: "/images/Logos/logo_british.png", w: 160 },
-                { name: "Lufthansa", src: "/images/Logos/logo_luftansa.png", w: 150 },
-                { name: "Air France", src: "/images/Logos/logo_airfrance.png", w: 150 },
-                { name: "KLM", src: "/logos/klm.png", w: 80 },
-                { name: "Iberia", src: "/images/Logos/logo_iberia.png", w: 100 },
-                { name: "Swiss", src: "/logos/swiss.png", w: 80 },
-                { name: "Turkish Airlines", src: "/images/Logos/logo_turkish.png", w: 100 },
-                { name: "Qatar Airways", src: "/images/Logos/logo_qatar.png", w: 100 },
-                { name: "Mercedes-Benz", src: "/logos/mercedes.png", w: 80 },
-                { name: "BMW", src: "/images/Logos/logo_bmw.png", w: 80 },
-                { name: "Marriott", src: "/images/Logos/logo_marriott.png", w: 100 },
-                { name: "Air Europa", src: "/images/Logos/logo_aireuropa.png", w: 150 },
-                { name: "Royal Air Maroc", src: "/images/Logos/logo_airmaroc.png", w: 280 },
-                { name: "Aer Lingus", src: "/images/Logos/logo_aerlingus.png", w: 150 },
-                { name: "Air Canada", src: "/images/Logos/logo_aircanada.png", w: 150 },
-                { name: "Jet2", src: "/logos/jet2.png", w: 80 },
+                { name: "TAP Air Portugal", alt: "TAP Air Portugal — companhia aérea", src: "/images/Logos/logo_TAP.png", w: 57 },
+                { name: "Emirates", alt: "Emirates — companhia aérea", src: "/logos/emirates.png", w: 80 },
+                { name: "British Airways", alt: "British Airways — companhia aérea", src: "/images/Logos/logo_british.png", w: 160 },
+                { name: "Lufthansa", alt: "Lufthansa — companhia aérea", src: "/images/Logos/logo_luftansa.png", w: 150 },
+                { name: "Air France", alt: "Air France — companhia aérea", src: "/images/Logos/logo_airfrance.png", w: 150 },
+                { name: "KLM", alt: "KLM — companhia aérea", src: "/logos/klm.png", w: 80 },
+                { name: "Iberia", alt: "Iberia — companhia aérea", src: "/images/Logos/logo_iberia.png", w: 100 },
+                { name: "Swiss", alt: "Swiss International Air Lines — companhia aérea", src: "/logos/swiss.png", w: 80 },
+                { name: "Turkish Airlines", alt: "Turkish Airlines — companhia aérea", src: "/images/Logos/logo_turkish.png", w: 100 },
+                { name: "Qatar Airways", alt: "Qatar Airways — companhia aérea", src: "/images/Logos/logo_qatar.png", w: 100 },
+                { name: "Air Europa", alt: "Air Europa — companhia aérea", src: "/images/Logos/logo_aireuropa.png", w: 150 },
+                { name: "Royal Air Maroc", alt: "Royal Air Maroc — companhia aérea", src: "/images/Logos/logo_airmaroc.png", w: 280 },
+                { name: "Aer Lingus", alt: "Aer Lingus — companhia aérea", src: "/images/Logos/logo_aerlingus.png", w: 150 },
+                { name: "Air Canada", alt: "Air Canada — companhia aérea", src: "/images/Logos/logo_aircanada.png", w: 150 },
+                { name: "Jet2", alt: "Jet2 — companhia aérea", src: "/logos/jet2.png", w: 80 },
               ]).map((logo, i) => (
                 <div key={i} className="flex-shrink-0 flex items-center justify-center select-none"
                   style={{ height: "52px", width: "auto", WebkitTouchCallout: "none", userSelect: "none" }}
                   onContextMenu={(e) => e.preventDefault()}>
                   <div className="h-[40px] md:h-[45px] bg-contain bg-center bg-no-repeat"
                     style={{ backgroundImage: `url(${logo.src})`, width: `${(logo as { w?: number }).w || 80}px`, minWidth: "60px", transform: "none" }}
-                    role="img" aria-label={logo.name} draggable={false} onDragStart={(e) => e.preventDefault()} />
+                    role="img" aria-label={logo.alt} draggable={false} onDragStart={(e) => e.preventDefault()} />
                 </div>
               ))}
             </div>

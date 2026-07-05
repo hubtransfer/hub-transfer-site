@@ -61,7 +61,6 @@ export interface LandingTranslations {
 
   // Partners carousel
   partnersLabel: string;
-  partnersSub: string;
 
   // Section labels
   labelTech: string;
@@ -189,8 +188,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     footer: '© 2025 HUB Transfer. Tecnologia que garante.',
 
     // Partners carousel
-    partnersLabel: 'QUEM VOA E QUEM FICA, CONFIA NA HUB',
-    partnersSub: 'De hotéis em Lisboa a companhias aéreas internacionais — monitorizamos voos, coordenamos transfers e entregamos excelência.',
+    partnersLabel: 'Os nossos clientes chegam diariamente em voos de:',
 
     // Section labels
     labelTech: 'Tecnologia',
@@ -317,8 +315,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     footer: '© 2025 HUB Transfer. Technology that guarantees.',
 
     // Partners carousel
-    partnersLabel: 'THOSE WHO FLY AND THOSE WHO STAY, TRUST THE HUB',
-    partnersSub: 'From Lisbon hotels to international airlines — we monitor flights, coordinate transfers and deliver excellence.',
+    partnersLabel: 'Our guests arrive daily on flights with:',
 
     // Section labels
     labelTech: 'Technology',
@@ -445,8 +442,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     footer: '© 2025 HUB Transfer. Tecnología que garantiza.',
 
     // Partners carousel
-    partnersLabel: 'QUIEN VUELA Y QUIEN SE QUEDA, CONFÍA EN HUB',
-    partnersSub: 'De hoteles en Lisboa a aerolíneas internacionales — monitorizamos vuelos, coordinamos transfers y entregamos excelencia.',
+    partnersLabel: 'Nuestros clientes llegan a diario en vuelos de:',
 
     // Section labels
     labelTech: 'Tecnología',
@@ -573,8 +569,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     footer: '© 2025 HUB Transfer. Technologie qui garantit.',
 
     // Partners carousel
-    partnersLabel: 'CEUX QUI VOLENT ET CEUX QUI RESTENT FONT CONFIANCE À HUB',
-    partnersSub: 'Des hôtels de Lisbonne aux compagnies aériennes internationales — nous surveillons les vols, coordonnons les transferts et offrons l\'excellence.',
+    partnersLabel: 'Nos clients arrivent chaque jour sur des vols de :',
 
     // Section labels
     labelTech: 'Technologie',
@@ -701,8 +696,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     footer: '© 2025 HUB Transfer. Tecnologia che garantisce.',
 
     // Partners carousel
-    partnersLabel: 'CHI VOLA E CHI RESTA, SI AFFIDA A HUB',
-    partnersSub: 'Dagli hotel di Lisbona alle compagnie aeree internazionali — monitoriamo i voli, coordiniamo i transfer e garantiamo eccellenza.',
+    partnersLabel: 'I nostri clienti arrivano ogni giorno con voli di:',
 
     // Section labels
     labelTech: 'Tecnologia',
