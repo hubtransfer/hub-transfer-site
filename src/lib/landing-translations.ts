@@ -29,11 +29,26 @@ export interface LandingTranslations {
   algoFeature3: string;
 
   // Fleet
+  fleetEyebrow: string;
   fleetTitle: string;
   fleetDesc: string;
   fleetFeature1: string;
   fleetFeature2: string;
   fleetFeature3: string;
+  // Service categories (Fase 4)
+  catLabel: string;
+  cat1Title: string;
+  cat1Line: string;
+  cat1Cap: string;
+  cat2Title: string;
+  cat2Line: string;
+  cat2Cap: string;
+  cat3Title: string;
+  cat3Line: string;
+  cat3Cap: string;
+  toursLine: string;
+  fleetFootnote: string;
+  pax7Marker: string;
 
   // Why it works (4 reasons)
   whyTitle: string;
@@ -154,12 +169,26 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     algoFeature3: 'Zero necessidade de enviar mensagens',
 
     // Fleet
-    fleetTitle: 'Investimos cada cêntimo da HUB Transfer em tecnologia.',
+    fleetEyebrow: 'O SERVIÇO',
+    fleetTitle: 'A mesma tecnologia, do radar à estrada.',
     fleetDesc:
-      'Enquanto muitas empresas gastam fortunas em carros de ostentação, nós decidimos investir em Sincronização Aérea Profunda. Porque entendemos que o verdadeiro luxo não é apenas um banco de pele num carro que não chega. Luxo a sério é o seu voo atrasar 4 horas e, quando pisa no terminal de Lisboa, o seu motorista já lá estar.',
+      'O sistema que monitoriza o seu voo é o mesmo que coordena o carro à sua espera. E no serviço executivo, a tecnologia entra no próprio carro: Tesla 100% elétrico — silencioso, confortável, sem emissões.',
     fleetFeature1: 'Pontualidade com garantia real',
     fleetFeature2: 'Monitorização de voo em tempo real',
     fleetFeature3: 'Suporte 24/7',
+    catLabel: 'CATEGORIA',
+    cat1Title: 'MPV',
+    cat1Line: 'Espaço para a família e para as malas, do aeroporto ao destino.',
+    cat1Cap: 'Até 4 passageiros + bagagem',
+    cat2Title: 'Sedan',
+    cat2Line: 'Conforto direto e discreto para viagens a dois ou três.',
+    cat2Cap: 'Até 3 passageiros + bagagem',
+    cat3Title: 'Sedan Executivo',
+    cat3Line: 'Tesla 100% elétrico. Silencioso, pontual, discreto.',
+    cat3Cap: 'Até 3 passageiros',
+    toursLine: 'Tours Privados — Sintra e arredores de Lisboa ao seu ritmo, com motorista dedicado. Roteiro personalizado.',
+    fleetFootnote: 'Veículo atribuído conforme a categoria reservada.',
+    pax7Marker: '👥 Grupo de 7+ passageiros — pedido de orçamento',
 
     // Why
     whyTitle: 'Ou apertamos a sua mão, ou pagamos a conta.',
@@ -284,12 +313,26 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     algoFeature3: 'Zero need for you to send messages',
 
     // Fleet
-    fleetTitle: 'We invest every penny of HUB Transfer in technology.',
+    fleetEyebrow: 'THE SERVICE',
+    fleetTitle: 'The same technology, from radar to road.',
     fleetDesc:
-      'While many companies spend fortunes on flashy cars, we chose to invest in Deep Flight Synchronisation. Because we understand that real luxury isn\'t just a leather seat in a car that never shows up. Real luxury is your flight being delayed 4 hours and when you step into Lisbon\'s terminal, your driver is already there.',
+      'The system tracking your flight is the same one coordinating the car waiting for you. And in our executive service, the technology extends to the car itself: a 100% electric Tesla — quiet, comfortable, zero emissions.',
     fleetFeature1: 'Punctuality with a real guarantee',
     fleetFeature2: 'Real-time flight monitoring',
     fleetFeature3: '24/7 Support',
+    catLabel: 'CATEGORY',
+    cat1Title: 'MPV',
+    cat1Line: 'Room for the family and the luggage, from airport to destination.',
+    cat1Cap: 'Up to 4 passengers + luggage',
+    cat2Title: 'Sedan',
+    cat2Line: 'Straightforward, discreet comfort for two or three.',
+    cat2Cap: 'Up to 3 passengers + luggage',
+    cat3Title: 'Executive Sedan',
+    cat3Line: '100% electric Tesla. Quiet, punctual, discreet.',
+    cat3Cap: 'Up to 3 passengers',
+    toursLine: 'Private Tours — Sintra and the Lisbon area at your own pace, with a dedicated driver. Custom itinerary.',
+    fleetFootnote: 'Vehicle assigned according to the booked category.',
+    pax7Marker: '👥 Group of 7+ passengers — quote request',
 
     // Why
     whyTitle: 'Why It Works',
@@ -415,12 +458,26 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     algoFeature3: 'Cero necesidad de enviar mensajes',
 
     // Fleet
-    fleetTitle: 'Invertimos cada céntimo de HUB Transfer en tecnología.',
+    fleetEyebrow: 'EL SERVICIO',
+    fleetTitle: 'La misma tecnología, del radar a la carretera.',
     fleetDesc:
-      'Mientras muchas empresas gastan fortunas en coches de ostentación, nosotros decidimos invertir en Sincronización Aérea Profunda. Porque entendemos que el verdadero lujo no es solo un asiento de cuero en un coche que no llega. El verdadero lujo es que tu vuelo se retrase 4 horas y cuando pisas el aeropuerto de Lisboa, tu conductor ya está ahí.',
+      'El sistema que monitoriza su vuelo es el mismo que coordina el coche que le espera. Y en el servicio ejecutivo, la tecnología llega al propio coche: Tesla 100% eléctrico — silencioso, cómodo, sin emisiones.',
     fleetFeature1: 'Puntualidad con garantía real',
     fleetFeature2: 'Monitorización de vuelo en tiempo real',
     fleetFeature3: 'Soporte 24/7',
+    catLabel: 'CATEGORÍA',
+    cat1Title: 'MPV',
+    cat1Line: 'Espacio para la familia y el equipaje, del aeropuerto al destino.',
+    cat1Cap: 'Hasta 4 pasajeros + equipaje',
+    cat2Title: 'Sedán',
+    cat2Line: 'Confort directo y discreto para dos o tres.',
+    cat2Cap: 'Hasta 3 pasajeros + equipaje',
+    cat3Title: 'Sedán Ejecutivo',
+    cat3Line: 'Tesla 100% eléctrico. Silencioso, puntual, discreto.',
+    cat3Cap: 'Hasta 3 pasajeros',
+    toursLine: 'Tours Privados — Sintra y los alrededores de Lisboa a su ritmo, con conductor dedicado. Itinerario personalizado.',
+    fleetFootnote: 'Vehículo asignado según la categoría reservada.',
+    pax7Marker: '👥 Grupo de 7+ pasajeros — solicitud de presupuesto',
 
     // Why
     whyTitle: 'Por Qué Funciona',
@@ -546,12 +603,26 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     algoFeature3: 'Aucun besoin d\'envoyer des messages',
 
     // Fleet
-    fleetTitle: 'Nous investissons chaque centime de HUB Transfer dans la technologie.',
+    fleetEyebrow: 'LE SERVICE',
+    fleetTitle: 'La même technologie, du radar à la route.',
     fleetDesc:
-      "Alors que beaucoup d'entreprises dépensent des fortunes en voitures de prestige, nous avons choisi d'investir dans la Synchronisation Aérienne Profonde. Car nous savons que le vrai luxe, ce n'est pas seulement un siège en cuir dans une voiture qui n'arrive jamais. Le vrai luxe, c'est quand votre vol a 4 heures de retard et qu'en arrivant à Lisbonne, votre chauffeur est déjà là.",
+      "Le système qui suit votre vol est le même qui coordonne la voiture qui vous attend. Et pour le service executive, la technologie s'étend à la voiture elle-même : Tesla 100 % électrique — silencieuse, confortable, zéro émission.",
     fleetFeature1: 'Ponctualité avec une vraie garantie',
     fleetFeature2: 'Surveillance de vol en temps réel',
     fleetFeature3: 'Assistance 24h/24',
+    catLabel: 'CATÉGORIE',
+    cat1Title: 'Monospace',
+    cat1Line: "De la place pour la famille et les bagages, de l'aéroport à destination.",
+    cat1Cap: "Jusqu'à 4 passagers + bagages",
+    cat2Title: 'Berline',
+    cat2Line: 'Un confort simple et discret pour deux ou trois.',
+    cat2Cap: "Jusqu'à 3 passagers + bagages",
+    cat3Title: 'Berline Executive',
+    cat3Line: 'Tesla 100 % électrique. Silencieuse, ponctuelle, discrète.',
+    cat3Cap: "Jusqu'à 3 passagers",
+    toursLine: 'Excursions Privées — Sintra et les environs de Lisbonne à votre rythme, avec chauffeur dédié. Itinéraire personnalisé.',
+    fleetFootnote: 'Véhicule attribué selon la catégorie réservée.',
+    pax7Marker: '👥 Groupe de 7+ passagers — demande de devis',
 
     // Why
     whyTitle: 'Pourquoi Ça Marche',
@@ -677,12 +748,26 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     algoFeature3: 'Zero necessità di inviare messaggi',
 
     // Fleet
-    fleetTitle: 'Investiamo ogni centesimo di HUB Transfer in tecnologia.',
+    fleetEyebrow: 'IL SERVIZIO',
+    fleetTitle: 'La stessa tecnologia, dal radar alla strada.',
     fleetDesc:
-      "Mentre molte aziende spendono fortune in auto appariscenti, noi abbiamo scelto di investire nella Sincronizzazione Aerea Profonda. Perché sappiamo che il vero lusso non è solo un sedile in pelle in un'auto che non arriva mai. Il vero lusso è quando il tuo volo ritarda di 4 ore e appena metti piede a Lisbona, il tuo autista è già lì.",
+      "Il sistema che monitora il suo volo è lo stesso che coordina l'auto che la aspetta. E nel servizio executive, la tecnologia arriva fino all'auto: Tesla 100% elettrica — silenziosa, confortevole, a zero emissioni.",
     fleetFeature1: 'Puntualità con garanzia reale',
     fleetFeature2: 'Monitoraggio del volo in tempo reale',
     fleetFeature3: 'Supporto 24/7',
+    catLabel: 'CATEGORIA',
+    cat1Title: 'Monovolume',
+    cat1Line: "Spazio per la famiglia e i bagagli, dall'aeroporto a destinazione.",
+    cat1Cap: 'Fino a 4 passeggeri + bagagli',
+    cat2Title: 'Berlina',
+    cat2Line: 'Comfort diretto e discreto per due o tre.',
+    cat2Cap: 'Fino a 3 passeggeri + bagagli',
+    cat3Title: 'Berlina Executive',
+    cat3Line: 'Tesla 100% elettrica. Silenziosa, puntuale, discreta.',
+    cat3Cap: 'Fino a 3 passeggeri',
+    toursLine: 'Tour Privati — Sintra e i dintorni di Lisbona al suo ritmo, con autista dedicato. Itinerario personalizzato.',
+    fleetFootnote: 'Veicolo assegnato in base alla categoria prenotata.',
+    pax7Marker: '👥 Gruppo di 7+ passeggeri — richiesta di preventivo',
 
     // Why
     whyTitle: 'Perché Funziona',

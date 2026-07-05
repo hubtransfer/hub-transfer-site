@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { Menu, X, Phone, Mail, MapPin, Facebook, Instagram, ExternalLink, ArrowRight, ChevronDown, Crosshair, Radar, Headphones, Radio, BellRing, MessageSquareOff, Lock, Clock, ShieldCheck } from "lucide-react";
+import { Menu, X, Phone, Mail, MapPin, Facebook, Instagram, ExternalLink, ArrowRight, ChevronDown, Crosshair, Radar, Headphones, Radio, BellRing, MessageSquareOff, Lock, Clock, ShieldCheck, Users, Car, Zap, Map } from "lucide-react";
 import Script from "next/script";
 import Image from "next/image";
 import PhoneInput from "@/components/PhoneInput";
@@ -419,9 +419,11 @@ export default function LandingPage() {
   }, [drawerOpen]);
 
   const waBookingUrl = useCallback(() => {
-    const msg = `Olá! Quero um orçamento para transfer:\n\n📍 De: ${bOrigin || "—"}\n🏁 Para: ${bDest || "—"}\n${routeInfo ? `📏 ${routeInfo.distance} (~${routeInfo.duration})\n` : ""}📅 Data: ${bDate || "—"}\n👥 Passageiros: ${bPax}\n📱 WhatsApp: ${bPhone}`;
+    // Grupo 7+ → marcador localizado (contém sempre o token "7+" para contagem no WhatsApp)
+    const paxLine = bPax >= 7 ? t.pax7Marker : `👥 Passageiros: ${bPax}`;
+    const msg = `Olá! Quero um orçamento para transfer:\n\n📍 De: ${bOrigin || "—"}\n🏁 Para: ${bDest || "—"}\n${routeInfo ? `📏 ${routeInfo.distance} (~${routeInfo.duration})\n` : ""}📅 Data: ${bDate || "—"}\n${paxLine}\n📱 WhatsApp: ${bPhone}`;
     return `https://wa.me/351968698138?text=${encodeURIComponent(msg)}`;
-  }, [bOrigin, bDest, routeInfo, bDate, bPax, bPhone]);
+  }, [bOrigin, bDest, routeInfo, bDate, bPax, bPhone, t]);
 
   const scrollTo = (id: string) => { setMenuOpen(false); setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }), 150); };
 
@@ -623,42 +625,65 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  WHY US — Image left, text right                            */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section id="why" className="py-16 md:py-24">
-          <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-[2fr_3fr] gap-10 items-center">
+        <section id="why" className="py-16 md:py-24 px-6">
+          <div className="max-w-6xl mx-auto">
+            {/* Intro */}
             <Reveal>
-              <div className="relative">
-                <picture className="contents">
-                  <source srcSet="/images/mercedes.webp" type="image/webp" />
-                  <img src="/images/mercedes.jpg" alt="Transfer privado Mercedes S-Class HUB Transfer em Lisboa" className="w-full h-[350px] lg:h-[480px] object-cover rounded-xl" />
-                </picture>
-                <div className="absolute inset-0 bg-gradient-to-l from-[var(--hub-black)]/40 to-transparent" />
-              </div>
+              <p className="text-[var(--hub-gold)] text-xs tracking-[0.28em] uppercase font-semibold font-mono mb-4">{t.fleetEyebrow}</p>
+              <h2 className="text-3xl md:text-5xl font-bold leading-tight mb-6 max-w-3xl" style={{ fontFamily: "var(--font-display)" }}>{t.fleetTitle}</h2>
+              <p className="text-[#D0D0D0] text-base md:text-lg leading-relaxed mb-8 max-w-2xl">{t.fleetDesc}</p>
             </Reveal>
-            <Reveal delay={0.2} className="lg:pl-20">
-              <p className="text-[var(--hub-gold)] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelFleet}</p>
-              <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-6" style={{ fontFamily: "var(--font-display)" }}>
-                {t.fleetTitle}
-              </h2>
-              <p className="text-[#D0D0D0] text-base leading-relaxed mb-8">{t.fleetDesc}</p>
-              <div className="space-y-4">
+
+            {/* 3 features — slim inline row */}
+            <Reveal delay={0.05}>
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4 sm:gap-x-8 sm:gap-y-3 mb-12">
                 {[
-                  { icon: <Crosshair className="w-7 h-7" strokeWidth={1.5} />, text: t.fleetFeature1 },
-                  { icon: <Radar className="w-7 h-7" strokeWidth={1.5} />, text: t.fleetFeature2 },
-                  { icon: <Headphones className="w-7 h-7" strokeWidth={1.5} />, text: t.fleetFeature3 },
+                  { icon: <Crosshair className="w-5 h-5" strokeWidth={1.5} />, text: t.fleetFeature1 },
+                  { icon: <Radar className="w-5 h-5" strokeWidth={1.5} />, text: t.fleetFeature2 },
+                  { icon: <Headphones className="w-5 h-5" strokeWidth={1.5} />, text: t.fleetFeature3 },
                 ].map((f, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: i * 0.15, ease: "easeOut" }}
-                    className="flex items-center gap-3 group"
-                  >
-                    <div className="text-[var(--hub-gold)] group-hover:scale-110 transition-transform duration-200 flex-shrink-0">{f.icon}</div>
-                    <span className="text-[#F5F5F5] text-base font-semibold">{f.text}</span>
-                  </motion.div>
+                  <div key={i} className="flex items-center gap-2.5">
+                    <span className="text-[var(--hub-gold)] flex-shrink-0">{f.icon}</span>
+                    <span className="text-[#F5F5F5] text-sm font-semibold">{f.text}</span>
+                  </div>
                 ))}
               </div>
+            </Reveal>
+
+            {/* 3 category cards — altura natural (items-start).
+                TODO(Tesla): o 3.º cartão (Sedan Executivo) tem um slot reservado para a
+                foto REAL do Tesla da operação. Quando existir, inserir um <picture>
+                WebP+fallback (disciplina da Fase 1), área ~16:9 no topo do cartão.
+                NÃO usar stock. Até lá, o cartão vive só com ícone + texto. */}
+            <div className="grid sm:grid-cols-3 gap-5 items-start">
+              {[
+                { icon: <Users className="w-6 h-6" strokeWidth={1.5} />, title: t.cat1Title, line: t.cat1Line, cap: t.cat1Cap },
+                { icon: <Car className="w-6 h-6" strokeWidth={1.5} />, title: t.cat2Title, line: t.cat2Line, cap: t.cat2Cap },
+                { icon: <Zap className="w-6 h-6" strokeWidth={1.5} />, title: t.cat3Title, line: t.cat3Line, cap: t.cat3Cap },
+              ].map((cat, i) => (
+                <ScrollReveal key={i} delay={i * 0.08}>
+                  <article className="flex flex-col rounded-2xl border border-[var(--hub-line)] bg-[var(--hub-graphite)] p-6">
+                    <p className="text-[var(--hub-dim)] text-[10px] tracking-[0.22em] uppercase font-mono mb-4">{t.catLabel}</p>
+                    <span className="text-[var(--hub-gold)] mb-4">{cat.icon}</span>
+                    <h3 className="text-white text-xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>{cat.title}</h3>
+                    <p className="text-[#B0B0B0] text-sm leading-relaxed mb-4">{cat.line}</p>
+                    <p className="text-[var(--hub-gold)] text-xs font-mono tracking-wide">{cat.cap}</p>
+                  </article>
+                </ScrollReveal>
+              ))}
+            </div>
+
+            {/* Tours service band — full-width, fina */}
+            <Reveal delay={0.1}>
+              <div className="mt-6 rounded-2xl border border-[var(--hub-line)] bg-[var(--hub-graphite)]/60 px-6 py-5 flex items-start gap-4">
+                <span className="text-[var(--hub-gold)] flex-shrink-0 mt-0.5"><Map className="w-6 h-6" strokeWidth={1.5} /></span>
+                <p className="text-[#D0D0D0] text-sm md:text-base leading-relaxed">{t.toursLine}</p>
+              </div>
+            </Reveal>
+
+            {/* Footnote */}
+            <Reveal delay={0.12}>
+              <p className="mt-6 text-[var(--hub-dim)] text-[10px] md:text-xs tracking-wide font-mono">{t.fleetFootnote}</p>
             </Reveal>
           </div>
         </section>
@@ -1070,10 +1095,10 @@ export default function LandingPage() {
                       <div>
                         <label className="text-[var(--hub-gold)] text-[10px] tracking-wider uppercase block mb-1.5">{lang === "PT" ? "PASSAGEIROS" : lang === "ES" ? "PASAJEROS" : lang === "FR" ? "PASSAGERS" : lang === "IT" ? "PASSEGGERI" : "PASSENGERS"}</label>
                         <div className="flex gap-1.5">
-                          {[1, 2, 3, 4, 5, 6].map((n) => (
+                          {[1, 2, 3, 4, 5, 6, 7].map((n) => (
                             <button key={n} type="button" onClick={() => setBPax(n)}
                               className={`flex-1 h-10 text-sm font-medium rounded-lg transition-colors cursor-pointer ${bPax === n ? "bg-[var(--hub-gold)] text-[var(--hub-black)]" : "bg-white/[0.06] border border-white/[0.12] text-[#B0B0B0]"}`}>
-                              {n}
+                              {n === 7 ? "7+" : n}
                             </button>
                           ))}
                         </div>
