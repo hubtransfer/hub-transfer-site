@@ -24,6 +24,8 @@ Junior Gutierez, CEO da HUB Transfer (Jornadas e Possibilidades, Unipessoal Lda)
 ---
 
 ## DESIGN SYSTEM
+> **Toda alteração visual segue `docs/DESIGN-HUB-2.md`** (direção de arte HUB 2.0: tokens, voz PT-PT, sistema de imagem, fases da reforma). Consultar antes de qualquer mudança de UI.
+
 - Fundo: escuro/preto
 - Cor principal: dourado #D4A017 / amber
 - Logo: barra com 3 pontos/traços + texto "HUB TRANSFER"

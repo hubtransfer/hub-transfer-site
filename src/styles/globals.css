@@ -71,6 +71,17 @@
   --animate-slide-out-right: slide-out-right 0.4s ease-in forwards;
 }
 
+/* ─── HUB 2.0 — Tokens (fonte única de verdade — ver docs/DESIGN-HUB-2.md) ─── */
+:root {
+  --hub-black: #0A0A0A;    /* fundo base */
+  --hub-graphite: #141414; /* cards/superfícies */
+  --hub-line: #2A2A2A;     /* bordas/divisores */
+  --hub-gold: #F0D030;     /* ação/destaque — NUNCA hardcodar dourado fora do token */
+  --hub-white: #EDEDED;    /* texto principal */
+  --hub-muted: #9A9A9A;    /* texto secundário */
+  --hub-dim: #7A7A7A;      /* notas/rodapés */
+}
+
 /* ─── Keyframes ─── */
 @keyframes fade-in {
   from { opacity: 0; }

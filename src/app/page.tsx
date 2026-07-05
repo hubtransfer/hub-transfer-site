@@ -31,63 +31,63 @@ function RadarIllustration() {
     <div className="relative w-[260px] md:w-[320px] lg:w-[420px] aspect-square select-none mx-auto">
       {/* LIVE indicator */}
       <div className="absolute top-2 right-3 flex items-center gap-1.5 z-10">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#F0D030] radar-live" />
-        <span className="text-[#F0D030] text-[9px] tracking-[0.15em] uppercase font-mono">LIVE</span>
+        <span className="w-1.5 h-1.5 rounded-full bg-[var(--hub-gold)] radar-live" />
+        <span className="text-[var(--hub-gold)] text-[9px] tracking-[0.15em] uppercase font-mono">LIVE</span>
       </div>
 
       <svg viewBox="0 0 240 240" className="w-full h-full">
         <defs>
           <radialGradient id="sweepCone">
-            <stop offset="0%" stopColor="#F0D030" stopOpacity="0.25" />
-            <stop offset="100%" stopColor="#F0D030" stopOpacity="0" />
+            <stop offset="0%" stopColor="var(--hub-gold)" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="var(--hub-gold)" stopOpacity="0" />
           </radialGradient>
           <radialGradient id="blipG">
-            <stop offset="0%" stopColor="#F0D030" stopOpacity="0.7" />
-            <stop offset="100%" stopColor="#F0D030" stopOpacity="0" />
+            <stop offset="0%" stopColor="var(--hub-gold)" stopOpacity="0.7" />
+            <stop offset="100%" stopColor="var(--hub-gold)" stopOpacity="0" />
           </radialGradient>
         </defs>
 
         {/* Concentric rings */}
-        <circle cx="120" cy="120" r="100" fill="none" stroke="#F0D030" strokeWidth="0.5" opacity="0.35" />
-        <circle cx="120" cy="120" r="75"  fill="none" stroke="#F0D030" strokeWidth="0.4" opacity="0.25" />
-        <circle cx="120" cy="120" r="50"  fill="none" stroke="#F0D030" strokeWidth="0.4" opacity="0.2" />
-        <circle cx="120" cy="120" r="25"  fill="none" stroke="#F0D030" strokeWidth="0.3" opacity="0.15" />
+        <circle cx="120" cy="120" r="100" fill="none" stroke="var(--hub-gold)" strokeWidth="0.5" opacity="0.35" />
+        <circle cx="120" cy="120" r="75"  fill="none" stroke="var(--hub-gold)" strokeWidth="0.4" opacity="0.25" />
+        <circle cx="120" cy="120" r="50"  fill="none" stroke="var(--hub-gold)" strokeWidth="0.4" opacity="0.2" />
+        <circle cx="120" cy="120" r="25"  fill="none" stroke="var(--hub-gold)" strokeWidth="0.3" opacity="0.15" />
 
         {/* Crosshair */}
-        <line x1="20" y1="120" x2="220" y2="120" stroke="#F0D030" strokeWidth="0.3" opacity="0.12" />
-        <line x1="120" y1="20" x2="120" y2="220" stroke="#F0D030" strokeWidth="0.3" opacity="0.12" />
+        <line x1="20" y1="120" x2="220" y2="120" stroke="var(--hub-gold)" strokeWidth="0.3" opacity="0.12" />
+        <line x1="120" y1="20" x2="120" y2="220" stroke="var(--hub-gold)" strokeWidth="0.3" opacity="0.12" />
 
         {/* Tick marks every 30° — pre-computed fixed positions */}
-        <line x1="217" y1="120" x2="224" y2="120" stroke="#F0D030" strokeWidth="0.7" opacity="0.4" />
-        <line x1="204" y1="71"  x2="207" y2="69"  stroke="#F0D030" strokeWidth="0.4" opacity="0.2" />
-        <line x1="169" y1="35"  x2="170" y2="32"  stroke="#F0D030" strokeWidth="0.4" opacity="0.2" />
-        <line x1="120" y1="23"  x2="120" y2="16"  stroke="#F0D030" strokeWidth="0.7" opacity="0.4" />
-        <line x1="71"  y1="35"  x2="70"  y2="32"  stroke="#F0D030" strokeWidth="0.4" opacity="0.2" />
-        <line x1="36"  y1="71"  x2="33"  y2="69"  stroke="#F0D030" strokeWidth="0.4" opacity="0.2" />
-        <line x1="23"  y1="120" x2="16"  y2="120" stroke="#F0D030" strokeWidth="0.7" opacity="0.4" />
-        <line x1="36"  y1="169" x2="33"  y2="171" stroke="#F0D030" strokeWidth="0.4" opacity="0.2" />
-        <line x1="71"  y1="205" x2="70"  y2="208" stroke="#F0D030" strokeWidth="0.4" opacity="0.2" />
-        <line x1="120" y1="217" x2="120" y2="224" stroke="#F0D030" strokeWidth="0.7" opacity="0.4" />
-        <line x1="169" y1="205" x2="170" y2="208" stroke="#F0D030" strokeWidth="0.4" opacity="0.2" />
-        <line x1="204" y1="169" x2="207" y2="171" stroke="#F0D030" strokeWidth="0.4" opacity="0.2" />
+        <line x1="217" y1="120" x2="224" y2="120" stroke="var(--hub-gold)" strokeWidth="0.7" opacity="0.4" />
+        <line x1="204" y1="71"  x2="207" y2="69"  stroke="var(--hub-gold)" strokeWidth="0.4" opacity="0.2" />
+        <line x1="169" y1="35"  x2="170" y2="32"  stroke="var(--hub-gold)" strokeWidth="0.4" opacity="0.2" />
+        <line x1="120" y1="23"  x2="120" y2="16"  stroke="var(--hub-gold)" strokeWidth="0.7" opacity="0.4" />
+        <line x1="71"  y1="35"  x2="70"  y2="32"  stroke="var(--hub-gold)" strokeWidth="0.4" opacity="0.2" />
+        <line x1="36"  y1="71"  x2="33"  y2="69"  stroke="var(--hub-gold)" strokeWidth="0.4" opacity="0.2" />
+        <line x1="23"  y1="120" x2="16"  y2="120" stroke="var(--hub-gold)" strokeWidth="0.7" opacity="0.4" />
+        <line x1="36"  y1="169" x2="33"  y2="171" stroke="var(--hub-gold)" strokeWidth="0.4" opacity="0.2" />
+        <line x1="71"  y1="205" x2="70"  y2="208" stroke="var(--hub-gold)" strokeWidth="0.4" opacity="0.2" />
+        <line x1="120" y1="217" x2="120" y2="224" stroke="var(--hub-gold)" strokeWidth="0.7" opacity="0.4" />
+        <line x1="169" y1="205" x2="170" y2="208" stroke="var(--hub-gold)" strokeWidth="0.4" opacity="0.2" />
+        <line x1="204" y1="169" x2="207" y2="171" stroke="var(--hub-gold)" strokeWidth="0.4" opacity="0.2" />
 
         {/* Cardinal labels + coordinates */}
-        <text x="120" y="14"  textAnchor="middle" fill="#F0D030" opacity="0.5" fontSize="5.5" className="font-mono">N</text>
-        <text x="120" y="234" textAnchor="middle" fill="#F0D030" opacity="0.5" fontSize="5.5" className="font-mono">S</text>
-        <text x="10"  y="122" textAnchor="middle" fill="#F0D030" opacity="0.5" fontSize="5.5" className="font-mono">W</text>
-        <text x="232" y="122" textAnchor="middle" fill="#F0D030" opacity="0.5" fontSize="5.5" className="font-mono">E</text>
-        <text x="22"  y="28"  fill="#F0D030" opacity="0.35" fontSize="4.5" className="font-mono">38.7°N</text>
-        <text x="185" y="232" fill="#F0D030" opacity="0.35" fontSize="4.5" className="font-mono">9.1°W</text>
+        <text x="120" y="14"  textAnchor="middle" fill="var(--hub-gold)" opacity="0.5" fontSize="5.5" className="font-mono">N</text>
+        <text x="120" y="234" textAnchor="middle" fill="var(--hub-gold)" opacity="0.5" fontSize="5.5" className="font-mono">S</text>
+        <text x="10"  y="122" textAnchor="middle" fill="var(--hub-gold)" opacity="0.5" fontSize="5.5" className="font-mono">W</text>
+        <text x="232" y="122" textAnchor="middle" fill="var(--hub-gold)" opacity="0.5" fontSize="5.5" className="font-mono">E</text>
+        <text x="22"  y="28"  fill="var(--hub-gold)" opacity="0.35" fontSize="4.5" className="font-mono">38.7°N</text>
+        <text x="185" y="232" fill="var(--hub-gold)" opacity="0.35" fontSize="4.5" className="font-mono">9.1°W</text>
 
         {/* Center: LIS */}
-        <circle cx="120" cy="120" r="3" fill="#F0D030" opacity="0.3" />
-        <circle cx="120" cy="120" r="1.2" fill="#F0D030" opacity="0.7" />
-        <text x="120" y="130" textAnchor="middle" fill="#F0D030" opacity="0.6" fontSize="5" fontWeight="bold" className="font-mono">LIS</text>
+        <circle cx="120" cy="120" r="3" fill="var(--hub-gold)" opacity="0.3" />
+        <circle cx="120" cy="120" r="1.2" fill="var(--hub-gold)" opacity="0.7" />
+        <text x="120" y="130" textAnchor="middle" fill="var(--hub-gold)" opacity="0.6" fontSize="5" fontWeight="bold" className="font-mono">LIS</text>
 
         {/* Rotating sweep arm + trail — CSS class only */}
         <g className="radar-sweep">
           <path d="M 120 120 L 220 120 A 100 100 0 0 0 203 68 Z" fill="url(#sweepCone)" />
-          <line x1="120" y1="120" x2="220" y2="120" stroke="#F0D030" strokeWidth="1" opacity="0.6" />
+          <line x1="120" y1="120" x2="220" y2="120" stroke="var(--hub-gold)" strokeWidth="1" opacity="0.6" />
         </g>
 
         {/* Flight blips — 5 on mobile, 8 on desktop */}
@@ -95,15 +95,15 @@ function RadarIllustration() {
           <g key={i} className={`${p.moveCls} ${"desktopOnly" in p && p.desktopOnly ? "hidden lg:block" : ""}`}>
             {p.trail && (
               <line x1={p.cx - 8} y1={p.cy - 8} x2={p.cx} y2={p.cy}
-                stroke="#F0D030" strokeWidth="0.4" opacity="0.2" strokeDasharray="2 2" />
+                stroke="var(--hub-gold)" strokeWidth="0.4" opacity="0.2" strokeDasharray="2 2" />
             )}
             <circle cx={p.cx} cy={p.cy} r={p.sz * 0.35 + 2} fill="url(#blipG)" className={p.blipCls} />
             <text x={p.cx} y={p.cy + p.sz * 0.15} textAnchor="middle"
-              fill="#F0D030" opacity="0.9" fontSize={p.sz} className={p.blipCls}>
+              fill="var(--hub-gold)" opacity="0.9" fontSize={p.sz} className={p.blipCls}>
               ✈
             </text>
             <text x={p.cx + p.sz * 0.35 + 4} y={p.cy - 3}
-              fill="#F0D030" opacity="0.4" fontSize="3.8" className="font-mono">
+              fill="var(--hub-gold)" opacity="0.4" fontSize="3.8" className="font-mono">
               {p.code}
             </text>
           </g>
@@ -112,10 +112,10 @@ function RadarIllustration() {
 
       {/* Data readout */}
       <div className="absolute -bottom-8 lg:-bottom-10 left-0 right-0 text-center space-y-0.5 lg:space-y-1">
-        <p className="text-[#F0D030] text-[8px] lg:text-[10px] tracking-[0.2em] uppercase opacity-80 font-mono">
+        <p className="text-[var(--hub-gold)] text-[8px] lg:text-[10px] tracking-[0.2em] uppercase opacity-80 font-mono">
           MONITORING ACTIVE
         </p>
-        <p className="text-[#F0D030] text-[7px] lg:text-[9px] tracking-[0.15em] uppercase opacity-60 font-mono">
+        <p className="text-[var(--hub-gold)] text-[7px] lg:text-[9px] tracking-[0.15em] uppercase opacity-60 font-mono">
           SYNC EVERY 30s
         </p>
       </div>
@@ -190,7 +190,7 @@ function SealImage({ lang: sealLang }: { lang: string }) {
         {/* Impact ring */}
         {ring && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-[160px] h-[160px] md:w-[220px] md:h-[220px] rounded-full border border-[#F0D030]/40"
+            <div className="w-[160px] h-[160px] md:w-[220px] md:h-[220px] rounded-full border border-[var(--hub-gold)]/40"
               style={{ animation: "stampRing 0.6s ease-out forwards" }} />
           </div>
         )}
@@ -279,7 +279,7 @@ function Stars({ label, className = "" }: { label: string; className?: string })
   return (
     <span role="img" aria-label={label} className={`inline-flex gap-0.5 ${className}`}>
       {Array.from({ length: 5 }).map((_, i) => (
-        <svg key={i} viewBox="0 0 20 20" className="w-4 h-4 fill-[#F0D030]" aria-hidden="true">
+        <svg key={i} viewBox="0 0 20 20" className="w-4 h-4 fill-[var(--hub-gold)]" aria-hidden="true">
           <path d="M10 1.5l2.47 5.01 5.53.8-4 3.9.94 5.5L10 14.6l-4.95 2.6.94-5.5-4-3.9 5.53-.8L10 1.5z" />
         </svg>
       ))}
@@ -290,7 +290,7 @@ function Stars({ label, className = "" }: { label: string; className?: string })
 function ReviewAvatar({ initials, size = "md" }: { initials: string; size?: "md" | "lg" }) {
   const dim = size === "lg" ? "w-12 h-12 text-base" : "w-10 h-10 text-sm";
   return (
-    <div className={`${dim} rounded-full border border-[#F0D030]/60 flex items-center justify-center text-[#F0D030] font-semibold shrink-0`} aria-hidden="true">
+    <div className={`${dim} rounded-full border border-[var(--hub-gold)]/60 flex items-center justify-center text-[var(--hub-gold)] font-semibold shrink-0`} aria-hidden="true">
       {initials}
     </div>
   );
@@ -303,16 +303,16 @@ function ReviewCard({ review, t, lang, featured = false }: { review: ReviewItem;
   const writtenInAria = `${t.reviewWrittenIn} ${LANG_NAMES[lang][review.lang]}`;
 
   return (
-    <article className={`h-full flex flex-col rounded-2xl border border-[#2A2A2A] bg-[#141414] ${featured ? "p-7 md:p-9" : "p-6"}`}>
+    <article className={`flex flex-col rounded-2xl border border-[var(--hub-line)] bg-[var(--hub-graphite)] ${featured ? "p-7 md:p-9" : "p-6"}`}>
       {/* Objection eyebrow */}
-      <p className="text-[#F0D030] text-[10px] md:text-xs tracking-[0.2em] uppercase font-semibold font-body mb-4">{objLabel}</p>
+      <p className="text-[var(--hub-gold)] text-[10px] md:text-xs tracking-[0.2em] uppercase font-semibold font-body mb-4">{objLabel}</p>
 
       {/* Original text — the star of the card */}
       <div className="relative">
         {featured && (
-          <span aria-hidden="true" className="absolute -top-8 -left-1 text-[#F0D030]/20 leading-none select-none" style={{ fontFamily: "var(--font-display)", fontSize: "5.5rem" }}>&ldquo;</span>
+          <span aria-hidden="true" className="absolute -top-8 -left-1 text-[var(--hub-gold)]/20 leading-none select-none" style={{ fontFamily: "var(--font-display)", fontSize: "5.5rem" }}>&ldquo;</span>
         )}
-        <p className={`relative text-[#EDEDED] ${featured ? "text-lg md:text-xl leading-relaxed" : "text-sm md:text-base leading-relaxed"}`}>
+        <p className={`relative text-[var(--hub-white)] ${featured ? "text-lg md:text-xl leading-relaxed" : "text-sm md:text-base leading-relaxed"}`}>
           {review.text}
         </p>
       </div>
@@ -321,7 +321,7 @@ function ReviewCard({ review, t, lang, featured = false }: { review: ReviewItem;
       {translation && (
         <div className="mt-4 pt-3 border-t border-[#242424]">
           <p className="text-[#8A8A8A] text-[10px] tracking-wider uppercase mb-1">{t.reviewTranslationLabel}</p>
-          <p className="text-[#9A9A9A] text-xs md:text-sm italic leading-relaxed">{translation}</p>
+          <p className="text-[var(--hub-muted)] text-xs md:text-sm italic leading-relaxed">{translation}</p>
         </div>
       )}
 
@@ -460,13 +460,13 @@ export default function LandingPage() {
               <div className="flex gap-1">
                 {LANGS.map((l) => (
                   <button key={l} onClick={() => setLang(l)}
-                    className={`w-8 h-6 rounded overflow-hidden border transition-all cursor-pointer ${lang === l ? "border-[#F0D030]/60 opacity-100" : "border-transparent opacity-40 hover:opacity-70"}`}>
+                    className={`w-8 h-6 rounded overflow-hidden border transition-all cursor-pointer ${lang === l ? "border-[var(--hub-gold)]/60 opacity-100" : "border-transparent opacity-40 hover:opacity-70"}`}>
                     <img src={`/flags/${l.toLowerCase()}.jpg`} alt={l} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
               <button onClick={() => setDrawerOpen(true)}
-                className="text-[13px] font-semibold tracking-wider uppercase px-5 py-2 border border-[#F0D030]/30 text-[#F0D030] hover:bg-[#F0D030] hover:text-black transition-all duration-300 cursor-pointer">
+                className="text-[13px] font-semibold tracking-wider uppercase px-5 py-2 border border-[var(--hub-gold)]/30 text-[var(--hub-gold)] hover:bg-[var(--hub-gold)] hover:text-black transition-all duration-300 cursor-pointer">
                 {t.navBook}
               </button>
             </div>
@@ -486,13 +486,13 @@ export default function LandingPage() {
                     <button key={l.id} onClick={() => scrollTo(l.id)} className="block text-[#D0D0D0] text-sm tracking-wide uppercase cursor-pointer">{l.label}</button>
                   ))}
                   <button onClick={() => { setMenuOpen(false); setDrawerOpen(true); }}
-                    className="w-full text-center text-[13px] font-semibold tracking-wider uppercase py-3 border border-[#F0D030]/30 text-[#F0D030] hover:bg-[#F0D030] hover:text-[#0A0A0A] transition-all cursor-pointer">
+                    className="w-full text-center text-[13px] font-semibold tracking-wider uppercase py-3 border border-[var(--hub-gold)]/30 text-[var(--hub-gold)] hover:bg-[var(--hub-gold)] hover:text-[var(--hub-black)] transition-all cursor-pointer">
                     {t.navBook}
                   </button>
                   <div className="flex gap-1 pt-2">
                     {LANGS.map((l) => (
                       <button key={l} onClick={() => { setLang(l); setMenuOpen(false); }}
-                        className={`w-8 h-6 rounded overflow-hidden border transition-all cursor-pointer ${lang === l ? "border-[#F0D030]/60 opacity-100" : "border-transparent opacity-40"}`}>
+                        className={`w-8 h-6 rounded overflow-hidden border transition-all cursor-pointer ${lang === l ? "border-[var(--hub-gold)]/60 opacity-100" : "border-transparent opacity-40"}`}>
                         <img src={`/flags/${l.toLowerCase()}.jpg`} alt={l} className="w-full h-full object-cover" />
                       </button>
                     ))}
@@ -508,9 +508,12 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         <section className="relative min-h-screen flex items-center justify-center">
           <div className="absolute inset-0">
-            <img src="/images/rua01.png" alt="Rua de Lisboa com transfer privado HUB Transfer" className="w-full h-full object-cover" loading="eager" />
-            <div className="absolute inset-0 bg-[#0A0A0A]/75" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-transparent to-[#0A0A0A]/40" />
+            <picture className="contents">
+              <source srcSet="/images/rua01.webp" type="image/webp" />
+              <img src="/images/rua01.jpg" alt="Rua de Lisboa com transfer privado HUB Transfer" className="w-full h-full object-cover" loading="eager" />
+            </picture>
+            <div className="absolute inset-0 bg-[var(--hub-black)]/75" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[var(--hub-black)] via-transparent to-[var(--hub-black)]/40" />
           </div>
 
           <div className="relative z-10 max-w-3xl mx-auto px-6 text-center pt-20 pb-32">
@@ -525,7 +528,7 @@ export default function LandingPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6 }}
                   className="block text-[2.8rem] md:text-[4.5rem] leading-[1.05] font-bold"
-                  style={{ fontFamily: "var(--font-display)", color: "#F0D030" }}
+                  style={{ fontFamily: "var(--font-display)", color: "var(--hub-gold)" }}
                 >
                   {t.headlineHighlight}
                 </motion.span>
@@ -548,7 +551,7 @@ export default function LandingPage() {
               className="mt-10"
             >
               <button onClick={() => setDrawerOpen(true)}
-                className="inline-flex items-center gap-2 bg-[#F0D030] text-black text-[13px] font-semibold tracking-[0.15em] uppercase px-8 py-4 hover:bg-[#D4B828] transition-colors duration-300 cursor-pointer">
+                className="inline-flex items-center gap-2 bg-[var(--hub-gold)] text-black text-[13px] font-semibold tracking-[0.15em] uppercase px-8 py-4 hover:bg-[var(--hub-gold)]/90 transition-colors duration-300 cursor-pointer">
                 {t.ctaBook}
                 <ArrowRight className="w-4 h-4" />
               </button>
@@ -571,7 +574,7 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  SOCIAL PROOF — Human + impactful                          */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section id="stats" className="bg-[#1A1A1A] border-y border-[#2A2A2A]">
+        <section id="stats" className="bg-[#1A1A1A] border-y border-[var(--hub-line)]">
           <div className="max-w-4xl mx-auto px-6 py-4 text-center">
             <p className="text-[#B0B0B0] text-xs md:text-sm tracking-wide font-body">{t.factsBar}</p>
           </div>
@@ -580,15 +583,15 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  PAIN — Centered text, solid dark background                */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section className="py-20 md:py-24 px-6" style={{ background: "linear-gradient(180deg, #0A0A0A 0%, #141414 100%)" }}>
+        <section className="py-20 md:py-24 px-6" style={{ background: "linear-gradient(180deg, var(--hub-black) 0%, var(--hub-graphite) 100%)" }}>
           <div className="max-w-[700px] mx-auto text-center">
             <Reveal>
-              <p className="text-[#F0D030] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelProblem}</p>
+              <p className="text-[var(--hub-gold)] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelProblem}</p>
               <h2 className="text-2xl md:text-4xl font-bold leading-tight mb-6" style={{ fontFamily: "var(--font-display)" }}>
                 {t.painTitle}
               </h2>
               <p className="text-[#D0D0D0] text-base leading-relaxed mb-6 max-w-[600px] mx-auto">{t.painDesc}</p>
-              <p className="text-[#F0D030] text-sm font-semibold">{t.painSubtext}</p>
+              <p className="text-[var(--hub-gold)] text-sm font-semibold">{t.painSubtext}</p>
             </Reveal>
           </div>
         </section>
@@ -603,7 +606,7 @@ export default function LandingPage() {
                 <RadarIllustration />
               </Reveal>
               <Reveal className="lg:order-1">
-                <p className="text-[#F0D030] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelTech}</p>
+                <p className="text-[var(--hub-gold)] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelTech}</p>
                 <h2 className="text-3xl md:text-5xl font-bold leading-tight mb-6" style={{ fontFamily: "var(--font-display)" }}>
                   {t.techTitle}
                 </h2>
@@ -622,7 +625,7 @@ export default function LandingPage() {
                       transition={{ duration: 0.5, delay: i * 0.15, ease: "easeOut" }}
                       className="flex items-center gap-3 group"
                     >
-                      <div className="text-[#F0D030] group-hover:scale-110 transition-transform duration-200 flex-shrink-0">{f.icon}</div>
+                      <div className="text-[var(--hub-gold)] group-hover:scale-110 transition-transform duration-200 flex-shrink-0">{f.icon}</div>
                       <span className="text-[#F5F5F5] text-base font-semibold">{f.text}</span>
                     </motion.div>
                   ))}
@@ -639,12 +642,15 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-[2fr_3fr] gap-10 items-center">
             <Reveal>
               <div className="relative">
-                <img src="/images/mercedes.png" alt="Transfer privado Mercedes S-Class HUB Transfer em Lisboa" className="w-full h-[350px] lg:h-[480px] object-cover rounded-xl" />
-                <div className="absolute inset-0 bg-gradient-to-l from-[#0A0A0A]/40 to-transparent" />
+                <picture className="contents">
+                  <source srcSet="/images/mercedes.webp" type="image/webp" />
+                  <img src="/images/mercedes.jpg" alt="Transfer privado Mercedes S-Class HUB Transfer em Lisboa" className="w-full h-[350px] lg:h-[480px] object-cover rounded-xl" />
+                </picture>
+                <div className="absolute inset-0 bg-gradient-to-l from-[var(--hub-black)]/40 to-transparent" />
               </div>
             </Reveal>
             <Reveal delay={0.2} className="lg:pl-20">
-              <p className="text-[#F0D030] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelFleet}</p>
+              <p className="text-[var(--hub-gold)] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelFleet}</p>
               <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-6" style={{ fontFamily: "var(--font-display)" }}>
                 {t.fleetTitle}
               </h2>
@@ -663,7 +669,7 @@ export default function LandingPage() {
                     transition={{ duration: 0.5, delay: i * 0.15, ease: "easeOut" }}
                     className="flex items-center gap-3 group"
                   >
-                    <div className="text-[#F0D030] group-hover:scale-110 transition-transform duration-200 flex-shrink-0">{f.icon}</div>
+                    <div className="text-[var(--hub-gold)] group-hover:scale-110 transition-transform duration-200 flex-shrink-0">{f.icon}</div>
                     <span className="text-[#F5F5F5] text-base font-semibold">{f.text}</span>
                   </motion.div>
                 ))}
@@ -678,7 +684,7 @@ export default function LandingPage() {
         <section className="py-16 md:py-24 px-6">
           <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-0 items-center">
             <Reveal className="lg:pr-20">
-              <p className="text-[#F0D030] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelHow}</p>
+              <p className="text-[var(--hub-gold)] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.labelHow}</p>
               <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-10" style={{ fontFamily: "var(--font-display)" }}>
                 {t.algoTitle}
               </h2>
@@ -689,7 +695,7 @@ export default function LandingPage() {
                   { step: "03", title: t.step3Title, desc: t.step3Desc },
                 ].map((s, i) => (
                   <div key={i} className="flex gap-5">
-                    <div className="text-[#F0D030]/25 text-4xl font-bold leading-none flex-shrink-0 w-12" style={{ fontFamily: "var(--font-mono)" }}>{s.step}</div>
+                    <div className="text-[var(--hub-gold)]/25 text-4xl font-bold leading-none flex-shrink-0 w-12" style={{ fontFamily: "var(--font-mono)" }}>{s.step}</div>
                     <div>
                       <h3 className="text-base font-semibold text-white mb-1.5">{s.title}</h3>
                       <p className="text-[#D0D0D0] text-sm leading-relaxed">{s.desc}</p>
@@ -700,8 +706,11 @@ export default function LandingPage() {
             </Reveal>
             <Reveal delay={0.2}>
               <div className="relative">
-                <img src="/images/app.png" alt="Aplicação HUB Transfer com vista de Lisboa" className="w-full h-[400px] lg:h-[520px] object-cover rounded-xl" />
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#0A0A0A]/50 to-transparent" />
+                <picture className="contents">
+                  <source srcSet="/images/app.webp" type="image/webp" />
+                  <img src="/images/app.jpg" alt="Aplicação HUB Transfer com vista de Lisboa" className="w-full h-[400px] lg:h-[520px] object-cover rounded-xl" />
+                </picture>
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[var(--hub-black)]/50 to-transparent" />
               </div>
             </Reveal>
           </div>
@@ -710,10 +719,10 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  PARTNERS — Scrolling logos                                */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section className="py-10 md:py-14 border-y border-[#2A2A2A] overflow-hidden">
+        <section className="py-10 md:py-14 border-y border-[var(--hub-line)] overflow-hidden">
           <div className="max-w-6xl mx-auto px-4 md:px-6 text-center mb-8">
             <Reveal>
-              <p className="text-[#F0D030] text-sm md:text-base font-semibold font-body">{t.partnersLabel}</p>
+              <p className="text-[var(--hub-gold)] text-sm md:text-base font-semibold font-body">{t.partnersLabel}</p>
             </Reveal>
           </div>
           <div
@@ -724,8 +733,8 @@ export default function LandingPage() {
             onMouseUp={(e) => { const t = e.currentTarget.querySelector("[data-carousel]") as HTMLElement; if (t) t.style.animationPlayState = "running"; }}
             onMouseLeave={(e) => { const t = e.currentTarget.querySelector("[data-carousel]") as HTMLElement; if (t) t.style.animationPlayState = "running"; }}
           >
-            <div className="absolute left-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-r from-[#0A0A0A] to-transparent z-10 pointer-events-none" />
-            <div className="absolute right-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-l from-[#0A0A0A] to-transparent z-10 pointer-events-none" />
+            <div className="absolute left-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-r from-[var(--hub-black)] to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-l from-[var(--hub-black)] to-transparent z-10 pointer-events-none" />
             <div data-carousel="" className="flex items-center w-max gap-7 md:gap-12" style={{ animation: "scroll 35s linear infinite" }}>
               {/* Apenas companhias aéreas — uso descritivo/factual, sem implicar parceria */}
               {[...Array(2)].flatMap(() => [
@@ -764,11 +773,11 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  AVALIAÇÕES REAIS — Google reviews (curadoria por objeção)  */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section id="avaliacoes" className="py-16 md:py-24 px-6 border-t border-[#2A2A2A]">
+        <section id="avaliacoes" className="py-16 md:py-24 px-6 border-t border-[var(--hub-line)]">
           <div className="max-w-6xl mx-auto">
             {/* Header */}
             <ScrollReveal>
-              <p className="text-[#F0D030] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.reviewsEyebrow}</p>
+              <p className="text-[var(--hub-gold)] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.reviewsEyebrow}</p>
               <h2 className="text-3xl md:text-5xl font-bold leading-tight" style={{ fontFamily: "var(--font-display)" }}>{t.reviewsTitle}</h2>
               <div className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2">
                 <Stars label={t.reviewStarsAria} />
@@ -780,7 +789,7 @@ export default function LandingPage() {
                   href={GOOGLE_PROFILE_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#F0D030] text-sm hover:underline rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F0D030]"
+                  className="text-[var(--hub-gold)] text-sm hover:underline rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--hub-gold)]"
                 >
                   {t.reviewsSeeAll}
                 </a>
@@ -793,9 +802,9 @@ export default function LandingPage() {
             </ScrollReveal>
 
             {/* Grid — cards 5-7 (Patrizia/Ruth/Zoë) juntos na última fila do desktop */}
-            <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
               {GRID_REVIEWS.filter((r) => r.active).map((r, i) => (
-                <ScrollReveal key={r.id} delay={i * 0.08} className="h-full">
+                <ScrollReveal key={r.id} delay={i * 0.08}>
                   <ReviewCard review={r} t={t} lang={lang} />
                 </ScrollReveal>
               ))}
@@ -803,7 +812,7 @@ export default function LandingPage() {
 
             {/* Footnote */}
             <ScrollReveal delay={0.1}>
-              <p className="mt-10 text-[#7A7A7A] text-xs text-center max-w-2xl mx-auto leading-relaxed">{t.reviewsFootnote}</p>
+              <p className="mt-10 text-[var(--hub-dim)] text-xs text-center max-w-2xl mx-auto leading-relaxed">{t.reviewsFootnote}</p>
             </ScrollReveal>
           </div>
           <style dangerouslySetInnerHTML={{ __html: `
@@ -818,11 +827,11 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  GUARANTEE — Unified commitment + seal + badges            */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <section id="guarantee" className="py-16 md:py-24 px-6" style={{ background: "linear-gradient(180deg, #0A0A0A 0%, #111111 50%, #0A0A0A 100%)" }}>
+        <section id="guarantee" className="py-16 md:py-24 px-6" style={{ background: "linear-gradient(180deg, var(--hub-black) 0%, #111111 50%, var(--hub-black) 100%)" }}>
           <div className="max-w-3xl mx-auto text-center">
             {/* Label */}
             <Reveal>
-              <p className="text-[#F0D030] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.guaranteeBadge}</p>
+              <p className="text-[var(--hub-gold)] text-xs tracking-[0.25em] uppercase font-semibold font-body mb-4">{t.guaranteeBadge}</p>
             </Reveal>
 
             {/* Title */}
@@ -860,7 +869,7 @@ export default function LandingPage() {
                   transition={{ duration: 0.5, delay: i * 0.1, ease: "easeOut" }}
                   className="flex flex-col items-center gap-2 group"
                 >
-                  <div className="text-[#F0D030] opacity-80 group-hover:opacity-100 group-hover:-translate-y-1 transition-all duration-200">
+                  <div className="text-[var(--hub-gold)] opacity-80 group-hover:opacity-100 group-hover:-translate-y-1 transition-all duration-200">
                     {b.icon}
                   </div>
                   <p className="text-[#D0D0D0] text-xs md:text-sm font-medium text-center tracking-wide">{b.text}</p>
@@ -872,7 +881,7 @@ export default function LandingPage() {
             <Reveal delay={0.4}>
               <div className="mt-12">
                 <button onClick={() => setDrawerOpen(true)}
-                  className="inline-flex items-center gap-2 bg-[#F0D030] text-[#0A0A0A] text-[13px] font-semibold tracking-[0.15em] uppercase px-10 py-4 hover:bg-[#D4B828] transition-colors duration-300 cursor-pointer">
+                  className="inline-flex items-center gap-2 bg-[var(--hub-gold)] text-[var(--hub-black)] text-[13px] font-semibold tracking-[0.15em] uppercase px-10 py-4 hover:bg-[var(--hub-gold)]/90 transition-colors duration-300 cursor-pointer">
                   {t.ctaBook}
                   <ArrowRight className="w-4 h-4" />
                 </button>
@@ -884,20 +893,20 @@ export default function LandingPage() {
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  FOOTER                                                     */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        <footer className="border-t border-[#D4A017]/20">
+        <footer className="border-t border-[var(--hub-gold)]/20">
           <div className="max-w-6xl mx-auto px-6 py-14 md:py-16">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
               {/* Col 1 — Brand */}
               <div>
                 <Image src="/images/logo.png" alt="HUB Transfer" width={160} height={50} className="h-11 w-auto mb-3" />
-                <p className="text-[#D4A017] text-xs font-medium tracking-wider mb-2">Transfer and Tourism</p>
+                <p className="text-[var(--hub-gold)] text-xs font-medium tracking-wider mb-2">Transfer and Tourism</p>
                 <p className="text-[#999] text-xs leading-relaxed mb-4">
                   Serviço premium de transfers em Lisboa e Portugal. Segurança, pontualidade e conforto em cada viagem.
                 </p>
                 <div className="flex gap-3">
-                  <a href={COMPANY.instagram} target="_blank" rel="noopener noreferrer" title="Instagram" className="text-[#888] hover:text-[#D4A017] transition-colors"><Instagram className="w-4 h-4" /></a>
-                  <a href={COMPANY.facebook} target="_blank" rel="noopener noreferrer" title="Facebook" className="text-[#888] hover:text-[#D4A017] transition-colors"><Facebook className="w-4 h-4" /></a>
-                  <a href={WA_URL} target="_blank" rel="noopener noreferrer" title="WhatsApp" className="text-[#888] hover:text-[#D4A017] transition-colors">
+                  <a href={COMPANY.instagram} target="_blank" rel="noopener noreferrer" title="Instagram" className="text-[#888] hover:text-[var(--hub-gold)] transition-colors"><Instagram className="w-4 h-4" /></a>
+                  <a href={COMPANY.facebook} target="_blank" rel="noopener noreferrer" title="Facebook" className="text-[#888] hover:text-[var(--hub-gold)] transition-colors"><Facebook className="w-4 h-4" /></a>
+                  <a href={WA_URL} target="_blank" rel="noopener noreferrer" title="WhatsApp" className="text-[#888] hover:text-[var(--hub-gold)] transition-colors">
                     <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                   </a>
                 </div>
@@ -919,11 +928,11 @@ export default function LandingPage() {
               <div>
                 <p className="text-white text-xs tracking-wider uppercase mb-4 font-semibold">{lang === "PT" ? "Contacto" : "Contact"}</p>
                 <div className="space-y-2.5 text-xs">
-                  <a href={`tel:${COMPANY.whatsapp}`} className="flex items-center gap-2 text-[#999] hover:text-[#D4A017] transition-colors"><Phone className="w-3.5 h-3.5 text-[#D4A017]" />{COMPANY.whatsappFormatted}</a>
-                  <a href={`mailto:${COMPANY.email}`} className="flex items-center gap-2 text-[#999] hover:text-[#D4A017] transition-colors"><Mail className="w-3.5 h-3.5 text-[#D4A017]" />{COMPANY.email}</a>
-                  <div className="flex items-center gap-2 text-[#999]"><MapPin className="w-3.5 h-3.5 text-[#D4A017]" />{COMPANY.location}</div>
-                  <a href={WA_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#999] hover:text-[#D4A017] transition-colors">
-                    <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-[#D4A017]"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                  <a href={`tel:${COMPANY.whatsapp}`} className="flex items-center gap-2 text-[#999] hover:text-[var(--hub-gold)] transition-colors"><Phone className="w-3.5 h-3.5 text-[var(--hub-gold)]" />{COMPANY.whatsappFormatted}</a>
+                  <a href={`mailto:${COMPANY.email}`} className="flex items-center gap-2 text-[#999] hover:text-[var(--hub-gold)] transition-colors"><Mail className="w-3.5 h-3.5 text-[var(--hub-gold)]" />{COMPANY.email}</a>
+                  <div className="flex items-center gap-2 text-[#999]"><MapPin className="w-3.5 h-3.5 text-[var(--hub-gold)]" />{COMPANY.location}</div>
+                  <a href={WA_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#999] hover:text-[var(--hub-gold)] transition-colors">
+                    <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-[var(--hub-gold)]"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                     WhatsApp
                   </a>
                 </div>
@@ -933,10 +942,10 @@ export default function LandingPage() {
               <div>
                 <p className="text-white text-xs tracking-wider uppercase mb-4 font-semibold">Legal</p>
                 <div className="space-y-2.5 text-xs">
-                  <a href="/privacidade" className="block text-[#999] hover:text-[#D4A017] transition-colors">Política de Privacidade</a>
-                  <a href="/termos" className="block text-[#999] hover:text-[#D4A017] transition-colors">Termos e Condições</a>
-                  <a href="https://www.livroreclamacoes.pt/" target="_blank" rel="noopener noreferrer" className="block text-[#999] hover:text-[#D4A017] transition-colors">Livro de Reclamações</a>
-                  <a href="/login" className="block text-[#999] hover:text-[#D4A017] transition-colors">Área Reservada (Parceiros)</a>
+                  <a href="/privacidade" className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">Política de Privacidade</a>
+                  <a href="/termos" className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">Termos e Condições</a>
+                  <a href="https://www.livroreclamacoes.pt/" target="_blank" rel="noopener noreferrer" className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">Livro de Reclamações</a>
+                  <a href="/login" className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">Área Reservada (Parceiros)</a>
                 </div>
                 <p className="text-[#666] text-[10px] mt-4 font-mono">RNAVT {COMPANY.rnavt} | NIF {COMPANY.nif}</p>
               </div>
@@ -944,7 +953,7 @@ export default function LandingPage() {
           </div>
 
           {/* Bottom bar */}
-          <div className="border-t border-[#D4A017]/15">
+          <div className="border-t border-[var(--hub-gold)]/15">
             <div className="max-w-6xl mx-auto px-6 py-4 text-center">
               <p className="text-[#666] text-[10px] font-mono leading-relaxed">
                 © 2026 {COMPANY.legalName} — Todos os direitos reservados<br />
@@ -960,7 +969,7 @@ export default function LandingPage() {
         <div className="fixed bottom-0 left-0 right-0 z-40 p-4 md:hidden">
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full flex items-center justify-center gap-2 bg-[#F0D030] text-black text-[13px] font-semibold tracking-[0.15em] uppercase py-4 animate-[subtlePulse_3s_ease-in-out_infinite] cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 bg-[var(--hub-gold)] text-black text-[13px] font-semibold tracking-[0.15em] uppercase py-4 animate-[subtlePulse_3s_ease-in-out_infinite] cursor-pointer"
           >
             {t.ctaBook}
             <ArrowRight className="w-4 h-4" />
@@ -997,7 +1006,7 @@ export default function LandingPage() {
                 <div
                   className="relative w-full max-w-[480px] max-h-[85vh] overflow-y-auto rounded-2xl pointer-events-auto select-none"
                   style={{
-                    backgroundImage: "url(/images/rua01.png)",
+                    backgroundImage: "url(/images/rua01.jpg)",
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     WebkitTouchCallout: "none",
@@ -1013,7 +1022,7 @@ export default function LandingPage() {
                     {/* Header */}
                     <div className="flex items-center justify-between mb-5">
                       <h3 className="text-xl font-bold text-[#F5F5F5]">
-                        {lang === "PT" ? "Reserve seu transfer" : lang === "ES" ? "Reserve su transfer" : lang === "FR" ? "Réservez votre transfert" : lang === "IT" ? "Prenota il tuo transfer" : "Book your transfer"}
+                        {lang === "PT" ? "Reserve o seu transfer" : lang === "ES" ? "Reserve su transfer" : lang === "FR" ? "Réservez votre transfert" : lang === "IT" ? "Prenota il tuo transfer" : "Book your transfer"}
                       </h3>
                       <button onClick={() => setDrawerOpen(false)} className="text-[#888] hover:text-[#F5F5F5] transition-colors cursor-pointer">
                         <X className="w-5 h-5" />
@@ -1023,21 +1032,21 @@ export default function LandingPage() {
                     <div className="space-y-3">
                       {/* Origin — quick button + free text with autocomplete */}
                       <div>
-                        <label className="text-[#F0D030] text-[10px] tracking-wider uppercase block mb-1.5">{lang === "PT" ? "ORIGEM" : lang === "ES" ? "ORIGEN" : lang === "FR" ? "ORIGINE" : lang === "IT" ? "ORIGINE" : "FROM"}</label>
+                        <label className="text-[var(--hub-gold)] text-[10px] tracking-wider uppercase block mb-1.5">{lang === "PT" ? "ORIGEM" : lang === "ES" ? "ORIGEN" : lang === "FR" ? "ORIGINE" : lang === "IT" ? "ORIGINE" : "FROM"}</label>
                         <div className="flex gap-1.5 mb-1.5">
                           <button type="button" onClick={() => setBOrigin("Aeroporto de Lisboa")}
-                            className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${bOrigin.includes("Aeroporto") ? "border-[#F0D030]/40 text-[#F0D030] bg-[#F0D030]/10" : "border-[#2A2A2A] text-[#B0B0B0]"}`}>
+                            className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${bOrigin.includes("Aeroporto") ? "border-[var(--hub-gold)]/40 text-[var(--hub-gold)] bg-[var(--hub-gold)]/10" : "border-[var(--hub-line)] text-[#B0B0B0]"}`}>
                             ✈ Aeroporto de Lisboa
                           </button>
                         </div>
                         <input id="drawerOrigin" type="text" value={bOrigin} onChange={(e) => setBOrigin(e.target.value)}
                           placeholder={lang === "PT" ? "Endereço de origem..." : lang === "ES" ? "Dirección de origen..." : lang === "FR" ? "Adresse d'origine..." : lang === "IT" ? "Indirizzo di origine..." : "Pick-up address..."}
-                          className="w-full h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 text-[#F5F5F5] text-sm placeholder-[#666] focus:outline-none focus:border-[#F0D030] transition-colors" />
+                          className="w-full h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 text-[#F5F5F5] text-sm placeholder-[#666] focus:outline-none focus:border-[var(--hub-gold)] transition-colors" />
                       </div>
 
                       {/* Destination — quick buttons + free text with autocomplete */}
                       <div>
-                        <label className="text-[#F0D030] text-[10px] tracking-wider uppercase block mb-1.5">{lang === "PT" ? "DESTINO" : lang === "ES" ? "DESTINO" : lang === "FR" ? "DESTINATION" : lang === "IT" ? "DESTINAZIONE" : "TO"}</label>
+                        <label className="text-[var(--hub-gold)] text-[10px] tracking-wider uppercase block mb-1.5">{lang === "PT" ? "DESTINO" : lang === "ES" ? "DESTINO" : lang === "FR" ? "DESTINATION" : lang === "IT" ? "DESTINAZIONE" : "TO"}</label>
                         <div className="flex gap-1.5 mb-1.5 flex-wrap">
                           {[
                             { l: "✈ Aeroporto", v: "Aeroporto de Lisboa" },
@@ -1045,30 +1054,30 @@ export default function LandingPage() {
                             { l: "🏰 Sintra", v: "Sintra, Portugal" },
                           ].map((q) => (
                             <button key={q.l} type="button" onClick={() => setBDest(q.v)}
-                              className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${bDest === q.v ? "border-[#F0D030]/40 text-[#F0D030] bg-[#F0D030]/10" : "border-[#2A2A2A] text-[#B0B0B0]"}`}>
+                              className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${bDest === q.v ? "border-[var(--hub-gold)]/40 text-[var(--hub-gold)] bg-[var(--hub-gold)]/10" : "border-[var(--hub-line)] text-[#B0B0B0]"}`}>
                               {q.l}
                             </button>
                           ))}
                         </div>
                         <input id="drawerDest" type="text" value={bDest} onChange={(e) => setBDest(e.target.value)}
                           placeholder={lang === "PT" ? "Endereço de destino..." : lang === "ES" ? "Dirección de destino..." : lang === "FR" ? "Adresse de destination..." : lang === "IT" ? "Indirizzo di destinazione..." : "Destination address..."}
-                          className="w-full h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 text-[#F5F5F5] text-sm placeholder-[#666] focus:outline-none focus:border-[#F0D030] transition-colors" />
+                          className="w-full h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 text-[#F5F5F5] text-sm placeholder-[#666] focus:outline-none focus:border-[var(--hub-gold)] transition-colors" />
                       </div>
 
                       {/* Date — full width */}
                       <div>
-                        <label className="text-[#F0D030] text-[10px] tracking-wider uppercase block mb-1.5">{lang === "PT" ? "DATA" : lang === "ES" ? "FECHA" : lang === "FR" ? "DATE" : "DATE"}</label>
+                        <label className="text-[var(--hub-gold)] text-[10px] tracking-wider uppercase block mb-1.5">{lang === "PT" ? "DATA" : lang === "ES" ? "FECHA" : lang === "FR" ? "DATE" : "DATE"}</label>
                         <input type="date" value={bDate} onChange={(e) => setBDate(e.target.value)}
-                          className="w-full h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 text-[#F5F5F5] text-sm focus:outline-none focus:border-[#F0D030] [color-scheme:dark] transition-colors" />
+                          className="w-full h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 text-[#F5F5F5] text-sm focus:outline-none focus:border-[var(--hub-gold)] [color-scheme:dark] transition-colors" />
                       </div>
 
                       {/* Pax — separate row */}
                       <div>
-                        <label className="text-[#F0D030] text-[10px] tracking-wider uppercase block mb-1.5">{lang === "PT" ? "PASSAGEIROS" : lang === "ES" ? "PASAJEROS" : lang === "FR" ? "PASSAGERS" : lang === "IT" ? "PASSEGGERI" : "PASSENGERS"}</label>
+                        <label className="text-[var(--hub-gold)] text-[10px] tracking-wider uppercase block mb-1.5">{lang === "PT" ? "PASSAGEIROS" : lang === "ES" ? "PASAJEROS" : lang === "FR" ? "PASSAGERS" : lang === "IT" ? "PASSEGGERI" : "PASSENGERS"}</label>
                         <div className="flex gap-1.5">
                           {[1, 2, 3, 4, 5, 6].map((n) => (
                             <button key={n} type="button" onClick={() => setBPax(n)}
-                              className={`flex-1 h-10 text-sm font-medium rounded-lg transition-colors cursor-pointer ${bPax === n ? "bg-[#F0D030] text-[#0A0A0A]" : "bg-white/[0.06] border border-white/[0.12] text-[#B0B0B0]"}`}>
+                              className={`flex-1 h-10 text-sm font-medium rounded-lg transition-colors cursor-pointer ${bPax === n ? "bg-[var(--hub-gold)] text-[var(--hub-black)]" : "bg-white/[0.06] border border-white/[0.12] text-[#B0B0B0]"}`}>
                               {n}
                             </button>
                           ))}
@@ -1077,7 +1086,7 @@ export default function LandingPage() {
 
                       {/* Phone with DDI selector */}
                       <div>
-                        <label className="text-[#F0D030] text-[10px] tracking-wider uppercase block mb-1">WHATSAPP</label>
+                        <label className="text-[var(--hub-gold)] text-[10px] tracking-wider uppercase block mb-1">WHATSAPP</label>
                         <PhoneInput value={bPhone} onChange={setBPhone} defaultCountry="PT" />
                       </div>
 
@@ -1086,11 +1095,11 @@ export default function LandingPage() {
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                           className="flex justify-center gap-8 py-2">
                           <div className="text-center">
-                            <div className="text-[#F0D030] text-lg font-bold" style={{ fontFamily: "var(--font-mono)" }}>{routeInfo.distance}</div>
+                            <div className="text-[var(--hub-gold)] text-lg font-bold" style={{ fontFamily: "var(--font-mono)" }}>{routeInfo.distance}</div>
                             <div className="text-[#888] text-[10px]">{lang === "PT" ? "Distância" : "Distance"}</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-[#F0D030] text-lg font-bold" style={{ fontFamily: "var(--font-mono)" }}>~{routeInfo.duration}</div>
+                            <div className="text-[var(--hub-gold)] text-lg font-bold" style={{ fontFamily: "var(--font-mono)" }}>~{routeInfo.duration}</div>
                             <div className="text-[#888] text-[10px]">{lang === "PT" ? "Tempo" : "Time"}</div>
                           </div>
                         </motion.div>
@@ -1098,7 +1107,7 @@ export default function LandingPage() {
 
                       {/* CTA */}
                       <a href={waBookingUrl()} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2 w-full h-12 bg-[#F0D030] text-[#0A0A0A] text-[13px] font-bold tracking-[0.12em] uppercase rounded-lg hover:bg-[#D4B828] transition-colors">
+                        className="flex items-center justify-center gap-2 w-full h-12 bg-[var(--hub-gold)] text-[var(--hub-black)] text-[13px] font-bold tracking-[0.12em] uppercase rounded-lg hover:bg-[var(--hub-gold)]/90 transition-colors">
                         {lang === "PT" ? "Solicitar orçamento" : lang === "ES" ? "Solicitar presupuesto" : lang === "FR" ? "Demander un devis" : lang === "IT" ? "Richiedi preventivo" : "Request quote"}
                         <ArrowRight className="w-4 h-4" />
                       </a>
