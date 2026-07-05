@@ -149,7 +149,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     fleetTitle: 'Investimos cada cêntimo da HUB Transfer em tecnologia.',
     fleetDesc:
       'Enquanto muitas empresas gastam fortunas em carros de ostentação, nós decidimos investir em Sincronização Aérea Profunda. Porque entendemos que o verdadeiro luxo não é apenas um banco de pele num carro que não chega. Luxo a sério é o seu voo atrasar 4 horas e, quando pisa no terminal de Lisboa, o seu motorista já lá estar.',
-    fleetFeature1: '96.8% de Pontualidade',
+    fleetFeature1: 'Pontualidade com garantia real',
     fleetFeature2: 'Monitorização de voo em tempo real',
     fleetFeature3: 'Suporte 24/7',
 
@@ -158,7 +158,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     whyDesc: 'A nossa confiança no algoritmo é absoluta.',
     whyReason1Title: 'Sincronização Aérea Profunda',
     whyReason1Desc:
-      'Monitoriza 47 variáveis do seu voo em tempo real. Atrasos, mudanças de porta, tudo é seguido automaticamente.',
+      'Monitoriza o seu voo em tempo real: atrasos, mudanças de porta de embarque, aterragens antecipadas — tudo seguido automaticamente.',
     whyReason2Title: 'Motoristas Concierge',
     whyReason2Desc:
       'Não são apenas motoristas. São profissionais treinados para acolher. Conhecem cada rua de Lisboa, Porto e Faro.',
@@ -275,7 +275,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     fleetTitle: 'We invest every penny of HUB Transfer in technology.',
     fleetDesc:
       'While many companies spend fortunes on flashy cars, we chose to invest in Deep Flight Synchronisation. Because we understand that real luxury isn\'t just a leather seat in a car that never shows up. Real luxury is your flight being delayed 4 hours and when you step into Lisbon\'s terminal, your driver is already there.',
-    fleetFeature1: '96.8% Punctuality',
+    fleetFeature1: 'Punctuality with a real guarantee',
     fleetFeature2: 'Real-time flight monitoring',
     fleetFeature3: '24/7 Support',
 
@@ -285,7 +285,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
       'It\'s not magic. It\'s technology, precision and commitment to you.',
     whyReason1Title: 'Smart Algorithm',
     whyReason1Desc:
-      'Monitors 47 variables of your flight in real-time. Delays, gate changes, everything is tracked.',
+      'Tracks your flight in real time: delays, gate changes, early landings — everything followed automatically.',
     whyReason2Title: 'Trained Drivers',
     whyReason2Desc:
       'Every driver receives premium training. They know every street in Lisbon, Porto and Faro.',
@@ -402,7 +402,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     fleetTitle: 'Invertimos cada céntimo de HUB Transfer en tecnología.',
     fleetDesc:
       'Mientras muchas empresas gastan fortunas en coches de ostentación, nosotros decidimos invertir en Sincronización Aérea Profunda. Porque entendemos que el verdadero lujo no es solo un asiento de cuero en un coche que no llega. El verdadero lujo es que tu vuelo se retrase 4 horas y cuando pisas el aeropuerto de Lisboa, tu conductor ya está ahí.',
-    fleetFeature1: '96.8% de Puntualidad',
+    fleetFeature1: 'Puntualidad con garantía real',
     fleetFeature2: 'Monitorización de vuelo en tiempo real',
     fleetFeature3: 'Soporte 24/7',
 
@@ -412,7 +412,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
       'No es magia. Es tecnología, precisión y compromiso contigo.',
     whyReason1Title: 'Algoritmo Inteligente',
     whyReason1Desc:
-      'Monitorea 47 variables de tu vuelo en tiempo real. Retrasos, cambios de puerta, todo se rastrea.',
+      'Monitoriza su vuelo en tiempo real: retrasos, cambios de puerta de embarque, aterrizajes anticipados — todo seguido automáticamente.',
     whyReason2Title: 'Conductores Entrenados',
     whyReason2Desc:
       'Cada conductor recibe entrenamiento premium. Conocen cada calle de Lisboa, Oporto y Faro.',
@@ -529,7 +529,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     fleetTitle: 'Nous investissons chaque centime de HUB Transfer dans la technologie.',
     fleetDesc:
       "Alors que beaucoup d'entreprises dépensent des fortunes en voitures de prestige, nous avons choisi d'investir dans la Synchronisation Aérienne Profonde. Car nous savons que le vrai luxe, ce n'est pas seulement un siège en cuir dans une voiture qui n'arrive jamais. Le vrai luxe, c'est quand votre vol a 4 heures de retard et qu'en arrivant à Lisbonne, votre chauffeur est déjà là.",
-    fleetFeature1: '96.8% de Ponctualité',
+    fleetFeature1: 'Ponctualité avec une vraie garantie',
     fleetFeature2: 'Surveillance de vol en temps réel',
     fleetFeature3: 'Assistance 24h/24',
 
@@ -539,7 +539,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
       "Ce n'est pas de la magie. C'est de la technologie, de la précision et un engagement envers vous.",
     whyReason1Title: 'Algorithme Intelligent',
     whyReason1Desc:
-      'Surveille 47 variables de votre vol en temps réel. Retards, changements de porte, tout est suivi.',
+      'Suit votre vol en temps réel : retards, changements de porte d\'embarquement, atterrissages anticipés — tout est suivi automatiquement.',
     whyReason2Title: 'Conducteurs Formés',
     whyReason2Desc:
       'Chaque conducteur reçoit une formation premium. Ils connaissent chaque rue de Lisbonne, Porto et Faro.',
@@ -656,7 +656,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     fleetTitle: 'Investiamo ogni centesimo di HUB Transfer in tecnologia.',
     fleetDesc:
       "Mentre molte aziende spendono fortune in auto appariscenti, noi abbiamo scelto di investire nella Sincronizzazione Aerea Profonda. Perché sappiamo che il vero lusso non è solo un sedile in pelle in un'auto che non arriva mai. Il vero lusso è quando il tuo volo ritarda di 4 ore e appena metti piede a Lisbona, il tuo autista è già lì.",
-    fleetFeature1: '96.8% di Puntualità',
+    fleetFeature1: 'Puntualità con garanzia reale',
     fleetFeature2: 'Monitoraggio del volo in tempo reale',
     fleetFeature3: 'Supporto 24/7',
 
@@ -666,7 +666,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
       'Non è magia. È tecnologia, precisione e impegno verso di te.',
     whyReason1Title: 'Algoritmo Intelligente',
     whyReason1Desc:
-      'Monitora 47 variabili del tuo volo in tempo reale. Ritardi, cambi di gate, tutto è tracciato.',
+      'Monitora il suo volo in tempo reale: ritardi, cambi di gate, atterraggi anticipati — tutto seguito automaticamente.',
     whyReason2Title: 'Conducenti Addestrati',
     whyReason2Desc:
       'Ogni conducente riceve formazione premium. Conoscono ogni strada di Lisbona, Porto e Faro.',
