@@ -105,12 +105,6 @@ export default function RootLayout({
                 longitude: -9.1393,
               },
               areaServed: { "@type": "City", name: "Lisboa" },
-              aggregateRating: {
-                "@type": "AggregateRating",
-                ratingValue: "4.9",
-                reviewCount: "4387",
-                bestRating: "5",
-              },
               priceRange: "€€",
               openingHoursSpecification: {
                 "@type": "OpeningHoursSpecification",
