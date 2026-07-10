@@ -107,7 +107,7 @@ export interface LandingTranslations {
 
   // Guarantee badges
   badgePrice: string;
-  badgeWait: string;
+  badgePunctual: string;
   badgeCancel: string;
   badgeFlight: string;
 
@@ -179,7 +179,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Guarantee
     guaranteeDesc:
-      '90 minutos de espera incluídos, contados da aterragem real do seu voo. E depois deles, nunca cancelamos sem falar consigo.',
+      'Monitorizamos o seu voo em tempo real e coordenamos a sua chegada ao minuto. E nunca cancelamos sem falar consigo.',
     guaranteeBadge: 'Garantia 100%',
     policyLink: 'Consultar a Política de Espera →',
 
@@ -233,7 +233,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Guarantee badges
     badgePrice: 'Preço fixo',
-    badgeWait: '90 min de espera incluídos',
+    badgePunctual: 'Sempre pontual',
     badgeCancel: 'Cancelamento grátis até 3h antes',
     badgeFlight: 'Voo monitorizado',
 
@@ -303,7 +303,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Guarantee
     guaranteeDesc:
-      "90 minutes of waiting time included, counted from your flight's actual landing. And beyond that, we never cancel without talking to you.",
+      "We track your flight in real time and coordinate your arrival to the minute. And we never cancel without talking to you.",
     guaranteeBadge: '100% Guarantee',
     policyLink: 'Read our Waiting Policy →',
 
@@ -357,7 +357,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Guarantee badges
     badgePrice: 'Fixed price',
-    badgeWait: '90 min waiting included',
+    badgePunctual: 'Always on time',
     badgeCancel: 'Free cancellation up to 3h before',
     badgeFlight: 'Flight tracked',
 
@@ -427,7 +427,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Guarantee
     guaranteeDesc:
-      '90 minutos de espera incluidos, contados desde el aterrizaje real de su vuelo. Y después, nunca cancelamos sin hablar con usted.',
+      'Monitorizamos su vuelo en tiempo real y coordinamos su llegada al minuto. Y nunca cancelamos sin hablar con usted.',
     guaranteeBadge: 'Garantía 100%',
     policyLink: 'Consultar la Política de Espera →',
 
@@ -481,7 +481,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Guarantee badges
     badgePrice: 'Precio fijo',
-    badgeWait: '90 min de espera incluidos',
+    badgePunctual: 'Siempre puntual',
     badgeCancel: 'Cancelación gratis hasta 3h antes',
     badgeFlight: 'Vuelo monitorizado',
 
@@ -551,7 +551,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Guarantee
     guaranteeDesc:
-      "90 minutes d'attente incluses, comptées à partir de l'atterrissage réel de votre vol. Et au-delà, nous n'annulons jamais sans vous parler.",
+      "Nous suivons votre vol en temps réel et coordonnons votre arrivée à la minute près. Et nous n'annulons jamais sans vous parler.",
     guaranteeBadge: 'Garantie 100%',
     policyLink: "Consulter la Politique d'Attente →",
 
@@ -605,7 +605,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Guarantee badges
     badgePrice: 'Prix fixe',
-    badgeWait: "90 min d'attente inclus",
+    badgePunctual: 'Toujours ponctuel',
     badgeCancel: 'Annulation gratuite jusqu\'à 3h avant',
     badgeFlight: 'Vol surveillé',
 
@@ -675,7 +675,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Guarantee
     guaranteeDesc:
-      "90 minuti di attesa inclusi, contati dall'atterraggio reale del suo volo. E oltre, non cancelliamo mai senza parlarle.",
+      "Monitoriamo il suo volo in tempo reale e coordiniamo il suo arrivo al minuto. E non cancelliamo mai senza parlarle.",
     guaranteeBadge: 'Garanzia 100%',
     policyLink: 'Consultare la Politica di Attesa →',
 
@@ -729,7 +729,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Guarantee badges
     badgePrice: 'Prezzo fisso',
-    badgeWait: '90 min di attesa inclusi',
+    badgePunctual: 'Sempre puntuale',
     badgeCancel: 'Cancellazione gratuita fino a 3h prima',
     badgeFlight: 'Volo monitorato',
 
