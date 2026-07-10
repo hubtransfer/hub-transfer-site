@@ -174,71 +174,72 @@ function RadarIllustration({ variant = "default", states }: { variant?: "default
 }
 const WA_URL = `https://wa.me/${COMPANY.whatsapp.replace(/\+/g, "")}`;
 
-/* ─── Seal image with stamp impact animation ─── */
-const SEAL_MAP: Record<string, string> = {
-  PT: "/images/selo_br.png",
-  EN: "/images/selo_en.png",
-  ES: "/images/selo_es.png",
-  FR: "/images/selo_fr.png",
-  IT: "/images/selo_it.png",
-};
-
-function SealImage({ lang: sealLang }: { lang: string }) {
+/* ─── Selo SVG tipo carimbo (substitui os PNGs selo_*).
+   Texto em arco via textPath: t.headline (topo) + t.headlineHighlight (base),
+   uppercase, sem ponto final. Cores por token. A animação de stamp é a única
+   animação da secção Garantia. aria-hidden (decorativo). ─── */
+function StampSeal({ topText, bottomText }: { topText: string; bottomText: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const [stamped, setStamped] = useState(false);
-  const [ring, setRing] = useState(false);
-
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     const obs = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting && !stamped) {
-          setStamped(true);
-          setTimeout(() => setRing(true), 350);
-        }
-      },
+      ([e]) => { if (e.isIntersecting) { setStamped(true); obs.disconnect(); } },
       { threshold: 0.4 },
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, [stamped]);
-
-  const src = SEAL_MAP[sealLang] || SEAL_MAP.EN;
+  }, []);
+  const top = topText.toUpperCase().replace(/[.]+$/, "").trim();
+  const bottom = bottomText.toUpperCase().replace(/[.]+$/, "").trim();
 
   return (
-    <div ref={ref} className="flex justify-center mt-10">
-      <div className="relative">
-        {/* Impact ring */}
-        {ring && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-[160px] h-[160px] md:w-[220px] md:h-[220px] rounded-full border border-[var(--hub-gold)]/40"
-              style={{ animation: "stampRing 0.6s ease-out forwards" }} />
-          </div>
-        )}
-
-        {/* Seal image */}
-        <Image
-          src={src}
-          alt="Selo de Garantia HUB Transfer"
-          width={220}
-          height={220}
-          className="w-[160px] h-auto md:w-[220px]"
-          style={{
-            opacity: stamped ? 1 : 0,
-            transform: stamped ? "scale(1) rotate(-5deg)" : "scale(2) rotate(-15deg)",
-            transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.15s ease-out",
-          }}
-        />
-      </div>
-
+    <div ref={ref} className="flex justify-center mt-10" aria-hidden="true">
+      <svg viewBox="0 0 240 240" className={`w-[170px] h-[170px] md:w-[220px] md:h-[220px] stamp-seal ${stamped ? "stamped" : ""}`} fill="none">
+        <defs>
+          <path id="sealTop" d="M 20 120 A 100 100 0 0 1 220 120" />
+          <path id="sealBottom" d="M 26 120 A 94 94 0 0 0 214 120" />
+        </defs>
+        {/* rings */}
+        <circle cx="120" cy="120" r="113" stroke="var(--hub-gold)" strokeWidth="2.5" opacity="0.95" />
+        <circle cx="120" cy="120" r="93" stroke="var(--hub-gold)" strokeWidth="1" opacity="0.5" />
+        {/* arc text */}
+        <text fill="var(--hub-gold)" fontSize="13" fontWeight="700" letterSpacing="1.5" className="font-mono">
+          <textPath href="#sealTop" startOffset="50%" textAnchor="middle">{top}</textPath>
+        </text>
+        <text fill="var(--hub-gold)" fontSize="13" fontWeight="700" letterSpacing="1.5" className="font-mono">
+          <textPath href="#sealBottom" startOffset="50%" textAnchor="middle">{bottom}</textPath>
+        </text>
+        {/* diagonal center stamp band */}
+        <g transform="rotate(-7 120 120)">
+          <rect x="26" y="101" width="188" height="38" rx="3" fill="var(--hub-gold)" />
+          <text x="120" y="121" textAnchor="middle" fill="var(--hub-black)" fontSize="21" fontWeight="800" style={{ fontFamily: "var(--font-display)" }}>HUB TRANSFER</text>
+          <text x="120" y="132" textAnchor="middle" fill="var(--hub-black)" fontSize="7" fontWeight="700" letterSpacing="3.5" className="font-mono">PORTUGAL</text>
+        </g>
+      </svg>
       <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes stampRing {
-          0% { transform: scale(0.8); opacity: 0.4; }
-          100% { transform: scale(2.2); opacity: 0; }
+        .stamp-seal { opacity: 0; transform: scale(1.8) rotate(-15deg); transform-origin: center; transition: transform .45s cubic-bezier(.34,1.56,.64,1), opacity .18s ease-out; }
+        .stamp-seal.stamped { opacity: 1; transform: scale(1) rotate(-4deg); }
+        @media (prefers-reduced-motion: reduce) {
+          .stamp-seal { transition: none; opacity: 1; transform: rotate(-4deg); }
         }
       `}} />
     </div>
+  );
+}
+
+/* ─── Números/condições em mono (dados de sistema): envolve "90", "3h", etc. ─── */
+function MonoNums({ text }: { text: string }) {
+  const parts = text.split(/(\d+h?)/g);
+  return (
+    <>
+      {parts.map((p, i) =>
+        /^\d+h?$/.test(p)
+          ? <span key={i} className="font-mono">{p}</span>
+          : <span key={i}>{p}</span>
+      )}
+    </>
   );
 }
 
@@ -705,7 +706,7 @@ export default function LandingPage() {
                   { step: "03", title: t.step3Title, desc: t.step3Desc },
                 ].map((s, i) => (
                   <div key={i} className="flex gap-5">
-                    <div className="text-[var(--hub-gold)]/25 text-4xl font-bold leading-none flex-shrink-0 w-12" style={{ fontFamily: "var(--font-mono)" }}>{s.step}</div>
+                    <div className="text-[var(--hub-gold)]/40 text-5xl font-bold leading-none flex-shrink-0 w-14" style={{ fontFamily: "var(--font-mono)" }}>{s.step}</div>
                     <div>
                       <h3 className="text-base font-semibold text-white mb-1.5">{s.title}</h3>
                       <p className="text-[#D0D0D0] text-sm leading-relaxed">{s.desc}</p>
@@ -851,39 +852,40 @@ export default function LandingPage() {
               </h2>
             </Reveal>
 
-            {/* Subtitle */}
+            {/* Subtitle — a condição da promessa (número em mono) */}
             <Reveal delay={0.1}>
               <p className="mt-5 text-[#D0D0D0] text-base md:text-lg leading-relaxed max-w-xl mx-auto">
-                {t.guaranteeDesc}
+                <MonoNums text={t.guaranteeDesc} />
               </p>
             </Reveal>
 
-            {/* Designer seal — changes per language */}
-            <Reveal delay={0.2}>
-              <SealImage lang={lang} />
+            {/* Link para a Política de Espera */}
+            <Reveal delay={0.15}>
+              <a
+                href={lang === "PT" ? "/politica-de-espera" : "/waiting-policy"}
+                className="inline-block mt-4 text-[var(--hub-gold)] text-sm font-medium hover:underline rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--hub-gold)]"
+              >
+                {t.policyLink}
+              </a>
             </Reveal>
 
-            {/* 4 guarantee badges with Lucide icons */}
+            {/* Selo SVG — carimbo (única animação da secção) */}
+            <StampSeal topText={t.headline} bottomText={t.headlineHighlight} />
+
+            {/* 4 guarantee badges — estáticos (sem fades a competir com o carimbo) */}
             <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-8">
               {[
                 { icon: <Lock className="w-7 h-7 md:w-9 md:h-9" strokeWidth={1.5} />, text: t.badgePrice },
-                { icon: <Clock className="w-7 h-7 md:w-9 md:h-9" strokeWidth={1.5} />, text: t.badgePunctual },
+                { icon: <Clock className="w-7 h-7 md:w-9 md:h-9" strokeWidth={1.5} />, text: t.badgeWait },
                 { icon: <ShieldCheck className="w-7 h-7 md:w-9 md:h-9" strokeWidth={1.5} />, text: t.badgeCancel },
                 { icon: <Radar className="w-7 h-7 md:w-9 md:h-9" strokeWidth={1.5} />, text: t.badgeFlight },
               ].map((b, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: i * 0.1, ease: "easeOut" }}
-                  className="flex flex-col items-center gap-2 group"
-                >
+                <div key={i} className="flex flex-col items-center gap-2 group">
                   <div className="text-[var(--hub-gold)] opacity-80 group-hover:opacity-100 group-hover:-translate-y-1 transition-all duration-200">
                     {b.icon}
                   </div>
-                  <p className="text-[#D0D0D0] text-xs md:text-sm font-medium text-center tracking-wide">{b.text}</p>
-                </motion.div>
+                  <p className="text-[#D0D0D0] text-xs md:text-sm font-medium text-center tracking-wide"><MonoNums text={b.text} /></p>
+                </div>
               ))}
             </div>
 
@@ -954,6 +956,7 @@ export default function LandingPage() {
                 <div className="space-y-2.5 text-xs">
                   <a href="/privacidade" className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">Política de Privacidade</a>
                   <a href="/termos" className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">Termos e Condições</a>
+                  <a href={lang === "PT" ? "/politica-de-espera" : "/waiting-policy"} className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">{lang === "PT" ? "Política de Espera" : lang === "ES" ? "Política de Espera" : lang === "FR" ? "Politique d'Attente" : lang === "IT" ? "Politica di Attesa" : "Waiting Policy"}</a>
                   <a href="https://www.livroreclamacoes.pt/" target="_blank" rel="noopener noreferrer" className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">Livro de Reclamações</a>
                   <a href="/login" className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">Área Reservada (Parceiros)</a>
                 </div>
@@ -966,7 +969,7 @@ export default function LandingPage() {
           <div className="border-t border-[var(--hub-gold)]/15">
             <div className="max-w-6xl mx-auto px-6 py-4 text-center">
               <p className="text-[#666] text-[10px] font-mono leading-relaxed">
-                © 2026 {COMPANY.legalName} — Todos os direitos reservados<br />
+                © {new Date().getFullYear()} {COMPANY.legalName} — Todos os direitos reservados<br />
                 RNAVT {COMPANY.rnavt} · NIF {COMPANY.nif} · Licenciado pelo Turismo de Portugal
               </p>
             </div>

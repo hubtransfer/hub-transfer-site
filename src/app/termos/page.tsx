@@ -43,7 +43,7 @@ export default function TermosPage() {
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">5. Atrasos de voo</h2>
-          <p>A HUB Transfer monitoriza os voos em tempo real. Em caso de atraso, o horario de pickup é automaticamente ajustado sem custo adicional. O motorista aguarda ate 60 minutos apos a aterragem.</p>
+          <p>A HUB Transfer monitoriza os voos em tempo real. Em caso de atraso, o horario de pickup é automaticamente ajustado sem custo adicional. O tempo de espera incluido e as condições de espera estendida constam da nossa <a href="/politica-de-espera" className="text-[#D4A017] hover:underline">Política de Espera</a>.</p>
         </section>
 
         <section className="space-y-3">

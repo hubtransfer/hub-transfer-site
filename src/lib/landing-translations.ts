@@ -50,33 +50,17 @@ export interface LandingTranslations {
   fleetFootnote: string;
   pax7Marker: string;
 
-  // Why it works (4 reasons)
-  whyTitle: string;
-  whyDesc: string;
-  whyReason1Title: string;
-  whyReason1Desc: string;
-  whyReason2Title: string;
-  whyReason2Desc: string;
-  whyReason3Title: string;
-  whyReason3Desc: string;
-  whyReason4Title: string;
-  whyReason4Desc: string;
-
   // Commitment block
   commitTitle: string;
-  commitSub: string;
 
   // Guarantee
-  guaranteeTitle: string;
   guaranteeDesc: string;
   guaranteeBadge: string;
+  policyLink: string;
 
   // CTA Final
   ctaFinalTitle: string;
   ctaFinalDesc: string;
-
-  // Footer
-  footer: string;
 
   // Partners carousel
   partnersLabel: string;
@@ -123,7 +107,7 @@ export interface LandingTranslations {
 
   // Guarantee badges
   badgePrice: string;
-  badgePunctual: string;
+  badgeWait: string;
   badgeCancel: string;
   badgeFlight: string;
 
@@ -190,39 +174,19 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     fleetFootnote: 'Veículo atribuído conforme a categoria reservada.',
     pax7Marker: '👥 Grupo de 7+ passageiros — pedido de orçamento',
 
-    // Why
-    whyTitle: 'Ou apertamos a sua mão, ou pagamos a conta.',
-    whyDesc: 'A nossa confiança no algoritmo é absoluta.',
-    whyReason1Title: 'Sincronização Aérea Profunda',
-    whyReason1Desc:
-      'Monitoriza o seu voo em tempo real: atrasos, mudanças de porta de embarque, aterragens antecipadas — tudo seguido automaticamente.',
-    whyReason2Title: 'Motoristas Concierge',
-    whyReason2Desc:
-      'Não são apenas motoristas. São profissionais treinados para acolher. Conhecem cada rua de Lisboa, Porto e Faro.',
-    whyReason3Title: 'Garantia HUB',
-    whyReason3Desc:
-      'Se falharmos, não paga. Devolvemos o seu dinheiro e pagamos o seu Uber.',
-    whyReason4Title: 'Concierges Digitais 24/7',
-    whyReason4Desc:
-      'Tecnologia para garantir, humanos para acolher. A nossa central não é um bot frio; é uma equipa pronta a ajudar em segundos.',
-
     // Commitment block
     commitTitle: 'Ou apertamos a sua mão, ou pagamos a conta.',
-    commitSub: 'O nosso compromisso, carimbado.',
 
     // Guarantee
-    guaranteeTitle: 'Garantia HUB: Risco Zero',
     guaranteeDesc:
-      'Ou apertamos a sua mão, ou pagamos o seu Uber e devolvemos o seu dinheiro.',
+      '90 minutos de espera incluídos, contados da aterragem real do seu voo. E depois deles, nunca cancelamos sem falar consigo.',
     guaranteeBadge: 'Garantia 100%',
+    policyLink: 'Consultar a Política de Espera →',
 
     // CTA Final
     ctaFinalTitle:
       'O único passo entre o caos do aeroporto e o conforto do seu hotel.',
     ctaFinalDesc: 'Reserve em 2 minutos e deixe o resto com o nosso algoritmo.',
-
-    // Footer
-    footer: '© 2025 HUB Transfer. Tecnologia que garante.',
 
     // Partners carousel
     partnersLabel: 'Os nossos clientes chegam diariamente em voos de:',
@@ -269,7 +233,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Guarantee badges
     badgePrice: 'Preço fixo',
-    badgePunctual: 'Sempre pontual',
+    badgeWait: '90 min de espera incluídos',
     badgeCancel: 'Cancelamento grátis até 3h antes',
     badgeFlight: 'Voo monitorizado',
 
@@ -334,40 +298,19 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     fleetFootnote: 'Vehicle assigned according to the booked category.',
     pax7Marker: '👥 Group of 7+ passengers — quote request',
 
-    // Why
-    whyTitle: 'Why It Works',
-    whyDesc:
-      'It\'s not magic. It\'s technology, precision and commitment to you.',
-    whyReason1Title: 'Smart Algorithm',
-    whyReason1Desc:
-      'Tracks your flight in real time: delays, gate changes, early landings — everything followed automatically.',
-    whyReason2Title: 'Trained Drivers',
-    whyReason2Desc:
-      'Every driver receives premium training. They know every street in Lisbon, Porto and Faro.',
-    whyReason3Title: 'Trust Guarantee',
-    whyReason3Desc:
-      'If we fail, you don\'t pay. Simple. Your satisfaction is our commitment.',
-    whyReason4Title: '24/7 Support',
-    whyReason4Desc:
-      'Team available anytime. Problem? We solve it in minutes, not hours.',
-
     // Commitment block
     commitTitle: 'We shake your hand, or we pay the bill.',
-    commitSub: 'Our commitment, stamped.',
 
     // Guarantee
-    guaranteeTitle: 'HUB Guarantee: Zero Risk',
     guaranteeDesc:
-      'If the driver is more than 10 minutes late, the transfer is free and we pay your Uber.',
+      "90 minutes of waiting time included, counted from your flight's actual landing. And beyond that, we never cancel without talking to you.",
     guaranteeBadge: '100% Guarantee',
+    policyLink: 'Read our Waiting Policy →',
 
     // CTA Final
     ctaFinalTitle:
       'The only step between airport chaos and the comfort of your hotel.',
     ctaFinalDesc: 'Book in 2 minutes and let our algorithm handle the rest.',
-
-    // Footer
-    footer: '© 2025 HUB Transfer. Technology that guarantees.',
 
     // Partners carousel
     partnersLabel: 'Our guests arrive daily on flights with:',
@@ -414,7 +357,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Guarantee badges
     badgePrice: 'Fixed price',
-    badgePunctual: 'Always on time',
+    badgeWait: '90 min waiting included',
     badgeCancel: 'Free cancellation up to 3h before',
     badgeFlight: 'Flight tracked',
 
@@ -479,40 +422,19 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     fleetFootnote: 'Vehículo asignado según la categoría reservada.',
     pax7Marker: '👥 Grupo de 7+ pasajeros — solicitud de presupuesto',
 
-    // Why
-    whyTitle: 'Por Qué Funciona',
-    whyDesc:
-      'No es magia. Es tecnología, precisión y compromiso contigo.',
-    whyReason1Title: 'Algoritmo Inteligente',
-    whyReason1Desc:
-      'Monitoriza su vuelo en tiempo real: retrasos, cambios de puerta de embarque, aterrizajes anticipados — todo seguido automáticamente.',
-    whyReason2Title: 'Conductores Entrenados',
-    whyReason2Desc:
-      'Cada conductor recibe entrenamiento premium. Conocen cada calle de Lisboa, Oporto y Faro.',
-    whyReason3Title: 'Garantía de Confianza',
-    whyReason3Desc:
-      'Si fallamos, no pagas. Así de simple. Tu satisfacción es nuestro compromiso.',
-    whyReason4Title: 'Soporte 24/7',
-    whyReason4Desc:
-      'Equipo disponible en cualquier momento. ¿Problema? Lo resolvemos en minutos, no en horas.',
-
     // Commitment block
     commitTitle: 'O le damos la mano, o pagamos la cuenta.',
-    commitSub: 'Nuestro compromiso, sellado.',
 
     // Guarantee
-    guaranteeTitle: 'Garantía HUB: Riesgo Cero',
     guaranteeDesc:
-      'Si el conductor se retrasa más de 10 minutos, el traslado es gratis y pagamos tu Uber.',
+      '90 minutos de espera incluidos, contados desde el aterrizaje real de su vuelo. Y después, nunca cancelamos sin hablar con usted.',
     guaranteeBadge: 'Garantía 100%',
+    policyLink: 'Consultar la Política de Espera →',
 
     // CTA Final
     ctaFinalTitle:
       'El único paso entre el caos del aeropuerto y la comodidad de tu hotel.',
     ctaFinalDesc: 'Reserva en 2 minutos y deja el resto a nuestro algoritmo.',
-
-    // Footer
-    footer: '© 2025 HUB Transfer. Tecnología que garantiza.',
 
     // Partners carousel
     partnersLabel: 'Nuestros clientes llegan a diario en vuelos de:',
@@ -559,7 +481,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Guarantee badges
     badgePrice: 'Precio fijo',
-    badgePunctual: 'Siempre puntual',
+    badgeWait: '90 min de espera incluidos',
     badgeCancel: 'Cancelación gratis hasta 3h antes',
     badgeFlight: 'Vuelo monitorizado',
 
@@ -624,40 +546,19 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     fleetFootnote: 'Véhicule attribué selon la catégorie réservée.',
     pax7Marker: '👥 Groupe de 7+ passagers — demande de devis',
 
-    // Why
-    whyTitle: 'Pourquoi Ça Marche',
-    whyDesc:
-      "Ce n'est pas de la magie. C'est de la technologie, de la précision et un engagement envers vous.",
-    whyReason1Title: 'Algorithme Intelligent',
-    whyReason1Desc:
-      'Suit votre vol en temps réel : retards, changements de porte d\'embarquement, atterrissages anticipés — tout est suivi automatiquement.',
-    whyReason2Title: 'Conducteurs Formés',
-    whyReason2Desc:
-      'Chaque conducteur reçoit une formation premium. Ils connaissent chaque rue de Lisbonne, Porto et Faro.',
-    whyReason3Title: 'Garantie de Confiance',
-    whyReason3Desc:
-      "Si nous échouons, vous ne payez pas. C'est aussi simple. Votre satisfaction est notre engagement.",
-    whyReason4Title: 'Support 24/7',
-    whyReason4Desc:
-      'Équipe disponible à tout moment. Problème? On le résout en minutes, pas en heures.',
-
     // Commitment block
     commitTitle: "On vous serre la main, ou on paie l'addition.",
-    commitSub: 'Notre engagement, tamponné.',
 
     // Guarantee
-    guaranteeTitle: 'Garantie HUB: Zéro Risque',
     guaranteeDesc:
-      'Si le conducteur a plus de 10 minutes de retard, le transfert est gratuit et nous payons votre Uber.',
+      "90 minutes d'attente incluses, comptées à partir de l'atterrissage réel de votre vol. Et au-delà, nous n'annulons jamais sans vous parler.",
     guaranteeBadge: 'Garantie 100%',
+    policyLink: "Consulter la Politique d'Attente →",
 
     // CTA Final
     ctaFinalTitle:
       "La seule étape entre le chaos de l'aéroport et le confort de votre hôtel.",
     ctaFinalDesc: 'Réservez en 2 minutes et laissez notre algorithme faire le reste.',
-
-    // Footer
-    footer: '© 2025 HUB Transfer. Technologie qui garantit.',
 
     // Partners carousel
     partnersLabel: 'Nos clients arrivent chaque jour sur des vols de :',
@@ -704,7 +605,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Guarantee badges
     badgePrice: 'Prix fixe',
-    badgePunctual: 'Toujours ponctuel',
+    badgeWait: "90 min d'attente inclus",
     badgeCancel: 'Annulation gratuite jusqu\'à 3h avant',
     badgeFlight: 'Vol surveillé',
 
@@ -769,40 +670,19 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     fleetFootnote: 'Veicolo assegnato in base alla categoria prenotata.',
     pax7Marker: '👥 Gruppo di 7+ passeggeri — richiesta di preventivo',
 
-    // Why
-    whyTitle: 'Perché Funziona',
-    whyDesc:
-      'Non è magia. È tecnologia, precisione e impegno verso di te.',
-    whyReason1Title: 'Algoritmo Intelligente',
-    whyReason1Desc:
-      'Monitora il suo volo in tempo reale: ritardi, cambi di gate, atterraggi anticipati — tutto seguito automaticamente.',
-    whyReason2Title: 'Conducenti Addestrati',
-    whyReason2Desc:
-      'Ogni conducente riceve formazione premium. Conoscono ogni strada di Lisbona, Porto e Faro.',
-    whyReason3Title: 'Garanzia di Fiducia',
-    whyReason3Desc:
-      'Se falliamo, non paghi. Semplice. La tua soddisfazione è il nostro impegno.',
-    whyReason4Title: 'Supporto 24/7',
-    whyReason4Desc:
-      'Team disponibile in qualsiasi momento. Problema? Lo risolviamo in minuti, non in ore.',
-
     // Commitment block
     commitTitle: 'O vi stringiamo la mano, o paghiamo il conto.',
-    commitSub: 'Il nostro impegno, timbrato.',
 
     // Guarantee
-    guaranteeTitle: 'Garanzia HUB: Zero Rischi',
     guaranteeDesc:
-      'Se il conducente è in ritardo di più di 10 minuti, il trasferimento è gratuito e paghiamo il tuo Uber.',
+      "90 minuti di attesa inclusi, contati dall'atterraggio reale del suo volo. E oltre, non cancelliamo mai senza parlarle.",
     guaranteeBadge: 'Garanzia 100%',
+    policyLink: 'Consultare la Politica di Attesa →',
 
     // CTA Final
     ctaFinalTitle:
       "L'unico passo tra il caos dell'aeroporto e il comfort del tuo hotel.",
     ctaFinalDesc: 'Prenota in 2 minuti e lascia il resto al nostro algoritmo.',
-
-    // Footer
-    footer: '© 2025 HUB Transfer. Tecnologia che garantisce.',
 
     // Partners carousel
     partnersLabel: 'I nostri clienti arrivano ogni giorno con voli di:',
@@ -849,7 +729,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Guarantee badges
     badgePrice: 'Prezzo fisso',
-    badgePunctual: 'Sempre puntuale',
+    badgeWait: '90 min di attesa inclusi',
     badgeCancel: 'Cancellazione gratuita fino a 3h prima',
     badgeFlight: 'Volo monitorato',
 
