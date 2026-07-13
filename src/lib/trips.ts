@@ -76,7 +76,9 @@ export interface HubViagem {
   platform: string;
   platformCode?: string;   // TALIXO/WT/HEY/LIOZ/ELH/DIRETO — código da operadora (backend)
   sourceLabel?: string;    // TLX/WT/HEY/LIOZ/ELH/EMH/GDA/HUB — sigla do badge (backend)
-  driverPrice?: string | number;  // valor ao motorista já calculado pelo motor de comissões
+  comissao?: string | number;     // valor ao motorista, calculado pelo motor de comissões
+  comissaoNivel?: string;         // OPERADORA / ... — nível que originou o valor
+  driverPrice?: string | number;  // alias aceite caso o feed passe a usar este nome
   concluida: boolean;
   status?: string;
   statusMotorista?: string;  // BD(56): AGUARDANDO/NO_LOCAL/EM_VIAGEM/FINALIZADO
@@ -456,12 +458,13 @@ export function calcFlightProgress(depTime: string, arrTime: string): number {
 }
 
 /**
- * Driver price. The backend commission engine is the source of truth
- * (driverPrice in the getViagens feed); the platform heuristic below only
- * runs for older responses / cached trips that predate that field.
+ * Driver price — single source of truth for both the trip card and the admin
+ * per-driver summary. The backend commission engine wins: it sends the value as
+ * `comissao` (getViagens). The platform heuristic below only runs for older
+ * responses / cached trips that predate that field.
  */
-export function calcDriverPrice(trip: { platform?: string; driverPrice?: string | number }): number {
-  const raw = trip.driverPrice;
+export function calcDriverPrice(trip: { platform?: string; comissao?: string | number; driverPrice?: string | number }): number {
+  const raw = trip.comissao ?? trip.driverPrice;
   if (raw !== undefined && raw !== null && String(raw).trim() !== '') {
     const n = Number(String(raw).replace(',', '.').replace(/[^0-9.-]/g, ''));
     if (Number.isFinite(n) && n >= 0) return n;
