@@ -74,6 +74,9 @@ export interface HubViagem {
   notes?: string;
   driver: string;
   platform: string;
+  platformCode?: string;   // TALIXO/WT/HEY/LIOZ/ELH/DIRETO — código da operadora (backend)
+  sourceLabel?: string;    // TLX/WT/HEY/LIOZ/ELH/EMH/GDA/HUB — sigla do badge (backend)
+  driverPrice?: string | number;  // valor ao motorista já calculado pelo motor de comissões
   concluida: boolean;
   status?: string;
   statusMotorista?: string;  // BD(56): AGUARDANDO/NO_LOCAL/EM_VIAGEM/FINALIZADO
@@ -453,17 +456,31 @@ export function calcFlightProgress(depTime: string, arrTime: string): number {
 }
 
 /**
- * Calculate driver price based on platform.
+ * Driver price. The backend commission engine is the source of truth
+ * (driverPrice in the getViagens feed); the platform heuristic below only
+ * runs for older responses / cached trips that predate that field.
  */
-export function calcDriverPrice(platform: string): number {
+export function calcDriverPrice(trip: { platform?: string; driverPrice?: string | number }): number {
+  const raw = trip.driverPrice;
+  if (raw !== undefined && raw !== null && String(raw).trim() !== '') {
+    const n = Number(String(raw).replace(',', '.').replace(/[^0-9.-]/g, ''));
+    if (Number.isFinite(n) && n >= 0) return n;
+  }
+
+  const platform = trip.platform || '';
   if (!platform) return 10;
   return platform.toLowerCase().includes('talixo') ? 9 : 10;
 }
 
 /**
- * Get source label (TLX / WT / HUB) from trip data.
+ * Source badge (TLX / WT / HEY / LIOZ / ELH / EMH / GDA / HUB). The backend
+ * sends sourceLabel; the platform/id heuristic below only runs for older
+ * responses / cached trips that predate that field.
  */
-export function getSourceLabel(trip: { platform?: string; id?: string }): string {
+export function getSourceLabel(trip: { platform?: string; id?: string; sourceLabel?: string }): string {
+  const fromFeed = (trip.sourceLabel || '').trim();
+  if (fromFeed) return fromFeed.toUpperCase();
+
   const platform = (trip.platform || '').toLowerCase();
   const id = (trip.id || '').toLowerCase();
   const all = platform + ' ' + id;
