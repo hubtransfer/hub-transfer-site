@@ -123,7 +123,7 @@ export default function TripCard({
   const tipo = detectTipo(viagem.origin || "", viagem.flight || "");
   const hora = cleanHora(viagem.pickupTime || "");
   const lang = resolveLanguage(viagem.language || "", viagem.phone);
-  const price = calcDriverPrice(viagem.platform || "");
+  const price = calcDriverPrice(viagem);
   const isDone = viagem.concluida || viagem.status === "CONCLUIDA" || viagem.status === "FINALIZOU";
   const ts = getTypeStyle(tipo);
 

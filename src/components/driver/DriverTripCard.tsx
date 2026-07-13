@@ -108,7 +108,7 @@ export default function DriverTripCard({
   const tipo = detectTipo(viagem.origin || "", viagem.flight || "", viagem.type);
   const hora = cleanHora(viagem.pickupTime || "");
   const lang = resolveLanguage(viagem.language || "", viagem.phone);
-  const price = calcDriverPrice(viagem.platform || "");
+  const price = calcDriverPrice(viagem);
   const isDone = viagem.concluida || viagem.status === "CONCLUIDA" || viagem.status === "FINALIZOU";
   const sourceLabel = getSourceLabel(viagem);
   const c = ts(tipo);

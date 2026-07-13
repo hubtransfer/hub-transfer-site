@@ -111,7 +111,7 @@ export default function DriverTripsPage() {
       const tipo = detectTipo(v.origin || "", v.flight || "", v.type);
       if (tipo === "CHEGADA") chegadas++;
       else recolhas++;
-      totalPay += calcDriverPrice(v.platform || "");
+      totalPay += calcDriverPrice(v);
       if (v.concluida || v.status === "CONCLUIDA" || v.status === "FINALIZOU") done++;
     }
     return { total: driverTrips.length, chegadas, recolhas, totalPay, done };

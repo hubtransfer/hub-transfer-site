@@ -211,7 +211,7 @@ export function useDriverStore(): DriverStore {
       const tipo = detectTipo(v.origin, v.flight, v.type);
       if (tipo === 'CHEGADA') chegadas++;
       else if (tipo === 'RECOLHA') recolhas++;
-      totalPay += calcDriverPrice(v.platform);
+      totalPay += calcDriverPrice(v);
     }
 
     return { total: viagens.length, chegadas, recolhas, totalPay };

@@ -388,7 +388,7 @@ export function useTripsStore(): TripsStore {
 
       if (!v.driver || v.driver.trim() === "") stats.semMotorista++;
 
-      if (v.driver) stats.totalPay += calcDriverPrice(v.platform);
+      if (v.driver) stats.totalPay += calcDriverPrice(v);
     }
 
     return stats;
@@ -408,7 +408,7 @@ export function useTripsStore(): TripsStore {
         summary[driver] = { count: 0, total: 0 };
       }
       summary[driver].count++;
-      if (v.driver) summary[driver].total += calcDriverPrice(v.platform);
+      if (v.driver) summary[driver].total += calcDriverPrice(v);
     }
 
     return summary;
