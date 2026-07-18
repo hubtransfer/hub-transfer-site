@@ -6,7 +6,9 @@ import type { HubViagem } from "@/lib/trips";
 import { HUB_CENTRAL_URL, detectTipo, cleanHora, todayStr } from "@/lib/trips";
 import { getOriginFlag } from "@/lib/countryFlags";
 import { computeFlightState, getDelayedTime, delayColor } from "@/lib/flightUtils";
-import DriverProgressBar from "@/components/shared/DriverProgressBar";
+import LiveBoard from "@/components/live/LiveBoard";
+import LiveProgressStrip from "@/components/live/LiveProgressStrip";
+import { statusMotoristaToPasso } from "@/lib/live";
 
 interface LiveTabProps {
   services: Transfer[];     // hotel's own transfer data
@@ -241,6 +243,7 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
                 delayMin, v.etaChegada || "", v.depActualFull || v.depTimeFull || "", v.etaChegadaFull || ""
               );
 
+              const passoMotorista = statusMotoristaToPasso(v.statusMotorista);
               const cardKey = v.id || v.client || String(Math.random());
               const isExpanded = expandedId === cardKey;
 
@@ -314,11 +317,14 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
                           <span className="font-mono text-sm font-bold text-[#D4A017]">LIS</span>
                         </div>
                       </div>
-
-                      {/* Driver progress bar */}
-                      <DriverProgressBar statusMotorista={v.statusMotorista} />
                     </div>
                   )}
+
+                  {/* Carrinho — SEMPRE visível, com ou sem dados de voo
+                      (o voo acima é info extra, nunca condição) */}
+                  <div className="px-4 pb-1">
+                    <LiveProgressStrip n={passoMotorista.n} noShow={passoMotorista.noShow} horaAgendada={hora} />
+                  </div>
 
                   {/* Pickup */}
                   <p className="text-center font-mono text-sm py-1" style={{ color: "#D4A017" }}>🚗 Pickup: {hora}</p>
@@ -397,38 +403,36 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
         )}
       </div>
 
-      {/* ═══ OTHER TRANSFERS (from hotel's own data) ═══ */}
-      {todayTransfers.length > 0 && (
-        <div className="mb-8">
-          <h3 className="text-[#D4A017] uppercase tracking-wider text-xs font-bold mb-3 font-mono">🚗 Outros Transfers — {todayTransfers.length}</h3>
-          <div className="space-y-1.5">
-            {todayTransfers.map((s) => {
-              const tipo = getTripType(s);
-              const typeColor = TYPE_COLORS[tipo];
-              return (
-                <div key={s.id} className="bg-[#111] border border-[#2A2A2A] rounded-lg px-4 py-2.5 flex items-center gap-3"
-                  style={{ borderLeftWidth: "3px", borderLeftColor: typeColor }}>
-                  <span className="font-mono text-sm font-bold w-[48px]" style={{ color: typeColor }}>{s.horaPickup}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-white font-semibold truncate">{s.nomeCliente}</p>
-                    <p className="text-[10px] text-[#888] truncate">→ {(s.destino || "").replace(/,.*$/, "")}</p>
-                  </div>
-                  <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded flex-shrink-0" style={{ backgroundColor: `${typeColor}20`, color: typeColor }}>{tipo}</span>
-                  <span className="text-[10px] text-[#888] font-mono flex-shrink-0">{s.numeroPessoas}p</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Empty state */}
-      {hotelFlights.length === 0 && todayTransfers.length === 0 && !hubLoading && (
-        <div className="text-center py-16">
-          <p className="text-4xl mb-3 opacity-30">🏨</p>
-          <p className="text-[#666] text-sm font-mono">Nenhum transfer para hoje</p>
-        </div>
-      )}
+      {/* ═══ TRANSFERS EM DIRECTO (feed liveHotel — carrinho 5 pontos) ═══ */}
+      <div className="mb-8">
+        <LiveBoard
+          codigo={hotelCode || hotelName}
+          nomeExib={hotelName || hotelCode || "Portal"}
+          fallback={todayTransfers.length > 0 ? (
+            <div className="mt-4">
+              <h3 className="text-[#D4A017] uppercase tracking-wider text-xs font-bold mb-3 font-mono">🚗 Outros Transfers — {todayTransfers.length}</h3>
+              <div className="space-y-1.5">
+                {todayTransfers.map((s) => {
+                  const tipo = getTripType(s);
+                  const typeColor = TYPE_COLORS[tipo];
+                  return (
+                    <div key={s.id} className="bg-[#111] border border-[#2A2A2A] rounded-lg px-4 py-2.5 flex items-center gap-3"
+                      style={{ borderLeftWidth: "3px", borderLeftColor: typeColor }}>
+                      <span className="font-mono text-sm font-bold w-[48px]" style={{ color: typeColor }}>{s.horaPickup}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-white font-semibold truncate">{s.nomeCliente}</p>
+                        <p className="text-[10px] text-[#888] truncate">→ {(s.destino || "").replace(/,.*$/, "")}</p>
+                      </div>
+                      <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded flex-shrink-0" style={{ backgroundColor: `${typeColor}20`, color: typeColor }}>{tipo}</span>
+                      <span className="text-[10px] text-[#888] font-mono flex-shrink-0">{s.numeroPessoas}p</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : undefined}
+        />
+      </div>
 
       {/* ═══ FOOTER STATS ═══ */}
       <div className="flex items-center justify-center gap-6 py-4 border-t border-[#2A2A2A] text-xs text-[#888] font-mono">
