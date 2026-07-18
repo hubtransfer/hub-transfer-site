@@ -2,8 +2,6 @@
 
 import React, { useMemo, useState, useRef, useCallback } from "react";
 import type { HubViagem, Driver } from "@/lib/trips";
-import LiveProgressStrip from "@/components/live/LiveProgressStrip";
-import { statusMotoristaToPasso } from "@/lib/live";
 import {
   detectTipo,
   splitLocation,
@@ -128,7 +126,6 @@ export default function TripCard({
   const price = calcDriverPrice(viagem);
   const isDone = viagem.concluida || viagem.status === "CONCLUIDA" || viagem.status === "FINALIZOU";
   const ts = getTypeStyle(tipo);
-  const passo = statusMotoristaToPasso(viagem.statusMotorista);
 
   const flightProgress = useMemo(() => {
     if (tipo !== "CHEGADA") return 0;
@@ -395,14 +392,6 @@ export default function TripCard({
             </div>
           </div>
         )}
-      </div>
-
-      {/* ============================================================ */}
-      {/*  CARRINHO — SEMPRE visível, com ou sem voo                   */}
-      {/*  (statusMotorista do feed viagens; o voo é info extra acima) */}
-      {/* ============================================================ */}
-      <div className="px-4 pb-2">
-        <LiveProgressStrip n={isDone ? 5 : passo.n} noShow={passo.noShow} horaAgendada={hora} />
       </div>
 
       {/* ============================================================ */}

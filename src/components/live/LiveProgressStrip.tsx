@@ -15,6 +15,8 @@ interface LiveProgressStripProps {
   /** Hora agendada — mostrada sob o ponto 1 (Agendada) */
   horaAgendada?: string;
   noShow?: boolean;
+  /** Versão compacta: só pontos + carrinho, sem rótulos nem horas (cartão fechado) */
+  compact?: boolean;
 }
 
 const CLR_GOLD = "#D4A017";
@@ -30,7 +32,7 @@ const CarIcon = ({ color }: { color: string }) => (
   </svg>
 );
 
-export default function LiveProgressStrip({ n, tsPassos, horaAgendada, noShow }: LiveProgressStripProps) {
+export default function LiveProgressStrip({ n, tsPassos, horaAgendada, noShow, compact }: LiveProgressStripProps) {
   // NO_SHOW: carro parado no ponto 2 ("A caminho"), tudo vermelho
   const activeStep = noShow ? 2 : Math.min(5, Math.max(1, n || 1));
   const isDone = !noShow && activeStep >= 5;
@@ -38,7 +40,7 @@ export default function LiveProgressStrip({ n, tsPassos, horaAgendada, noShow }:
   const linePct = ((activeStep - 1) / 4) * 100;
 
   return (
-    <div className="w-full px-2 sm:px-4 py-1 sm:py-2">
+    <div className={compact ? "w-full px-1 pt-3 pb-0.5" : "w-full px-2 sm:px-4 py-1 sm:py-2"}>
       {/* Pontos + linhas */}
       <div className="relative flex items-center justify-between" style={{ height: "24px" }}>
         {/* Linha pontilhada de fundo (largura total) */}
@@ -90,7 +92,9 @@ export default function LiveProgressStrip({ n, tsPassos, horaAgendada, noShow }:
       </div>
 
       {/* Rótulos + horas sob cada ponto — mobile-first: rótulos longos
-          quebram em 2 linhas em vez de colidir num ecrã estreito */}
+          quebram em 2 linhas em vez de colidir num ecrã estreito.
+          Na versão compacta não há rótulos. */}
+      {!compact && (
       <div className="relative mt-0.5" style={{ height: "34px" }}>
         {LIVE_STEPS.map((s, i) => {
           const stepNum = i + 1;
@@ -121,6 +125,7 @@ export default function LiveProgressStrip({ n, tsPassos, horaAgendada, noShow }:
           );
         })}
       </div>
+      )}
     </div>
   );
 }

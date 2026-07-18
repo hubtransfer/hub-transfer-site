@@ -19,7 +19,8 @@ import { getOriginFlag } from "@/lib/countryFlags";
 import { getDelayedTime, delayColor, computeFlightState } from "@/lib/flightUtils";
 import NoShowModal from "@/components/driver/NoShowModal";
 import SwipeBar from "@/components/shared/SwipeBar";
-import DriverProgressBar from "@/components/shared/DriverProgressBar";
+import LiveProgressStrip from "@/components/live/LiveProgressStrip";
+import { statusMotoristaToPasso } from "@/lib/live";
 
 
 
@@ -112,6 +113,7 @@ export default function DriverTripCard({
   const isDone = viagem.concluida || viagem.status === "CONCLUIDA" || viagem.status === "FINALIZOU";
   const sourceLabel = getSourceLabel(viagem);
   const c = ts(tipo);
+  const passo = statusMotoristaToPasso(viagem.statusMotorista);
 
   const hasFlightNumber = !!(viagem.flight && viagem.flight.trim());
   const hasFlight = hasFlightNumber && (tipo === "CHEGADA" || !!(viagem.depAirport || viagem.depIata || viagem.arrTime));
@@ -342,6 +344,14 @@ export default function DriverTripCard({
           </div>
         </div>
 
+        {/* Carrinho compacto — SEMPRE visível no cartão fechado,
+            recolha ou chegada, com ou sem voo (o voo abaixo é extra) */}
+        {!expanded && (
+          <div className="px-4">
+            <LiveProgressStrip compact n={isDone && !passo.noShow ? 5 : passo.n} noShow={passo.noShow} />
+          </div>
+        )}
+
         {/* L3-L6: Flight block (collapsed, CHEGADA only) */}
         {!expanded && hasFlight && flight && tipo === "CHEGADA" && (
           <div className="px-4 pb-3 pt-1">
@@ -391,9 +401,6 @@ export default function DriverTripCard({
                     <span className="font-mono text-sm font-bold text-[#D4A017]">LIS</span>
                   </div>
                 </div>
-
-                {/* L3: Driver progress bar */}
-                <DriverProgressBar statusMotorista={viagem.statusMotorista} />
 
                 {/* L4: Pickup */}
                 {hora && (
@@ -518,9 +525,6 @@ export default function DriverTripCard({
                       </div>
                     )}
 
-                    {/* Driver progress bar (expanded) */}
-                    <DriverProgressBar statusMotorista={viagem.statusMotorista} />
-
                     {/* Pickup time */}
                     <div className="mt-1 pt-1 border-t border-[#2A2A2A]/50 text-center">
                       <span className="font-mono text-xs" style={{ color: "#D4A017" }}>🚗 Pickup: {adjustedPickup || hora}</span>
@@ -570,6 +574,11 @@ export default function DriverTripCard({
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* ── Carrinho completo — SEMPRE, entre a rota e as acções ── */}
+            <div className="border-t border-[#2A2A2A] px-4 pt-1 pb-2">
+              <LiveProgressStrip n={isDone && !passo.noShow ? 5 : passo.n} noShow={passo.noShow} horaAgendada={adjustedPickup || hora} />
             </div>
 
             {/* ── Actions ── */}
