@@ -40,7 +40,7 @@ export default function LiveProgressStrip({ n, tsPassos, horaAgendada, noShow, c
   const linePct = ((activeStep - 1) / 4) * 100;
 
   return (
-    <div className={compact ? "w-full px-1 pt-3 pb-0.5" : "w-full px-2 sm:px-4 py-1 sm:py-2"}>
+    <div className={compact ? "w-full px-1 pt-3 pb-0.5" : "w-full px-7 py-1 sm:py-2"}>
       {/* Pontos + linhas */}
       <div className="relative flex items-center justify-between" style={{ height: "24px" }}>
         {/* Linha pontilhada de fundo (largura total) */}
@@ -111,19 +111,17 @@ export default function LiveProgressStrip({ n, tsPassos, horaAgendada, noShow, c
           const stepNum = i + 1;
           const isActive = activeStep >= stepNum;
           const pos = (i / 4) * 100;
-          const anchor = i === 0 ? "left" : i === 4 ? "right" : "center";
           const hora = i === 0 ? (horaAgendada || "") : tsToHora(tsPassos?.[s.tsKey!]);
           return (
-            <div key={s.label} className="absolute flex flex-col font-mono transition-colors duration-700" style={{
+            <div key={s.label} className="absolute flex flex-col items-center font-mono transition-colors duration-700" style={{
               left: `${pos}%`,
-              transform: anchor === "left" ? "translateX(0)" : anchor === "right" ? "translateX(-100%)" : "translateX(-50%)",
-              alignItems: anchor === "left" ? "flex-start" : anchor === "right" ? "flex-end" : "center",
+              transform: "translateX(-50%)",
             }}>
               <span style={{
                 fontSize: "9px",
                 lineHeight: "1.15",
                 maxWidth: "56px",
-                textAlign: anchor === "left" ? "left" : anchor === "right" ? "right" : "center",
+                textAlign: "center",
                 color: noShow ? CLR_RED : isDone ? CLR_GREEN : isActive ? "#D0D0D0" : CLR_GREY,
               }}>
                 {s.label}
