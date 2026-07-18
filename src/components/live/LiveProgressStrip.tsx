@@ -89,8 +89,9 @@ export default function LiveProgressStrip({ n, tsPassos, horaAgendada, noShow }:
         })}
       </div>
 
-      {/* Rótulos + horas sob cada ponto */}
-      <div className="relative mt-0.5" style={{ height: "26px" }}>
+      {/* Rótulos + horas sob cada ponto — mobile-first: rótulos longos
+          quebram em 2 linhas em vez de colidir num ecrã estreito */}
+      <div className="relative mt-0.5" style={{ height: "34px" }}>
         {LIVE_STEPS.map((s, i) => {
           const stepNum = i + 1;
           const isActive = activeStep >= stepNum;
@@ -103,7 +104,13 @@ export default function LiveProgressStrip({ n, tsPassos, horaAgendada, noShow }:
               transform: anchor === "left" ? "translateX(0)" : anchor === "right" ? "translateX(-100%)" : "translateX(-50%)",
               alignItems: anchor === "left" ? "flex-start" : anchor === "right" ? "flex-end" : "center",
             }}>
-              <span style={{ fontSize: "9px", color: noShow ? CLR_RED : isDone ? CLR_GREEN : isActive ? "#D0D0D0" : CLR_GREY, whiteSpace: "nowrap" }}>
+              <span style={{
+                fontSize: "9px",
+                lineHeight: "1.15",
+                maxWidth: "56px",
+                textAlign: anchor === "left" ? "left" : anchor === "right" ? "right" : "center",
+                color: noShow ? CLR_RED : isDone ? CLR_GREEN : isActive ? "#D0D0D0" : CLR_GREY,
+              }}>
                 {s.label}
               </span>
               {/* Hora só sob pontos atingidos */}

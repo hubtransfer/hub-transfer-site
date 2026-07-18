@@ -107,6 +107,21 @@ export const LIVE_STEPS: { label: string; tsKey: keyof LiveTsPassos | null }[] =
   { label: "Concluída", tsKey: "fim" },
 ];
 
+/**
+ * Mapeia o statusMotorista do feed `viagens` (BD/56) para o passo da faixa.
+ * Aliases aceites: CHEGOU→NO_LOCAL, CLIENTE_COMIGO→EM_VIAGEM.
+ * NO_SHOW: carro parado no ponto 2, vermelho.
+ */
+export function statusMotoristaToPasso(status?: string): { n: number; noShow: boolean } {
+  const u = (status || "").toUpperCase().replace(/[^A-Z]+/g, "_");
+  if (u.includes("NO_SHOW") || u.replace(/_/g, "").includes("NOSHOW")) return { n: 2, noShow: true };
+  if (u.includes("FINALIZADO") || u.includes("FINALIZOU") || u.includes("CONCLUIDA")) return { n: 5, noShow: false };
+  if (u.includes("EM_VIAGEM") || u.includes("CLIENTE_COMIGO") || u.includes("INICIOU")) return { n: 4, noShow: false };
+  if (u.includes("NO_LOCAL") || u.includes("CHEGOU")) return { n: 3, noShow: false };
+  if (u.includes("A_CAMINHO")) return { n: 2, noShow: false };
+  return { n: 1, noShow: false }; // AGUARDANDO / vazio → Agendada
+}
+
 export function isNoShow(v: LiveViagem): boolean {
   const chave = (v.passo?.chave || "").toUpperCase().replace(/[^A-Z]/g, "");
   if (chave.includes("NOSHOW")) return true;

@@ -6,8 +6,9 @@ import type { HubViagem } from "@/lib/trips";
 import { HUB_CENTRAL_URL, detectTipo, cleanHora, todayStr } from "@/lib/trips";
 import { getOriginFlag } from "@/lib/countryFlags";
 import { computeFlightState, getDelayedTime, delayColor } from "@/lib/flightUtils";
-import DriverProgressBar from "@/components/shared/DriverProgressBar";
 import LiveBoard from "@/components/live/LiveBoard";
+import LiveProgressStrip from "@/components/live/LiveProgressStrip";
+import { statusMotoristaToPasso } from "@/lib/live";
 
 interface LiveTabProps {
   services: Transfer[];     // hotel's own transfer data
@@ -242,6 +243,7 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
                 delayMin, v.etaChegada || "", v.depActualFull || v.depTimeFull || "", v.etaChegadaFull || ""
               );
 
+              const passoMotorista = statusMotoristaToPasso(v.statusMotorista);
               const cardKey = v.id || v.client || String(Math.random());
               const isExpanded = expandedId === cardKey;
 
@@ -315,11 +317,14 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
                           <span className="font-mono text-sm font-bold text-[#D4A017]">LIS</span>
                         </div>
                       </div>
-
-                      {/* Driver progress bar */}
-                      <DriverProgressBar statusMotorista={v.statusMotorista} />
                     </div>
                   )}
+
+                  {/* Carrinho — SEMPRE visível, com ou sem dados de voo
+                      (o voo acima é info extra, nunca condição) */}
+                  <div className="px-4 pb-1">
+                    <LiveProgressStrip n={passoMotorista.n} noShow={passoMotorista.noShow} horaAgendada={hora} />
+                  </div>
 
                   {/* Pickup */}
                   <p className="text-center font-mono text-sm py-1" style={{ color: "#D4A017" }}>🚗 Pickup: {hora}</p>
