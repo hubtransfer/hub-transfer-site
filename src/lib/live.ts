@@ -122,6 +122,16 @@ export function statusMotoristaToPasso(status?: string): { n: number; noShow: bo
   return { n: 1, noShow: false }; // AGUARDANDO / vazio → Agendada
 }
 
+/** Rótulo do passo ACTUAL (um só — para a faixa compacta em telemóvel). */
+export function rotuloPassoAtual(n: number, noShow?: boolean): { texto: string; cor: string } {
+  if (noShow) return { texto: "🚫 Cliente não compareceu", cor: "#EF4444" };
+  if (n >= 5) return { texto: "✅ Concluída", cor: "#4CAF50" };
+  if (n === 4) return { texto: "🧳 Cliente a bordo", cor: "#D4A017" };
+  if (n === 3) return { texto: "📍 No local", cor: "#D4A017" };
+  if (n === 2) return { texto: "🚗 A caminho", cor: "#D4A017" };
+  return { texto: "🕐 Agendada", cor: "#9CA3AF" };
+}
+
 export function isNoShow(v: LiveViagem): boolean {
   const chave = (v.passo?.chave || "").toUpperCase().replace(/[^A-Z]/g, "");
   if (chave.includes("NOSHOW")) return true;

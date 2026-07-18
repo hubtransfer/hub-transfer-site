@@ -6,7 +6,7 @@
 // HONESTIDADE: o carro só se move quando passo.n (confirmado no backend) muda.
 // Nada de interpolação inventada entre passos.
 
-import { LIVE_STEPS, tsToHora, type LiveTsPassos } from "@/lib/live";
+import { LIVE_STEPS, tsToHora, rotuloPassoAtual, type LiveTsPassos } from "@/lib/live";
 
 interface LiveProgressStripProps {
   /** Último passo CONFIRMADO (1..5) vindo do backend (passo.n) */
@@ -90,6 +90,17 @@ export default function LiveProgressStrip({ n, tsPassos, horaAgendada, noShow, c
           );
         })}
       </div>
+
+      {/* Compacto: um só rótulo — o passo ACTUAL (os 5 não cabem no telemóvel) */}
+      {compact && (() => {
+        const rotulo = rotuloPassoAtual(activeStep, noShow);
+        return (
+          <p className="text-center font-mono font-bold transition-colors duration-700"
+            style={{ fontSize: "10px", marginTop: "3px", color: rotulo.cor }}>
+            {rotulo.texto}
+          </p>
+        );
+      })()}
 
       {/* Rótulos + horas sob cada ponto — mobile-first: rótulos longos
           quebram em 2 linhas em vez de colidir num ecrã estreito.
