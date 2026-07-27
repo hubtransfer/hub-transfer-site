@@ -72,14 +72,52 @@ function precisaDeAudio(v: HubViagem): boolean {
   return /AGUARDA\s*[ÁA]UDIO/i.test(String(v.status || ""));
 }
 
-// ⚠️ A PRIMEIRA LINHA É LIDA PELO SERVIDOR. Não mudar o formato:
-//    "🎙️ ÁUDIO VIAGEM " seguido do id da viagem, sozinho na linha.
-//    As linhas seguintes são só para o motorista se orientar.
+// ⚠️ A PRIMEIRA LINHA É LIDA PELO SERVIDOR. Não mudar o formato.
 function textoDoAudio(v: HubViagem): string {
+  // Lê qualquer campo em segurança, mesmo os que ainda não estão no tipo.
+  const campo = (k: string): string => {
+    const x = v as unknown as Record<string, unknown>;
+    return String(x[k] ?? "").trim();
+  };
+
   const data = (v.date || v.flightDate || "").trim();
-  return `🎙️ ÁUDIO VIAGEM ${v.id}\n`
-    + `${data} · ${v.pickupTime} · ${v.origin} → ${v.destination}\n\n`
-    + `Vou gravar já a seguir 👇`;
+  const telLimpo = campo("phone").replace(/\D/g, "");
+  const voo = campo("flight");
+  const aterrou = campo("arrTime");
+  const jaAterrou = campo("statusVoo").toUpperCase().indexOf("ATERRIS") > -1;
+
+  // Bloco 1 — quem é o cliente (a 1ª linha é a que o servidor lê)
+  const b1 = [`🎙️ ÁUDIO VIAGEM ${v.id}`];
+  const ident = [campo("client"), campo("pax") ? campo("pax") + " pax" : "", campo("language")]
+    .filter(Boolean).join(" · ");
+  if (ident) b1.push(ident);
+  if (telLimpo) b1.push("📞 +" + telLimpo);
+
+  // Bloco 2 — o voo e a hora combinada
+  const b2 = [
+    data,
+    voo ? "voo " + voo : "",
+    aterrou ? (jaAterrou ? "aterrou " + aterrou : "previsão " + aterrou) : "",
+    v.pickupTime ? "recolha " + v.pickupTime : "",
+  ].filter(Boolean).join(" · ");
+
+  // Blocos 3 e 4 — moradas completas, cada uma na sua linha
+  const b3 = "📍 RECOLHA\n" + String(v.origin || "").trim();
+  const b4 = "🏁 DESTINO\n" + String(v.destination || "").trim();
+
+  // Bloco 5 — as horas reais do percurso do motorista
+  const h1 = [
+    campo("horaACaminho") ? "A caminho " + campo("horaACaminho") : "",
+    campo("horaNoLocal") ? "No local " + campo("horaNoLocal") : "",
+  ].filter(Boolean).join(" · ");
+  const h2 = [
+    campo("horaInicio") ? "Início " + campo("horaInicio") : "",
+    campo("horaFim") ? "Fim " + campo("horaFim") : "",
+  ].filter(Boolean).join(" · ");
+  const b5 = [h1, h2].filter(Boolean).join("\n");
+
+  return [b1.join("\n"), b2, b3, b4, b5, "Vou gravar já a seguir 👇"]
+    .filter(Boolean).join("\n\n");
 }
 
 function urlDoAudio(v: HubViagem): string {
