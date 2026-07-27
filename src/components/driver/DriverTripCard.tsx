@@ -56,6 +56,36 @@ function ts(tipo: string) { return TYPE_COLORS[tipo as keyof typeof TYPE_COLORS]
 const HOLD_MS = 1000;
 const SWIPE_PX = 140;
 
+/* ─── Estado "FALTA O ÁUDIO" ─── */
+// O backend passa a escrever "AGUARDA ÁUDIO" na coluna R quando a viagem foi
+// entregue mas o áudio do cliente ainda não chegou. O getViagens devolve então
+// concluida=false e status="AGUARDA ÁUDIO", que não bate em nenhum dos filtros
+// de conclusão — a viagem fica sozinha na lista activa, sem alterar filtro nenhum.
+// Enquanto o backend não escrever esse valor, nada disto se activa.
+
+const TEL_HUB = "351928283652";  // WhatsApp da Roberta HUB — nunca o do cliente
+
+function precisaDeAudio(v: HubViagem): boolean {
+  // No-show nunca entra neste estado: não há viagem, não há áudio.
+  if (/NO[-_\s]?SHOW/i.test(String(v.status || ""))) return false;
+  if (/NO[-_\s]?SHOW/i.test(String(v.statusMotorista || ""))) return false;
+  return /AGUARDA\s*[ÁA]UDIO/i.test(String(v.status || ""));
+}
+
+// ⚠️ A PRIMEIRA LINHA É LIDA PELO SERVIDOR. Não mudar o formato:
+//    "🎙️ ÁUDIO VIAGEM " seguido do id da viagem, sozinho na linha.
+//    As linhas seguintes são só para o motorista se orientar.
+function textoDoAudio(v: HubViagem): string {
+  const data = (v.date || v.flightDate || "").trim();
+  return `🎙️ ÁUDIO VIAGEM ${v.id}\n`
+    + `${data} · ${v.pickupTime} · ${v.origin} → ${v.destination}\n\n`
+    + `Vou gravar já a seguir 👇`;
+}
+
+function urlDoAudio(v: HubViagem): string {
+  return `https://wa.me/${TEL_HUB}?text=${encodeURIComponent(textoDoAudio(v))}`;
+}
+
 /* ─── Props ─── */
 
 interface DriverTripCardProps {
@@ -114,6 +144,7 @@ export default function DriverTripCard({
   const sourceLabel = getSourceLabel(viagem);
   const c = ts(tipo);
   const passo = statusMotoristaToPasso(viagem.statusMotorista);
+  const aguardaAudio = precisaDeAudio(viagem);
 
   const hasFlightNumber = !!(viagem.flight && viagem.flight.trim());
   const hasFlight = hasFlightNumber && (tipo === "CHEGADA" || !!(viagem.depAirport || viagem.depIata || viagem.arrTime));
@@ -250,11 +281,12 @@ export default function DriverTripCard({
       onPointerCancel={expanded && !isDone ? onCancel : undefined}
       className={`
         relative rounded-2xl border overflow-hidden border-l-4 select-none
-        ${isSwipeActive || isCompleting ? "border-l-[#F0D030]" : c.border}
+        ${isSwipeActive || isCompleting ? "border-l-[#F0D030]" : aguardaAudio ? "border-l-[#F0D030]" : c.border}
         ${isDone && !isHistorical ? "opacity-40 bg-[#1A1A1A] border-[#2A2A2A]" : ""}
         ${isDone && isHistorical ? "bg-[#1A1A1A] border-[#2A2A2A]" : ""}
-        ${!isDone && isNext ? "bg-[#1A1A00] border-[#2A2A1A] ring-1 ring-[#F0D030]/20" : ""}
-        ${!isDone && !isNext ? "bg-[#1A1A1A] border-[#2A2A2A] opacity-90" : ""}
+        ${!isDone && aguardaAudio ? "bg-[#1A1A00] border-[#2A2A1A] ring-1 ring-[#F0D030]/40" : ""}
+        ${!isDone && !aguardaAudio && isNext ? "bg-[#1A1A00] border-[#2A2A1A] ring-1 ring-[#F0D030]/20" : ""}
+        ${!isDone && !aguardaAudio && !isNext ? "bg-[#1A1A1A] border-[#2A2A2A] opacity-90" : ""}
         ${isSwipeActive || isCompleting ? `ring-2 ring-[${swipeColor}]/30` : ""}
       `}
       style={{
@@ -314,7 +346,11 @@ export default function DriverTripCard({
             <button type="button" onClick={(e) => { e.stopPropagation(); onDelete(viagem); }} title="Apagar viagem"
               className="text-[#666] hover:text-[#EF4444] transition-colors text-sm cursor-pointer">🗑️</button>
           )}
-          {viagem.statusMotorista && viagem.statusMotorista !== "AGUARDANDO" && (
+          {aguardaAudio ? (
+            <span className="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded bg-[#F0D030]/15 text-[#F0D030]">
+              🎙️ FALTA O ÁUDIO
+            </span>
+          ) : viagem.statusMotorista && viagem.statusMotorista !== "AGUARDANDO" && (
             <span className="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded" style={{
               backgroundColor: viagem.statusMotorista === "A_CAMINHO" ? "#9CA3AF20" : viagem.statusMotorista === "NO_LOCAL" ? "#3B82F620" : viagem.statusMotorista === "EM_VIAGEM" ? "#22C55E20" : viagem.statusMotorista === "FINALIZADO" ? "#D4A01720" : "#6B728020",
               color: viagem.statusMotorista === "A_CAMINHO" ? "#9CA3AF" : viagem.statusMotorista === "NO_LOCAL" ? "#3B82F6" : viagem.statusMotorista === "EM_VIAGEM" ? "#22C55E" : viagem.statusMotorista === "FINALIZADO" ? "#D4A017" : "#6B7280",
@@ -349,6 +385,23 @@ export default function DriverTripCard({
         {!expanded && (
           <div className="px-4">
             <LiveProgressStrip compact n={isDone && !passo.noShow ? 5 : passo.n} noShow={passo.noShow} />
+          </div>
+        )}
+
+        {/* Gravar áudio — cartão fechado, SÓ motorista.
+            stopPropagation: tocar no botão não pode expandir o cartão. */}
+        {!expanded && aguardaAudio && mode === "driver" && (
+          <div className="px-4 pt-2 pb-3">
+            <a
+              href={urlDoAudio(viagem)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
+              className="flex items-center justify-center gap-2.5 h-14 rounded-xl bg-[#F0D030]/10 border border-[#F0D030]/20 text-[#F0D030] font-mono text-base font-bold active:bg-[#F0D030]/20 transition-colors"
+            >
+              🎙️ Gravar áudio desta viagem
+            </a>
           </div>
         )}
 
@@ -612,6 +665,21 @@ export default function DriverTripCard({
                   </button>
                 )}
               </div>
+
+              {/* Gravar áudio — cartão aberto, SÓ motorista.
+                  Repetido aqui para o botão não desaparecer ao expandir. */}
+              {aguardaAudio && mode === "driver" && (
+                <a
+                  href={urlDoAudio(viagem)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  className="flex items-center justify-center gap-2.5 h-14 rounded-xl bg-[#F0D030]/10 border border-[#F0D030]/20 text-[#F0D030] font-mono text-base font-bold active:bg-[#F0D030]/20 transition-colors"
+                >
+                  🎙️ Gravar áudio desta viagem
+                </a>
+              )}
 
               {/* Admin-only: driver selector + dispatch */}
               {mode === "admin" && drivers && onSetDriver && (
