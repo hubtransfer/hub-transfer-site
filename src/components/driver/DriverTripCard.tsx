@@ -322,7 +322,7 @@ export default function DriverTripCard({
         ${isSwipeActive || isCompleting ? "border-l-[#F0D030]" : aguardaAudio ? "border-l-[#F0D030]" : c.border}
         ${isDone && !isHistorical ? "opacity-40 bg-[#1A1A1A] border-[#2A2A2A]" : ""}
         ${isDone && isHistorical ? "bg-[#1A1A1A] border-[#2A2A2A]" : ""}
-        ${!isDone && aguardaAudio ? "bg-[#1A1A00] border-[#2A2A1A] ring-1 ring-[#F0D030]/40" : ""}
+        ${!isDone && aguardaAudio ? "bg-[#1A1A00] border-[#2A2A1A] ring-1 ring-[#F0D030]/40 animate-gold-pulse" : ""}
         ${!isDone && !aguardaAudio && isNext ? "bg-[#1A1A00] border-[#2A2A1A] ring-1 ring-[#F0D030]/20" : ""}
         ${!isDone && !aguardaAudio && !isNext ? "bg-[#1A1A1A] border-[#2A2A2A] opacity-90" : ""}
         ${isSwipeActive || isCompleting ? `ring-2 ring-[${swipeColor}]/30` : ""}
@@ -384,11 +384,11 @@ export default function DriverTripCard({
             <button type="button" onClick={(e) => { e.stopPropagation(); onDelete(viagem); }} title="Apagar viagem"
               className="text-[#666] hover:text-[#EF4444] transition-colors text-sm cursor-pointer">🗑️</button>
           )}
-          {aguardaAudio ? (
+          {aguardaAudio && mode !== "driver" ? (
             <span className="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded bg-[#F0D030]/15 text-[#F0D030]">
               🎙️ FALTA O ÁUDIO
             </span>
-          ) : viagem.statusMotorista && viagem.statusMotorista !== "AGUARDANDO" && (
+          ) : !aguardaAudio && viagem.statusMotorista && viagem.statusMotorista !== "AGUARDANDO" && (
             <span className="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded" style={{
               backgroundColor: viagem.statusMotorista === "A_CAMINHO" ? "#9CA3AF20" : viagem.statusMotorista === "NO_LOCAL" ? "#3B82F620" : viagem.statusMotorista === "EM_VIAGEM" ? "#22C55E20" : viagem.statusMotorista === "FINALIZADO" ? "#D4A01720" : "#6B728020",
               color: viagem.statusMotorista === "A_CAMINHO" ? "#9CA3AF" : viagem.statusMotorista === "NO_LOCAL" ? "#3B82F6" : viagem.statusMotorista === "EM_VIAGEM" ? "#22C55E" : viagem.statusMotorista === "FINALIZADO" ? "#D4A017" : "#6B7280",
@@ -429,16 +429,22 @@ export default function DriverTripCard({
         {/* Gravar áudio — cartão fechado, SÓ motorista.
             stopPropagation: tocar no botão não pode expandir o cartão. */}
         {!expanded && aguardaAudio && mode === "driver" && (
-          <div className="px-4 pt-2 pb-3">
+          <div className="px-4 pb-3">
             <a
               href={urlDoAudio(viagem)}
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
               onPointerDown={(e) => e.stopPropagation()}
-              className="flex items-center justify-center gap-2.5 h-14 rounded-xl bg-[#F0D030]/10 border border-[#F0D030]/20 text-[#F0D030] font-mono text-base font-bold active:bg-[#F0D030]/20 transition-colors"
+              className="animate-gold-pulse-forte w-full mt-3 flex flex-col items-center justify-center text-center px-4 py-4"
+              style={{ borderRadius: "14px", border: "2px solid #F0D030", color: "#FFE55C", background: "linear-gradient(180deg, rgba(240,208,48,0.20), rgba(240,208,48,0.09))" }}
             >
-              🎙️ Gravar áudio desta viagem
+              <span style={{ fontSize: "16px", fontWeight: 800, letterSpacing: "0.06em" }}>
+                🎙️ FALTA O ÁUDIO
+              </span>
+              <span style={{ fontSize: "11px", fontWeight: 600, color: "#C9A227" }}>
+                carregar para falar com a Roberta
+              </span>
             </a>
           </div>
         )}
@@ -713,9 +719,15 @@ export default function DriverTripCard({
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
                   onPointerDown={(e) => e.stopPropagation()}
-                  className="flex items-center justify-center gap-2.5 h-14 rounded-xl bg-[#F0D030]/10 border border-[#F0D030]/20 text-[#F0D030] font-mono text-base font-bold active:bg-[#F0D030]/20 transition-colors"
+                  className="animate-gold-pulse-forte w-full flex flex-col items-center justify-center text-center px-4 py-4"
+                  style={{ borderRadius: "14px", border: "2px solid #F0D030", color: "#FFE55C", background: "linear-gradient(180deg, rgba(240,208,48,0.20), rgba(240,208,48,0.09))" }}
                 >
-                  🎙️ Gravar áudio desta viagem
+                  <span style={{ fontSize: "16px", fontWeight: 800, letterSpacing: "0.06em" }}>
+                    🎙️ FALTA O ÁUDIO
+                  </span>
+                  <span style={{ fontSize: "11px", fontWeight: 600, color: "#C9A227" }}>
+                    carregar para falar com a Roberta
+                  </span>
                 </a>
               )}
 
