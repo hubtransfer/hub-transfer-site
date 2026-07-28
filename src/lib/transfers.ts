@@ -277,19 +277,24 @@ export function normalizeTransfer(
 ): Transfer {
   return {
     id: (transfer.ID as number) || (transfer.id as number) || 0,
-    nomeCliente:
+    // String(...) em toda a volta: a folha devolve por vezes números ou null
+    // nestes campos, e um não-string aqui rebenta os filtros com .toLowerCase().
+    nomeCliente: String(
       (transfer.Cliente as string) ||
       (transfer.nomeCliente as string) ||
-      "",
-    referencia:
+      ""
+    ),
+    referencia: String(
       (transfer["Referência"] as string) ||
       (transfer.referencia as string) ||
-      "",
-    tipoServico:
+      ""
+    ),
+    tipoServico: String(
       (transfer["Tipo Serviço"] as string) ||
       (transfer.tipoServico as string) ||
-      "Transfer",
-    tourSelecionado: (transfer.tourSelecionado as string) || "",
+      "Transfer"
+    ),
+    tourSelecionado: String((transfer.tourSelecionado as string) || ""),
     numeroPessoas:
       parseInt(
         String(transfer.Pessoas || transfer.numeroPessoas)
@@ -298,24 +303,27 @@ export function normalizeTransfer(
       parseInt(
         String(transfer.Bagagens || transfer.numeroBagagens)
       ) || 0,
-    data:
-      (transfer.Data as string) || (transfer.data as string) || "",
-    contacto:
+    data: String((transfer.Data as string) || (transfer.data as string) || ""),
+    contacto: String(
       (transfer.Contacto as string) ||
       (transfer.contacto as string) ||
-      "",
-    numeroVoo:
+      ""
+    ),
+    numeroVoo: String(
       (transfer.Voo as string) ||
       (transfer.numeroVoo as string) ||
-      "",
-    origem:
+      ""
+    ),
+    origem: String(
       (transfer.Origem as string) ||
       (transfer.origem as string) ||
-      "",
-    destino:
+      ""
+    ),
+    destino: String(
       (transfer.Destino as string) ||
       (transfer.destino as string) ||
-      "",
+      ""
+    ),
     horaPickup: normalizeTime(
       (transfer["Hora Pick-up"] as string) ||
         (transfer.horaPickup as string) ||
@@ -404,9 +412,9 @@ export function applyFilters(
   }
 
   if (filters.cliente) {
-    const term = filters.cliente.toLowerCase();
+    const term = String(filters.cliente ?? "").toLowerCase();
     filtered = filtered.filter((s) =>
-      s.nomeCliente.toLowerCase().includes(term)
+      String(s.nomeCliente ?? "").toLowerCase().includes(term)
     );
   }
 

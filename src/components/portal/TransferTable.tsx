@@ -43,13 +43,13 @@ function cleanPhone(phone: string): string {
 }
 
 function isTourService(tipo: string, tourNome?: string): boolean {
-  const t = (tipo || "").toLowerCase();
-  return t.includes("tour") || t.includes("private") || !!(tourNome && tourNome.trim());
+  const t = String(tipo ?? "").toLowerCase();
+  return t.includes("tour") || t.includes("private") || !!(tourNome && String(tourNome).trim());
 }
 
 function isAirportToHotel(origem: string, destino: string): boolean {
-  const o = origem.toLowerCase();
-  const d = destino.toLowerCase();
+  const o = String(origem ?? "").toLowerCase();
+  const d = String(destino ?? "").toLowerCase();
   return (
     (o.includes("aeroporto") || o.includes("airport")) &&
     (d.includes("hotel") || (!d.includes("aeroporto") && !d.includes("airport")))

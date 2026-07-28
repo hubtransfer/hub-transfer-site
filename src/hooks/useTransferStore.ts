@@ -164,14 +164,16 @@ export function useTransferStore(): TransferStore {
     // Sort by date DESC, then hora DESC
     list.sort((a, b) => {
       // Parse dd/mm/yyyy or yyyy-mm-dd to comparable string
-      const da = (a.data || "").includes("/")
-        ? a.data.split("/").reverse().join("")
-        : (a.data || "").replace(/-/g, "");
-      const db = (b.data || "").includes("/")
-        ? b.data.split("/").reverse().join("")
-        : (b.data || "").replace(/-/g, "");
+      const sa = String(a.data ?? "");
+      const sb = String(b.data ?? "");
+      const da = sa.includes("/")
+        ? sa.split("/").reverse().join("")
+        : sa.replace(/-/g, "");
+      const db = sb.includes("/")
+        ? sb.split("/").reverse().join("")
+        : sb.replace(/-/g, "");
       if (da !== db) return db.localeCompare(da);
-      return (b.horaPickup || "").localeCompare(a.horaPickup || "");
+      return String(b.horaPickup ?? "").localeCompare(String(a.horaPickup ?? ""));
     });
     return list;
   }, [services, filters, hasActiveFilters]);
@@ -370,9 +372,9 @@ export function useTransferStore(): TransferStore {
     const testIds = services
       .filter(
         (s) =>
-          s.nomeCliente.toLowerCase().includes("test") ||
-          s.nomeCliente.toLowerCase().includes("teste") ||
-          s.referencia.toLowerCase().includes("test")
+          String(s.nomeCliente ?? "").toLowerCase().includes("test") ||
+          String(s.nomeCliente ?? "").toLowerCase().includes("teste") ||
+          String(s.referencia ?? "").toLowerCase().includes("test")
       )
       .map((s) => s.id);
 
