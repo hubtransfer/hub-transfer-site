@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 
 /* ─── Types ─── */
 
@@ -186,12 +187,22 @@ export default function NoShowModal({ isOpen, tripId, clientName, driverName, ga
   }, [canSubmit, slots, notes, tripId, clientName, driverName, gasUrl, date, saveToLocal, onSubmit, onClose]);
 
   if (!isOpen) return null;
+  if (typeof document === "undefined") return null;
 
-  return (
+  // Portal para document.body: o modal NÃO pode viver dentro do card — o
+  // motion.div do card tem transform (framer) + overflow-hidden, o que faz o
+  // `position: fixed` posicionar-se em relação ao CARD e desalinha os
+  // hit-targets no iOS (o toque no slot caía no overlay e fechava o modal).
+  // stopPropagation de pointer: com portal os eventos sintéticos ainda
+  // borbulham pela árvore React até aos handlers de swipe do card.
+  return createPortal(
     <div
       className="fixed inset-0 z-[99998] flex items-center justify-center p-4"
       style={{ background: "rgba(0,0,0,0.85)" }}
       onClick={onClose}
+      onPointerDown={(e) => e.stopPropagation()}
+      onPointerUp={(e) => e.stopPropagation()}
+      onPointerMove={(e) => e.stopPropagation()}
     >
       <div
         className="w-full max-w-[600px] max-h-[90vh] overflow-y-auto rounded-2xl bg-[#0A0A0A] border border-[#2A2A2A]"
@@ -301,6 +312,7 @@ export default function NoShowModal({ isOpen, tripId, clientName, driverName, ga
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
