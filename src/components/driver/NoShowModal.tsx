@@ -8,14 +8,18 @@ import { createPortal } from "react-dom";
 /** key = tipo EXACTO que o GAS registerNoShow usa para nomear os ficheiros */
 type ProofKey = "calls" | "whatsapp" | "sms" | "location" | "flight_arrival";
 
+interface ProofPhoto {
+  file: File;
+  preview: string;
+}
+
 interface ProofSlot {
   key: ProofKey;
   label: string;
   hint: string;
   icon: string;
   accept: string;
-  file: File | null;
-  preview: string | null;
+  photos: ProofPhoto[];
 }
 
 interface NoShowModalProps {
@@ -29,15 +33,17 @@ interface NoShowModalProps {
   onSubmit: (tripId: string) => void;
 }
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+// Limite de ENTRADA generoso: fotos de iPhone chegam aos 8-10MB, mas o que
+// segue no POST é sempre a versão comprimida (máx. 1600px, JPEG ~0.8).
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 
 // Sem `capture`: o browser deixa escolher câmara OU galeria em cada slot.
 const INITIAL_SLOTS: () => ProofSlot[] = () => [
-  { key: "calls",          icon: "📞", label: "Chamadas",          hint: "print do registo de chamadas ao cliente",             accept: "image/*", file: null, preview: null },
-  { key: "whatsapp",       icon: "💬", label: "WhatsApp",          hint: "print das tentativas no WhatsApp",                    accept: "image/*", file: null, preview: null },
-  { key: "sms",            icon: "✉️", label: "SMS",               hint: "print do SMS enviado",                                accept: "image/*", file: null, preview: null },
-  { key: "location",       icon: "📍", label: "Presença no local", hint: "foto no ponto de recolha (placa com nome visível)",   accept: "image/*", file: null, preview: null },
-  { key: "flight_arrival", icon: "✈️", label: "Horário do voo",    hint: "print da chegada do voo",                             accept: "image/*", file: null, preview: null },
+  { key: "calls",          icon: "📞", label: "Chamadas",          hint: "print do registo de chamadas ao cliente",             accept: "image/*", photos: [] },
+  { key: "whatsapp",       icon: "💬", label: "WhatsApp",          hint: "prints das tentativas no WhatsApp",                   accept: "image/*", photos: [] },
+  { key: "sms",            icon: "✉️", label: "SMS",               hint: "print do SMS enviado",                                accept: "image/*", photos: [] },
+  { key: "location",       icon: "📍", label: "Presença no local", hint: "foto no ponto de recolha (placa com nome visível)",   accept: "image/*", photos: [] },
+  { key: "flight_arrival", icon: "✈️", label: "Horário do voo",    hint: "print da chegada do voo",                             accept: "image/*", photos: [] },
 ];
 
 /* ─── File to base64 ─── */
@@ -50,6 +56,41 @@ function fileToBase64(file: File): Promise<string> {
   });
 }
 
+/* ─── Compressão client-side: máx. 1600px no lado maior, JPEG ~0.8.
+   O POST vai com tudo em base64 e o motorista está em 4G — sem isto,
+   meia dúzia de fotos de iPhone estouram o pedido. Prints de ecrã
+   ficam pequenos e perfeitamente legíveis. Em falha, base64 original. ─── */
+const COMPRESS_MAX_PX = 1600;
+const COMPRESS_QUALITY = 0.8;
+
+async function compressToDataUrl(file: File): Promise<string> {
+  try {
+    const url = URL.createObjectURL(file);
+    try {
+      const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const i = new Image();
+        i.onload = () => resolve(i);
+        i.onerror = () => reject(new Error("img load"));
+        i.src = url;
+      });
+      const scale = Math.min(1, COMPRESS_MAX_PX / Math.max(img.naturalWidth || 1, img.naturalHeight || 1));
+      const w = Math.max(1, Math.round((img.naturalWidth || 1) * scale));
+      const h = Math.max(1, Math.round((img.naturalHeight || 1) * scale));
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("no canvas ctx");
+      ctx.drawImage(img, 0, 0, w, h);
+      return canvas.toDataURL("image/jpeg", COMPRESS_QUALITY);
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  } catch {
+    return fileToBase64(file);
+  }
+}
+
 /* ─── Component ─── */
 
 export default function NoShowModal({ isOpen, tripId, clientName, driverName, gasUrl, date, onClose, onSubmit }: NoShowModalProps) {
@@ -59,28 +100,33 @@ export default function NoShowModal({ isOpen, tripId, clientName, driverName, ga
   const [toast, setToast] = useState("");
   const fileRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const proofCount = slots.filter((s) => s.file !== null).length;
-  // A defesa é obrigatória: pelo menos 1 prova E o relato preenchido
-  const canSubmit = proofCount >= 1 && notes.trim().length > 0 && !submitting;
+  const totalFotos = slots.reduce((n, s) => n + s.photos.length, 0);
+  const slotsComProva = slots.filter((s) => s.photos.length > 0).length;
+  // A defesa é obrigatória: pelo menos 1 foto no total E o relato preenchido
+  const canSubmit = totalFotos >= 1 && notes.trim().length > 0 && !submitting;
 
-  const handleFile = useCallback((index: number, file: File | null) => {
-    if (!file) return;
-    if (file.size > MAX_FILE_SIZE) {
-      alert("Ficheiro demasiado grande (máx. 5MB)");
-      return;
+  // Acrescenta (não substitui) — tocar outra vez no slot junta mais fotos
+  const handleFiles = useCallback((index: number, list: FileList | null) => {
+    if (!list || list.length === 0) return;
+    const added: ProofPhoto[] = [];
+    for (const file of Array.from(list)) {
+      if (file.size > MAX_FILE_SIZE) {
+        alert(`"${file.name}" é demasiado grande (máx. 20MB)`);
+        continue;
+      }
+      added.push({ file, preview: URL.createObjectURL(file) });
     }
-    const url = file.type.startsWith("image/") ? URL.createObjectURL(file) : null;
-    setSlots((prev) => prev.map((s, i) => i === index ? { ...s, file, preview: url } : s));
+    if (added.length === 0) return;
+    setSlots((prev) => prev.map((s, i) => i === index ? { ...s, photos: [...s.photos, ...added] } : s));
   }, []);
 
-  const removeFile = useCallback((index: number) => {
+  const removePhoto = useCallback((slotIdx: number, photoIdx: number) => {
     setSlots((prev) => prev.map((s, i) => {
-      if (i !== index) return s;
-      if (s.preview) URL.revokeObjectURL(s.preview);
-      return { ...s, file: null, preview: null };
+      if (i !== slotIdx) return s;
+      const photo = s.photos[photoIdx];
+      if (photo?.preview) URL.revokeObjectURL(photo.preview);
+      return { ...s, photos: s.photos.filter((_, j) => j !== photoIdx) };
     }));
-    // Clear the file input
-    if (fileRefs.current[index]) fileRefs.current[index]!.value = "";
   }, []);
 
   /** Save to localStorage as fallback */
@@ -115,16 +161,18 @@ export default function NoShowModal({ isOpen, tripId, clientName, driverName, ga
     setSubmitting(true);
 
     try {
-      // Convert all files to base64
+      // Uma entrada em proofs POR FOTO, todas com o type do slot —
+      // o GAS numera ficheiros repetidos do mesmo tipo (_2, _3…).
+      // Cada foto é comprimida (1600px / JPEG 0.8) antes do base64.
       const proofs: { key: ProofKey; label: string; fileName: string; mime: string; data: string }[] = [];
       for (const slot of slots) {
-        if (slot.file) {
-          const data = await fileToBase64(slot.file);
+        for (const photo of slot.photos) {
+          const data = await compressToDataUrl(photo.file);
           proofs.push({
             key: slot.key,
             label: slot.label,
-            fileName: slot.file.name,
-            mime: slot.file.type,
+            fileName: photo.file.name.replace(/\.[^.]+$/, "") + ".jpg",
+            mime: "image/jpeg",
             data,
           });
         }
@@ -224,50 +272,56 @@ export default function NoShowModal({ isOpen, tripId, clientName, driverName, ga
         <div className="px-5 py-4 space-y-3">
           {slots.map((slot, i) => (
             <div key={slot.key} className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-3">
-              <p className="text-xs font-mono text-[#D0D0D0] mb-0.5">
-                <span className="mr-1">{slot.icon}</span> <span className="font-bold">{slot.label}</span>
-              </p>
+              <div className="flex items-center justify-between mb-0.5">
+                <p className="text-xs font-mono text-[#D0D0D0]">
+                  <span className="mr-1">{slot.icon}</span> <span className="font-bold">{slot.label}</span>
+                </p>
+                {slot.photos.length > 0 && (
+                  <span className="text-[10px] font-mono font-bold text-[#F87171]">
+                    {slot.photos.length} {slot.photos.length === 1 ? "foto" : "fotos"}
+                  </span>
+                )}
+              </div>
               <p className="text-[10px] text-[#777] mb-2">{slot.hint}</p>
 
-              {slot.preview ? (
-                <div className="relative inline-block">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={slot.preview}
-                    alt={slot.label}
-                    className="max-h-[80px] rounded-lg object-cover"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeFile(i)}
-                    className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#EF4444] text-white text-xs flex items-center justify-center font-bold"
-                  >
-                    ✕
-                  </button>
+              {/* Miniaturas em grelha, ✕ individual */}
+              {slot.photos.length > 0 && (
+                <div className="grid grid-cols-4 gap-2 mb-2">
+                  {slot.photos.map((photo, j) => (
+                    <div key={photo.preview} className="relative">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={photo.preview}
+                        alt={`${slot.label} ${j + 1}`}
+                        className="w-full h-16 rounded-lg object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removePhoto(i, j)}
+                        className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#EF4444] text-white text-xs flex items-center justify-center font-bold"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              ) : slot.file ? (
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-[#D0D0D0] font-mono truncate">{slot.file.name}</span>
-                  <button
-                    type="button"
-                    onClick={() => removeFile(i)}
-                    className="text-[#EF4444] text-xs font-bold"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ) : (
-                <label className="flex items-center justify-center h-16 border border-dashed border-[#2A2A2A] rounded-lg cursor-pointer hover:border-[#EF4444]/30 transition-colors">
-                  <span className="text-xs text-[#666]">📷 Câmara ou galeria (máx. 5MB)</span>
-                  <input
-                    ref={(el) => { fileRefs.current[i] = el; }}
-                    type="file"
-                    accept={slot.accept}
-                    className="hidden"
-                    onChange={(e) => handleFile(i, e.target.files?.[0] || null)}
-                  />
-                </label>
               )}
+
+              {/* Tocar outra vez ACRESCENTA — o input `multiple` deixa
+                  escolher várias da fototeca de uma só vez */}
+              <label className="flex items-center justify-center h-12 border border-dashed border-[#2A2A2A] rounded-lg cursor-pointer hover:border-[#EF4444]/30 transition-colors">
+                <span className="text-xs text-[#666]">
+                  {slot.photos.length > 0 ? "📷 Acrescentar mais fotos" : "📷 Câmara ou galeria (podes escolher várias)"}
+                </span>
+                <input
+                  ref={(el) => { fileRefs.current[i] = el; }}
+                  type="file"
+                  accept={slot.accept}
+                  multiple
+                  className="hidden"
+                  onChange={(e) => { handleFiles(i, e.target.files); e.target.value = ""; }}
+                />
+              </label>
             </div>
           ))}
 
@@ -288,8 +342,8 @@ export default function NoShowModal({ isOpen, tripId, clientName, driverName, ga
         {/* Footer */}
         <div className="sticky bottom-0 bg-[#0A0A0A] border-t border-[#2A2A2A] px-5 py-4 space-y-3">
           <p className="text-xs text-[#999] text-center font-mono">
-            {proofCount} de 5 provas carregadas
-            {proofCount < 1 && <span className="text-[#EF4444]"> (mínimo 1)</span>}
+            {totalFotos} {totalFotos === 1 ? "foto" : "fotos"} em {slotsComProva} {slotsComProva === 1 ? "prova" : "provas"}
+            {totalFotos < 1 && <span className="text-[#EF4444]"> (mínimo 1 foto)</span>}
             {notes.trim().length === 0 && <span className="text-[#EF4444]"> · falta o relato &quot;O que aconteceu?&quot;</span>}
           </p>
 
