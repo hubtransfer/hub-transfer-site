@@ -4,11 +4,15 @@ import React, { useState, useRef, useCallback } from "react";
 
 /* ─── Types ─── */
 
+/** key = tipo EXACTO que o GAS registerNoShow usa para nomear os ficheiros */
+type ProofKey = "calls" | "whatsapp" | "sms" | "location" | "flight_arrival";
+
 interface ProofSlot {
+  key: ProofKey;
   label: string;
+  hint: string;
   icon: string;
   accept: string;
-  capture?: string;
   file: File | null;
   preview: string | null;
 }
@@ -26,12 +30,13 @@ interface NoShowModalProps {
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
+// Sem `capture`: o browser deixa escolher câmara OU galeria em cada slot.
 const INITIAL_SLOTS: () => ProofSlot[] = () => [
-  { label: "Chamadas (4 tentativas)", icon: "📞", accept: "image/*,.pdf", file: null, preview: null },
-  { label: "Mensagem WhatsApp", icon: "💬", accept: "image/*,.pdf", file: null, preview: null },
-  { label: "Mensagem SMS", icon: "📱", accept: "image/*,.pdf", file: null, preview: null },
-  { label: "Presença no local (foto com placa)", icon: "📍", accept: "image/*", capture: "environment", file: null, preview: null },
-  { label: "Horário chegada do voo", icon: "✈️", accept: "image/*,.pdf", file: null, preview: null },
+  { key: "calls",          icon: "📞", label: "Chamadas",          hint: "print do registo de chamadas ao cliente",             accept: "image/*", file: null, preview: null },
+  { key: "whatsapp",       icon: "💬", label: "WhatsApp",          hint: "print das tentativas no WhatsApp",                    accept: "image/*", file: null, preview: null },
+  { key: "sms",            icon: "✉️", label: "SMS",               hint: "print do SMS enviado",                                accept: "image/*", file: null, preview: null },
+  { key: "location",       icon: "📍", label: "Presença no local", hint: "foto no ponto de recolha (placa com nome visível)",   accept: "image/*", file: null, preview: null },
+  { key: "flight_arrival", icon: "✈️", label: "Horário do voo",    hint: "print da chegada do voo",                             accept: "image/*", file: null, preview: null },
 ];
 
 /* ─── File to base64 ─── */
@@ -54,7 +59,8 @@ export default function NoShowModal({ isOpen, tripId, clientName, driverName, ga
   const fileRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const proofCount = slots.filter((s) => s.file !== null).length;
-  const canSubmit = proofCount >= 4 && !submitting;
+  // A defesa é obrigatória: pelo menos 1 prova E o relato preenchido
+  const canSubmit = proofCount >= 1 && notes.trim().length > 0 && !submitting;
 
   const handleFile = useCallback((index: number, file: File | null) => {
     if (!file) return;
@@ -79,7 +85,7 @@ export default function NoShowModal({ isOpen, tripId, clientName, driverName, ga
   /** Save to localStorage as fallback */
   const saveToLocal = useCallback((
     d: string,
-    proofs: { label: string; fileName: string; type: string; data: string }[],
+    proofs: { key: ProofKey; label: string; fileName: string; mime: string; data: string }[],
   ) => {
     try {
       const key = `hub_noshow_${tripId}_${d}`;
@@ -109,14 +115,15 @@ export default function NoShowModal({ isOpen, tripId, clientName, driverName, ga
 
     try {
       // Convert all files to base64
-      const proofs: { label: string; fileName: string; type: string; data: string }[] = [];
+      const proofs: { key: ProofKey; label: string; fileName: string; mime: string; data: string }[] = [];
       for (const slot of slots) {
         if (slot.file) {
           const data = await fileToBase64(slot.file);
           proofs.push({
+            key: slot.key,
             label: slot.label,
             fileName: slot.file.name,
-            type: slot.file.type,
+            mime: slot.file.type,
             data,
           });
         }
@@ -135,8 +142,10 @@ export default function NoShowModal({ isOpen, tripId, clientName, driverName, ga
             date: d,
             driverName: driverName || "",
             observations: notes,
+            // type = calls/whatsapp/sms/location/flight_arrival — o GAS nomeia
+            // os ficheiros por estes tipos; nunca enviar o MIME aqui.
             proofs: proofs.map((p) => ({
-              type: p.type,
+              type: p.key,
               filename: p.fileName,
               data: p.data,
             })),
@@ -203,10 +212,11 @@ export default function NoShowModal({ isOpen, tripId, clientName, driverName, ga
         {/* Proof slots */}
         <div className="px-5 py-4 space-y-3">
           {slots.map((slot, i) => (
-            <div key={slot.label} className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-3">
-              <p className="text-xs font-mono text-[#D0D0D0] mb-2">
-                <span className="mr-1">{slot.icon}</span> {slot.label}
+            <div key={slot.key} className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-3">
+              <p className="text-xs font-mono text-[#D0D0D0] mb-0.5">
+                <span className="mr-1">{slot.icon}</span> <span className="font-bold">{slot.label}</span>
               </p>
+              <p className="text-[10px] text-[#777] mb-2">{slot.hint}</p>
 
               {slot.preview ? (
                 <div className="relative inline-block">
@@ -237,12 +247,11 @@ export default function NoShowModal({ isOpen, tripId, clientName, driverName, ga
                 </div>
               ) : (
                 <label className="flex items-center justify-center h-16 border border-dashed border-[#2A2A2A] rounded-lg cursor-pointer hover:border-[#EF4444]/30 transition-colors">
-                  <span className="text-xs text-[#666]">Carregar ficheiro (máx. 5MB)</span>
+                  <span className="text-xs text-[#666]">📷 Câmara ou galeria (máx. 5MB)</span>
                   <input
                     ref={(el) => { fileRefs.current[i] = el; }}
                     type="file"
                     accept={slot.accept}
-                    capture={slot.capture as "environment" | undefined}
                     className="hidden"
                     onChange={(e) => handleFile(i, e.target.files?.[0] || null)}
                   />
@@ -251,14 +260,15 @@ export default function NoShowModal({ isOpen, tripId, clientName, driverName, ga
             </div>
           ))}
 
-          {/* Notes */}
+          {/* O que aconteceu — a defesa do motorista, obrigatória */}
           <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-3">
-            <p className="text-xs font-mono text-[#D0D0D0] mb-2">📝 Observações</p>
+            <p className="text-xs font-mono text-[#D0D0D0] mb-0.5">📝 <span className="font-bold">O que aconteceu?</span> <span className="text-[#EF4444]">*</span></p>
+            <p className="text-[10px] text-[#777] mb-2">a tua defesa — conta a história completa, com horas</p>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Descreva o que aconteceu..."
-              rows={3}
+              placeholder="Ex.: Cheguei às 08:05, voo aterrou às 08:12, esperei 65 min com placa na saída. Liguei 3x e mandei WhatsApp/SMS sem resposta. Contactei a operadora às 09:20."
+              rows={5}
               className="w-full bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg px-3 py-2 text-sm text-[#F5F5F5] placeholder-[#666] focus:outline-none focus:border-[#EF4444]/40 resize-none font-mono"
             />
           </div>
@@ -267,7 +277,9 @@ export default function NoShowModal({ isOpen, tripId, clientName, driverName, ga
         {/* Footer */}
         <div className="sticky bottom-0 bg-[#0A0A0A] border-t border-[#2A2A2A] px-5 py-4 space-y-3">
           <p className="text-xs text-[#999] text-center font-mono">
-            {proofCount} de 5 provas carregadas {proofCount < 4 && <span className="text-[#EF4444]">(mínimo 4)</span>}
+            {proofCount} de 5 provas carregadas
+            {proofCount < 1 && <span className="text-[#EF4444]"> (mínimo 1)</span>}
+            {notes.trim().length === 0 && <span className="text-[#EF4444]"> · falta o relato &quot;O que aconteceu?&quot;</span>}
           </p>
 
           <button

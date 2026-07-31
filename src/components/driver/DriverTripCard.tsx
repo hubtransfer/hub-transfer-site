@@ -762,19 +762,24 @@ export default function DriverTripCard({
                   NO_SHOW: viagem encerrada — nada de swipe nem "Parabéns". */}
               {isNoShowTrip ? (
                 <>
-                  <div className="w-full rounded-2xl py-5 px-4 text-center space-y-1"
-                    style={{ background: "#1A1414", border: "1px solid rgba(239,68,68,0.25)" }}>
+                  {/* Caixa clicável — tocar abre o formulário de provas (driver E admin).
+                      O registerNoShow do GAS reutiliza a pasta, anexar depois é seguro. */}
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setNoShowOpen(true)}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setNoShowOpen(true); }}
+                    className="w-full rounded-2xl py-5 px-4 text-center space-y-1 cursor-pointer active:opacity-80 transition-opacity"
+                    style={{ background: "#1A1414", border: "1px solid rgba(239,68,68,0.25)" }}
+                  >
                     <p className="text-base font-bold text-[#EF4444]">🚫 Cliente não compareceu</p>
                     <p className="text-xs text-[#999] font-mono">Viagem encerrada como no-show</p>
+                    <p className="text-[10px] text-[#F87171]/70 font-mono">📎 tocar para anexar provas</p>
                   </div>
-                  {/* O motorista pode anexar (mais) provas mesmo depois de marcado —
-                      o registerNoShow do GAS reutiliza a pasta se já existir. */}
-                  {mode === "driver" && (
-                    <button type="button" onClick={() => setNoShowOpen(true)}
-                      className="w-full h-12 rounded-xl bg-transparent border border-[#EF4444]/30 text-[#EF4444] font-mono text-sm font-bold hover:bg-[#EF4444]/15 active:bg-[#EF4444]/20 transition-colors">
-                      📎 Anexar provas do no-show
-                    </button>
-                  )}
+                  <button type="button" onClick={() => setNoShowOpen(true)}
+                    className="w-full h-12 rounded-xl bg-transparent border border-[#EF4444]/30 text-[#EF4444] font-mono text-sm font-bold hover:bg-[#EF4444]/15 active:bg-[#EF4444]/20 transition-colors">
+                    📎 Anexar provas do no-show
+                  </button>
                 </>
               ) : (
                 <SwipeBar
