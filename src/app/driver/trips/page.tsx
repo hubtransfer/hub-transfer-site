@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { useDriverStore } from "@/hooks/useDriverStore";
 import DriverTripCard from "@/components/driver/DriverTripCard";
 import DriverNameplate from "@/components/driver/DriverNameplate";
+import NoShowModal from "@/components/driver/NoShowModal";
 import { SkeletonList } from "@/components/trips/SkeletonCard";
 import { getSession, clearSession } from "@/lib/auth";
 import ChangePasswordModal from "@/components/shared/ChangePasswordModal";
 import {
+  HUB_CENTRAL_URL,
   detectTipo,
   calcDriverPrice,
   cleanHora,
@@ -45,6 +47,9 @@ export default function DriverTripsPage() {
   const [nameplateOpen, setNameplateOpen] = useState(false);
   const [nameplateName, setNameplateName] = useState("");
   const [nameplateDest, setNameplateDest] = useState("");
+
+  /* ── Anexar provas a um no-show já marcado (linhas compactas) ── */
+  const [proofTrip, setProofTrip] = useState<HubViagem | null>(null);
 
   /* ── Load session from auth ── */
   useEffect(() => {
@@ -338,9 +343,15 @@ export default function DriverTripsPage() {
                         {tipo}
                       </span>
                       {noShow ? (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#7F1D1D]/50 text-[#F87171]">
-                          🚫 Cliente não compareceu
-                        </span>
+                        <>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#7F1D1D]/50 text-[#F87171]">
+                            🚫 Cliente não compareceu
+                          </span>
+                          <button type="button" onClick={() => setProofTrip(viagem)} title="Anexar provas do no-show"
+                            className="text-sm px-1.5 py-0.5 rounded border border-[#7F1D1D]/60 text-[#F87171] hover:bg-[#7F1D1D]/30 active:bg-[#7F1D1D]/40 transition-colors">
+                            📎
+                          </button>
+                        </>
                       ) : (
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#22C55E]/10 text-[#22C55E]">
                           CONCLUÍDA
@@ -354,6 +365,20 @@ export default function DriverTripsPage() {
           </>
         )}
       </div>
+
+      {/* ── PROVAS DO NO-SHOW (viagem já marcada — só anexa, não re-marca) ── */}
+      {proofTrip && (
+        <NoShowModal
+          isOpen
+          tripId={String(proofTrip.id ?? "")}
+          clientName={String(proofTrip.client ?? "")}
+          driverName={store.driverName}
+          gasUrl={HUB_CENTRAL_URL}
+          date={String(proofTrip.date || proofTrip.flightDate || "")}
+          onClose={() => setProofTrip(null)}
+          onSubmit={() => { setProofTrip(null); store.syncViagensSilent(); }}
+        />
+      )}
 
       {/* ── NAMEPLATE ── */}
       <DriverNameplate

@@ -761,11 +761,21 @@ export default function DriverTripCard({
               {/* Swipe bar — both driver and admin modes.
                   NO_SHOW: viagem encerrada — nada de swipe nem "Parabéns". */}
               {isNoShowTrip ? (
-                <div className="w-full rounded-2xl py-5 px-4 text-center space-y-1"
-                  style={{ background: "#1A1414", border: "1px solid rgba(239,68,68,0.25)" }}>
-                  <p className="text-base font-bold text-[#EF4444]">🚫 Cliente não compareceu</p>
-                  <p className="text-xs text-[#999] font-mono">Viagem encerrada como no-show</p>
-                </div>
+                <>
+                  <div className="w-full rounded-2xl py-5 px-4 text-center space-y-1"
+                    style={{ background: "#1A1414", border: "1px solid rgba(239,68,68,0.25)" }}>
+                    <p className="text-base font-bold text-[#EF4444]">🚫 Cliente não compareceu</p>
+                    <p className="text-xs text-[#999] font-mono">Viagem encerrada como no-show</p>
+                  </div>
+                  {/* O motorista pode anexar (mais) provas mesmo depois de marcado —
+                      o registerNoShow do GAS reutiliza a pasta se já existir. */}
+                  {mode === "driver" && (
+                    <button type="button" onClick={() => setNoShowOpen(true)}
+                      className="w-full h-12 rounded-xl bg-transparent border border-[#EF4444]/30 text-[#EF4444] font-mono text-sm font-bold hover:bg-[#EF4444]/15 active:bg-[#EF4444]/20 transition-colors">
+                      📎 Anexar provas do no-show
+                    </button>
+                  )}
+                </>
               ) : (
                 <SwipeBar
                   tripId={cardId}
@@ -814,8 +824,16 @@ export default function DriverTripCard({
         date={viagem.flightDate}
         onClose={() => setNoShowOpen(false)}
         onSubmit={(id) => {
+          // Folha = fonte de verdade: persistir NO_SHOW via marcarNoShow.
+          // Nunca "completar" aqui — escreveria CONCLUIDA por cima do no-show.
+          const rowIndex = String(viagem.rowIndex ?? "").trim();
+          if (rowIndex) {
+            fetch(`${HUB_CENTRAL_URL}?action=marcarNoShow&rowIndex=${encodeURIComponent(rowIndex)}&t=${Date.now()}`, { redirect: "follow" })
+              .catch((err) => console.error("marcarNoShow error:", err))
+              .finally(() => { onRefresh?.(); });
+          }
           if (onNoShow) onNoShow(id);
-          else onDarBaixa(viagem.id, viagem.rowIndex ?? "", id);
+          else if (!rowIndex) onDarBaixa(viagem.id, "", id);
         }}
       />
     </motion.div>
