@@ -14,6 +14,7 @@ import {
   cleanHora,
   todayStr,
   dateToISO,
+  isNoShowViagem,
 } from "@/lib/trips";
 import type { HubViagem } from "@/lib/trips";
 
@@ -135,15 +136,17 @@ export default function DriverTripsPage() {
   /*  MAIN DRIVER VIEW                                                 */
   /* ================================================================ */
 
+  // NO_SHOW dá baixa: sai das ativas e junta-se às terminadas (com selo próprio)
   const nonDoneTrips = driverTrips.filter(
     (v) =>
+      !isNoShowViagem(v) &&
       !v.concluida &&
       v.status !== "CONCLUIDA" &&
       v.status !== "FINALIZOU",
   );
   const doneTrips = driverTrips.filter(
     (v) =>
-      v.concluida || v.status === "CONCLUIDA" || v.status === "FINALIZOU",
+      isNoShowViagem(v) || v.concluida || v.status === "CONCLUIDA" || v.status === "FINALIZOU",
   );
 
   return (
@@ -304,7 +307,11 @@ export default function DriverTripsPage() {
                 <div className="flex items-center gap-3 py-3">
                   <div className="flex-1 h-px bg-white/5" />
                   <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-mono">
-                    Concluídas ({doneTrips.length})
+                    {(() => {
+                      const noShows = doneTrips.filter((v) => isNoShowViagem(v)).length;
+                      const done = doneTrips.length - noShows;
+                      return noShows > 0 ? `Concluídas (${done}) · No-show (${noShows})` : `Concluídas (${done})`;
+                    })()}
                   </p>
                   <div className="flex-1 h-px bg-white/5" />
                 </div>
@@ -313,11 +320,12 @@ export default function DriverTripsPage() {
                   const tipo = detectTipo(viagem.origin || "", viagem.flight || "", viagem.type);
                   const hora = cleanHora(viagem.pickupTime || "");
                   const typeColor = tipo === "CHEGADA" ? "#D4A847" : tipo === "RECOLHA" ? "#8B9DAF" : "#C17E4A";
+                  const noShow = isNoShowViagem(viagem);
                   return (
                     <div
                       key={vId}
                       className="bg-[#1A1A1A] rounded-xl border border-[#2A2A2A] px-4 py-3 flex items-center gap-3 opacity-50"
-                      style={{ borderLeftWidth: "3px", borderLeftColor: typeColor }}
+                      style={{ borderLeftWidth: "3px", borderLeftColor: noShow ? "#7F1D1D" : typeColor, ...(noShow ? { filter: "grayscale(0.55)" } : {}) }}
                     >
                       <span className="font-mono text-sm font-bold text-[#666]">{hora}</span>
                       <div className="flex-1 min-w-0">
@@ -329,9 +337,15 @@ export default function DriverTripsPage() {
                       >
                         {tipo}
                       </span>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#22C55E]/10 text-[#22C55E]">
-                        CONCLUÍDA
-                      </span>
+                      {noShow ? (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#7F1D1D]/50 text-[#F87171]">
+                          🚫 Cliente não compareceu
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#22C55E]/10 text-[#22C55E]">
+                          CONCLUÍDA
+                        </span>
+                      )}
                     </div>
                   );
                 })}

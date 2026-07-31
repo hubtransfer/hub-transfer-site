@@ -15,6 +15,7 @@ import {
   detectTipo,
   calcDriverPrice,
   todayStr,
+  isNoShowViagem,
 } from "@/lib/trips";
 
 // ─── LocalStorage Keys ───
@@ -276,10 +277,10 @@ export function useTripsStore(): TripsStore {
       (s) => s.type === "RECOLHA"
     ).length;
 
-    // Count completed/no-show hubViagens
-    const hubNoShow = hubViagens.filter((v) => v.status === "NO-SHOW").length;
+    // Count completed/no-show hubViagens — no-show conta SEMPRE à parte, nunca como concluída
+    const hubNoShow = hubViagens.filter((v) => isNoShowViagem(v)).length;
     const hubDone = hubViagens.filter(
-      (v) => (v.concluida || v.status === "CONCLUIDA" || v.status === "FINALIZOU" || v.status === "concluida") && v.status !== "NO-SHOW",
+      (v) => (v.concluida || v.status === "CONCLUIDA" || v.status === "FINALIZOU" || v.status === "concluida") && !isNoShowViagem(v),
     ).length;
     const hubActive = hubViagens.length - hubDone - hubNoShow;
 
@@ -353,18 +354,18 @@ export function useTripsStore(): TripsStore {
   const diaActiveList = useMemo<HubViagem[]>(() => {
     if (!isViewingToday) return diaList; // Past dates: show ALL including completed
     return diaList.filter(
-      (v) => !v.concluida && v.status !== "CONCLUIDA" && v.status !== "FINALIZOU" && v.status !== "concluida" && v.status !== "NO-SHOW",
+      (v) => !v.concluida && v.status !== "CONCLUIDA" && v.status !== "FINALIZOU" && v.status !== "concluida" && !isNoShowViagem(v),
     );
   }, [diaList, isViewingToday]);
 
   const diaDoneList = useMemo<HubViagem[]>(() => {
     return diaList.filter(
-      (v) => (v.concluida || v.status === "CONCLUIDA" || v.status === "FINALIZOU" || v.status === "concluida") && v.status !== "NO-SHOW",
+      (v) => (v.concluida || v.status === "CONCLUIDA" || v.status === "FINALIZOU" || v.status === "concluida") && !isNoShowViagem(v),
     );
   }, [diaList]);
 
   const diaNoShowList = useMemo<HubViagem[]>(() => {
-    return diaList.filter((v) => v.status === "NO-SHOW");
+    return diaList.filter((v) => isNoShowViagem(v));
   }, [diaList]);
 
   // ──────────────────────────────────────────────
@@ -596,7 +597,19 @@ export function useTripsStore(): TripsStore {
 
   const diaSetDriver = useCallback((cardId: string, driver: string) => {
     setDiaDriverMap((prev) => ({ ...prev, [cardId]: driver }));
-  }, []);
+
+    // Persistir a troca na folha (col AA) — sem isto a mudança era só local
+    const v = hubViagens.find(
+      (x) => String(x.id || String(x.client ?? "").replace(/\W/g, "")) === String(cardId),
+    );
+    const rowIndex = String(v?.rowIndex ?? "");
+    if (!rowIndex || !driver) return;
+    const base = hubViagensUrl || HUB_CENTRAL_URL;
+    const url = `${base}?action=trocarMotorista&rowIndex=${encodeURIComponent(rowIndex)}&motorista=${encodeURIComponent(driver)}&t=${ts()}`;
+    fetch(url, { redirect: "follow" }).catch((err) => {
+      console.error("trocarMotorista error:", err);
+    });
+  }, [hubViagens, hubViagensUrl]);
 
   const darBaixa = useCallback(
     async (id: string, rowIndex: string, cardId: string) => {
@@ -641,7 +654,7 @@ export function useTripsStore(): TripsStore {
       prev.map((v) => {
         const vId = v.id || (v.client || "").replace(/\W/g, "");
         if (String(vId) === String(cardId)) {
-          return { ...v, concluida: true, status: "NO-SHOW" };
+          return { ...v, concluida: true, status: "NO-SHOW", statusMotorista: "NO_SHOW" };
         }
         return v;
       })

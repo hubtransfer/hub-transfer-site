@@ -458,6 +458,15 @@ export function calcFlightProgress(depTime: string, arrTime: string): number {
 }
 
 /**
+ * NO_SHOW — cliente não compareceu. Verdadeiro se qualquer um dos campos de
+ * estado (R ou BD/56) contiver NO-SHOW/NO_SHOW. Blindado contra null/número.
+ */
+export function isNoShowViagem(v: { status?: unknown; statusMotorista?: unknown }): boolean {
+  const re = /NO[-_\s]?SHOW/i;
+  return re.test(String(v?.status ?? '')) || re.test(String(v?.statusMotorista ?? ''));
+}
+
+/**
  * Driver price — single source of truth for both the trip card and the admin
  * per-driver summary. The backend commission engine wins: it sends the value as
  * `comissao` (getViagens). The platform heuristic below only runs for older

@@ -13,6 +13,7 @@ import {
   getSourceLabel,
   getMapUrl,
   getWazeUrl,
+  isNoShowViagem,
 } from "@/lib/trips";
 import { generateDriverWhatsAppURL, generateDriverSmsURL } from "@/lib/driver-templates";
 import { getOriginFlag } from "@/lib/countryFlags";
@@ -137,6 +138,7 @@ interface DriverTripCardProps {
   onSmsMsg?: (cid: string, type: string, client: string, lang: string, origin: string, hora: string, phone: string) => void;
   driverName?: string;  // logged-in driver name (driver mode) or selected driver (admin mode)
   onNoShow?: (tripId: string) => void;  // called after no-show proofs submitted
+  onMarkNoShow?: (viagem: HubViagem) => void;  // admin only — marca no-show direto no GAS (com confirmação)
   onRefresh?: () => void;  // triggered after each swipe to re-fetch fresh data
   onDelete?: (viagem: HubViagem) => void;  // admin only — opens delete confirmation
   mode?: "driver" | "admin";
@@ -153,6 +155,7 @@ export default function DriverTripCard({
   onSetDriver, onDispatch, onClientMsg, onSmsMsg,
   driverName: driverNameProp,
   onNoShow,
+  onMarkNoShow,
   onRefresh,
   onDelete,
   mode = "driver",
@@ -183,6 +186,8 @@ export default function DriverTripCard({
   const c = ts(tipo);
   const passo = statusMotoristaToPasso(viagem.statusMotorista);
   const aguardaAudio = precisaDeAudio(viagem);
+  // NO_SHOW pode vir da col R ("NO-SHOW") ou da BD/56 ("NO_SHOW") — cobrir ambas
+  const isNoShowTrip = isNoShowViagem(viagem);
 
   const hasFlightNumber = !!(viagem.flight && viagem.flight.trim());
   const hasFlight = hasFlightNumber && (tipo === "CHEGADA" || !!(viagem.depAirport || viagem.depIata || viagem.arrTime));
@@ -313,25 +318,27 @@ export default function DriverTripCard({
   return (
     <motion.div
       layout
-      onPointerDown={expanded && !isDone ? onDown : undefined}
-      onPointerMove={expanded && !isDone ? onMove : undefined}
-      onPointerUp={expanded && !isDone ? onUp : undefined}
-      onPointerCancel={expanded && !isDone ? onCancel : undefined}
+      onPointerDown={expanded && !isDone && !isNoShowTrip ? onDown : undefined}
+      onPointerMove={expanded && !isDone && !isNoShowTrip ? onMove : undefined}
+      onPointerUp={expanded && !isDone && !isNoShowTrip ? onUp : undefined}
+      onPointerCancel={expanded && !isDone && !isNoShowTrip ? onCancel : undefined}
       className={`
         relative rounded-2xl border overflow-hidden border-l-4 select-none
-        ${isSwipeActive || isCompleting ? "border-l-[#F0D030]" : aguardaAudio ? "border-l-[#F0D030]" : c.border}
-        ${isDone && !isHistorical ? "opacity-40 bg-[#1A1A1A] border-[#2A2A2A]" : ""}
-        ${isDone && isHistorical ? "bg-[#1A1A1A] border-[#2A2A2A]" : ""}
-        ${!isDone && aguardaAudio ? "bg-[#1A1A00] border-[#2A2A1A] ring-1 ring-[#F0D030]/40 animate-gold-pulse" : ""}
-        ${!isDone && !aguardaAudio && isNext ? "bg-[#1A1A00] border-[#2A2A1A] ring-1 ring-[#F0D030]/20" : ""}
-        ${!isDone && !aguardaAudio && !isNext ? "bg-[#1A1A1A] border-[#2A2A2A] opacity-90" : ""}
+        ${isSwipeActive || isCompleting ? "border-l-[#F0D030]" : isNoShowTrip ? "border-l-[#7F1D1D]" : aguardaAudio ? "border-l-[#F0D030]" : c.border}
+        ${isNoShowTrip ? "bg-[#151515] border-[#2A2A2A]" : ""}
+        ${!isNoShowTrip && isDone && !isHistorical ? "opacity-40 bg-[#1A1A1A] border-[#2A2A2A]" : ""}
+        ${!isNoShowTrip && isDone && isHistorical ? "bg-[#1A1A1A] border-[#2A2A2A]" : ""}
+        ${!isNoShowTrip && !isDone && aguardaAudio ? "bg-[#1A1A00] border-[#2A2A1A] ring-1 ring-[#F0D030]/40 animate-gold-pulse" : ""}
+        ${!isNoShowTrip && !isDone && !aguardaAudio && isNext ? "bg-[#1A1A00] border-[#2A2A1A] ring-1 ring-[#F0D030]/20" : ""}
+        ${!isNoShowTrip && !isDone && !aguardaAudio && !isNext ? "bg-[#1A1A1A] border-[#2A2A2A] opacity-90" : ""}
         ${isSwipeActive || isCompleting ? `ring-2 ring-[${swipeColor}]/30` : ""}
       `}
       style={{
         transform: isSwiping ? `translateX(${swipeX}px)` : isCompleting ? "translateX(100vw)" : undefined,
         transition: isSwiping ? "none" : "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+        filter: isNoShowTrip ? "grayscale(0.55)" : undefined,
       }}
-      animate={isCompleting ? { x: "100vw", opacity: 0 } : { x: 0, opacity: (isDone && !isHistorical) ? 0.4 : 1 }}
+      animate={isCompleting ? { x: "100vw", opacity: 0 } : { x: 0, opacity: (isDone && !isHistorical) ? 0.4 : isNoShowTrip ? 0.65 : 1 }}
       transition={{ duration: 0.4 }}
     >
       {/* ── Copy toast ── */}
@@ -384,7 +391,11 @@ export default function DriverTripCard({
             <button type="button" onClick={(e) => { e.stopPropagation(); onDelete(viagem); }} title="Apagar viagem"
               className="text-[#666] hover:text-[#EF4444] transition-colors text-sm cursor-pointer">🗑️</button>
           )}
-          {aguardaAudio && mode !== "driver" ? (
+          {isNoShowTrip ? (
+            <span className="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded bg-[#7F1D1D]/50 text-[#F87171]">
+              🚫 No-Show
+            </span>
+          ) : aguardaAudio && mode !== "driver" ? (
             <span className="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded bg-[#F0D030]/15 text-[#F0D030]">
               🎙️ FALTA O ÁUDIO
             </span>
@@ -422,7 +433,7 @@ export default function DriverTripCard({
             recolha ou chegada, com ou sem voo (o voo abaixo é extra) */}
         {!expanded && (
           <div className="px-4">
-            <LiveProgressStrip compact n={isDone && !passo.noShow ? 5 : passo.n} noShow={passo.noShow} />
+            <LiveProgressStrip compact n={isDone && !isNoShowTrip ? 5 : passo.n} noShow={isNoShowTrip} />
           </div>
         )}
 
@@ -675,7 +686,7 @@ export default function DriverTripCard({
 
             {/* ── Carrinho completo — SEMPRE, entre a rota e as acções ── */}
             <div className="border-t border-[#2A2A2A] px-4 pt-1 pb-2">
-              <LiveProgressStrip n={isDone && !passo.noShow ? 5 : passo.n} noShow={passo.noShow} horaAgendada={adjustedPickup || hora} />
+              <LiveProgressStrip n={isDone && !isNoShowTrip ? 5 : passo.n} noShow={isNoShowTrip} horaAgendada={adjustedPickup || hora} />
             </div>
 
             {/* ── Actions ── */}
@@ -747,27 +758,46 @@ export default function DriverTripCard({
                 </button>
               )}
 
-              {/* Swipe bar — both driver and admin modes */}
-              <SwipeBar
-                tripId={cardId}
-                rowIndex={viagem.rowIndex ?? ""}
-                initialStatus={viagem.statusMotorista || viagem.status}
-                origin={viagem.origin}
-                destination={viagem.destination}
-                coordsOrigem={viagem.coordsOrigem}
-                coordsDestino={viagem.coordsDestino}
-                onStatusChange={(newStatus) => {
-                  if (newStatus === "FINALIZADO") onDarBaixa(viagem.id, viagem.rowIndex ?? "", cardId);
-                  onRefresh?.();
-                }}
-              />
+              {/* Swipe bar — both driver and admin modes.
+                  NO_SHOW: viagem encerrada — nada de swipe nem "Parabéns". */}
+              {isNoShowTrip ? (
+                <div className="w-full rounded-2xl py-5 px-4 text-center space-y-1"
+                  style={{ background: "#1A1414", border: "1px solid rgba(239,68,68,0.25)" }}>
+                  <p className="text-base font-bold text-[#EF4444]">🚫 Cliente não compareceu</p>
+                  <p className="text-xs text-[#999] font-mono">Viagem encerrada como no-show</p>
+                </div>
+              ) : (
+                <SwipeBar
+                  tripId={cardId}
+                  rowIndex={viagem.rowIndex ?? ""}
+                  initialStatus={viagem.statusMotorista || viagem.status}
+                  origin={viagem.origin}
+                  destination={viagem.destination}
+                  coordsOrigem={viagem.coordsOrigem}
+                  coordsDestino={viagem.coordsDestino}
+                  onStatusChange={(newStatus) => {
+                    if (newStatus === "FINALIZADO") onDarBaixa(viagem.id, viagem.rowIndex ?? "", cardId);
+                    onRefresh?.();
+                  }}
+                />
+              )}
 
-              {/* No-Show button */}
-              {!isDone && (
-                <button type="button" onClick={() => setNoShowOpen(true)}
-                  className="w-full h-12 rounded-xl bg-transparent border border-[#EF4444]/30 text-[#EF4444] font-mono text-sm font-bold hover:bg-[#EF4444]/15 active:bg-[#EF4444]/20 transition-colors">
-                  🚫 Cliente No-Show
-                </button>
+              {/* No-Show — driver: fluxo de provas; admin: marcar direto no GAS
+                  (funciona mesmo em viagens já concluídas, para corrigir enganos) */}
+              {mode === "admin" && onMarkNoShow ? (
+                !isNoShowTrip && (
+                  <button type="button" onClick={() => onMarkNoShow(viagem)}
+                    className="w-full h-12 rounded-xl bg-transparent border border-[#EF4444]/30 text-[#EF4444] font-mono text-sm font-bold hover:bg-[#EF4444]/15 active:bg-[#EF4444]/20 transition-colors">
+                    🚫 Marcar No-Show
+                  </button>
+                )
+              ) : (
+                !isDone && !isNoShowTrip && (
+                  <button type="button" onClick={() => setNoShowOpen(true)}
+                    className="w-full h-12 rounded-xl bg-transparent border border-[#EF4444]/30 text-[#EF4444] font-mono text-sm font-bold hover:bg-[#EF4444]/15 active:bg-[#EF4444]/20 transition-colors">
+                    🚫 Cliente No-Show
+                  </button>
+                )
               )}
             </div>
           </motion.div>

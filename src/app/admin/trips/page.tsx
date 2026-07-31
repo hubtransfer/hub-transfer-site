@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTripsStore } from "@/hooks/useTripsStore";
 import TripCard from "@/components/driver/DriverTripCard";
 import DriverNameplate from "@/components/driver/DriverNameplate";
+import NoShowModal from "@/components/driver/NoShowModal";
 import RestaurantsTab from "@/components/admin/RestaurantsTab";
 import type { TabType, HubViagem, TripService } from "@/lib/trips";
 import {
@@ -18,6 +19,7 @@ import {
   getSmsUrl,
   todayStr,
   dateToISO,
+  isNoShowViagem,
 } from "@/lib/trips";
 import { validateLogin, getSession } from "@/lib/auth";
 import ChangePasswordModal from "@/components/shared/ChangePasswordModal";
@@ -152,6 +154,48 @@ export default function TripsPage() {
     }
     setDeleteLoading(false);
   }, [deleteTrip, deletePwd, store]);
+
+  // Marcar No-Show (admin) — confirmação → GET marcarNoShow → refrescar → oferecer provas
+  const [markNoShowTrip, setMarkNoShowTrip] = useState<HubViagem | null>(null);
+  const [markNoShowLoading, setMarkNoShowLoading] = useState(false);
+  const [markNoShowError, setMarkNoShowError] = useState("");
+  const [markNoShowToast, setMarkNoShowToast] = useState("");
+  const [proofOfferTrip, setProofOfferTrip] = useState<HubViagem | null>(null);
+  const [proofModalTrip, setProofModalTrip] = useState<HubViagem | null>(null);
+
+  const openMarkNoShow = useCallback((viagem: HubViagem) => {
+    setMarkNoShowTrip(viagem);
+    setMarkNoShowError("");
+  }, []);
+
+  const handleMarkNoShow = useCallback(async () => {
+    if (!markNoShowTrip) return;
+    const rowIndex = String(markNoShowTrip.rowIndex ?? "").trim();
+    if (!rowIndex) {
+      setMarkNoShowError("Viagem sem rowIndex — impossível marcar no-show.");
+      return;
+    }
+    setMarkNoShowError("");
+    setMarkNoShowLoading(true);
+    try {
+      const url = `${HUB_CENTRAL_URL}?action=marcarNoShow&rowIndex=${encodeURIComponent(rowIndex)}&t=${Date.now()}`;
+      const res = await fetch(url, { redirect: "follow" });
+      const data = await res.json();
+      if (data.success) {
+        const trip = markNoShowTrip;
+        setMarkNoShowToast(`🚫 ${String(trip.client ?? "Viagem")} marcada como no-show`);
+        setMarkNoShowTrip(null);
+        store.syncViagens(true);
+        setTimeout(() => setMarkNoShowToast(""), 3000);
+        setProofOfferTrip(trip);
+      } else {
+        setMarkNoShowError(String(data.message || data.error || "Erro ao marcar no-show"));
+      }
+    } catch {
+      setMarkNoShowError("Erro de conexão");
+    }
+    setMarkNoShowLoading(false);
+  }, [markNoShowTrip, store]);
 
   // Local URL input
   const [urlInput, setUrlInput] = useState("");
@@ -552,6 +596,7 @@ export default function TripsPage() {
                     onShowNameplate={store.showNameplate}
                     onRefresh={store.syncViagensSilent}
                     onDelete={setDeleteTrip}
+                    onMarkNoShow={openMarkNoShow}
                     mode="admin"
                     isHistorical={!store.isViewingToday}
                   />
@@ -609,6 +654,10 @@ export default function TripsPage() {
                         className="text-[10px] font-mono bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-amber-400 hover:border-amber-400/30 px-2 py-0.5 rounded cursor-pointer transition-colors">
                         🔄 Reactivar
                       </button>
+                      <button onClick={() => openMarkNoShow(viagem)}
+                        className="text-[10px] font-mono bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-red-400 hover:border-red-400/30 px-2 py-0.5 rounded cursor-pointer transition-colors">
+                        🚫 No-Show
+                      </button>
                     </div>
                   );
                 })}
@@ -628,22 +677,30 @@ export default function TripsPage() {
                     const tipo = detectTipo(viagem.origin || "", viagem.flight || "", viagem.type);
                     const hora = cleanHora(viagem.pickupTime || "");
                     const typeColor = tipo === "CHEGADA" ? "#D4A847" : tipo === "RECOLHA" ? "#8B9DAF" : "#C17E4A";
-                    const isDone = viagem.concluida || viagem.status === "CONCLUIDA" || viagem.status === "FINALIZOU";
+                    const noShow = isNoShowViagem(viagem);
+                    const isDone = !noShow && (viagem.concluida || viagem.status === "CONCLUIDA" || viagem.status === "FINALIZOU");
                     return (
                       <div key={vId}
-                        className={`bg-hub-black-card border border-hub-gold/5 rounded-lg px-4 py-3 flex items-center gap-3 ${isDone ? "opacity-60" : ""}`}
-                        style={{ borderLeftWidth: "3px", borderLeftColor: typeColor }}>
+                        className={`bg-hub-black-card border border-hub-gold/5 rounded-lg px-4 py-3 flex items-center gap-3 ${isDone || noShow ? "opacity-60" : ""}`}
+                        style={{ borderLeftWidth: "3px", borderLeftColor: noShow ? "#7F1D1D" : typeColor, ...(noShow ? { filter: "grayscale(0.55)" } : {}) }}>
                         <span className="font-mono text-sm font-bold text-zinc-500">{hora}</span>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm text-zinc-300 truncate">{viagem.client}</p>
                           {viagem.driver && <p className="text-[10px] text-zinc-500 truncate">{viagem.driver}</p>}
                         </div>
                         <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded" style={{ backgroundColor: `${typeColor}15`, color: typeColor }}>{tipo}</span>
+                        {noShow && <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#7F1D1D]/50 text-[#F87171]">🚫 Cliente não compareceu</span>}
                         {isDone && <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#22C55E]/10 text-[#22C55E]">CONCLUÍDA</span>}
                         <button onClick={() => { setResetTrip(viagem); setResetPwd(""); setResetError(""); }}
                           className="text-[10px] font-mono bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-amber-400 hover:border-amber-400/30 px-2 py-0.5 rounded cursor-pointer transition-colors">
                           🔄 Reactivar
                         </button>
+                        {!noShow && (
+                          <button onClick={() => openMarkNoShow(viagem)}
+                            className="text-[10px] font-mono bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-red-400 hover:border-red-400/30 px-2 py-0.5 rounded cursor-pointer transition-colors">
+                            🚫 No-Show
+                          </button>
+                        )}
                       </div>
                     );
                   })
@@ -869,6 +926,73 @@ export default function TripsPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ─── MARCAR NO-SHOW: CONFIRMAÇÃO ─── */}
+      {markNoShowTrip && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.8)" }}
+          onClick={() => setMarkNoShowTrip(null)}>
+          <div className="w-full max-w-sm bg-[#1A1A1A] border border-[#EF4444]/30 rounded-xl p-5 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-base font-bold text-[#EF4444]">🚫 Marcar No-Show</h3>
+            <p className="text-sm text-zinc-300">
+              Marcar <span className="text-white font-semibold">{String(markNoShowTrip.client ?? "esta viagem")}</span> como no-show?
+              Isto substitui o estado atual.
+            </p>
+            <p className="text-xs text-zinc-500 font-mono">
+              {String(markNoShowTrip.date || markNoShowTrip.flightDate || "—")} · {cleanHora(String(markNoShowTrip.pickupTime ?? ""))} · {String(markNoShowTrip.id ?? "—")}
+            </p>
+            {markNoShowError && <p className="text-xs text-[#EF4444] font-mono">{markNoShowError}</p>}
+            <div className="flex gap-2">
+              <button onClick={() => setMarkNoShowTrip(null)}
+                className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 py-2.5 rounded-lg text-sm font-mono transition-colors">Cancelar</button>
+              <button onClick={handleMarkNoShow} disabled={markNoShowLoading}
+                className="flex-1 bg-[#EF4444] hover:bg-[#DC2626] text-white py-2.5 rounded-lg text-sm font-mono font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                {markNoShowLoading ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : "Confirmar No-Show"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MARCAR NO-SHOW: OFERECER PROVAS ─── */}
+      {proofOfferTrip && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.8)" }}
+          onClick={() => setProofOfferTrip(null)}>
+          <div className="w-full max-w-sm bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-5 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-base font-bold text-white">📎 Anexar provas agora?</h3>
+            <p className="text-xs text-zinc-400">
+              Provas do no-show de <span className="text-white font-semibold">{String(proofOfferTrip.client ?? "")}</span> — chamadas, mensagens, foto no local, horário do voo.
+            </p>
+            <div className="flex gap-2">
+              <button onClick={() => setProofOfferTrip(null)}
+                className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 py-2.5 rounded-lg text-sm font-mono transition-colors">Agora não</button>
+              <button onClick={() => { setProofModalTrip(proofOfferTrip); setProofOfferTrip(null); }}
+                className="flex-1 bg-[#EF4444]/20 hover:bg-[#EF4444]/30 text-[#EF4444] py-2.5 rounded-lg text-sm font-mono font-bold transition-colors">
+                📎 Anexar provas
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL DE PROVAS (reutiliza o fluxo do /driver) ─── */}
+      {proofModalTrip && (
+        <NoShowModal
+          isOpen
+          tripId={String(proofModalTrip.id ?? "")}
+          clientName={String(proofModalTrip.client ?? "")}
+          driverName={String(proofModalTrip.driver ?? "")}
+          gasUrl={HUB_CENTRAL_URL}
+          date={String(proofModalTrip.date || proofModalTrip.flightDate || "")}
+          onClose={() => setProofModalTrip(null)}
+          onSubmit={() => { setProofModalTrip(null); store.syncViagens(true); }}
+        />
+      )}
+
+      {markNoShowToast && (
+        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[9999] bg-[#7F1D1D] text-white text-sm font-bold px-5 py-2.5 rounded-lg shadow-lg">
+          {markNoShowToast}
         </div>
       )}
 

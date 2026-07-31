@@ -33,8 +33,8 @@ const CarIcon = ({ color }: { color: string }) => (
 );
 
 export default function LiveProgressStrip({ n, tsPassos, horaAgendada, noShow, compact }: LiveProgressStripProps) {
-  // NO_SHOW: carro parado no ponto 2 ("A caminho"), tudo vermelho
-  const activeStep = noShow ? 2 : Math.min(5, Math.max(1, n || 1));
+  // NO_SHOW: carro parado no ponto 3 ("No local"), tudo vermelho — nunca até ao fim
+  const activeStep = noShow ? 3 : Math.min(5, Math.max(1, n || 1));
   const isDone = !noShow && activeStep >= 5;
   const color = noShow ? CLR_RED : isDone ? CLR_GREEN : CLR_GOLD;
   const linePct = ((activeStep - 1) / 4) * 100;
