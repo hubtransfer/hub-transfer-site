@@ -41,6 +41,10 @@ export async function POST(req: Request) {
     return erro("Senha incorrecta", 400);
   }
 
+  // A partir daqui o pedido pode ter chegado ao Google — em caso de dúvida a
+  // resposta leva naoConfirmado: true e o painel reconcilia a lista com o
+  // backend em vez de assumir o resultado. Nunca incluir a senha na resposta.
+  const t0 = Date.now();
   try {
     const res = await fetch(GAS_URL, {
       method: "POST",
@@ -60,19 +64,40 @@ export async function POST(req: Request) {
     try {
       return NextResponse.json(JSON.parse(text));
     } catch {
-      // O Apps Script devolve uma página HTML de erro se a publicação estiver mal
-      return erro(
-        "Erro: resposta inesperada do Apps Script (não é JSON). Verifique a publicação do Web App.",
-        502,
+      const corpo = text.replace(/\s+/g, " ").trim().slice(0, 300);
+      return NextResponse.json(
+        {
+          ok: false,
+          naoConfirmado: true,
+          mensagem:
+            "O Apps Script respondeu, mas não em JSON — não foi possível confirmar o resultado.",
+          clienteNotificado: false,
+          log: [
+            `HTTP ${res.status}`,
+            `content-type: ${res.headers.get("content-type") || "—"}`,
+            `url final: ${res.url}`,
+            `redireccionado: ${res.redirected ? "sim" : "não"}`,
+            `demorou: ${Date.now() - t0}ms`,
+            `corpo (primeiros 300 chars): ${corpo || "(vazio)"}`,
+          ],
+        },
+        { status: 502 },
       );
     }
   } catch (err) {
-    const timeout = err instanceof Error && err.name === "TimeoutError";
-    return erro(
-      timeout
-        ? "Erro: o Apps Script demorou demasiado a responder. Verifique na folha se a viagem foi apagada."
-        : "Erro de conexão com o Apps Script",
-      502,
-    );
+    if (err instanceof Error && err.name === "TimeoutError") {
+      return NextResponse.json(
+        {
+          ok: false,
+          naoConfirmado: true,
+          mensagem:
+            "Timeout: o Apps Script não respondeu dentro de 55s — não foi possível confirmar o resultado.",
+          clienteNotificado: false,
+          log: [`timeout ao fim de ${Date.now() - t0}ms (limite 55000ms)`],
+        },
+        { status: 504 },
+      );
+    }
+    return erro("Erro de conexão com o Apps Script", 502);
   }
 }

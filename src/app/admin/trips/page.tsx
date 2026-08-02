@@ -199,6 +199,17 @@ export default function TripsPage() {
           });
           store.removeViagem(tripId);
           store.syncViagensSilent();
+        } else if (data.naoConfirmado) {
+          // Resposta ilegível ou timeout: a viagem PODE ter sido apagada.
+          // Não mexer na lista às cegas — reconciliar com o backend.
+          closeDeleteModal();
+          setDeleteLogOpen(false);
+          setDeleteResult({
+            tone: "warning",
+            mensagem: `⚠️ ${msg} A lista vai ser actualizada a partir do backend.`,
+            log: Array.isArray(data.log) ? data.log : [],
+          });
+          store.syncViagensSilent();
         } else {
           setDeleteError(msg || "Erro ao apagar viagem");
         }
