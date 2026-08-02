@@ -128,6 +128,7 @@ interface TripsStore {
   diaSetDriver: (cardId: string, driver: string) => void;
   darBaixa: (id: string, rowIndex: string, cardId: string) => Promise<void>;
   markNoShow: (cardId: string) => void;
+  removeViagem: (id: string) => void;
 
   // Past View
   pastViagens: HubViagem[];
@@ -859,6 +860,13 @@ export function useTripsStore(): TripsStore {
     setShowViagensCfg((prev) => !prev);
   }, []);
 
+  // Remoção local imediata (após apagar no backend) — sem esperar pelo re-fetch
+  const removeViagem = useCallback((id: string) => {
+    if (!id) return;
+    setHubViagens((prev) => prev.filter((v) => String(v.id ?? "") !== id));
+    setPastViagens((prev) => prev.filter((v) => String(v.id ?? "") !== id));
+  }, []);
+
   // ──────────────────────────────────────────────
   // Return
   // ──────────────────────────────────────────────
@@ -918,6 +926,7 @@ export function useTripsStore(): TripsStore {
     diaSetDriver,
     darBaixa,
     markNoShow,
+    removeViagem,
 
     // Past View
     pastViagens,

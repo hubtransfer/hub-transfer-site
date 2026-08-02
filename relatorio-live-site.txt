@@ -1,0 +1,103 @@
+═══════════════════════════════════════════════════════════════════════════
+RELATÓRIO — LIVE VERDADEIRO (branch feature/live-carrinho)
+Data: 2026-07-18 · 3 commits sobre o master · SEM merge, SEM deploy
+═══════════════════════════════════════════════════════════════════════════
+
+RESUMO
+------
+O separador LIVE do /portal e a nova página /admin/live passam a mostrar,
+por viagem, uma faixa de 5 pontos (Agendada → A caminho → No local →
+Cliente a bordo → Concluída) com o carrinho posicionado no último passo
+CONFIRMADO pelo backend (passo.n do feed liveHotel). O carro só se move
+quando o estado real muda — transição CSS suave, zero interpolação
+inventada. A secção VOOS não foi tocada.
+
+FORENSE (Parte A — ver relatorio-forense-live.txt)
+--------------------------------------------------
+O tracking do carrinho nunca foi apagado: a DriverProgressBar (fefb8be,
+04/04/2026) vive no master, mas estava invisível porque o LiveTab a
+aninhava no bloco condicionado a DADOS DE VOO ({!flight.noData && ...}) e
+filtrava viagens sem número de voo. "Monitoramento em breve" é o texto de
+estado do VOO (flightUtils.ts:97,102), não um stub do tracking. A Parte B
+RESTAUROU a linguagem visual desse componente (linha pontilhada, carro
+SVG, dourado, transição 500-700ms, 🏁 verde) na nova faixa de 5 pontos,
+agora desacoplada do voo.
+
+FICHEIROS NOVOS / ALTERADOS
+---------------------------
+  src/lib/live.ts                          NOVO — tipos do feed liveHotel
+      (LiveViagem, passo{chave,rotulo,n}, tsPassos, pos{min,maps}),
+      fetchLivePing/fetchLiveJson, credencial LIVE em sessionStorage,
+      helpers (splitDia hoje/amanhã, isNoShow, tsToHora, firstName).
+      SEM campos de dinheiro — o feed não traz preços, por contrato.
+  src/hooks/useLiveHotel.ts                NOVO — polling poupança:
+      ping (formato=ping) → só se o hash `h` mudar vem o json completo;
+      quente=25s / calmo=3min (flag `quente` do ping);
+      document.hidden PÁRA tudo (timer cancelado, zero rede);
+      ao voltar ao separador, tick imediato (visibilitychange).
+  src/components/live/LiveProgressStrip.tsx NOVO — faixa 5 pontos +
+      carrinho (elemento único com `left` animado, duration-700);
+      hora (tsPassos) sob cada ponto atingido; ponto 1 mostra a hora
+      agendada; NO_SHOW: tudo vermelho, carro parado no ponto 2.
+  src/components/live/LiveTripCard.tsx     NOVO — cartão por viagem:
+      hora, cliente, plataforma, 🚘 primeiro nome do motorista,
+      ✈️ voo (texto — não existe padrão flightradar no site),
+      rota, faixa de progresso, 📍 "posição há Xmin" → pos.maps;
+      NO_SHOW: cartão vermelho + rótulo "Cliente não compareceu".
+  src/components/live/LiveBoard.tsx        NOVO — quadro partilhado:
+      desbloqueio por senha, grupos HOJE + AMANHÃ (colapsado),
+      indicador de sync, fallback "Live indisponível" sem partir o resto.
+  src/components/portal/LiveTab.tsx        ALTERADO — a secção "Outros
+      Transfers" foi substituída pelo LiveBoard; a lista antiga ficou
+      como fallback quando o LIVE não tem dados. SECÇÃO VOOS INTACTA
+      (nenhuma linha do bloco de voos foi alterada).
+  src/app/admin/live/page.tsx (+layout)    NOVO — vista total, só admins:
+      guard requireSession admin (redirect /login), envia codigo=nome
+      do admin; o backend devolve TODAS as viagens.
+
+AUTENTICAÇÃO — DECISÃO DE DESENHO (importante)
+----------------------------------------------
+O feed exige &codigo=&senha=, mas a sessão de login (hub_session) NÃO
+guarda a senha — política explícita do auth.ts ("passwords should never
+be stored in localStorage"), e a regra da missão era LER a auth, não
+alterá-la. Solução: o LIVE pede a senha UMA vez por separador, valida-a
+no próprio ping do liveHotel e guarda-a em sessionStorage (morre ao
+fechar o separador). O codigo vem sempre da sessão: hotel → session.code
+(ELH/EMH/GDA/TEST), admin → session.name. Se o backend recusar a
+credencial a meio (ok:false), o quadro limpa a credencial e volta ao
+desbloqueio. Nenhuma linha de auth.ts/login foi alterada.
+
+VERIFICAÇÕES FEITAS
+-------------------
+  ✅ typecheck limpo — `tsc --noEmit` sem erros no código do projecto.
+     (Nota: havia ficheiros GERADOS corruptos em .next/dev/types, restos
+     de um `next dev` interrompido, git-ignorados, que partiam até o
+     build do master; removidos — regeneram-se sozinhos.)
+  ✅ `npm run build` completo: 16 páginas, /admin/live gerada.
+  ✅ Dev server: /portal e /admin/live respondem 200 sem erros.
+  ✅ GAS real sondado: action=liveHotel JÁ EXISTE no deploy actual e
+     responde {"ok":false,"erro":"TOKEN"} a credenciais inválidas —
+     exactamente o contrato que o cliente implementa.
+  ✅ Zero dependências novas (nenhuma alteração ao package.json).
+
+VALIDAÇÃO LOCALHOST — critérios-ouro (pendente de credenciais reais)
+--------------------------------------------------------------------
+Os 4 critérios exigem senhas reais (TEST, hotel, motorista), que não
+estão — e não devem estar — no repositório. Checklist para o Junior:
+  a) login TEST → LIVE → inserir senha no desbloqueio → devem aparecer
+     TODAS as viagens de hoje com carrinhos nos passos certos;
+  b) login dum hotel real (ELH/EMH) → só as viagens dele;
+  c) swipe de motorista real → com o separador visível, o carrinho
+     avança em ≤45s (ping 25s em modo quente + margem de fetch);
+  d) Network tab: com o separador oculto (document.hidden) NÃO há
+     nenhuma chamada liveHotel; ao voltar, dispara um ping imediato.
+Se algum falhar, dizer-me o que apareceu — ajusto sem mexer no resto.
+
+GATE
+----
+NÃO foi feito merge nem push nem deploy. Tudo está em
+feature/live-carrinho (3 commits: 60d876b, 3805eb4, b8f3214), à espera
+do teu OK. Para experimentar localmente:
+  git checkout feature/live-carrinho && npm run dev
+
+═══════════════════════════════════════════════════════════════════════════

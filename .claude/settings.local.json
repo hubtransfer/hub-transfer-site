@@ -59,7 +59,29 @@
       "PowerShell(npm run *)",
       "PowerShell(git *)",
       "PowerShell(Get-Process *)",
-      "PowerShell(npx tsc --noEmit 2>&1 | Select-Object -First 30; \"TSC_EXIT: $LASTEXITCODE\")"
+      "PowerShell(npx tsc --noEmit 2>&1 | Select-Object -First 30; \"TSC_EXIT: $LASTEXITCODE\")",
+      "PowerShell(winget install *)",
+      "Read(//c/Users/hubtr/.ssh/**)",
+      "Bash(ssh-keygen -t *)",
+      "Bash(ssh *)",
+      "Bash(grep -v \"^\\\\s*$\")",
+      "Bash(grep -rn -B4 \"?\\\\${params}\" src/)",
+      "PowerShell($c = git log --oneline origin/master..HEAD; \"commits a frente de origin/master: \" + $c.Count; \"\"; $c | Select-Object -First 15)",
+      "PowerShell(git config *)",
+      "PowerShell(git log --pretty=format:\"%h %ae %s\" origin/master..HEAD; \"\"; \"--- git status ---\"; git status; \"\"; \"--- stash list ---\"; git stash list)",
+      "PowerShell(git push *)",
+      "Bash(git ls-tree *)",
+      "Bash(git check-ignore *)",
+      "Bash(kill %1)",
+      "Bash(taskkill //PID 684 //F)",
+      "Bash(taskkill //F //FI \"WINDOWTITLE eq *3411*\")",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //F //PID 25000)",
+      "Bash(git -C /c/Projetos/hub-transfer-site add src/components/driver/DriverTripCard.tsx src/styles/globals.css)",
+      "Bash(git -C /c/Projetos/hub-transfer-site commit -m 'audio: botao grande FALTA O AUDIO no card do motorista *)",
+      "Bash(git -C /c/Projetos/hub-transfer-site push origin master)",
+      "PowerShell(npx next start -p 3877)",
+      "Bash(git *)"
     ]
   }
 }

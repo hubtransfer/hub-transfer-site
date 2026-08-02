@@ -1,0 +1,94 @@
+═══════════════════════════════════════════════════════════════════════════
+RELATÓRIO FORENSE — "Monitoramento em breve" no separador LIVE do /portal
+Data: 2026-07-18 · Análise 100% read-only (git history + código actual)
+═══════════════════════════════════════════════════════════════════════════
+
+VEREDICTO EM UMA LINHA
+----------------------
+O rastreio do carrinho EXISTE, ESTÁ NO MASTER e NUNCA FOI APAGADO — está
+apenas ESCONDIDO por uma condição de renderização que acopla a barra do
+carro à existência de dados de VOO. "Monitoramento em breve" não é um stub
+do tracking: é o texto de estado do VOO quando não há dados de voo.
+
+1. ONDE VIVE O "STUB" HOJE
+--------------------------
+git grep "Monitoramento em breve" →
+  · src/lib/flightUtils.ts:97 e :102 — computeFlightState devolve
+    { noData: true, statusText: 'Monitoramento em breve' } quando a viagem
+    não tem horários de voo utilizáveis.
+  · Introduzido no commit 6ca9a0e (2026-04-02, "fix: Descola→Decola + sem
+    dados falsos + precisão pickupTime") — precisamente para NÃO inventar
+    dados falsos de voo.
+Ou seja: o texto pertence ao módulo de FLIGHT tracking, não ao tracking do
+motorista.
+
+2. O COMPONENTE DO CARRINHO EXISTIU? SIM — E AINDA EXISTE
+---------------------------------------------------------
+  · src/components/shared/DriverProgressBar.tsx — presente no master HEAD.
+    Barra pontilhada com 4 pontos (A caminho → No local → Com cliente →
+    Chegou), carro SVG no passo actual, linha dourada com transition-all
+    duration-500, bandeira 🏁 verde quando concluída.
+  · História (git log --follow):
+      fefb8be 2026-04-04 feat: DriverProgressBar — barra pontilhada carro no LIVE do hotel  (nascimento)
+      5377c0b / 7963c9f / 8835cc6 / 372e900 — refinamentos de layout
+      51c1149 2026-06-10 feat(camada3): estado A_CAMINHO no fluxo do motorista
+  · src/components/portal/LiveTab.tsx:319 — o LiveTab do master JÁ renderiza
+    <DriverProgressBar statusMotorista={v.statusMotorista} /> em cada cartão.
+
+3. AS BRANCHES "PERDIDAS" NÃO ESTÃO PERDIDAS
+--------------------------------------------
+  · camada2-coords-motorista (e9285ec: coordsOrigem/coordsDestino no feed)
+    e camada3-clique-a-caminho (51c1149: estado A_CAMINHO) aparecem em
+    `git branch --merged master` e `git log master..camadaX` está VAZIO
+    → ambas totalmente contidas no master. Nada por mergear.
+  · git log --all --diff-filter=D: nenhum ficheiro de live/track/car/monitor
+    foi apagado (só imagens e ficheiros manus-original irrelevantes).
+
+4. ENTÃO PORQUE É QUE O DONO VÊ "Monitoramento em breve" SEM CARRINHO?
+----------------------------------------------------------------------
+Três gargalos no LiveTab.tsx do master, todos de RENDERIZAÇÃO/DADOS:
+
+  a) ACOPLAMENTO AO VOO (a causa principal) — LiveTab.tsx:280:
+       {!flight.noData && !flight.cancelled && ( ...barra voo...
+         <DriverProgressBar .../> )}
+     A barra do carrinho está DENTRO do bloco que só renderiza quando há
+     dados de voo. Sem dados de voo → flight.noData=true → o cartão mostra
+     apenas o texto "Monitoramento em breve" (estado do voo) e a barra do
+     carro é suprimida junto. O tracking do motorista morre por culpa do
+     flight tracking.
+
+  b) FILTRO "SÓ COM VOO" — LiveTab.tsx:152:
+       if (!v.flight?.trim()) return false;
+     Viagens sem número de voo nem sequer entram na secção principal; caem
+     em "Outros Transfers", que não tem DriverProgressBar de todo.
+
+  c) MATCHING FRÁGIL DO HOTEL — LiveTab.tsx:160-169: o hotel é identificado
+     por substring do nome/código dentro de destino/origem/plataforma/id.
+     Se nada casar, a viagem não aparece.
+
+Além disso, o DIAGNOSTICO_TRACKING.md (2026-06-09, no repo) confirma:
+statusMotorista só muda nos 3 swipes manuais; o 1º ponto "A caminho" da
+barra raramente acende (o SwipeBar começa em NO_LOCAL; camada3 acrescentou
+A_CAMINHO por clique). Com viagens quase sempre em AGUARDANDO, a barra —
+quando aparece — fica cinzenta, reforçando a impressão de "não existe".
+
+5. CONCLUSÃO E DECISÃO PARA A PARTE B
+-------------------------------------
+  · O componente existiu? SIM — DriverProgressBar.tsx, nascido em fefb8be
+    (04/04/2026), evoluído até 51c1149 (10/06/2026).
+  · Em que commit/branch? Vive no MASTER (e nas branches camada2/camada3,
+    já mergeadas). Nunca foi removido nem ficou por mergear.
+  · O que fazia? 4 pontos + carro SVG posicionado no último estado
+    confirmado do motorista (statusMotorista BD(56)), transição CSS 500ms.
+  · Porque "saiu"? Não saiu — ficou invisível por decisão de layout
+    (aninhado no bloco condicionado a dados de voo) + filtros de dados.
+
+  → PARTE B = RESTAURAR/ADAPTAR: a nova faixa de 5 pontos reutiliza a
+    linguagem visual e a lógica da DriverProgressBar existente (pontos,
+    carro, linha dourada, transição 500ms, 🏁 verde), desacoplada do voo,
+    alimentada pelo novo feed liveHotel (passo.n do backend), com o 5.º
+    ponto "Agendada" e estados NO_SHOW. A secção VOOS fica intacta.
+
+═══════════════════════════════════════════════════════════════════════════
+Fim do relatório forense. Nenhum código alterado nesta fase.
+═══════════════════════════════════════════════════════════════════════════
