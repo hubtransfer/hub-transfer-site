@@ -161,7 +161,6 @@ export default function TripsPage() {
     const trip = deleteTrip;
     const tripId = String(trip.id || "");
     try {
-      const session = getSession();
       const res = await fetch("/api/transfers/apagar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -169,7 +168,6 @@ export default function TripsPage() {
           id: tripId,
           senha: deletePwd,
           notificar,
-          session: { name: session?.name || "", role: session?.role || "" },
         }),
       });
       const data = await res.json().catch(() => null);

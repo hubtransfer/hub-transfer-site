@@ -14,7 +14,6 @@ interface ApagarBody {
   id?: string;
   senha?: string;
   notificar?: boolean;
-  session?: { name?: string; role?: string };
 }
 
 function erro(mensagem: string, status: number) {
@@ -32,11 +31,9 @@ export async function POST(req: Request) {
     return erro("Pedido inválido", 400);
   }
 
-  // Mesmo mecanismo de sessão do painel (localStorage bridge): o cliente envia
-  // a sessão; a validação real da senha é feita pelo backend GAS.
-  if (!body.session?.name || body.session.role !== "admin") {
-    return erro("Sessão de administrador inválida", 401);
-  }
+  // Sem verificação de sessão aqui: a sessão vive no localStorage e seria o
+  // browser a enviá-la, logo qualquer um a forjaria — e expirada bloqueava
+  // admins verdadeiros. A protecção real é a senha, validada no Apps Script.
   if (!body.id) {
     return erro("Falta o ID da viagem", 400);
   }
