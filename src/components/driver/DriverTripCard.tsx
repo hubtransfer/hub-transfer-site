@@ -190,6 +190,8 @@ export default function DriverTripCard({
   const isNoShowTrip = isNoShowViagem(viagem);
 
   const hasFlightNumber = !!(viagem.flight && viagem.flight.trim());
+  // "🇧🇷 Brasil" → só o emoji junto ao voo; o nome do país fica no title
+  const bandeiraEmoji = (viagem.bandeira || "").trim().split(" ")[0];
   const hasFlight = hasFlightNumber && (tipo === "CHEGADA" || !!(viagem.depAirport || viagem.depIata || viagem.arrTime));
 
   // Real-time flight state — recalculates every 30s
@@ -464,7 +466,7 @@ export default function DriverTripCard({
         {!expanded && hasFlight && flight && tipo === "CHEGADA" && (
           <div className="px-4 pb-3 pt-1">
             {flight.noData ? (
-              <p className="font-mono text-xs text-[#888] italic">✈️ {viagem.flight} · Dados em breve</p>
+              <p className="font-mono text-xs text-[#888] italic">✈️ {viagem.flight}{bandeiraEmoji && <span title={viagem.bandeira}> {bandeiraEmoji}</span>} · Dados em breve</p>
             ) : flight.cancelled ? (
               <div className="flex items-center gap-2">
                 <div className="flex-1" style={{ height: "3px", borderRadius: "2px", backgroundColor: "#EF4444", opacity: 0.3 }} />
@@ -552,7 +554,7 @@ export default function DriverTripCard({
                   <div className="flex items-center gap-3">
                     <span className="text-xl leading-none">🌍</span>
                     <div className="flex-1">
-                      <p className="text-center mb-1.5"><a href={`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="font-mono text-sm text-amber-400 hover:text-amber-300 font-bold underline cursor-pointer">{viagem.flight}</a></p>
+                      <p className="text-center mb-1.5"><a href={`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="font-mono text-sm text-amber-400 hover:text-amber-300 font-bold underline cursor-pointer">{viagem.flight}</a>{bandeiraEmoji && <span title={viagem.bandeira} className="ml-1.5">{bandeiraEmoji}</span>}</p>
                       <p className="text-center font-mono text-[11px] italic font-medium text-[#E0E0E0]">✈️ Acompanhamento do voo activa em breve</p>
                     </div>
                     <div className="text-center min-w-[48px]">
@@ -570,6 +572,7 @@ export default function DriverTripCard({
                         className="font-mono text-sm text-amber-400 hover:text-amber-300 font-bold underline cursor-pointer">
                         {viagem.flight}
                       </a>
+                      {bandeiraEmoji && <span title={viagem.bandeira} className="text-sm leading-none">{bandeiraEmoji}</span>}
                       {depDelayMin > 0 && (
                         <span className="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded text-xs font-mono font-bold">+{depDelayMin}min partida</span>
                       )}
