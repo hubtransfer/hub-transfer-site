@@ -228,9 +228,10 @@ export default function DriverTripCard({
     return ""; // original pickup is fine
   }, [viagem.etaChegada, viagem.arrTime, hora]);
 
-  // Origin flag + IATA code from depIata
+  // Origin flag + IATA code from depIata; a coluna Bandeira Origem do backend
+  // cobre os casos em que o dicionário local não conhece o aeroporto
   const depIata = (viagem.depIata || "").toUpperCase().trim();
-  const originFlag = getOriginFlag(depIata);
+  const originFlag = getOriginFlag(depIata) || bandeiraEmoji;
 
   // Departure delay + arrival original vs ETA
   const depDelayMin = parseInt(viagem.depDelay || "0", 10) || 0;
@@ -495,7 +496,7 @@ export default function DriverTripCard({
                 {/* L2: Flight bar — flag+IATA | progress | flag+IATA */}
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1 flex-shrink-0">
-                    <span className="text-sm leading-none">{originFlag || "🌍"}</span>
+                    {originFlag && <span className="text-sm leading-none">{originFlag}</span>}
                     <span className="font-mono text-sm font-bold text-[#D4A017]">{depIata}</span>
                   </div>
                   <div className="flex-1 relative" style={{ height: "3px", borderRadius: "2px", backgroundColor: "#333" }}>
@@ -552,9 +553,9 @@ export default function DriverTripCard({
               <div className="px-4 py-3 border-t border-[#2A2A2A]" style={{ backgroundColor: `${c.hex}06` }}>
                 {flight.noData ? (
                   <div className="flex items-center gap-3">
-                    <span className="text-xl leading-none">🌍</span>
+                    <span className="text-xl leading-none" title={viagem.bandeira || undefined}>{bandeiraEmoji || "✈️"}</span>
                     <div className="flex-1">
-                      <p className="text-center mb-1.5"><a href={`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="font-mono text-sm text-amber-400 hover:text-amber-300 font-bold underline cursor-pointer">{viagem.flight}</a>{bandeiraEmoji && <span title={viagem.bandeira} className="ml-1.5">{bandeiraEmoji}</span>}</p>
+                      <p className="text-center mb-1.5"><a href={`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="font-mono text-sm text-amber-400 hover:text-amber-300 font-bold underline cursor-pointer">{viagem.flight}</a></p>
                       <p className="text-center font-mono text-[11px] italic font-medium text-[#E0E0E0]">✈️ Acompanhamento do voo activa em breve</p>
                     </div>
                     <div className="text-center min-w-[48px]">
@@ -572,7 +573,6 @@ export default function DriverTripCard({
                         className="font-mono text-sm text-amber-400 hover:text-amber-300 font-bold underline cursor-pointer">
                         {viagem.flight}
                       </a>
-                      {bandeiraEmoji && <span title={viagem.bandeira} className="text-sm leading-none">{bandeiraEmoji}</span>}
                       {depDelayMin > 0 && (
                         <span className="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded text-xs font-mono font-bold">+{depDelayMin}min partida</span>
                       )}
@@ -606,8 +606,8 @@ export default function DriverTripCard({
                       {/* Flight bar — same as minimised */}
                       <div className="flex items-center gap-2">
                         <div className="flex items-center gap-1 flex-shrink-0">
-                          <span className="text-sm leading-none">{originFlag || "🌍"}</span>
-                          <span className="font-mono text-sm font-bold text-[#D4A017]">{depIata || "???"}</span>
+                          {originFlag && <span className="text-sm leading-none">{originFlag}</span>}
+                          <span className="font-mono text-sm font-bold text-[#D4A017]">{depIata}</span>
                         </div>
                         <div className="flex-1 relative cursor-pointer" style={{ height: "3px", borderRadius: "2px", backgroundColor: "#333" }}
                           onClick={() => viagem.flight && window.open(`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`, "_blank")}>

@@ -329,7 +329,7 @@ export default function TripCard({
               <div className="flex items-center justify-between text-xs">
                 <div className="text-center">
                   <p className="font-mono font-bold text-sm" style={{ color: ts.hex }}>
-                    {(viagem.depAirport || viagem.depIata || depAirport || "???").toUpperCase()}
+                    {(viagem.depAirport || viagem.depIata || depAirport || "").toUpperCase()}
                   </p>
                   <p className="text-[10px] text-white/40">{viagem.depCity || "Partida"}</p>
                   {viagem.depTime && <p className="font-mono text-[10px] text-white/50 mt-0.5">{viagem.depTime}</p>}

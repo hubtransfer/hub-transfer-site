@@ -5,24 +5,27 @@ const AIRPORT_COUNTRY: Record<string, string> = {
   // UK
   LHR: 'GB', LGW: 'GB', STN: 'GB', LTN: 'GB', MAN: 'GB', BHX: 'GB', EDI: 'GB', GLA: 'GB',
   BRS: 'GB', EMA: 'GB', NCL: 'GB', LPL: 'GB', ABZ: 'GB', SOU: 'GB', LCY: 'GB', BFS: 'GB',
+  LBA: 'GB',
   // Irlanda
   DUB: 'IE', ORK: 'IE', SNN: 'IE',
   // França
   CDG: 'FR', ORY: 'FR', LYS: 'FR', MRS: 'FR', NCE: 'FR', TLS: 'FR', BOD: 'FR', NTE: 'FR',
-  SXB: 'FR', MPL: 'FR', BIQ: 'FR',
+  SXB: 'FR', MPL: 'FR', BIQ: 'FR', BVA: 'FR', LIL: 'FR',
   // Espanha
   MAD: 'ES', BCN: 'ES', AGP: 'ES', ALC: 'ES', PMI: 'ES', IBZ: 'ES', TFS: 'ES', LPA: 'ES',
   ACE: 'ES', FUE: 'ES', VLC: 'ES', SVQ: 'ES', BIO: 'ES', SCQ: 'ES', VGO: 'ES', ZAZ: 'ES',
+  MAH: 'ES', OVD: 'ES', GRX: 'ES', XRY: 'ES', SDR: 'ES', TFN: 'ES',
   // Alemanha
   FRA: 'DE', MUC: 'DE', BER: 'DE', DUS: 'DE', HAM: 'DE', CGN: 'DE', STR: 'DE',
-  NUE: 'DE', HAJ: 'DE', LEJ: 'DE', DTM: 'DE',
+  NUE: 'DE', HAJ: 'DE', LEJ: 'DE', DTM: 'DE', FMM: 'DE', HHN: 'DE',
   // Itália
   FCO: 'IT', MXP: 'IT', LIN: 'IT', BGY: 'IT', VCE: 'IT', NAP: 'IT', BLQ: 'IT', PSA: 'IT',
   CTA: 'IT', PMO: 'IT', FLR: 'IT', TRN: 'IT', BRI: 'IT', CAG: 'IT', CIA: 'IT',
+  TSF: 'IT', GOA: 'IT',
   // Holanda
   AMS: 'NL', EIN: 'NL', RTM: 'NL',
   // Bélgica
-  BRU: 'BE', CRL: 'BE',
+  BRU: 'BE', CRL: 'BE', ANR: 'BE',
   // Luxemburgo
   LUX: 'LU',
   // Suíça
@@ -30,15 +33,19 @@ const AIRPORT_COUNTRY: Record<string, string> = {
   // Áustria
   VIE: 'AT', SZG: 'AT', INN: 'AT',
   // Dinamarca
-  CPH: 'DK',
+  CPH: 'DK', BLL: 'DK', AAL: 'DK',
   // Noruega
-  OSL: 'NO', BGO: 'NO',
+  OSL: 'NO', BGO: 'NO', TRF: 'NO',
   // Suécia
-  ARN: 'SE', GOT: 'SE',
+  ARN: 'SE', GOT: 'SE', NYO: 'SE', MMX: 'SE',
   // Finlândia
   HEL: 'FI', TMP: 'FI',
   // Polónia
-  WAW: 'PL', WMI: 'PL', KRK: 'PL', WRO: 'PL',
+  WAW: 'PL', WMI: 'PL', KRK: 'PL', WRO: 'PL', GDN: 'PL', POZ: 'PL', KTW: 'PL',
+  // Eslováquia
+  BTS: 'SK',
+  // Bálticos
+  TLL: 'EE', RIX: 'LV', VNO: 'LT',
   // República Checa
   PRG: 'CZ',
   // Hungria
@@ -68,7 +75,7 @@ const AIRPORT_COUNTRY: Record<string, string> = {
   // Islândia
   KEF: 'IS',
   // Marrocos
-  CMN: 'MA', RAK: 'MA', FEZ: 'MA', AGA: 'MA', TNG: 'MA',
+  CMN: 'MA', RAK: 'MA', FEZ: 'MA', AGA: 'MA', TNG: 'MA', RBA: 'MA',
   // Tunísia
   TUN: 'TN',
   // Argélia
@@ -77,12 +84,12 @@ const AIRPORT_COUNTRY: Record<string, string> = {
   CAI: 'EG',
   // Brasil
   GRU: 'BR', GIG: 'BR', BSB: 'BR', CNF: 'BR', SSA: 'BR', REC: 'BR', FOR: 'BR',
-  CWB: 'BR', POA: 'BR', VCP: 'BR', MAO: 'BR', BEL: 'BR',
+  CWB: 'BR', POA: 'BR', VCP: 'BR', MAO: 'BR', BEL: 'BR', NAT: 'BR', MCZ: 'BR',
   // EUA
   JFK: 'US', EWR: 'US', BOS: 'US', IAD: 'US', MIA: 'US', ATL: 'US', ORD: 'US',
   LAX: 'US', SFO: 'US', DFW: 'US', IAH: 'US', PHL: 'US', CLT: 'US',
   // Canadá
-  YYZ: 'CA', YUL: 'CA', YVR: 'CA',
+  YYZ: 'CA', YUL: 'CA', YVR: 'CA', YYC: 'CA',
   // Emirados
   DXB: 'AE', AUH: 'AE',
   // Qatar
@@ -124,7 +131,11 @@ const AIRPORT_COUNTRY: Record<string, string> = {
   // Gana
   ACC: 'GH',
   // Senegal
-  DSS: 'SN',
+  DSS: 'SN', DKR: 'SN',
+  // Guiné-Bissau
+  OXB: 'GW',
+  // São Tomé e Príncipe
+  TMS: 'ST',
   // Angola
   LAD: 'AO',
   // Moçambique
@@ -134,13 +145,23 @@ const AIRPORT_COUNTRY: Record<string, string> = {
   // Quénia
   NBO: 'KE',
   // Cabo Verde
-  SID: 'CV', RAI: 'CV',
+  SID: 'CV', RAI: 'CV', BVC: 'CV', VXE: 'CV',
   // Argentina
-  EZE: 'AR',
+  EZE: 'AR', AEP: 'AR',
+  // Chile
+  SCL: 'CL',
+  // Peru
+  LIM: 'PE',
   // Colômbia
   BOG: 'CO',
+  // Venezuela
+  CCS: 'VE',
+  // Uruguai
+  MVD: 'UY',
+  // Panamá
+  PTY: 'PA',
   // México
-  MEX: 'MX',
+  MEX: 'MX', CUN: 'MX',
   // Rússia
   SVO: 'RU', DME: 'RU', LED: 'RU',
   // Ucrânia
@@ -165,11 +186,11 @@ function countryToFlag(code: string): string {
   );
 }
 
-/** Get origin flag emoji from IATA code. Returns '🌍' if IATA unknown, '' if no IATA. */
+/** Get origin flag emoji from IATA code. Returns '' if IATA unknown or missing — the UI then shows only the code, never a placeholder. */
 export function getOriginFlag(depIata: string): string {
   if (!depIata) return '';
   const country = AIRPORT_COUNTRY[depIata.toUpperCase().trim()];
-  return country ? countryToFlag(country) : '🌍';
+  return country ? countryToFlag(country) : '';
 }
 
 /** Get country code from IATA code */

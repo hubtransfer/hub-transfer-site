@@ -226,7 +226,9 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
               const tipo = detectTipo(v.origin || "", v.flight || "", v.type);
               const hora = cleanHora(v.pickupTime || "");
               const depIata = (v.depIata || "").toUpperCase().trim();
-              const originFlag = getOriginFlag(depIata);
+              // Bandeira Origem do backend cobre aeroportos fora do dicionário local
+              const bandeiraEmoji = (v.bandeira || "").trim().split(" ")[0];
+              const originFlag = getOriginFlag(depIata) || bandeiraEmoji;
               const delayMin = parseInt(v.atrasoMin || "0", 10) || 0;
               const depDelayMin = parseInt(v.depDelay || "0", 10) || 0;
               const etaChegada = (v.etaChegada || "").trim();
@@ -299,8 +301,8 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
                       {/* Flight bar */}
                       <div className="flex items-center gap-2">
                         <div className="flex items-center gap-1 flex-shrink-0">
-                          <span className="text-sm leading-none">{originFlag || "🌍"}</span>
-                          <span className="font-mono text-sm font-bold text-[#D4A017]">{depIata || "???"}</span>
+                          {originFlag && <span className="text-sm leading-none">{originFlag}</span>}
+                          <span className="font-mono text-sm font-bold text-[#D4A017]">{depIata}</span>
                         </div>
                         <div className="flex-1 relative" style={{ height: "3px", borderRadius: "2px", backgroundColor: "#333" }}>
                           <div className="h-full transition-all duration-[2s] ease-in-out" style={{ width: `${Math.max(flight.progress, 2)}%`, backgroundColor: flight.color, borderRadius: "2px" }} />
