@@ -15,6 +15,7 @@ import {
 import {
   loadTransfersFromSheets,
   sendToSheets,
+  type BackendSaveResult,
   testConnection,
   testBasicConnectivity,
   clearAllDataFromSheets,
@@ -22,7 +23,13 @@ import {
 } from "@/lib/google-sheets";
 
 // ─── LocalStorage Keys ───
-const LS_SERVICES = "partnershipTransferData";
+// Chave versionada (migração 08/2026): a antiga "partnershipTransferData"
+// acumulou ids fantasma gerados no browser (1259/1260/1261, testes velhos) que
+// os sync re-empurravam para a folha. A v2 só recebe dados vindos da folha ou
+// entradas provisórias tmp-* à espera de criação; a chave antiga é apagada no
+// arranque e browsers com código velho nunca leem a v2.
+const LS_SERVICES = "partnershipTransferData_v2";
+const LS_SERVICES_LEGACY = "partnershipTransferData";
 const LS_FILTERS = "activeFilters";
 const LS_LAST_SYNC = "lastSyncTime";
 const LS_WEBAPP_URL = "webappUrl";
@@ -43,7 +50,7 @@ interface TransferStore {
   totalPages: number;
   paginatedServices: Transfer[];
   isAdminMode: boolean;
-  editingId: number | null;
+  editingId: number | string | null;
   isConnected: boolean;
   syncInProgress: boolean;
   lastSyncTime: string | null;
@@ -54,9 +61,9 @@ interface TransferStore {
   // Actions
   loadFromSheets: () => Promise<void>;
   submitTransfer: (formData: Partial<Transfer>) => Promise<void>;
-  editService: (id: number) => Transfer | undefined;
-  changeStatus: (id: number) => void;
-  deleteService: (id: number) => void;
+  editService: (id: number | string) => Transfer | undefined;
+  changeStatus: (id: number | string) => void;
+  deleteService: (id: number | string) => void;
   clearAllData: () => Promise<void>;
   clearTestData: () => Promise<void>;
   exportCSV: () => void;
@@ -70,7 +77,12 @@ interface TransferStore {
   testBasicConnectivityAction: () => Promise<void>;
   showStatusMessage: (message: string, type: StatusType) => void;
   setCurrentServiceType: (type: ServiceType) => void;
-  setEditingId: (id: number | null) => void;
+  setEditingId: (id: number | string | null) => void;
+}
+
+// Entrada local ainda à espera do ID definitivo do backend
+function isPendingCreate(t: Transfer): boolean {
+  return typeof t.id === "string" && t.id.startsWith("tmp-");
 }
 
 // ─── Helper: safe localStorage ───
@@ -109,7 +121,7 @@ export function useTransferStore(): TransferStore {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [isAdminMode, setIsAdminMode] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<number | string | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [syncInProgress, setSyncInProgress] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
@@ -203,6 +215,15 @@ export function useTransferStore(): TransferStore {
     if (mountedRef.current) return;
     mountedRef.current = true;
 
+    // Migração única: purgar o estado antigo. Entradas cujo id não existe na
+    // folha eram fantasmas re-empurrados em loop; as que existem voltam do
+    // getAllData no primeiro sync. Nada da chave antiga entra na v2.
+    try {
+      localStorage.removeItem(LS_SERVICES_LEGACY);
+    } catch {
+      // sem acesso ao storage — nada a migrar
+    }
+
     const savedServices = loadFromLocalStorage<Transfer[]>(LS_SERVICES, []);
     const savedFilters = loadFromLocalStorage<ActiveFilters>(LS_FILTERS, DEFAULT_FILTERS);
     const savedLastSync = typeof window !== "undefined" ? localStorage.getItem(LS_LAST_SYNC) : null;
@@ -245,7 +266,14 @@ export function useTransferStore(): TransferStore {
     const result = await loadTransfersFromSheets();
 
     if (result.success) {
-      persistServices(result.data);
+      // A folha é a verdade; só sobrevivem localmente as entradas ainda à
+      // espera do ID definitivo do backend.
+      setServices((prev) => {
+        const pending = prev.filter(isPendingCreate);
+        const merged = [...result.data, ...pending];
+        saveToLocalStorage(LS_SERVICES, merged);
+        return merged;
+      });
       const syncTime = new Date().toISOString();
       setLastSyncTime(syncTime);
       localStorage.setItem(LS_LAST_SYNC, syncTime);
@@ -256,7 +284,73 @@ export function useTransferStore(): TransferStore {
     }
 
     setSyncInProgress(false);
-  }, [persistServices, showStatusMessage]);
+  }, [showStatusMessage]);
+
+  // ─── Reconciliação com a resposta do backend endurecido ───
+  const adoptBackendResult = useCallback(
+    (localId: string, res: BackendSaveResult) => {
+      if (!res.ok) {
+        showStatusMessage(
+          "Salvo localmente, mas falhou ao enviar para Google Sheets",
+          "warning"
+        );
+        return;
+      }
+
+      // Lápide: viagem apagada de propósito — remover e nunca mais reenviar
+      if (res.status === "apagada") {
+        setServices((prev) => {
+          const next = prev.filter((s) => s.id !== localId);
+          saveToLocalStorage(LS_SERVICES, next);
+          return next;
+        });
+        showStatusMessage(
+          "Esta viagem foi apagada no sistema — removida localmente",
+          "warning"
+        );
+        return;
+      }
+
+      // Recusa do backend (edicao_sem_identidade, trava_erro, …): marcar como
+      // falhada e não repetir o pedido
+      if (res.sucesso === false) {
+        setServices((prev) => {
+          const next = prev.map((s) =>
+            s.id === localId ? { ...s, syncFalhou: true } : s
+          );
+          saveToLocalStorage(LS_SERVICES, next);
+          return next;
+        });
+        showStatusMessage(
+          `Backend recusou a gravação${res.motivo ? ` (${res.motivo})` : ""} — o pedido não será repetido`,
+          "error"
+        );
+        return;
+      }
+
+      // ID definitivo: idNovo quando desviada para nova linha; senão o
+      // transfer.id devolvido (cobre criação normal e reaproveitada)
+      const idDefinitivo = res.desviadaParaNova ? res.idNovo : res.transferId;
+      if (idDefinitivo === undefined || idDefinitivo === null || idDefinitivo === "") {
+        return;
+      }
+      setServices((prev) => {
+        const next = prev.map((s) =>
+          s.id === localId ? { ...s, id: idDefinitivo, syncFalhou: false } : s
+        );
+        saveToLocalStorage(LS_SERVICES, next);
+        return next;
+      });
+      if (res.reaproveitada) {
+        showStatusMessage(`Viagem já existia na folha — adoptado o ID ${idDefinitivo}`, "info");
+      } else if (res.desviadaParaNova) {
+        showStatusMessage(`ID ocupado — a folha atribuiu o novo ID ${idDefinitivo}`, "info");
+      } else {
+        showStatusMessage(`Viagem gravada na folha com o ID ${idDefinitivo}`, "success");
+      }
+    },
+    [showStatusMessage]
+  );
 
   // ─── submitTransfer ───
   const submitTransfer = useCallback(
@@ -273,7 +367,9 @@ export function useTransferStore(): TransferStore {
         setEditingId(null);
         showStatusMessage("Servico atualizado com sucesso!", "success");
       } else {
-        const newId = services.length > 0 ? Math.max(...services.map((s) => s.id)) + 1 : 1;
+        // O ID definitivo é atribuído pela folha (guarda de duplicados);
+        // localmente fica um provisório incolidível até a resposta chegar.
+        const newId = `tmp-${Date.now()}`;
         const defaults: Transfer = {
           id: newId, created: now, nomeCliente: "", referencia: "", tipoServico: "Transfer",
           tourSelecionado: "", numeroPessoas: 0, numeroBagagens: 0, data: "", contacto: "",
@@ -287,23 +383,25 @@ export function useTransferStore(): TransferStore {
 
         // Send to Sheets if connected
         if (isConnected) {
-          sendToSheets(newTransfer).catch(() => {
-            showStatusMessage(
-              "Salvo localmente, mas falhou ao enviar para Google Sheets",
-              "warning"
-            );
-          });
+          sendToSheets(newTransfer)
+            .then((res) => adoptBackendResult(newId, res))
+            .catch(() => {
+              showStatusMessage(
+                "Salvo localmente, mas falhou ao enviar para Google Sheets",
+                "warning"
+              );
+            });
         }
       }
 
       persistServices(updatedServices);
     },
-    [services, editingId, isConnected, persistServices, showStatusMessage]
+    [services, editingId, isConnected, persistServices, showStatusMessage, adoptBackendResult]
   );
 
   // ─── editService ───
   const editService = useCallback(
-    (id: number): Transfer | undefined => {
+    (id: number | string): Transfer | undefined => {
       const service = services.find((s) => s.id === id);
       if (service) {
         setEditingId(id);
@@ -315,7 +413,7 @@ export function useTransferStore(): TransferStore {
 
   // ─── changeStatus ───
   const changeStatus = useCallback(
-    (id: number) => {
+    (id: number | string) => {
       const updatedServices = services.map((s) => {
         if (s.id === id) {
           const nextStatus = STATUS_CYCLE[s.status] || "Solicitado";
@@ -334,7 +432,7 @@ export function useTransferStore(): TransferStore {
 
   // ─── deleteService ───
   const deleteService = useCallback(
-    (id: number) => {
+    (id: number | string) => {
       const confirmed = window.confirm("Tem certeza que deseja excluir este servico?");
       if (!confirmed) return;
 

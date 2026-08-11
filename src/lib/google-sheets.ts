@@ -136,26 +136,64 @@ export async function loadTransfersFromSheets(): Promise<{
   }
 }
 
+/** Resposta do backend endurecido ao addTransfer. `ok: false` = rede/parse
+ *  falhou (a viagem fica local com id provisório). Os restantes campos seguem
+ *  o contrato do GAS: transfer.id é o ID que ficou de facto na folha. */
+export interface BackendSaveResult {
+  ok: boolean;
+  sucesso?: boolean;
+  status?: string;            // "apagada" — lápide: remover localmente, não reenviar
+  reaproveitada?: boolean;    // já existia na folha — adoptar transferId
+  desviadaParaNova?: boolean; // id ocupado — adoptar idNovo
+  idNovo?: number | string;
+  transferId?: number | string;
+  motivo?: string;            // "edicao_sem_identidade" | "trava_erro" — não re-tentar
+  message?: string;
+}
+
 export async function sendToSheets(
   serviceData: Transfer
-): Promise<boolean> {
+): Promise<BackendSaveResult> {
   const url = getWebAppUrl();
-  if (!url) return false;
+  if (!url) return { ok: false, message: "URL não configurada" };
+
+  // O id local (tmp-...) nunca segue como definitivo — vai à parte, como
+  // idProvisorio, e o backend decide o ID real (guarda de duplicados).
+  const { id: idProvisorio, ...dados } = serviceData;
 
   try {
-    await fetch(url, {
+    // text/plain mantém o pedido "simples" (sem preflight, que o GAS não
+    // responde) mas em modo cors a resposta já é legível.
+    const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "text/plain" },
       body: JSON.stringify({
-        ...serviceData,
+        ...dados,
+        idProvisorio,
         emailDestino: TEST_EMAIL,
         action: "addTransfer",
       }),
-      mode: "no-cors",
+      mode: "cors",
+      redirect: "follow",
     });
-    return true;
+
+    const text = await response.text();
+    const result = JSON.parse(text) as Record<string, unknown>;
+    const transfer = result.transfer as Record<string, unknown> | undefined;
+
+    return {
+      ok: true,
+      sucesso: (result.sucesso ?? result.success) as boolean | undefined,
+      status: result.status as string | undefined,
+      reaproveitada: result.reaproveitada === true,
+      desviadaParaNova: result.desviadaParaNova === true,
+      idNovo: result.idNovo as number | string | undefined,
+      transferId: transfer?.id as number | string | undefined,
+      motivo: result.motivo as string | undefined,
+      message: (result.message || result.mensagem) as string | undefined,
+    };
   } catch {
-    return false;
+    return { ok: false, message: "Sem resposta legível do servidor" };
   }
 }
 

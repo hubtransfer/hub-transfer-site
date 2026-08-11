@@ -23,9 +23,9 @@ interface TransferTableProps {
   itemsPerPage: number;
   onChangePage: (page: number) => void;
   onChangePageSize: (size: number) => void;
-  onEdit: (id: number) => void;
-  onChangeStatus: (id: number) => void;
-  onDelete: (id: number) => void;
+  onEdit: (id: number | string) => void;
+  onChangeStatus: (id: number | string) => void;
+  onDelete: (id: number | string) => void;
   filters: ActiveFilters;
   onSetFilter: (key: string, value: string | null) => void;
   onClearFilters: () => void;
@@ -317,9 +317,12 @@ export default function TransferTable({
                       style={{ borderLeft: `3px solid ${tripColor}` }}
                       className="border-b border-[#1A1A1A] bg-[#111] hover:bg-[#1A1A1A] transition-colors"
                     >
-                      {/* ID */}
+                      {/* ID — "…" enquanto aguarda o definitivo da folha */}
                       <td className="px-2 py-2 text-[#666] font-mono text-xs">
-                        {s.id}
+                        {typeof s.id === "string" ? "…" : s.id}
+                        {s.syncFalhou && (
+                          <span title="O backend recusou a gravação — não será re-tentada" className="text-red-400 ml-1">⚠</span>
+                        )}
                       </td>
 
                       {/* Ref */}

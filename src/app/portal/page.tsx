@@ -74,7 +74,7 @@ export default function PortalPage() {
   }, [activeTab, store]);
 
   const handleEdit = useCallback(
-    (id: number) => {
+    (id: number | string) => {
       store.editService(id);
       setActiveTab("form");
       setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);

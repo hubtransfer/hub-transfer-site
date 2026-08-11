@@ -5,7 +5,10 @@
 
 // ─── Types ───
 export interface Transfer {
-  id: number;
+  // number = ID definitivo atribuído pela folha; string "tmp-..." = provisório
+  // local à espera da resposta do backend (nunca enviado como definitivo)
+  id: number | string;
+  syncFalhou?: boolean;
   nomeCliente: string;
   referencia: string;
   tipoServico: string;
