@@ -51,8 +51,11 @@ export interface TourData {
 }
 
 // ─── Constants ───
+// HUB Central — o mesmo deployment do getViagens, com o guarda de duplicados
+// e as travas do backend endurecido. (O URL antigo apontava a um Apps Script
+// à parte que não passava por essas protecções.)
 export const WEBAPP_URL =
-  "https://script.google.com/macros/s/AKfycbwpiWkRZHm0ZDQ7AydqWBWsHXvpiS9VnevS9BpHGYB8sE1Rghy4zYIdwOTvdV2FhLb4rg/exec";
+  "https://script.google.com/macros/s/AKfycbwwr4_wjibbZgVEDD7JC0VSYce7C8iIvSmJFSbDHO_IX1L5KHSagOxkJZOL0ya746Uicw/exec";
 export const TEST_EMAIL = "juniorgutierezbega@gmail.com";
 export const SPREADSHEET_ID =
   "15zfdrXZaR49HrVsHzpszLLbqFKCenvMn11IvMkYSMHI";

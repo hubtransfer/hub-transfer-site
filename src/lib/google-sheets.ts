@@ -8,9 +8,19 @@ import {
   TEST_EMAIL,
   normalizeTransfer,
 } from "./transfers";
+import { getSession } from "./auth";
 
 function getWebAppUrl(): string {
   if (typeof window === "undefined") return WEBAPP_URL;
+  // O override "webappUrl" só vale com sessão de hotel activa (cada hotel
+  // grava no GAS dele). Sem ela, o valor é resto de uma sessão antiga e
+  // mandava as viagens do admin para o script errado — limpa-se e grava-se
+  // sempre no HUB Central.
+  const session = getSession();
+  if (session?.role !== "hotel") {
+    try { localStorage.removeItem("webappUrl"); } catch { /* */ }
+    return WEBAPP_URL;
+  }
   const saved = localStorage.getItem("webappUrl");
   return saved?.trim() || WEBAPP_URL;
 }
