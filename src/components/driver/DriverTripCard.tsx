@@ -125,6 +125,30 @@ function urlDoAudio(v: HubViagem): string {
   return `https://wa.me/${TEL_HUB}?text=${encodeURIComponent(textoDoAudio(v))}`;
 }
 
+// Avisa o backend de que o motorista carregou no WhatsApp — coluna CM.
+// sendBeacon porque o clique navega para o wa.me: um fetch normal era
+// cancelado a meio pelo browser e o registo perdia-se sem erro nenhum.
+function registarCliqueWhatsApp(v: HubViagem, motorista: string) {
+  const payload = JSON.stringify({
+    rowIndex: v.rowIndex ?? "",  // o MESMO identificador do updateDriverStatus
+    id: v.id,                    // reserva, se não houver rowIndex
+    motorista,
+  });
+  const url = "/api/motorista/mensagem-enviada";
+  const enviou =
+    typeof navigator !== "undefined" &&
+    typeof navigator.sendBeacon === "function" &&
+    navigator.sendBeacon(url, new Blob([payload], { type: "application/json" }));
+  if (!enviou) {
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: payload,
+      keepalive: true,
+    }).catch(() => {});
+  }
+}
+
 /* ─── Props ─── */
 
 interface DriverTripCardProps {
@@ -256,6 +280,15 @@ export default function DriverTripCard({
 
   /* ─ No-Show modal ─ */
   const [noShowOpen, setNoShowOpen] = useState(false);
+
+  /* ─ WhatsApp já enviado (optimista + confirmação do backend no refresh) ─ */
+  // O sendBeacon é disparar e esquecer: marca-se logo no clique, sem esperar.
+  // Quando o getViagens enviar o campo msgEnviada (coluna CM), confirma aqui.
+  const msgRegistada = !!String(
+    (viagem as unknown as Record<string, unknown>)["msgEnviada"] ?? "",
+  ).trim();
+  const [waSent, setWaSent] = useState(msgRegistada);
+  useEffect(() => { if (msgRegistada) setWaSent(true); }, [msgRegistada]);
 
   /* ─ Expand / Collapse ─ */
   const [expanded, setExpanded] = useState(false);
@@ -707,10 +740,17 @@ export default function DriverTripCard({
                 {viagem.phone && (
                   <button type="button" onClick={() => {
                     const drv = driverNameProp || viagem.driver || "o motorista";
+                    // 1º o registo (beacon sobrevive à navegação), só depois o wa.me
+                    registarCliqueWhatsApp(viagem, driverNameProp || viagem.driver || "");
+                    setWaSent(true);
                     window.open(generateDriverWhatsAppURL(viagem, drv), "_blank");
                   }}
-                    className="flex items-center justify-center gap-2.5 h-14 rounded-xl bg-[#25d366]/10 border border-[#25d366]/20 text-[#25d366] font-mono text-base font-bold active:bg-[#25d366]/20 transition-colors">
-                    <WhatsAppIcon /> WhatsApp
+                    className={`flex items-center justify-center gap-2.5 h-14 rounded-xl font-mono text-base font-bold transition-colors ${
+                      waSent
+                        ? "bg-[#25d366]/25 border border-[#25d366]/60 text-[#25d366]"
+                        : "bg-[#25d366]/10 border border-[#25d366]/20 text-[#25d366] active:bg-[#25d366]/20"
+                    }`}>
+                    <WhatsAppIcon /> WhatsApp{waSent ? " ✓" : ""}
                   </button>
                 )}
                 {viagem.phone && (
