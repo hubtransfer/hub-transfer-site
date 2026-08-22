@@ -21,7 +21,7 @@ import { getDelayedTime, delayColor, computeFlightState } from "@/lib/flightUtil
 import NoShowModal from "@/components/driver/NoShowModal";
 import SwipeBar from "@/components/shared/SwipeBar";
 import LiveProgressStrip from "@/components/live/LiveProgressStrip";
-import { statusMotoristaToPasso } from "@/lib/live";
+import { statusMotoristaToPasso, type LiveTsPassos } from "@/lib/live";
 
 
 
@@ -149,6 +149,13 @@ function registarCliqueWhatsApp(v: HubViagem, motorista: string) {
   }
 }
 
+// "19/08/2026 14:33 · Victor Santiago" → "19/08 14:33" (sem o ano). Sem match
+// → "" (o botão volta ao estado por clicar; nunca mostrar a string inteira).
+function extrairDiaHora(s: string): string {
+  const m = /\b(\d{1,2}\/\d{1,2})\/\d{4}\s+(\d{1,2}:\d{2})\b/.exec(s);
+  return m ? `${m[1]} ${m[2]}` : "";
+}
+
 /* ─── Props ─── */
 
 interface DriverTripCardProps {
@@ -209,6 +216,13 @@ export default function DriverTripCard({
   const sourceLabel = getSourceLabel(viagem);
   const c = ts(tipo);
   const passo = statusMotoristaToPasso(viagem.statusMotorista);
+  // Horas reais por etapa (getViagens ainda não as envia — enquanto vierem
+  // vazias, o tsToHora devolve "" e a faixa fica como hoje: só a Agendada).
+  const tsPassos = useMemo<LiveTsPassos>(() => {
+    const x = viagem as unknown as Record<string, unknown>;
+    const h = (k: string) => String(x[k] ?? "").trim();
+    return { acaminho: h("horaACaminho"), nolocal: h("horaNoLocal"), emviagem: h("horaInicio"), fim: h("horaFim") };
+  }, [viagem]);
   const aguardaAudio = precisaDeAudio(viagem);
   // NO_SHOW pode vir da col R ("NO-SHOW") ou da BD/56 ("NO_SHOW") — cobrir ambas
   const isNoShowTrip = isNoShowViagem(viagem);
@@ -284,11 +298,11 @@ export default function DriverTripCard({
   /* ─ WhatsApp já enviado (optimista + confirmação do backend no refresh) ─ */
   // O sendBeacon é disparar e esquecer: marca-se logo no clique, sem esperar.
   // Quando o getViagens enviar o campo msgEnviada (coluna CM), confirma aqui.
-  const msgRegistada = !!String(
+  const horaRegistada = extrairDiaHora(String(
     (viagem as unknown as Record<string, unknown>)["msgEnviada"] ?? "",
-  ).trim();
-  const [waSent, setWaSent] = useState(msgRegistada);
-  useEffect(() => { if (msgRegistada) setWaSent(true); }, [msgRegistada]);
+  ));
+  const [waHora, setWaHora] = useState(horaRegistada);
+  useEffect(() => { if (horaRegistada) setWaHora(horaRegistada); }, [horaRegistada]);
 
   /* ─ Expand / Collapse ─ */
   const [expanded, setExpanded] = useState(false);
@@ -469,7 +483,7 @@ export default function DriverTripCard({
             recolha ou chegada, com ou sem voo (o voo abaixo é extra) */}
         {!expanded && (
           <div className="px-4">
-            <LiveProgressStrip compact n={isDone && !isNoShowTrip ? 5 : passo.n} noShow={isNoShowTrip} />
+            <LiveProgressStrip compact n={isDone && !isNoShowTrip ? 5 : passo.n} tsPassos={tsPassos} noShow={isNoShowTrip} />
           </div>
         )}
 
@@ -722,7 +736,7 @@ export default function DriverTripCard({
 
             {/* ── Carrinho completo — SEMPRE, entre a rota e as acções ── */}
             <div className="border-t border-[#2A2A2A] px-4 pt-1 pb-2">
-              <LiveProgressStrip n={isDone && !isNoShowTrip ? 5 : passo.n} noShow={isNoShowTrip} horaAgendada={adjustedPickup || hora} />
+              <LiveProgressStrip n={isDone && !isNoShowTrip ? 5 : passo.n} tsPassos={tsPassos} noShow={isNoShowTrip} horaAgendada={adjustedPickup || hora} />
             </div>
 
             {/* ── Actions ── */}
@@ -742,15 +756,16 @@ export default function DriverTripCard({
                     const drv = driverNameProp || viagem.driver || "o motorista";
                     // 1º o registo (beacon sobrevive à navegação), só depois o wa.me
                     registarCliqueWhatsApp(viagem, driverNameProp || viagem.driver || "");
-                    setWaSent(true);
+                    const agora = new Date();
+                    setWaHora(`${String(agora.getDate()).padStart(2, "0")}/${String(agora.getMonth() + 1).padStart(2, "0")} ${String(agora.getHours()).padStart(2, "0")}:${String(agora.getMinutes()).padStart(2, "0")}`);
                     window.open(generateDriverWhatsAppURL(viagem, drv), "_blank");
                   }}
                     className={`flex items-center justify-center gap-2.5 h-14 rounded-xl font-mono text-base font-bold transition-colors ${
-                      waSent
+                      waHora
                         ? "bg-[#25d366]/25 border border-[#25d366]/60 text-[#25d366]"
                         : "bg-[#25d366]/10 border border-[#25d366]/20 text-[#25d366] active:bg-[#25d366]/20"
                     }`}>
-                    <WhatsAppIcon /> WhatsApp{waSent ? " ✓" : ""}
+                    <WhatsAppIcon /> WhatsApp{waHora ? ` ${waHora}` : ""}
                   </button>
                 )}
                 {viagem.phone && (

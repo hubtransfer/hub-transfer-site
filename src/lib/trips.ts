@@ -83,6 +83,10 @@ export interface HubViagem {
   concluida: boolean;
   status?: string;
   statusMotorista?: string;  // BD(56): AGUARDANDO/NO_LOCAL/EM_VIAGEM/FINALIZADO
+  horaACaminho?: string;   // hora real "A caminho" — sem coluna no backend hoje
+  horaNoLocal?: string;    // BE(57) — hora real do NO_LOCAL
+  horaInicio?: string;     // BG(59) — hora real do EM_VIAGEM
+  horaFim?: string;        // BI(61) — hora real do FINALIZADO
   coordsOrigem?: string;   // "lat,lng" geocoded do pickup (DL/116)
   coordsDestino?: string;  // "lat,lng" geocoded do destino (DM/117)
 }
