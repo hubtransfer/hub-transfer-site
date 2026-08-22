@@ -479,11 +479,13 @@ export default function DriverTripCard({
           </div>
         </div>
 
-        {/* Carrinho compacto — SEMPRE visível no cartão fechado,
-            recolha ou chegada, com ou sem voo (o voo abaixo é extra) */}
+        {/* Carrinho — SEMPRE visível no cartão fechado, recolha ou chegada,
+            com ou sem voo (o voo abaixo é extra). Faixa completa: as 5
+            etiquetas + horas, igual ao cartão expandido (fim do compact aqui).
+            pt-2 compensa o carrinho que sobressai acima da linha. */}
         {!expanded && (
-          <div className="px-4">
-            <LiveProgressStrip compact n={isDone && !isNoShowTrip ? 5 : passo.n} tsPassos={tsPassos} noShow={isNoShowTrip} />
+          <div className="px-4 pt-2">
+            <LiveProgressStrip n={isDone && !isNoShowTrip ? 5 : passo.n} tsPassos={tsPassos} noShow={isNoShowTrip} horaAgendada={adjustedPickup || hora} />
           </div>
         )}
 
@@ -765,7 +767,7 @@ export default function DriverTripCard({
                         ? "bg-[#25d366]/25 border border-[#25d366]/60 text-[#25d366]"
                         : "bg-[#25d366]/10 border border-[#25d366]/20 text-[#25d366] active:bg-[#25d366]/20"
                     }`}>
-                    <WhatsAppIcon /> WhatsApp{waHora ? ` ${waHora}` : ""}
+                    <WhatsAppIcon /> WhatsApp
                   </button>
                 )}
                 {viagem.phone && (
@@ -778,6 +780,13 @@ export default function DriverTripCard({
                   </button>
                 )}
               </div>
+
+              {/* Registo do contacto — só existe se houver registo; sem espaço reservado */}
+              {viagem.phone && waHora && (
+                <p className="font-mono text-[11px] text-[#25d366]/80 text-center -mt-1">
+                  Cliente contactado · {waHora}
+                </p>
+              )}
 
               {/* Gravar áudio — cartão aberto, SÓ motorista.
                   Repetido aqui para o botão não desaparecer ao expandir. */}

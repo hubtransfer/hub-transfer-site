@@ -138,9 +138,23 @@ export function isNoShow(v: LiveViagem): boolean {
   return (v.passo?.rotulo || "").toLowerCase().includes("não compareceu");
 }
 
-/** Normaliza um timestamp do feed para HH:MM (aceita ISO ou texto com hora). */
+/**
+ * Normaliza um timestamp do feed para HH:MM.
+ * Data-hora ISO: sem fuso → UTC; com Z/offset → respeitado. Ambos formatados
+ * em Europe/Lisbon (o Intl trata o Verão/Inverno — nunca somar horas à mão).
+ * "HH:mm" solto (sem data): já vem na hora local, fica exactamente como está.
+ */
 export function tsToHora(ts?: string): string {
   if (!ts) return "";
+  const iso = ts.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(Z|[+-]\d{2}:?\d{2})?/);
+  if (iso) {
+    const d = new Date(iso[1] ? iso[0] : iso[0] + "Z");
+    if (!isNaN(d.getTime())) {
+      return new Intl.DateTimeFormat("pt-PT", {
+        timeZone: "Europe/Lisbon", hour: "2-digit", minute: "2-digit", hour12: false,
+      }).format(d);
+    }
+  }
   const m = ts.match(/(\d{1,2}):(\d{2})/);
   if (!m) return "";
   return `${m[1].padStart(2, "0")}:${m[2]}`;
