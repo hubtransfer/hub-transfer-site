@@ -69,6 +69,7 @@ export interface HubViagem {
   depDelay?: string;        // departure delay minutes
   arrOriginal?: string;     // HH:MM — original scheduled arrival
   arrOriginalFull?: string; // YYYY-MM-DD HH:MM
+  rotaVoo?: string;         // texto pronto do backend, ex.: "🇪🇸 MAD → 🇵🇹 LIS"; pode vir vazio ou a começar por "❓"
   language: string;
   pax: string;
   bags?: string;

@@ -125,14 +125,16 @@ function urlDoAudio(v: HubViagem): string {
   return `https://wa.me/${TEL_HUB}?text=${encodeURIComponent(textoDoAudio(v))}`;
 }
 
-// Avisa o backend de que o motorista carregou no WhatsApp — coluna CM.
-// sendBeacon porque o clique navega para o wa.me: um fetch normal era
+// Avisa o backend de que o motorista contactou o cliente — coluna CM.
+// A coluna responde a "já falaste com o cliente?", não a "mandaste WhatsApp?":
+// o canal (whatsapp/sms) vai entre parênteses no campo motorista, texto livre.
+// sendBeacon porque o clique navega para o wa.me/sms:: um fetch normal era
 // cancelado a meio pelo browser e o registo perdia-se sem erro nenhum.
-function registarCliqueWhatsApp(v: HubViagem, motorista: string) {
+function registarContactoCliente(v: HubViagem, motorista: string, canal: string) {
   const payload = JSON.stringify({
     rowIndex: v.rowIndex ?? "",  // o MESMO identificador do updateDriverStatus
     id: v.id,                    // reserva, se não houver rowIndex
-    motorista,
+    motorista: `${motorista} (${canal})`.trim(),
   });
   const url = "/api/motorista/mensagem-enviada";
   const enviou =
@@ -271,6 +273,17 @@ export default function DriverTripCard({
   const depIata = (viagem.depIata || "").toUpperCase().trim();
   const originFlag = getOriginFlag(depIata) || bandeiraEmoji;
 
+  // Rota do voo pronta do backend ("🇪🇸 MAD → 🇵🇹 LIS"). Defensivo: só usa
+  // quando vem preenchida, não começa por "❓" e o split pelo "→" dá exactamente
+  // 2 partes (backend pode não estar republicado). Origem à esquerda, destino à direita.
+  const rotaVooRaw = (viagem.rotaVoo || "").trim();
+  const rotaVooParts = rotaVooRaw && !rotaVooRaw.startsWith("❓")
+    ? rotaVooRaw.split("→").map((p) => p.trim())
+    : [];
+  const rotaVooValida = rotaVooParts.length === 2 && !!rotaVooParts[0] && !!rotaVooParts[1];
+  const rotaOrigem = rotaVooValida ? rotaVooParts[0] : "";
+  const rotaDestino = rotaVooValida ? rotaVooParts[1] : "";
+
   // Departure delay + arrival original vs ETA
   const depDelayMin = parseInt(viagem.depDelay || "0", 10) || 0;
   const arrOriginal = (viagem.arrOriginal || "").trim();
@@ -295,14 +308,23 @@ export default function DriverTripCard({
   /* ─ No-Show modal ─ */
   const [noShowOpen, setNoShowOpen] = useState(false);
 
-  /* ─ WhatsApp já enviado (optimista + confirmação do backend no refresh) ─ */
-  // O sendBeacon é disparar e esquecer: marca-se logo no clique, sem esperar.
-  // Quando o getViagens enviar o campo msgEnviada (coluna CM), confirma aqui.
+  /* ─ Cliente contactado (optimista + confirmação do backend no refresh) ─ */
+  // Qualquer canal conta (WhatsApp ou SMS): a coluna CM regista "já falaram
+  // com o cliente", não o meio. O sendBeacon é disparar e esquecer: marca-se
+  // logo no clique; o getViagens confirma via msgEnviada (coluna CM).
   const horaRegistada = extrairDiaHora(String(
     (viagem as unknown as Record<string, unknown>)["msgEnviada"] ?? "",
   ));
   const [waHora, setWaHora] = useState(horaRegistada);
   useEffect(() => { if (horaRegistada) setWaHora(horaRegistada); }, [horaRegistada]);
+
+  // Regista o contacto (qualquer canal) e marca a hora optimista — chamado
+  // ANTES do window.open: o beacon sobrevive à navegação, um fetch não.
+  const registarContacto = useCallback((canal: string) => {
+    registarContactoCliente(viagem, driverNameProp || viagem.driver || "", canal);
+    const agora = new Date();
+    setWaHora(`${String(agora.getDate()).padStart(2, "0")}/${String(agora.getMonth() + 1).padStart(2, "0")} ${String(agora.getHours()).padStart(2, "0")}:${String(agora.getMinutes()).padStart(2, "0")}`);
+  }, [viagem, driverNameProp]);
 
   /* ─ Expand / Collapse ─ */
   const [expanded, setExpanded] = useState(false);
@@ -410,11 +432,6 @@ export default function DriverTripCard({
             exit={{ opacity: 0 }}
             className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center"
           >
-            <div className="flex items-center gap-3 font-mono text-base font-bold" style={{ color: swipeColor }}>
-              {isArmed && !swipeX && <span className="animate-pulse">Arrastar para concluir →</span>}
-              {isSwiping && swipePct < 1 && <><span>Arrastar para concluir</span><span className="text-xl">→</span></>}
-              {isSwiping && swipePct >= 1 && <><span>Soltar para concluir</span><span className="text-xl">✓</span></>}
-            </div>
             {isSwiping && (
               <div className="absolute bottom-0 left-0 right-0 h-1.5 rounded-full overflow-hidden bg-[#1A1A1A]">
                 <motion.div className="h-full rounded-full" style={{ width: `${swipePct * 100}%`, backgroundColor: swipeColor }} />
@@ -516,7 +533,15 @@ export default function DriverTripCard({
         {!expanded && hasFlight && flight && tipo === "CHEGADA" && (
           <div className="px-4 pb-3 pt-1">
             {flight.noData ? (
-              <p className="font-mono text-xs text-[#888] italic">✈️ {viagem.flight}{bandeiraEmoji && <span title={viagem.bandeira}> {bandeiraEmoji}</span>} · Dados em breve</p>
+              rotaVooValida ? (
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono text-xs font-bold text-[#D4A017] whitespace-nowrap">{rotaOrigem}</span>
+                  <span className="font-mono text-xs text-[#888] italic">✈️ {viagem.flight} · Dados em breve</span>
+                  <span className="font-mono text-xs font-bold text-[#D4A017] whitespace-nowrap">{rotaDestino}</span>
+                </div>
+              ) : (
+                <p className="font-mono text-xs text-[#888] italic">✈️ {viagem.flight}{bandeiraEmoji && <span title={viagem.bandeira}> {bandeiraEmoji}</span>} · Dados em breve</p>
+              )
             ) : flight.cancelled ? (
               <div className="flex items-center gap-2">
                 <div className="flex-1" style={{ height: "3px", borderRadius: "2px", backgroundColor: "#EF4444", opacity: 0.3 }} />
@@ -545,8 +570,14 @@ export default function DriverTripCard({
                 {/* L2: Flight bar — flag+IATA | progress | flag+IATA */}
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1 flex-shrink-0">
-                    {originFlag && <span className="text-sm leading-none">{originFlag}</span>}
-                    <span className="font-mono text-sm font-bold text-[#D4A017]">{depIata}</span>
+                    {rotaVooValida ? (
+                      <span className="font-mono text-sm font-bold text-[#D4A017] whitespace-nowrap">{rotaOrigem}</span>
+                    ) : (
+                      <>
+                        {originFlag && <span className="text-sm leading-none">{originFlag}</span>}
+                        <span className="font-mono text-sm font-bold text-[#D4A017]">{depIata}</span>
+                      </>
+                    )}
                   </div>
                   <div className="flex-1 relative" style={{ height: "3px", borderRadius: "2px", backgroundColor: "#333" }}>
                     <div className="h-full transition-all duration-[2s] ease-in-out" style={{ width: `${Math.max(flight.progress, 2)}%`, backgroundColor: flight.color, borderRadius: "2px" }} />
@@ -557,8 +588,14 @@ export default function DriverTripCard({
                     </svg>
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
-                    <span className="text-sm leading-none">🇵🇹</span>
-                    <span className="font-mono text-sm font-bold text-[#D4A017]">LIS</span>
+                    {rotaVooValida ? (
+                      <span className="font-mono text-sm font-bold text-[#D4A017] whitespace-nowrap">{rotaDestino}</span>
+                    ) : (
+                      <>
+                        <span className="text-sm leading-none">🇵🇹</span>
+                        <span className="font-mono text-sm font-bold text-[#D4A017]">LIS</span>
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -602,14 +639,24 @@ export default function DriverTripCard({
               <div className="px-4 py-3 border-t border-[#2A2A2A]" style={{ backgroundColor: `${c.hex}06` }}>
                 {flight.noData ? (
                   <div className="flex items-center gap-3">
-                    <span className="text-xl leading-none" title={viagem.bandeira || undefined}>{bandeiraEmoji || "✈️"}</span>
+                    {rotaVooValida ? (
+                      <span className="font-mono text-xs font-bold whitespace-nowrap" style={{ color: c.hex }}>{rotaOrigem}</span>
+                    ) : (
+                      <span className="text-xl leading-none" title={viagem.bandeira || undefined}>{bandeiraEmoji || "✈️"}</span>
+                    )}
                     <div className="flex-1">
                       <p className="text-center mb-1.5"><a href={`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="font-mono text-sm text-amber-400 hover:text-amber-300 font-bold underline cursor-pointer">{viagem.flight}</a></p>
                       <p className="text-center font-mono text-[11px] italic font-medium text-[#E0E0E0]">✈️ Acompanhamento do voo activa em breve</p>
                     </div>
                     <div className="text-center min-w-[48px]">
-                      <p className="text-xl leading-none mb-1">🇵🇹</p>
-                      <p className="font-mono text-xs font-bold" style={{ color: c.hex }}>LIS</p>
+                      {rotaVooValida ? (
+                        <p className="font-mono text-xs font-bold whitespace-nowrap" style={{ color: c.hex }}>{rotaDestino}</p>
+                      ) : (
+                        <>
+                          <p className="text-xl leading-none mb-1">🇵🇹</p>
+                          <p className="font-mono text-xs font-bold" style={{ color: c.hex }}>LIS</p>
+                        </>
+                      )}
                     </div>
                   </div>
                 ) : (
@@ -655,8 +702,14 @@ export default function DriverTripCard({
                       {/* Flight bar — same as minimised */}
                       <div className="flex items-center gap-2">
                         <div className="flex items-center gap-1 flex-shrink-0">
-                          {originFlag && <span className="text-sm leading-none">{originFlag}</span>}
-                          <span className="font-mono text-sm font-bold text-[#D4A017]">{depIata}</span>
+                          {rotaVooValida ? (
+                            <span className="font-mono text-sm font-bold text-[#D4A017] whitespace-nowrap">{rotaOrigem}</span>
+                          ) : (
+                            <>
+                              {originFlag && <span className="text-sm leading-none">{originFlag}</span>}
+                              <span className="font-mono text-sm font-bold text-[#D4A017]">{depIata}</span>
+                            </>
+                          )}
                         </div>
                         <div className="flex-1 relative cursor-pointer" style={{ height: "3px", borderRadius: "2px", backgroundColor: "#333" }}
                           onClick={() => viagem.flight && window.open(`https://www.google.com/search?q=flight+${encodeURIComponent(viagem.flight)}`, "_blank")}>
@@ -672,8 +725,14 @@ export default function DriverTripCard({
                           )}
                         </div>
                         <div className="flex items-center gap-1 flex-shrink-0">
-                          <span className="text-sm leading-none">🇵🇹</span>
-                          <span className="font-mono text-sm font-bold text-[#D4A017]">LIS</span>
+                          {rotaVooValida ? (
+                            <span className="font-mono text-sm font-bold text-[#D4A017] whitespace-nowrap">{rotaDestino}</span>
+                          ) : (
+                            <>
+                              <span className="text-sm leading-none">🇵🇹</span>
+                              <span className="font-mono text-sm font-bold text-[#D4A017]">LIS</span>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -756,10 +815,7 @@ export default function DriverTripCard({
                 {viagem.phone && (
                   <button type="button" onClick={() => {
                     const drv = driverNameProp || viagem.driver || "o motorista";
-                    // 1º o registo (beacon sobrevive à navegação), só depois o wa.me
-                    registarCliqueWhatsApp(viagem, driverNameProp || viagem.driver || "");
-                    const agora = new Date();
-                    setWaHora(`${String(agora.getDate()).padStart(2, "0")}/${String(agora.getMonth() + 1).padStart(2, "0")} ${String(agora.getHours()).padStart(2, "0")}:${String(agora.getMinutes()).padStart(2, "0")}`);
+                    registarContacto("whatsapp");
                     window.open(generateDriverWhatsAppURL(viagem, drv), "_blank");
                   }}
                     className={`flex items-center justify-center gap-2.5 h-14 rounded-xl font-mono text-base font-bold transition-colors ${
@@ -773,6 +829,7 @@ export default function DriverTripCard({
                 {viagem.phone && (
                   <button type="button" onClick={() => {
                     const drv = driverNameProp || viagem.driver || "o motorista";
+                    registarContacto("sms");
                     window.open(generateDriverSmsURL(viagem, drv), "_blank");
                   }}
                     className="flex items-center justify-center gap-2.5 h-14 rounded-xl bg-[#8B9DAF]/10 border border-[#8B9DAF]/20 text-[#8B9DAF] font-mono text-base font-bold active:bg-[#8B9DAF]/20 transition-colors">
