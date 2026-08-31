@@ -45,6 +45,7 @@ export interface HubViagem {
   origin: string;
   destination: string;
   pickupTime: string;
+  pickupOriginal?: string;  // recolha ORIGINAL antes de alterações — AINDA NÃO vem do backend; opcional em todo o lado
   flight: string;
   flightDate?: string;
   bandeira?: string;       // "🇧🇷 Brasil" — coluna Bandeira Origem (flight tracking); vazio sem voo

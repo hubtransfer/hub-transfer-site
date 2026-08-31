@@ -48,6 +48,33 @@ export function delayColor(delayMin: number): string {
   return '#F5C518';
 }
 
+// ─── Horas com risco (estilo Google Flights) ───
+
+/** true quando original e actual existem e diferem ≥ 1 minuto (granularidade HH:mm) */
+export function horaAlterada(original?: string, atual?: string): boolean {
+  const o = toMin(original || '');
+  const a = toMin(atual || '');
+  if (o === null || a === null) return false;
+  return o !== a;
+}
+
+/**
+ * Descolagem original derivada — a duração do voo é constante, logo:
+ * depOriginal = depTime − (chegadaAtual − arrOriginal), módulo 24h.
+ * A diferença é assinada no intervalo [−12h, +12h) para voos que cruzam a
+ * meia-noite. Devolve '' se faltar qualquer campo ou se der igual ao depTime.
+ */
+export function derivarDepOriginal(depTime?: string, chegadaAtual?: string, arrOriginal?: string): string {
+  const dep = toMin(depTime || '');
+  const arrA = toMin(chegadaAtual || '');
+  const arrO = toMin(arrOriginal || '');
+  if (dep === null || arrA === null || arrO === null) return '';
+  const atraso = ((((arrA - arrO) + 720) % 1440) + 1440) % 1440 - 720;
+  if (atraso === 0) return '';
+  const orig = (((dep - atraso) % 1440) + 1440) % 1440;
+  return minToStr(orig);
+}
+
 // ─── Operational flight state ───
 
 export interface FlightState {

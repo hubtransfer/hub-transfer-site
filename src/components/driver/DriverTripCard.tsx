@@ -17,7 +17,8 @@ import {
 } from "@/lib/trips";
 import { generateDriverWhatsAppURL, generateDriverSmsURL } from "@/lib/driver-templates";
 import { getOriginFlag } from "@/lib/countryFlags";
-import { getDelayedTime, delayColor, computeFlightState } from "@/lib/flightUtils";
+import { delayColor, computeFlightState, derivarDepOriginal } from "@/lib/flightUtils";
+import HoraRiscada from "@/components/shared/HoraRiscada";
 import NoShowModal from "@/components/driver/NoShowModal";
 import SwipeBar from "@/components/shared/SwipeBar";
 import LiveProgressStrip from "@/components/live/LiveProgressStrip";
@@ -252,8 +253,17 @@ export default function DriverTripCard({
   const delayMin = parseInt(viagem.atrasoMin || "0", 10) || 0;
   const dColor = delayMin > 0 ? delayColor(delayMin) : "";
 
-  // Adjusted pickup: only change if etaChegada+15min > original pickupTime
+  // TLX (Talixo): o controlo da Talixo em destaque — a hora K manda, crua,
+  // sem nenhuma conta local. As restantes plataformas ficam como estavam.
+  const isTLX = sourceLabel === "TLX";
+  // Recolha original — o backend AINDA NÃO envia pickupOriginal; enquanto
+  // vier vazio nunca há risco no pickup (o HoraRiscada trata disso).
+  const pickupOriginal = cleanHora(viagem.pickupOriginal || "");
+
+  // Adjusted pickup: only change if etaChegada+15min > original pickupTime.
+  // NUNCA para TLX — nenhuma soma local (ETA+15) se aplica a viagens TLX.
   const adjustedPickup = useMemo(() => {
+    if (isTLX) return "";
     const eta = (viagem.etaChegada || viagem.arrTime || "").trim();
     if (!eta || !hora) return "";
     const etaM = (() => { const [h, m] = eta.split(":").map(Number); return isNaN(h) || isNaN(m) ? null : h * 60 + m; })();
@@ -266,7 +276,7 @@ export default function DriverTripCard({
       return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
     }
     return ""; // original pickup is fine
-  }, [viagem.etaChegada, viagem.arrTime, hora]);
+  }, [isTLX, viagem.etaChegada, viagem.arrTime, hora]);
 
   // Origin flag + IATA code from depIata; a coluna Bandeira Origem do backend
   // cobre os casos em que o dicionário local não conhece o aeroporto
@@ -284,25 +294,31 @@ export default function DriverTripCard({
   const rotaOrigem = rotaVooValida ? rotaVooParts[0] : "";
   const rotaDestino = rotaVooValida ? rotaVooParts[1] : "";
 
-  // Departure delay + arrival original vs ETA
+  // Departure delay + pares (original, actual) da regra do risco à Google
   const depDelayMin = parseInt(viagem.depDelay || "0", 10) || 0;
   const arrOriginal = (viagem.arrOriginal || "").trim();
   const etaChegada = (viagem.etaChegada || "").trim();
-  const hasArrDiff = arrOriginal && etaChegada && arrOriginal !== etaChegada;
-  const depActual = (viagem.depActual || "").trim();
   const depTime = (viagem.depTime || "").trim();
-  const hasDepDiff = depActual && depTime && depActual !== depTime;
+  // CHEGADA actual do voo: a real (arrTime, só depois de aterrar), senão o ETA
+  const chegadaAtual = arrTime || etaChegada;
+  // DESCOLAGEM: a original não vem no payload — deriva-se (duração constante)
+  const depOriginal = derivarDepOriginal(depTime, chegadaAtual, arrOriginal);
   const isLanded = (viagem.statusVoo || "").toUpperCase().replace(/[_\s]+/g, " ").includes("ATERRISADO") || (viagem.statusVoo || "").toUpperCase().includes("LANDED");
 
-  // Display time: ETA for flights, pickupTime otherwise
+  // Display time: TLX → pickupTime (K) crua; ETA for flights; pickupTime otherwise
   const displayTime = useMemo(() => {
+    if (isTLX) return hora; // TLX: a hora da Talixo manda — é por ela que auditam o motorista
     if (!hasFlight || !flight) return hora; // no flight → pickupTime
     if (isLanded) return viagem.arrTime || etaChegada || hora;
     if (etaChegada) return etaChegada;
     if (arrOriginal) return arrOriginal;
     if (viagem.arrTime) return viagem.arrTime;
     return hora;
-  }, [hasFlight, flight, isLanded, viagem.arrTime, etaChegada, arrOriginal, hora]);
+  }, [isTLX, hasFlight, flight, isLanded, viagem.arrTime, etaChegada, arrOriginal, hora]);
+
+  // Par da hora grande: TLX e viagens sem voo riscam contra a recolha original;
+  // chegadas com voo riscam contra a chegada original do voo
+  const displayOriginal = isTLX || !hasFlight || !flight ? pickupOriginal : arrOriginal;
 
 
   /* ─ No-Show modal ─ */
@@ -479,7 +495,10 @@ export default function DriverTripCard({
 
         {/* L2: ETA time | name (clickable→nameplate) | driver+price */}
         <div className="flex items-center gap-3 px-4 py-1">
-          <span className="flex-shrink-0 font-bold font-mono" style={{ fontSize: "1.5rem", color: isLanded ? "#22C55E" : c.hex }}>{displayTime}</span>
+          <span className="flex-shrink-0 font-bold font-mono" style={{ fontSize: "1.5rem", color: isLanded ? "#22C55E" : c.hex }}>
+            <HoraRiscada original={displayOriginal} atual={displayTime}
+              origClassName="font-mono text-sm font-normal line-through text-gray-500" />
+          </span>
           <div className="flex-1 min-w-0">
             <p className="text-xl font-bold text-white truncate cursor-pointer hover:text-[#D4A017] transition-colors"
               onClick={(e) => { e.stopPropagation(); onShowNameplate(viagem.client, viagem.destination); }}>
@@ -495,6 +514,21 @@ export default function DriverTripCard({
             {price > 0 && <span className="font-mono text-sm font-bold text-[#F0D030]">€{price}</span>}
           </div>
         </div>
+
+        {/* TLX: a hora REAL do voo pela API, num canto abaixo, mais pequena e
+            rotulada — com as mesmas regras de risco (par com arrOriginal).
+            A hora grande acima é a K da Talixo; esta linha é o voo. */}
+        {isTLX && hasFlight && chegadaAtual && (
+          <div className="px-4 -mt-0.5">
+            <span className="font-mono text-xs text-[#9CA3AF]">
+              ✈️ voo{" "}
+              <HoraRiscada original={arrOriginal} atual={chegadaAtual}
+                className="font-semibold text-white"
+                classNameSemRisco="text-[#9CA3AF]"
+                origClassName="line-through text-gray-500" />
+            </span>
+          </div>
+        )}
 
         {/* Carrinho — SEMPRE visível no cartão fechado, recolha ou chegada,
             com ou sem voo (o voo abaixo é extra). Faixa completa: as 5
@@ -549,21 +583,19 @@ export default function DriverTripCard({
               </div>
             ) : (
               <div className="space-y-0.5 sm:space-y-1">
-                {/* L1: Times — dep left, arr right */}
+                {/* L1: Times — dep left, arr right (risco à Google quando alteradas) */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
-                    {hasDepDiff ? (
-                      <><span className="font-mono text-xs line-through text-gray-500">{depTime}</span><span className="font-mono text-sm font-semibold text-white">→ {depActual}</span></>
-                    ) : depTime ? (
-                      <span className="font-mono text-xs text-gray-400">{depTime}</span>
-                    ) : null}
+                    <HoraRiscada original={depOriginal} atual={depTime}
+                      className="font-mono text-sm font-semibold text-white"
+                      classNameSemRisco="font-mono text-xs text-gray-400"
+                      origClassName="font-mono text-xs line-through text-gray-500" />
                   </div>
                   <div className="flex items-center gap-1">
-                    {hasArrDiff ? (
-                      <><span className="font-mono text-xs line-through text-gray-500">{arrOriginal}</span><span className="font-mono text-sm font-semibold text-white">→ {etaChegada}</span></>
-                    ) : (
-                      <span className="font-mono text-xs text-gray-400">{etaChegada || viagem.arrTime || ""}</span>
-                    )}
+                    <HoraRiscada original={arrOriginal} atual={chegadaAtual}
+                      className="font-mono text-sm font-semibold text-white"
+                      classNameSemRisco="font-mono text-xs text-gray-400"
+                      origClassName="font-mono text-xs line-through text-gray-500" />
                   </div>
                 </div>
 
@@ -601,7 +633,11 @@ export default function DriverTripCard({
 
                 {/* L4: Pickup */}
                 {hora && (
-                  <p className="text-center font-mono text-sm" style={{ color: "#D4A017" }}>🚗 Pickup: {adjustedPickup || hora}</p>
+                  <p className="text-center font-mono text-sm" style={{ color: "#D4A017" }}>
+                    🚗 Pickup:{" "}
+                    <HoraRiscada original={pickupOriginal} atual={adjustedPickup || hora}
+                      origClassName="line-through text-gray-500" />
+                  </p>
                 )}
               </div>
             )}
@@ -679,22 +715,20 @@ export default function DriverTripCard({
 
                     {/* Compact: times + bar + times in one horizontal block */}
                     <div className="space-y-0.5">
-                      {/* Times row */}
+                      {/* Times row — risco à Google quando alteradas */}
                       <div className="flex items-center justify-between">
                         <div>
-                          {viagem.depActual && viagem.depActual !== viagem.depTime ? (
-                            <span className="font-mono text-xs"><span className="line-through text-gray-500">{viagem.depTime}</span> <span className="text-white font-semibold">→ {viagem.depActual}</span></span>
-                          ) : viagem.depTime ? (
-                            <span className="font-mono text-xs text-gray-400">{viagem.depTime}</span>
-                          ) : null}
+                          <HoraRiscada original={depOriginal} atual={depTime}
+                            className="font-mono text-xs text-white font-semibold"
+                            classNameSemRisco="font-mono text-xs text-gray-400"
+                            origClassName="font-mono text-xs line-through text-gray-500" />
                           <p className="font-mono text-[8px] text-[#555] uppercase">Decolagem</p>
                         </div>
                         <div className="text-right">
-                          {hasArrDiff ? (
-                            <span className="font-mono text-xs"><span className="line-through text-gray-500">{arrOriginal}</span> <span className="text-white font-semibold">→ {etaChegada}</span></span>
-                          ) : (
-                            <span className="font-mono text-xs text-gray-400">{etaChegada || viagem.arrTime || ""}</span>
-                          )}
+                          <HoraRiscada original={arrOriginal} atual={chegadaAtual}
+                            className="font-mono text-xs text-white font-semibold"
+                            classNameSemRisco="font-mono text-xs text-gray-400"
+                            origClassName="font-mono text-xs line-through text-gray-500" />
                           <p className="font-mono text-[8px] text-[#555] uppercase text-right">Aterragem</p>
                         </div>
                       </div>
@@ -746,7 +780,11 @@ export default function DriverTripCard({
 
                     {/* Pickup time */}
                     <div className="mt-1 pt-1 border-t border-[#2A2A2A]/50 text-center">
-                      <span className="font-mono text-xs" style={{ color: "#D4A017" }}>🚗 Pickup: {adjustedPickup || hora}</span>
+                      <span className="font-mono text-xs" style={{ color: "#D4A017" }}>
+                        🚗 Pickup:{" "}
+                        <HoraRiscada original={pickupOriginal} atual={adjustedPickup || hora}
+                          origClassName="line-through text-gray-500" />
+                      </span>
                     </div>
                   </>
                 )}
