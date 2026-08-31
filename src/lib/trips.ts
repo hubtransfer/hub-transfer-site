@@ -113,6 +113,40 @@ export const HUB_CENTRAL_URL =
 
 export const PLATFORMS = ['Talixo', 'Empire Lisbon', 'Empire Marques', 'WT Driver'] as const;
 
+/**
+ * Chave canónica de um nome de motorista — MESMA regra do backend:
+ * sem acentos, sem maiúsculas, sem pontuação, sem espaços a mais.
+ * Nome vazio → chave vazia (e chave vazia NUNCA corresponde a ninguém).
+ */
+export const chaveMotorista = (s: string): string =>
+  (s || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+/** Lista oficial de motoristas do HUB Central (?action=motoristas) */
+export async function fetchMotoristas(): Promise<Driver[]> {
+  const url = `${HUB_CENTRAL_URL}?action=motoristas&t=${Date.now()}`;
+  const res = await fetch(url, { redirect: 'follow' });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const data = await res.json();
+  const rawList: Record<string, unknown>[] = Array.isArray(data)
+    ? data
+    : Array.isArray(data?.motoristas)
+      ? data.motoristas
+      : [];
+  return rawList
+    .map((m) => ({
+      name: String(m.name || m.nome || ''),
+      phone: String(m.phone || m.telefone || ''),
+      viatura: String(m.viatura || ''),
+    }))
+    .filter((d) => chaveMotorista(d.name) !== '');
+}
+
 export const DRIVERS_FALLBACK: Driver[] = [
   { name: 'Marco',  phone: '351912000001', viatura: '' },
   { name: 'João',   phone: '351912000002', viatura: '' },

@@ -34,6 +34,15 @@ export function setCachedTrips<T>(data: T, date: string): void {
   }
 }
 
+/** Limpa o cache de viagens — obrigatório ao trocar/limpar a identidade do motorista */
+export function clearCachedTrips(): void {
+  try {
+    localStorage.removeItem(CACHE_KEY);
+  } catch {
+    // ignore
+  }
+}
+
 export function getCacheTimestamp(): string | null {
   try {
     const raw = localStorage.getItem(CACHE_KEY);

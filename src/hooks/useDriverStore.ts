@@ -7,17 +7,12 @@ import {
   detectTipo,
   calcDriverPrice,
   cleanHora,
+  chaveMotorista,
 } from '@/lib/trips';
-import { getCachedTrips, setCachedTrips, getCacheTimestamp } from '@/lib/trips-cache';
+import { getCachedTrips, setCachedTrips, clearCachedTrips } from '@/lib/trips-cache';
 
 // ── Helpers ─────────────────────────────────────────────────
 
-const normalize = (s: string) =>
-  s
-    .toLowerCase()
-    .trim()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
 
 // ── Types ───────────────────────────────────────────────────
 
@@ -83,10 +78,13 @@ export function useDriverStore(): DriverStore {
     const name = driverNameRef.current;
     if (!name) return;
 
+    const me = chaveMotorista(name);
+    if (!me) return;
+
     // Load from cache first (instant) — only on initial load
     const dateKey = selectedDateRef.current || 'today';
     if (!silent) {
-      const cached = getCachedTrips<HubViagem[]>(dateKey + ':' + normalize(name));
+      const cached = getCachedTrips<HubViagem[]>(dateKey + ':' + me);
       if (cached && viagens.length === 0) {
         setViagens(cached.data);
         setIsFromCache(true);
@@ -99,16 +97,18 @@ export function useDriverStore(): DriverStore {
 
     try {
       const dateParam = selectedDateRef.current || '';
-      const url = `${gasUrl}?action=viagens&t=${Date.now()}${dateParam ? `&data=${encodeURIComponent(dateParam)}` : ''}`;
+      // Em modo motorista o pedido leva SEMPRE &motorista= — o backend só devolve as viagens dele
+      const url = `${gasUrl}?action=viagens&t=${Date.now()}${dateParam ? `&data=${encodeURIComponent(dateParam)}` : ''}&motorista=${encodeURIComponent(name)}`;
       const res = await fetch(url, { redirect: 'follow' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const json = await res.json();
       const raw: HubViagem[] = Array.isArray(json) ? json : (json.viagens || []);
 
-      const me = normalize(name);
+      // Cinto e suspensórios: só viagens cujo driver é EXACTAMENTE este motorista.
+      // Driver vazio nunca passa (chave vazia não corresponde a ninguém).
       const filtered = raw.filter((v) => {
-        const d = normalize(v.driver || '');
-        return d === me || d.includes(me) || me.includes(d);
+        const d = chaveMotorista(v.driver || '');
+        return d !== '' && d === me;
       });
 
       // Only update state if data actually changed
@@ -122,7 +122,7 @@ export function useDriverStore(): DriverStore {
         setViagens(filtered);
         setIsFromCache(false);
         setCacheAge(null);
-        setCachedTrips(filtered, dateKey + ':' + normalize(name));
+        setCachedTrips(filtered, dateKey + ':' + me);
 
         const now = new Date().toLocaleTimeString('pt-PT', {
           timeZone: 'Europe/Lisbon',
@@ -146,13 +146,25 @@ export function useDriverStore(): DriverStore {
   // ── Actions ─────────────────────────────────────────────
 
   const setDriverName = useCallback((name: string) => {
+    const changed = chaveMotorista(name) !== chaveMotorista(driverNameRef.current);
+    if (changed) {
+      // Sem contaminação entre identidades: limpa memória e cache antes de voltar a pedir
+      setViagens([]);
+      prevViagensKeyRef.current = '';
+      lastChangeRef.current = '';
+      setIsFromCache(false);
+      setCacheAge(null);
+      clearCachedTrips();
+    }
     setDriverNameState(name);
+    driverNameRef.current = name;
     try {
       localStorage.setItem('hub_driver_name', name);
     } catch {
       // ignore
     }
-  }, []);
+    if (name && changed) syncViagens();
+  }, [syncViagens]);
 
   const loadDate = useCallback(
     (dateStr: string) => {
@@ -225,23 +237,15 @@ export function useDriverStore(): DriverStore {
     });
   }, [viagens]);
 
-  // ── Mount: load from localStorage, initial sync, auto-sync ──
+  // ── Mount: auto-sync (a identidade é injectada pela página via setDriverName,
+  //    depois de validada contra a lista oficial ?action=motoristas) ──
 
   useEffect(() => {
-    let name = '';
     try {
-      name = localStorage.getItem('hub_driver_name') || '';
       const savedSync = localStorage.getItem('hub_driver_last_sync');
       if (savedSync) setLastSyncTime(savedSync);
     } catch {
       // ignore
-    }
-
-    if (name) {
-      setDriverNameState(name);
-      driverNameRef.current = name;
-      // Trigger initial sync after setting the name
-      syncViagens();
     }
 
     // Ping leve a cada 60s — só faz fetch completo se lastChange mudou
@@ -271,7 +275,7 @@ export function useDriverStore(): DriverStore {
       clearInterval(interval);
       document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, [syncViagens, syncViagensSilent]);
+  }, [syncViagensSilent]);
 
   // ── Return ──────────────────────────────────────────────
 
