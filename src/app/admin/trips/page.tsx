@@ -7,6 +7,7 @@ import TripCard from "@/components/driver/DriverTripCard";
 import DriverNameplate from "@/components/driver/DriverNameplate";
 import NoShowModal from "@/components/driver/NoShowModal";
 import RestaurantsTab from "@/components/admin/RestaurantsTab";
+import EsperaControl from "@/components/admin/EsperaControl";
 import type { TabType, HubViagem, TripService } from "@/lib/trips";
 import {
   HUB_CENTRAL_URL,
@@ -714,6 +715,7 @@ export default function TripsPage() {
                         {viagem.driver && <p className="text-[10px] text-zinc-500 truncate">{viagem.driver}</p>}
                       </div>
                       <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded" style={{ backgroundColor: `${typeColor}15`, color: typeColor }}>{tipo}</span>
+                      <EsperaControl viagem={viagem} onRefresh={store.syncViagensSilent} variant="row" />
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#22C55E]/10 text-[#22C55E]">CONCLUÍDA</span>
                       <button onClick={() => { setResetTrip(viagem); setResetPwd(""); setResetError(""); }}
                         className="text-[10px] font-mono bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-amber-400 hover:border-amber-400/30 px-2 py-0.5 rounded cursor-pointer transition-colors">
@@ -754,6 +756,7 @@ export default function TripsPage() {
                           {viagem.driver && <p className="text-[10px] text-zinc-500 truncate">{viagem.driver}</p>}
                         </div>
                         <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded" style={{ backgroundColor: `${typeColor}15`, color: typeColor }}>{tipo}</span>
+                        <EsperaControl viagem={viagem} onRefresh={() => store.loadPastDate(store.pastDate)} variant="row" />
                         {noShow && <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#7F1D1D]/50 text-[#F87171]">🚫 Cliente não compareceu</span>}
                         {isDone && <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#22C55E]/10 text-[#22C55E]">CONCLUÍDA</span>}
                         <button onClick={() => { setResetTrip(viagem); setResetPwd(""); setResetError(""); }}

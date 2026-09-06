@@ -91,6 +91,7 @@ export interface HubViagem {
   horaFim?: string;        // BI(61) — hora real do FINALIZADO
   coordsOrigem?: string;   // "lat,lng" geocoded do pickup (DL/116)
   coordsDestino?: string;  // "lat,lng" geocoded do destino (DM/117)
+  esperaEstado?: string;   // controlo de espera (PACOTE 11): marcas " · " — ver src/lib/espera.ts
 }
 
 export interface Driver {

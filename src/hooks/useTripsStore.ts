@@ -798,7 +798,7 @@ export function useTripsStore(): TripsStore {
 
       // Silent refresh: only update state if data actually changed (prevent re-renders)
       const key = JSON.stringify(
-        viagens.map((v) => `${v.id}|${v.statusMotorista || ""}|${v.status || ""}|${v.statusVoo || ""}|${v.etaChegada || ""}|${v.driver || ""}`)
+        viagens.map((v) => `${v.id}|${v.statusMotorista || ""}|${v.status || ""}|${v.statusVoo || ""}|${v.etaChegada || ""}|${v.driver || ""}|${v.esperaEstado || ""}`)
       );
       const changed = key !== prevViagensKeyRef.current;
 

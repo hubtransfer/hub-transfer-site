@@ -23,6 +23,7 @@ import NoShowModal from "@/components/driver/NoShowModal";
 import SwipeBar from "@/components/shared/SwipeBar";
 import LiveProgressStrip from "@/components/live/LiveProgressStrip";
 import { statusMotoristaToPasso, type LiveTsPassos } from "@/lib/live";
+import EsperaControl from "@/components/admin/EsperaControl";
 
 
 
@@ -470,6 +471,9 @@ export default function DriverTripCard({
         <div className="px-4 pt-3 flex items-center justify-between">
           <span className="font-semibold uppercase font-mono leading-none" style={{ fontSize: "0.65rem", letterSpacing: "0.5px", color: c.hex }}>{sourceLabel} · {tipo}</span>
           <div className="flex items-center gap-2">
+          {/* Controlo de espera — SÓ admin; o chip só existe com esperaEstado
+              preenchido. O motorista responde pelo WhatsApp: nada aqui. */}
+          {mode === "admin" && <EsperaControl viagem={viagem} onRefresh={onRefresh} />}
           {mode === "admin" && onDelete && (
             <button type="button" onClick={(e) => { e.stopPropagation(); onDelete(viagem); }} title="Apagar viagem"
               className="text-[#666] hover:text-[#EF4444] transition-colors text-sm cursor-pointer">🗑️</button>
