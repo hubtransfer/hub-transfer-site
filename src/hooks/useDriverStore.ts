@@ -113,7 +113,7 @@ export function useDriverStore(): DriverStore {
 
       // Only update state if data actually changed
       const key = JSON.stringify(
-        filtered.map((v) => `${v.id}|${v.statusMotorista || ''}|${v.status || ''}|${v.statusVoo || ''}|${v.etaChegada || ''}`)
+        filtered.map((v) => `${v.id}|${v.statusMotorista || ''}|${v.status || ''}|${v.statusVoo || ''}|${v.etaChegada || ''}|${v.esperaEstado || ''}`)
       );
       const changed = key !== prevViagensKeyRef.current;
 

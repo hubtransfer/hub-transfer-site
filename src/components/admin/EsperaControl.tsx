@@ -38,11 +38,15 @@ type Busy = `${Acao}:${"SIM" | "NAO"}` | null;
 interface EsperaControlProps {
   viagem: HubViagem;
   onRefresh?: () => void;
-  /** "card" = chip no cabeçalho do cartão; "row" = linha compacta (Passadas). */
-  variant?: "card" | "row";
+  /** "card" = chip no cabeçalho do cartão (gestão); "row" = linha compacta
+   *  (Passadas); "driver" = SÓ LEITURA para o motorista: mesmo chip, painel
+   *  com cabeçalho + linha do tempo + telefone, sem acções nem textos de
+   *  gestão (espera paga, guião, link). Nunca chama o backend. */
+  variant?: "card" | "row" | "driver";
 }
 
 export default function EsperaControl({ viagem, onRefresh, variant = "card" }: EsperaControlProps) {
+  const isDriver = variant === "driver";
   const texto = String((viagem as unknown as Record<string, unknown>)["esperaEstado"] ?? "").trim();
   const info = useMemo(() => parseEspera(texto), [texto]);
 
@@ -68,6 +72,7 @@ export default function EsperaControl({ viagem, onRefresh, variant = "card" }: E
   }, [aviso]);
 
   const chamar = useCallback(async (action: Acao, valor: "SIM" | "NAO") => {
+    if (isDriver) return; // motorista é só leitura — esperaContacto/esperaPaga nunca saem daqui
     if (busy) return; // um toque = uma chamada
     const rowIndex = String(viagem.rowIndex ?? "").trim();
     if (!rowIndex) { setErro("Viagem sem rowIndex — impossível registar."); return; }
@@ -87,7 +92,7 @@ export default function EsperaControl({ viagem, onRefresh, variant = "card" }: E
       setErro("Erro de conexão");
     }
     setBusy(null);
-  }, [busy, viagem.rowIndex, onRefresh]);
+  }, [isDriver, busy, viagem.rowIndex, onRefresh]);
 
   const copiarLink = useCallback(() => {
     if (!info.link) return;
@@ -104,6 +109,8 @@ export default function EsperaControl({ viagem, onRefresh, variant = "card" }: E
   const minutos = esperaMinutos(info);
   const telefone = String(viagem.phone || "").replace(/\D/g, "");
   const mostraContactado = !info.terminado && !(info.ultimaResposta?.sim);
+  // Motorista: fora a pílula de gestão «📞 ligar 75'» (pré-aviso à equipa)
+  const eventosVisiveis = isDriver ? info.eventos.filter((ev) => ev.kind !== "ligar") : info.eventos;
 
   return (
     <>
@@ -156,18 +163,18 @@ export default function EsperaControl({ viagem, onRefresh, variant = "card" }: E
               </p>
             </div>
 
-            {/* Linha do tempo */}
-            {info.eventos.length > 0 && (
+            {/* Linha do tempo — motorista não vê a pílula de gestão «📞 ligar 75'» */}
+            {eventosVisiveis.length > 0 && (
               <div>
                 <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5">Linha do tempo</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {info.eventos.map((ev, i) => <EventoPill key={i} ev={ev} />)}
+                  {eventosVisiveis.map((ev, i) => <EventoPill key={i} ev={ev} />)}
                 </div>
               </div>
             )}
 
-            {/* Link de pagamento */}
-            {info.link && (
+            {/* Link de pagamento — SÓ gestão */}
+            {!isDriver && info.link && (
               <div className="flex items-center justify-between gap-2 bg-[#D4A017]/10 border border-[#D4A017]/30 rounded-lg px-3 py-2">
                 <span className="text-xs text-[#D4A017] font-bold truncate">🔗 Link enviado</span>
                 <button type="button" onClick={copiarLink}
@@ -176,7 +183,7 @@ export default function EsperaControl({ viagem, onRefresh, variant = "card" }: E
                 </button>
               </div>
             )}
-            {!info.link && info.semLink && (
+            {!isDriver && !info.link && info.semLink && (
               <p className="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2">
                 ⚠️ sem provedor de pagamento — enviar MB WAY/transferência à mão
               </p>
@@ -192,8 +199,8 @@ export default function EsperaControl({ viagem, onRefresh, variant = "card" }: E
               <p className="text-xs text-zinc-500 text-center">Cliente sem número de telefone</p>
             )}
 
-            {/* Cliente contactado — enquanto a última resposta não for SIM */}
-            {mostraContactado && (
+            {/* Cliente contactado — SÓ gestão, enquanto a última resposta não for SIM */}
+            {!isDriver && mostraContactado && (
               <button type="button" disabled={!!busy}
                 onClick={() => chamar("esperaContacto", "SIM")}
                 className="w-full h-12 rounded-xl bg-[#22C55E]/15 border border-[#22C55E]/40 text-[#22C55E] text-sm font-bold hover:bg-[#22C55E]/25 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
@@ -203,8 +210,8 @@ export default function EsperaControl({ viagem, onRefresh, variant = "card" }: E
               </button>
             )}
 
-            {/* Espera paga — só aos 75'/90' e sem decisão ainda */}
-            {info.podeDecidirPaga && (
+            {/* Espera paga — SÓ gestão, aos 75'/90' e sem decisão ainda */}
+            {!isDriver && info.podeDecidirPaga && (
               <div>
                 <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5">Espera paga</p>
                 <div className="grid grid-cols-2 gap-2">
@@ -226,20 +233,22 @@ export default function EsperaControl({ viagem, onRefresh, variant = "card" }: E
               </div>
             )}
 
-            {erro && <p className="text-xs text-[#EF4444]">{erro}</p>}
-            {aviso && <p className="text-xs text-[#22C55E]">{aviso}</p>}
+            {!isDriver && erro && <p className="text-xs text-[#EF4444]">{erro}</p>}
+            {!isDriver && aviso && <p className="text-xs text-[#22C55E]">{aviso}</p>}
 
-            {/* Guião da chamada — colapsado por defeito */}
-            <div className="border border-[#2A2A2A] rounded-lg">
-              <button type="button" onClick={() => setGuiaoOpen((v) => !v)}
-                className="w-full flex items-center justify-between px-3 py-2 text-xs text-zinc-300 hover:text-white transition-colors">
-                <span>📄 Guião da chamada</span>
-                <span className="text-zinc-500">{guiaoOpen ? "▲" : "▼"}</span>
-              </button>
-              {guiaoOpen && (
-                <p className="px-3 pb-3 text-xs text-zinc-400 leading-relaxed font-sans">{GUIAO}</p>
-              )}
-            </div>
+            {/* Guião da chamada — SÓ gestão, colapsado por defeito */}
+            {!isDriver && (
+              <div className="border border-[#2A2A2A] rounded-lg">
+                <button type="button" onClick={() => setGuiaoOpen((v) => !v)}
+                  className="w-full flex items-center justify-between px-3 py-2 text-xs text-zinc-300 hover:text-white transition-colors">
+                  <span>📄 Guião da chamada</span>
+                  <span className="text-zinc-500">{guiaoOpen ? "▲" : "▼"}</span>
+                </button>
+                {guiaoOpen && (
+                  <p className="px-3 pb-3 text-xs text-zinc-400 leading-relaxed font-sans">{GUIAO}</p>
+                )}
+              </div>
+            )}
           </div>
         </div>,
         document.body,

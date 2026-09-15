@@ -471,9 +471,13 @@ export default function DriverTripCard({
         <div className="px-4 pt-3 flex items-center justify-between">
           <span className="font-semibold uppercase font-mono leading-none" style={{ fontSize: "0.65rem", letterSpacing: "0.5px", color: c.hex }}>{sourceLabel} · {tipo}</span>
           <div className="flex items-center gap-2">
-          {/* Controlo de espera — SÓ admin; o chip só existe com esperaEstado
-              preenchido. O motorista responde pelo WhatsApp: nada aqui. */}
-          {mode === "admin" && <EsperaControl viagem={viagem} onRefresh={onRefresh} />}
+          {/* Controlo de espera — o chip só existe com esperaEstado preenchido.
+              Gestão: painel completo com acções. Motorista: variante SÓ LEITURA
+              (chip + cabeçalho + linha do tempo + telefone), sem onRefresh
+              porque não há acção nenhuma que o dispare. */}
+          {mode === "admin"
+            ? <EsperaControl viagem={viagem} onRefresh={onRefresh} />
+            : <EsperaControl viagem={viagem} variant="driver" />}
           {mode === "admin" && onDelete && (
             <button type="button" onClick={(e) => { e.stopPropagation(); onDelete(viagem); }} title="Apagar viagem"
               className="text-[#666] hover:text-[#EF4444] transition-colors text-sm cursor-pointer">🗑️</button>
