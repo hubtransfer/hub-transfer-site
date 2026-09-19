@@ -400,6 +400,11 @@ export default function LandingPage() {
   const [bOrigin, setBOrigin] = useState("");
   const [bDest, setBDest] = useState("");
   const [bDate, setBDate] = useState("");
+  // Hora de recolha — dois seletores (00–23 / minutos de 5 em 5) em vez do
+  // campo nativo, que mostra AM/PM num browser em inglês. Opcional: sem hora
+  // escolhida, a mensagem não leva a hora.
+  const [bHour, setBHour] = useState("");
+  const [bMin, setBMin] = useState("00");
   const [bPax, setBPax] = useState(2);
   const [bBags, setBBags] = useState(2);   // malas grandes (de porão); 7 = "7+"
   const [bPhone, setBPhone] = useState("");
@@ -496,11 +501,15 @@ export default function LandingPage() {
     // Grupo 7+ → marcador localizado (contém sempre o token "7+" para contagem no WhatsApp)
     const paxLine = bPax >= 7 ? t.pax7Marker : `👥 Passageiros: ${bPax}`;
     const bagsLine = `🧳 Malas: ${bBags >= 7 ? "7+" : bBags}`;
-    const msg = `Olá! Quero um orçamento para transfer:\n\n📍 De: ${bOrigin || "—"}\n🏁 Para: ${bDest || "—"}\n${routeInfo ? `📏 ${routeInfo.km} km${routeInfo.duration ? ` (~${routeInfo.duration})` : ""}\n` : ""}📅 Data: ${bDate || "—"}\n${paxLine}\n${bagsLine}\n📱 WhatsApp: ${bPhone}`;
+    // dd/mm/aaaa — o formato da HUB-Central (o campo nativo devolve aaaa-mm-dd)
+    const [yy, mm, dd] = bDate.split("-");
+    const dateTxt = yy && mm && dd ? `${dd}/${mm}/${yy}` : "—";
+    const dateLine = `📅 Data: ${dateTxt}${bHour ? ` · 🕐 Hora: ${bHour}:${bMin}` : ""}`;
+    const msg = `Olá! Quero um orçamento para transfer:\n\n📍 De: ${bOrigin || "—"}\n🏁 Para: ${bDest || "—"}\n${routeInfo ? `📏 ${routeInfo.km} km${routeInfo.duration ? ` (~${routeInfo.duration})` : ""}\n` : ""}${dateLine}\n${paxLine}\n${bagsLine}\n📱 WhatsApp: ${bPhone}`;
     // api.whatsapp.com/send e NÃO wa.me: o redireccionamento do wa.me troca
     // cada emoji por U+FFFD («�»). Este formato abre a app/Web com o texto intacto.
     return `https://api.whatsapp.com/send?phone=351968698138&text=${encodeURIComponent(msg)}`;
-  }, [bOrigin, bDest, routeInfo, bDate, bPax, bBags, bPhone, t]);
+  }, [bOrigin, bDest, routeInfo, bDate, bHour, bMin, bPax, bBags, bPhone, t]);
 
   const scrollTo = (id: string) => { setMenuOpen(false); setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }), 150); };
 
@@ -1163,11 +1172,28 @@ export default function LandingPage() {
                           className="w-full h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 text-[#F5F5F5] text-sm placeholder-[#666] focus:outline-none focus:border-[var(--hub-gold)] transition-colors" />
                       </div>
 
-                      {/* Date — full width */}
-                      <div>
-                        <label className="text-[var(--hub-gold)] text-[10px] tracking-wider uppercase block mb-1.5">{lang === "PT" ? "DATA" : lang === "ES" ? "FECHA" : lang === "FR" ? "DATE" : "DATE"}</label>
-                        <input type="date" value={bDate} onChange={(e) => setBDate(e.target.value)}
-                          className="w-full h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 text-[#F5F5F5] text-sm focus:outline-none focus:border-[var(--hub-gold)] [color-scheme:dark] transition-colors" />
+                      {/* Data + hora de recolha — mesma linha, 60/40 */}
+                      <div className="grid grid-cols-[3fr_2fr] gap-1.5">
+                        <div className="min-w-0">
+                          <label className="text-[var(--hub-gold)] text-[10px] tracking-wider uppercase block mb-1.5">{lang === "PT" ? "DATA" : lang === "ES" ? "FECHA" : lang === "FR" ? "DATE" : "DATE"}</label>
+                          <input type="date" value={bDate} onChange={(e) => setBDate(e.target.value)}
+                            className="w-full h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 text-[#F5F5F5] text-sm focus:outline-none focus:border-[var(--hub-gold)] [color-scheme:dark] transition-colors" />
+                        </div>
+                        <div className="min-w-0">
+                          <label className="text-[var(--hub-gold)] text-[10px] tracking-wider uppercase block mb-1.5">{lang === "PT" ? "HORA" : lang === "ES" ? "HORA" : lang === "FR" ? "HEURE" : lang === "IT" ? "ORA" : "TIME"}</label>
+                          <div className="flex items-center gap-1">
+                            <select value={bHour} onChange={(e) => setBHour(e.target.value)} aria-label={lang === "PT" ? "Hora" : "Hour"}
+                              className="flex-1 min-w-0 h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-2 text-center text-[#F5F5F5] text-sm focus:outline-none focus:border-[var(--hub-gold)] [color-scheme:dark] transition-colors cursor-pointer">
+                              <option value="">--</option>
+                              {Array.from({ length: 24 }, (_, h) => String(h).padStart(2, "0")).map((h) => <option key={h} value={h}>{h}</option>)}
+                            </select>
+                            <span className="text-[#888] text-sm">:</span>
+                            <select value={bMin} onChange={(e) => setBMin(e.target.value)} aria-label={lang === "PT" ? "Minutos" : "Minutes"}
+                              className="flex-1 min-w-0 h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-2 text-center text-[#F5F5F5] text-sm focus:outline-none focus:border-[var(--hub-gold)] [color-scheme:dark] transition-colors cursor-pointer">
+                              {Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, "0")).map((m) => <option key={m} value={m}>{m}</option>)}
+                            </select>
+                          </div>
+                        </div>
                       </div>
 
                       {/* Pax — separate row */}
