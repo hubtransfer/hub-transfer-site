@@ -42,7 +42,8 @@ const MSG_TEMPLATES: Record<string, (n: string) => string> = {
 function waUrl(phone: string, name: string, lang: string = "EN"): string {
   const clean = phone.replace(/[^+\d]/g, "").replace(/^\+/, "");
   const fn = MSG_TEMPLATES[lang.toUpperCase()] || MSG_TEMPLATES.EN;
-  return `https://wa.me/${clean}?text=${encodeURIComponent(fn(name.split(" ")[0]))}`;
+  // api.whatsapp.com/send e não wa.me: o redireccionamento do wa.me troca os emojis por «�»
+  return `https://api.whatsapp.com/send?phone=${clean}&text=${encodeURIComponent(fn(name.split(" ")[0]))}`;
 }
 
 // ─── Component ───
