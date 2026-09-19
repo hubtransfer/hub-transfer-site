@@ -401,46 +401,104 @@ export default function LandingPage() {
   const [bDest, setBDest] = useState("");
   const [bDate, setBDate] = useState("");
   const [bPax, setBPax] = useState(2);
+  const [bBags, setBBags] = useState(2);   // malas grandes (de porão); 7 = "7+"
   const [bPhone, setBPhone] = useState("");
-  const [routeInfo, setRouteInfo] = useState<{ distance: string; duration: string } | null>(null);
+  // Chip «✈ Aeroporto de Lisboa» acende por IDENTIFICAÇÃO do sítio (chip ou
+  // escolha na lista que seja o aeroporto de Lisboa), nunca por o texto
+  // conter «Aeroporto» — «Aeroporto do Porto» acendia-o por engano.
+  const [bOriginIsLIS, setBOriginIsLIS] = useState(false);
+  // km: inteiro a partir dos METROS (independente da língua do browser);
+  // duração: texto da Google, como antes.
+  const [routeInfo, setRouteInfo] = useState<{ km: number; duration: string } | null>(null);
+  const routeReqRef = useRef(0);
 
   const calcRoute = useCallback(() => {
-    if (!bOrigin || !bDest) { setRouteInfo(null); return; }
+    if (!bOrigin || !bDest) return;
+    const req = ++routeReqRef.current;
     try {
       const gm = (window as unknown as Record<string, unknown>).google as { maps: { DistanceMatrixService: new () => { getDistanceMatrix: (o: unknown, cb: (r: unknown, s: string) => void) => void }; DistanceMatrixStatus: { OK: string }; TravelMode: { DRIVING: string } } } | undefined;
       if (!gm?.maps) return;
       new gm.maps.DistanceMatrixService().getDistanceMatrix(
         { origins: [bOrigin], destinations: [bDest], travelMode: gm.maps.TravelMode.DRIVING },
         (r: unknown, s: string) => {
+          if (req !== routeReqRef.current) return; // resposta de um par antigo
           if (s !== gm.maps.DistanceMatrixStatus.OK) return;
-          const el = (r as { rows: { elements: { distance: { text: string }; duration: { text: string }; status: string }[] }[] }).rows[0]?.elements[0];
-          if (el?.status === "OK") setRouteInfo({ distance: el.distance.text, duration: el.duration.text });
+          const el = (r as { rows: { elements: { distance?: { value: number }; duration?: { text: string }; status: string }[] }[] }).rows[0]?.elements[0];
+          if (el?.status !== "OK") return;
+          const km = Math.round((el.distance?.value ?? 0) / 1000);
+          // Nunca «0 km»: sem distância útil, a linha simplesmente não aparece
+          if (km >= 1) setRouteInfo({ km, duration: el.duration?.text ?? "" });
         },
       );
-    } catch { /* silent */ }
+    } catch { /* silent — o orçamento sai na mesma sem os km */ }
   }, [bOrigin, bDest]);
 
-  useEffect(() => { if (bOrigin && bDest) { const t = setTimeout(calcRoute, 600); return () => clearTimeout(t); } else { setRouteInfo(null); } }, [bOrigin, bDest, calcRoute]);
-
-  /* ── Google Places init ── */
+  // Qualquer mudança de origem/destino apaga logo os km anteriores: se o novo
+  // cálculo falhar, não fica a distância do par antigo na gaveta nem na mensagem.
   useEffect(() => {
-    const init = () => {
-      const gm = (window as unknown as Record<string, unknown>).google as { maps: { places: { Autocomplete: new (el: HTMLInputElement, o: Record<string, unknown>) => { addListener: (e: string, cb: () => void) => void } } } } | undefined;
-      if (!gm?.maps?.places) return;
-      const oEl = document.getElementById("drawerOrigin") as HTMLInputElement;
-      const dEl = document.getElementById("drawerDest") as HTMLInputElement;
-      if (oEl) { const ac = new gm.maps.places.Autocomplete(oEl, { types: ["establishment", "geocode"], componentRestrictions: { country: "pt" } }); ac.addListener("place_changed", () => setBOrigin(oEl.value)); }
-      if (dEl) { const ac = new gm.maps.places.Autocomplete(dEl, { types: ["establishment", "geocode"], componentRestrictions: { country: "pt" } }); ac.addListener("place_changed", () => setBDest(dEl.value)); }
+    setRouteInfo(null);
+    if (!bOrigin || !bDest) { routeReqRef.current++; return; }
+    const t = setTimeout(calcRoute, 600);
+    return () => clearTimeout(t);
+  }, [bOrigin, bDest, calcRoute]);
+
+  /* ── Google Places — autocomplete da gaveta ──
+     Portugal inteiro continua escolhível (Porto, Algarve: há transferes
+     longos); a pesquisa só é ENVIESADA para a região de Lisboa (~50 km do
+     centro). Instâncias limpas ao fechar a gaveta: antes cada abertura
+     deixava mais dois autocompletes e as respectivas listas no <body>. */
+  useEffect(() => {
+    if (!drawerOpen) return;
+    type Place = { types?: string[]; geometry?: { location?: { lat: () => number; lng: () => number } } };
+    type AC = { addListener: (e: string, cb: () => void) => void; getPlace: () => Place };
+    type GM = { maps: { places?: { Autocomplete: new (el: HTMLInputElement, o: Record<string, unknown>) => AC }; event: { clearInstanceListeners: (i: unknown) => void } } };
+    const LISBOA_BIAS = { north: 39.17, south: 38.27, east: -8.56, west: -9.72 }; // ±50 km de Lisboa
+    const LIS = { lat: 38.7742, lng: -9.1342 }; // Aeroporto Humberto Delgado
+    const isLisbonAirport = (p: Place): boolean => {
+      const loc = p.geometry?.location;
+      if (!loc || !p.types?.includes("airport")) return false;
+      const dLat = (loc.lat() - LIS.lat) * 111;
+      const dLng = (loc.lng() - LIS.lng) * 86.7;
+      return Math.hypot(dLat, dLng) < 3; // < 3 km do terminal
     };
-    if (drawerOpen) { const iv = setInterval(() => { if ((window as unknown as Record<string, unknown>).google) { init(); clearInterval(iv); } }, 500); return () => clearInterval(iv); }
+    const opts = {
+      types: ["establishment", "geocode"],
+      componentRestrictions: { country: "pt" },
+      bounds: LISBOA_BIAS,
+      strictBounds: false,
+      fields: ["types", "geometry"],
+    };
+    const instances: AC[] = [];
+    let gmRef: GM | undefined;
+    const init = (): boolean => {
+      const gm = (window as unknown as Record<string, unknown>).google as GM | undefined;
+      const oEl = document.getElementById("drawerOrigin") as HTMLInputElement | null;
+      const dEl = document.getElementById("drawerDest") as HTMLInputElement | null;
+      if (!gm?.maps?.places || !oEl || !dEl) return false;
+      gmRef = gm;
+      const oAc = new gm.maps.places.Autocomplete(oEl, opts);
+      oAc.addListener("place_changed", () => { setBOrigin(oEl.value); setBOriginIsLIS(isLisbonAirport(oAc.getPlace())); });
+      const dAc = new gm.maps.places.Autocomplete(dEl, opts);
+      dAc.addListener("place_changed", () => setBDest(dEl.value));
+      instances.push(oAc, dAc);
+      return true;
+    };
+    const iv = setInterval(() => { if (init()) clearInterval(iv); }, 500);
+    return () => {
+      clearInterval(iv);
+      instances.forEach((i) => gmRef?.maps.event.clearInstanceListeners(i));
+      // Na landing só a gaveta usa autocomplete — as listas no <body> são dela
+      document.querySelectorAll(".pac-container").forEach((el) => el.remove());
+    };
   }, [drawerOpen]);
 
   const waBookingUrl = useCallback(() => {
     // Grupo 7+ → marcador localizado (contém sempre o token "7+" para contagem no WhatsApp)
     const paxLine = bPax >= 7 ? t.pax7Marker : `👥 Passageiros: ${bPax}`;
-    const msg = `Olá! Quero um orçamento para transfer:\n\n📍 De: ${bOrigin || "—"}\n🏁 Para: ${bDest || "—"}\n${routeInfo ? `📏 ${routeInfo.distance} (~${routeInfo.duration})\n` : ""}📅 Data: ${bDate || "—"}\n${paxLine}\n📱 WhatsApp: ${bPhone}`;
+    const bagsLine = `🧳 Malas: ${bBags >= 7 ? "7+" : bBags}`;
+    const msg = `Olá! Quero um orçamento para transfer:\n\n📍 De: ${bOrigin || "—"}\n🏁 Para: ${bDest || "—"}\n${routeInfo ? `📏 ${routeInfo.km} km${routeInfo.duration ? ` (~${routeInfo.duration})` : ""}\n` : ""}📅 Data: ${bDate || "—"}\n${paxLine}\n${bagsLine}\n📱 WhatsApp: ${bPhone}`;
     return `https://wa.me/351968698138?text=${encodeURIComponent(msg)}`;
-  }, [bOrigin, bDest, routeInfo, bDate, bPax, bPhone, t]);
+  }, [bOrigin, bDest, routeInfo, bDate, bPax, bBags, bPhone, t]);
 
   const scrollTo = (id: string) => { setMenuOpen(false); setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }), 150); };
 
@@ -1073,12 +1131,12 @@ export default function LandingPage() {
                       <div>
                         <label className="text-[var(--hub-gold)] text-[10px] tracking-wider uppercase block mb-1.5">{lang === "PT" ? "ORIGEM" : lang === "ES" ? "ORIGEN" : lang === "FR" ? "ORIGINE" : lang === "IT" ? "ORIGINE" : "FROM"}</label>
                         <div className="flex gap-1.5 mb-1.5">
-                          <button type="button" onClick={() => setBOrigin("Aeroporto de Lisboa")}
-                            className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${bOrigin.includes("Aeroporto") ? "border-[var(--hub-gold)]/40 text-[var(--hub-gold)] bg-[var(--hub-gold)]/10" : "border-[var(--hub-line)] text-[#B0B0B0]"}`}>
+                          <button type="button" onClick={() => { setBOrigin("Aeroporto de Lisboa"); setBOriginIsLIS(true); }}
+                            className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${bOriginIsLIS ? "border-[var(--hub-gold)]/40 text-[var(--hub-gold)] bg-[var(--hub-gold)]/10" : "border-[var(--hub-line)] text-[#B0B0B0]"}`}>
                             ✈ Aeroporto de Lisboa
                           </button>
                         </div>
-                        <input id="drawerOrigin" type="text" value={bOrigin} onChange={(e) => setBOrigin(e.target.value)}
+                        <input id="drawerOrigin" type="text" value={bOrigin} onChange={(e) => { setBOrigin(e.target.value); setBOriginIsLIS(false); }}
                           placeholder={lang === "PT" ? "Endereço de origem..." : lang === "ES" ? "Dirección de origen..." : lang === "FR" ? "Adresse d'origine..." : lang === "IT" ? "Indirizzo di origine..." : "Pick-up address..."}
                           className="w-full h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 text-[#F5F5F5] text-sm placeholder-[#666] focus:outline-none focus:border-[var(--hub-gold)] transition-colors" />
                       </div>
@@ -1123,6 +1181,22 @@ export default function LandingPage() {
                         </div>
                       </div>
 
+                      {/* Malas — um só contador de malas GRANDES (decide ligeiro vs
+                          carrinha); as de mão ficam implícitas. Linha própria por
+                          baixo dos passageiros: lado a lado não cabe a 390px. */}
+                      <div>
+                        <label className="text-[var(--hub-gold)] text-[10px] tracking-wider uppercase block mb-1.5">{lang === "PT" ? "MALAS" : lang === "ES" ? "MALETAS" : lang === "FR" ? "BAGAGES" : lang === "IT" ? "BAGAGLI" : "BAGS"}</label>
+                        <div className="flex gap-1.5">
+                          {[0, 1, 2, 3, 4, 5, 6, 7].map((n) => (
+                            <button key={n} type="button" onClick={() => setBBags(n)}
+                              className={`flex-1 h-10 text-sm font-medium rounded-lg transition-colors cursor-pointer ${bBags === n ? "bg-[var(--hub-gold)] text-[var(--hub-black)]" : "bg-white/[0.06] border border-white/[0.12] text-[#B0B0B0]"}`}>
+                              {n === 7 ? "7+" : n}
+                            </button>
+                          ))}
+                        </div>
+                        <p className="text-[#888] text-[10px] mt-1">{lang === "PT" ? "malas grandes (de porão)" : lang === "ES" ? "maletas grandes (facturadas)" : lang === "FR" ? "grandes valises (en soute)" : lang === "IT" ? "valigie grandi (da stiva)" : "large bags (checked luggage)"}</p>
+                      </div>
+
                       {/* Phone with DDI selector */}
                       <div>
                         <label className="text-[var(--hub-gold)] text-[10px] tracking-wider uppercase block mb-1">WHATSAPP</label>
@@ -1134,13 +1208,15 @@ export default function LandingPage() {
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                           className="flex justify-center gap-8 py-2">
                           <div className="text-center">
-                            <div className="text-[var(--hub-gold)] text-lg font-bold" style={{ fontFamily: "var(--font-mono)" }}>{routeInfo.distance}</div>
+                            <div className="text-[var(--hub-gold)] text-lg font-bold" style={{ fontFamily: "var(--font-mono)" }}>{routeInfo.km} km</div>
                             <div className="text-[#888] text-[10px]">{lang === "PT" ? "Distância" : "Distance"}</div>
                           </div>
-                          <div className="text-center">
-                            <div className="text-[var(--hub-gold)] text-lg font-bold" style={{ fontFamily: "var(--font-mono)" }}>~{routeInfo.duration}</div>
-                            <div className="text-[#888] text-[10px]">{lang === "PT" ? "Tempo" : "Time"}</div>
-                          </div>
+                          {routeInfo.duration && (
+                            <div className="text-center">
+                              <div className="text-[var(--hub-gold)] text-lg font-bold" style={{ fontFamily: "var(--font-mono)" }}>~{routeInfo.duration}</div>
+                              <div className="text-[#888] text-[10px]">{lang === "PT" ? "Tempo" : "Time"}</div>
+                            </div>
+                          )}
                         </motion.div>
                       )}
 
