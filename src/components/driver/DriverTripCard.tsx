@@ -124,7 +124,8 @@ function textoDoAudio(v: HubViagem): string {
 }
 
 function urlDoAudio(v: HubViagem): string {
-  return `https://wa.me/${TEL_HUB}?text=${encodeURIComponent(textoDoAudio(v))}`;
+  // api.whatsapp.com/send e não wa.me: o redireccionamento do wa.me troca os emojis por «�»
+  return `https://api.whatsapp.com/send?phone=${TEL_HUB}&text=${encodeURIComponent(textoDoAudio(v))}`;
 }
 
 // Avisa o backend de que o motorista contactou o cliente — coluna CM.
