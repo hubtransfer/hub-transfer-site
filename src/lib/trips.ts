@@ -625,8 +625,11 @@ export function getWazeUrl(addr: string): string {
  */
 export function getWhatsAppUrl(phone: string, text?: string): string {
   const clean = phone.replace(/[\s\-().+]/g, '');
-  const base = `https://wa.me/${clean}`;
-  return text ? `${base}?text=${encodeURIComponent(text)}` : base;
+  // Com texto: api.whatsapp.com/send e não wa.me — o redireccionamento do
+  // wa.me troca os emojis por «�». Sem texto não há emojis a partir.
+  return text
+    ? `https://api.whatsapp.com/send?phone=${clean}&text=${encodeURIComponent(text)}`
+    : `https://wa.me/${clean}`;
 }
 
 /**
