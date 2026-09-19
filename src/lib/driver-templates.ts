@@ -81,7 +81,8 @@ export function generateDriverWhatsAppURL(trip: TripData, driverName: string): s
   const hora = cleanTime(trip.pickupTime);
   const msg = fn(trip.client, driverName, trip.origin, hora);
   const phone = trip.phone.replace(/\D/g, "");
-  return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+  // api.whatsapp.com/send e não wa.me: o redireccionamento do wa.me troca os emojis por «�»
+  return `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`;
 }
 
 export function generateDriverSmsURL(trip: TripData, driverName: string): string {
