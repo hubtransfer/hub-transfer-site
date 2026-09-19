@@ -497,7 +497,9 @@ export default function LandingPage() {
     const paxLine = bPax >= 7 ? t.pax7Marker : `👥 Passageiros: ${bPax}`;
     const bagsLine = `🧳 Malas: ${bBags >= 7 ? "7+" : bBags}`;
     const msg = `Olá! Quero um orçamento para transfer:\n\n📍 De: ${bOrigin || "—"}\n🏁 Para: ${bDest || "—"}\n${routeInfo ? `📏 ${routeInfo.km} km${routeInfo.duration ? ` (~${routeInfo.duration})` : ""}\n` : ""}📅 Data: ${bDate || "—"}\n${paxLine}\n${bagsLine}\n📱 WhatsApp: ${bPhone}`;
-    return `https://wa.me/351968698138?text=${encodeURIComponent(msg)}`;
+    // api.whatsapp.com/send e NÃO wa.me: o redireccionamento do wa.me troca
+    // cada emoji por U+FFFD («�»). Este formato abre a app/Web com o texto intacto.
+    return `https://api.whatsapp.com/send?phone=351968698138&text=${encodeURIComponent(msg)}`;
   }, [bOrigin, bDest, routeInfo, bDate, bPax, bBags, bPhone, t]);
 
   const scrollTo = (id: string) => { setMenuOpen(false); setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }), 150); };
