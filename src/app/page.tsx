@@ -1172,12 +1172,18 @@ export default function LandingPage() {
                           className="w-full h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 text-[#F5F5F5] text-sm placeholder-[#666] focus:outline-none focus:border-[var(--hub-gold)] transition-colors" />
                       </div>
 
-                      {/* Data + hora de recolha — mesma linha, 60/40 */}
-                      <div className="grid grid-cols-[3fr_2fr] gap-1.5">
+                      {/* Data + hora de recolha. Telemóvel (< 640px): empilhadas —
+                          o input date do Safari iOS tem largura intrínseca própria e
+                          não encolhe numa coluna estreita, ficando por baixo dos
+                          seletores. A partir de sm: lado a lado, 55/45.
+                          No próprio input: min-w-0 + appearance-none (a largura
+                          passa a ser a da célula) e valor alinhado à esquerda
+                          (o iOS centra-o por defeito). */}
+                      <div className="grid grid-cols-1 sm:grid-cols-[11fr_9fr] gap-3">
                         <div className="min-w-0">
                           <label className="text-[var(--hub-gold)] text-[10px] tracking-wider uppercase block mb-1.5">{lang === "PT" ? "DATA" : lang === "ES" ? "FECHA" : lang === "FR" ? "DATE" : "DATE"}</label>
                           <input type="date" value={bDate} onChange={(e) => setBDate(e.target.value)}
-                            className="w-full h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 text-[#F5F5F5] text-sm focus:outline-none focus:border-[var(--hub-gold)] [color-scheme:dark] transition-colors" />
+                            className="block w-full min-w-0 appearance-none h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 text-left text-[#F5F5F5] text-sm focus:outline-none focus:border-[var(--hub-gold)] [color-scheme:dark] [&::-webkit-date-and-time-value]:text-left transition-colors" />
                         </div>
                         <div className="min-w-0">
                           <label className="text-[var(--hub-gold)] text-[10px] tracking-wider uppercase block mb-1.5">{lang === "PT" ? "HORA" : lang === "ES" ? "HORA" : lang === "FR" ? "HEURE" : lang === "IT" ? "ORA" : "TIME"}</label>
