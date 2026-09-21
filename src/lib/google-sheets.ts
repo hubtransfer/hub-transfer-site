@@ -171,6 +171,12 @@ export async function sendToSheets(
   // idProvisorio, e o backend decide o ID real (guarda de duplicados).
   const { id: idProvisorio, ...dados } = serviceData;
 
+  // Perfil TEST («Teste Sistema Validado») = canal manual do Junior: vai
+  // etiquetado como Canal «Manual» (coluna EF do HUB-Central). Só este perfil
+  // — ELH/EMH gravam nos GAS próprios e a landing fica «Site».
+  const session = getSession();
+  const canal = session?.role === "hotel" && session.code?.toUpperCase() === "TEST" ? { canal: "Manual" } : {};
+
   try {
     // text/plain mantém o pedido "simples" (sem preflight, que o GAS não
     // responde) mas em modo cors a resposta já é legível.
@@ -179,6 +185,7 @@ export async function sendToSheets(
       headers: { "Content-Type": "text/plain" },
       body: JSON.stringify({
         ...dados,
+        ...canal,
         idProvisorio,
         emailDestino: TEST_EMAIL,
         action: "addTransfer",
