@@ -235,6 +235,10 @@ export default function DriverTripCard({
   // sem no-show e sem a janela de cancelar. Ganha ao no-show (nunca coexistem).
   const isCancelada = isCanceladaViagem(viagem);
   const encerrada = isNoShowTrip || isCancelada;
+  // Motorista numa viagem cancelada: sem preço e sem nenhuma forma de contactar
+  // o cliente (número, WhatsApp, SMS, ligar). O admin continua a ver tudo.
+  const semContacto = isCancelada && mode === "driver";
+  const telCliente = semContacto ? "" : (viagem.phone || "");
 
   const hasFlightNumber = !!(viagem.flight && viagem.flight.trim());
   // "🇧🇷 Brasil" → só o emoji junto ao voo; o nome do país fica no title
@@ -483,7 +487,7 @@ export default function DriverTripCard({
               porque não há acção nenhuma que o dispare. */}
           {mode === "admin"
             ? <EsperaControl viagem={viagem} onRefresh={onRefresh} />
-            : <EsperaControl viagem={viagem} variant="driver" />}
+            : !semContacto && <EsperaControl viagem={viagem} variant="driver" />}
           {isCancelada ? (
             <SeloDesfecho desfecho="cancelada" className="text-[9px]" />
           ) : isNoShowTrip ? (
@@ -523,7 +527,7 @@ export default function DriverTripCard({
                 ? <span className="font-mono text-[10px] font-semibold text-[#7EAA6E]/80 truncate max-w-[80px]">{viagem.driver}</span>
                 : <span className="font-mono text-[10px] text-[#555]">—</span>
             )}
-            {price > 0 && <span className="font-mono text-sm font-bold text-[#F0D030]">€{price}</span>}
+            {price > 0 && !semContacto && <span className="font-mono text-sm font-bold text-[#F0D030]">€{price}</span>}
           </div>
         </div>
 
@@ -853,15 +857,15 @@ export default function DriverTripCard({
             {/* ── Actions ── */}
             <div className="border-t border-[#2A2A2A] bg-[#111111] px-5 py-4 space-y-3">
               {/* Phone — click to copy */}
-              {viagem.phone && (
-                <button type="button" onClick={() => copyWithToast(`+${viagem.phone!.replace(/\D/g, "")}`)}
+              {telCliente && (
+                <button type="button" onClick={() => copyWithToast(`+${telCliente.replace(/\D/g, "")}`)}
                   className="w-full h-14 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] font-mono text-base text-[#E5E5E5] active:bg-[#2A2A2A] transition-colors flex items-center justify-center gap-2.5">
-                  <PhoneIcon /> +{viagem.phone.replace(/\D/g, "")}
+                  <PhoneIcon /> +{telCliente.replace(/\D/g, "")}
                 </button>
               )}
 
-              {/* WhatsApp + SMS — smart templates */}
-              <div className="grid grid-cols-2 gap-2.5">
+              {/* WhatsApp + SMS — smart templates (fora na cancelada do motorista) */}
+              {telCliente && <div className="grid grid-cols-2 gap-2.5">
                 {viagem.phone && (
                   <button type="button" onClick={() => {
                     const drv = driverNameProp || viagem.driver || "o motorista";
@@ -886,10 +890,10 @@ export default function DriverTripCard({
                     <SmsIcon /> SMS
                   </button>
                 )}
-              </div>
+              </div>}
 
               {/* Registo do contacto — só existe se houver registo; sem espaço reservado */}
-              {viagem.phone && waHora && (
+              {telCliente && waHora && (
                 <p className="font-mono text-[11px] text-[#25d366]/80 text-center -mt-1">
                   Cliente contactado · {waHora}
                 </p>
