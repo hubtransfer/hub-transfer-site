@@ -18,8 +18,6 @@ import {
   type BackendSaveResult,
   testConnection,
   testBasicConnectivity,
-  clearAllDataFromSheets,
-  clearTestDataFromSheets,
 } from "@/lib/google-sheets";
 
 // ─── LocalStorage Keys ───
@@ -64,8 +62,6 @@ interface TransferStore {
   editService: (id: number | string) => Transfer | undefined;
   changeStatus: (id: number | string) => void;
   deleteService: (id: number | string) => void;
-  clearAllData: () => Promise<void>;
-  clearTestData: () => Promise<void>;
   exportCSV: () => void;
   setFilter: (key: string, value: string | null) => void;
   clearFilters: () => void;
@@ -443,60 +439,6 @@ export function useTransferStore(): TransferStore {
     [services, persistServices, showStatusMessage]
   );
 
-  // ─── clearAllData ───
-  const clearAllData = useCallback(async () => {
-    const input = window.prompt(
-      'Para confirmar a exclusao de TODOS os dados, digite "CONFIRMAR":'
-    );
-    if (input !== "CONFIRMAR") {
-      showStatusMessage("Operacao cancelada", "info");
-      return;
-    }
-
-    persistServices([]);
-    localStorage.removeItem(LS_LAST_SYNC);
-    setLastSyncTime(null);
-
-    if (isConnected) {
-      const result = await clearAllDataFromSheets();
-      showStatusMessage(result.message, result.success ? "success" : "error");
-    } else {
-      showStatusMessage("Todos os dados locais foram excluidos", "success");
-    }
-  }, [isConnected, persistServices, showStatusMessage]);
-
-  // ─── clearTestData ───
-  const clearTestData = useCallback(async () => {
-    const testIds = services
-      .filter(
-        (s) =>
-          String(s.nomeCliente ?? "").toLowerCase().includes("test") ||
-          String(s.nomeCliente ?? "").toLowerCase().includes("teste") ||
-          String(s.referencia ?? "").toLowerCase().includes("test")
-      )
-      .map((s) => s.id);
-
-    if (testIds.length === 0) {
-      showStatusMessage("Nenhum dado de teste encontrado", "info");
-      return;
-    }
-
-    const updatedServices = services.filter((s) => !testIds.includes(s.id));
-    persistServices(updatedServices);
-
-    if (isConnected) {
-      const result = await clearTestDataFromSheets();
-      showStatusMessage(
-        result.success
-          ? `${testIds.length} registros de teste removidos`
-          : result.message,
-        result.success ? "success" : "error"
-      );
-    } else {
-      showStatusMessage(`${testIds.length} registros de teste removidos localmente`, "success");
-    }
-  }, [services, isConnected, persistServices, showStatusMessage]);
-
   // ─── exportCSV ───
   const exportCSVAction = useCallback(() => {
     if (services.length === 0) {
@@ -625,8 +567,6 @@ export function useTransferStore(): TransferStore {
     editService,
     changeStatus,
     deleteService,
-    clearAllData,
-    clearTestData,
     exportCSV: exportCSVAction,
     setFilter,
     clearFilters,

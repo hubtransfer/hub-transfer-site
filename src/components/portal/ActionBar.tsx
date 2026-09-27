@@ -5,7 +5,6 @@ interface ActionBarProps {
   onClearForm: () => void;
   onExportCSV: () => void;
   onToggleConfig: () => void;
-  onToggleClearData: () => void;
 }
 
 export default function ActionBar({
@@ -13,7 +12,6 @@ export default function ActionBar({
   onClearForm,
   onExportCSV,
   onToggleConfig,
-  onToggleClearData,
 }: ActionBarProps) {
   return (
     <div className="flex flex-wrap gap-3 p-4 bg-hub-black-card border-b border-hub-gold/10">
@@ -40,12 +38,6 @@ export default function ActionBar({
         className="bg-hub-black-elevated border border-hub-gold/10 text-hub-gray-400 px-5 py-2.5 rounded-xl text-sm font-semibold hover:border-hub-gold/30 hover:text-white transition-all"
       >
         ⚙️ Configurar
-      </button>
-      <button
-        onClick={onToggleClearData}
-        className="bg-hub-black-elevated border border-hub-gold/10 text-hub-gray-400 px-5 py-2.5 rounded-xl text-sm font-semibold hover:border-hub-error/30 hover:text-hub-error transition-all"
-      >
-        🗑️ Limpar Dados
       </button>
     </div>
   );

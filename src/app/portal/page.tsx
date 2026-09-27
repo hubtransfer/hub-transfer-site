@@ -9,7 +9,6 @@ import TransferTable from "@/components/portal/TransferTable";
 import KPICards from "@/components/portal/KPICards";
 import FinancialSummary from "@/components/portal/FinancialSummary";
 import ConfigPanel from "@/components/portal/ConfigPanel";
-import ClearDataPanel from "@/components/portal/ClearDataPanel";
 import StatusToast from "@/components/portal/StatusToast";
 import LiveTab from "@/components/portal/LiveTab";
 import type { Transfer } from "@/lib/transfers";
@@ -23,7 +22,6 @@ export default function PortalPage() {
   const router = useRouter();
   const formRef = useRef<HTMLDivElement>(null);
   const [showConfig, setShowConfig] = useState(false);
-  const [showClearData, setShowClearData] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [changePwdOpen, setChangePwdOpen] = useState(false);
@@ -200,14 +198,12 @@ export default function PortalPage() {
 
       {/* ═══ TAB CONTENT ═══ */}
 
-      {/* Config + Clear panels (admin) — constrained width */}
+      {/* Config panel (admin) — constrained width */}
       {isAdmin && (
         <div className="max-w-[960px] mx-auto">
           <ConfigPanel isOpen={showConfig} onClose={() => setShowConfig(false)}
             onTestConnection={(url) => store.testConnectionAction(url)}
             statusMessage={store.statusMessage} statusType={store.statusType} />
-          <ClearDataPanel isOpen={showClearData} onClose={() => setShowClearData(false)}
-            onClearAll={store.clearAllData} onClearTests={store.clearTestData} />
         </div>
       )}
 
@@ -263,10 +259,6 @@ export default function PortalPage() {
                   <button onClick={() => setShowConfig(!showConfig)}
                     className="h-8 px-3 bg-[#1A1A1A] border border-[#2A2A2A] text-[#A0A0A0] text-xs rounded hover:text-[#F5F5F5] transition-colors cursor-pointer">
                     Configurar
-                  </button>
-                  <button onClick={() => setShowClearData(!showClearData)}
-                    className="h-8 px-3 bg-[#1A1A1A] border border-[#2A2A2A] text-[#666] text-xs rounded hover:text-[#C06060] hover:border-[#C06060]/30 transition-colors cursor-pointer">
-                    Limpar Dados
                   </button>
                 </>
               )}
