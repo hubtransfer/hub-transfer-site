@@ -14,7 +14,9 @@ import {
   getMapUrl,
   getWazeUrl,
   isNoShowViagem,
+  isCanceladaViagem,
 } from "@/lib/trips";
+import { SeloDesfecho, type OpcaoCancelar } from "@/components/shared/CancelarViagem";
 import { generateDriverWhatsAppURL, generateDriverSmsURL } from "@/lib/driver-templates";
 import { getOriginFlag } from "@/lib/countryFlags";
 import { delayColor, computeFlightState, derivarDepOriginal } from "@/lib/flightUtils";
@@ -174,9 +176,8 @@ interface DriverTripCardProps {
   onSmsMsg?: (cid: string, type: string, client: string, lang: string, origin: string, hora: string, phone: string) => void;
   driverName?: string;  // logged-in driver name (driver mode) or selected driver (admin mode)
   onNoShow?: (tripId: string) => void;  // called after no-show proofs submitted
-  onMarkNoShow?: (viagem: HubViagem) => void;  // admin only — marca no-show direto no GAS (com confirmação)
+  onCancelar?: (viagem: HubViagem, inicial?: OpcaoCancelar) => void;  // admin only — janela Cancelar / No-show
   onRefresh?: () => void;  // triggered after each swipe to re-fetch fresh data
-  onDelete?: (viagem: HubViagem) => void;  // admin only — opens delete confirmation
   mode?: "driver" | "admin";
   isNext?: boolean;     // first non-done trip gets hero treatment
   isHistorical?: boolean; // viewing past date — don't dim completed trips
@@ -191,9 +192,8 @@ export default function DriverTripCard({
   onSetDriver, onDispatch, onClientMsg, onSmsMsg,
   driverName: driverNameProp,
   onNoShow,
-  onMarkNoShow,
+  onCancelar,
   onRefresh,
-  onDelete,
   mode = "driver",
   isNext = false,
   isHistorical = false,
@@ -231,6 +231,10 @@ export default function DriverTripCard({
   const aguardaAudio = precisaDeAudio(viagem);
   // NO_SHOW pode vir da col R ("NO-SHOW") ou da BD/56 ("NO_SHOW") — cobrir ambas
   const isNoShowTrip = isNoShowViagem(viagem);
+  // CANCELADA (R = «Cancelado»): a viagem já não se faz — selo, sem deslizar,
+  // sem no-show e sem a janela de cancelar. Ganha ao no-show (nunca coexistem).
+  const isCancelada = isCanceladaViagem(viagem);
+  const encerrada = isNoShowTrip || isCancelada;
 
   const hasFlightNumber = !!(viagem.flight && viagem.flight.trim());
   // "🇧🇷 Brasil" → só o emoji junto ao voo; o nome do país fica no title
@@ -408,27 +412,28 @@ export default function DriverTripCard({
   return (
     <motion.div
       layout
-      onPointerDown={expanded && !isDone && !isNoShowTrip ? onDown : undefined}
-      onPointerMove={expanded && !isDone && !isNoShowTrip ? onMove : undefined}
-      onPointerUp={expanded && !isDone && !isNoShowTrip ? onUp : undefined}
-      onPointerCancel={expanded && !isDone && !isNoShowTrip ? onCancel : undefined}
+      onPointerDown={expanded && !isDone && !encerrada ? onDown : undefined}
+      onPointerMove={expanded && !isDone && !encerrada ? onMove : undefined}
+      onPointerUp={expanded && !isDone && !encerrada ? onUp : undefined}
+      onPointerCancel={expanded && !isDone && !encerrada ? onCancel : undefined}
       className={`
         relative rounded-2xl border overflow-hidden border-l-4 select-none
-        ${isSwipeActive || isCompleting ? "border-l-[#F0D030]" : isNoShowTrip ? "border-l-[#7F1D1D]" : aguardaAudio ? "border-l-[#F0D030]" : c.border}
-        ${isNoShowTrip ? "bg-[#151515] border-[#2A2A2A]" : ""}
-        ${!isNoShowTrip && isDone && !isHistorical ? "opacity-40 bg-[#1A1A1A] border-[#2A2A2A]" : ""}
-        ${!isNoShowTrip && isDone && isHistorical ? "bg-[#1A1A1A] border-[#2A2A2A]" : ""}
-        ${!isNoShowTrip && !isDone && aguardaAudio ? "bg-[#1A1A00] border-[#2A2A1A] ring-1 ring-[#F0D030]/40 animate-gold-pulse" : ""}
-        ${!isNoShowTrip && !isDone && !aguardaAudio && isNext ? "bg-[#1A1A00] border-[#2A2A1A] ring-1 ring-[#F0D030]/20" : ""}
-        ${!isNoShowTrip && !isDone && !aguardaAudio && !isNext ? "bg-[#1A1A1A] border-[#2A2A2A] opacity-90" : ""}
+        ${isSwipeActive || isCompleting ? "border-l-[#F0D030]" : isCancelada ? "border-l-[#990000]" : isNoShowTrip ? "border-l-[#7F1D1D]" : aguardaAudio ? "border-l-[#F0D030]" : c.border}
+        ${encerrada ? "bg-[#151515] border-[#2A2A2A]" : ""}
+        ${!encerrada && isDone && !isHistorical ? "opacity-40 bg-[#1A1A1A] border-[#2A2A2A]" : ""}
+        ${!encerrada && isDone && isHistorical ? "bg-[#1A1A1A] border-[#2A2A2A]" : ""}
+        ${!encerrada && !isDone && aguardaAudio ? "bg-[#1A1A00] border-[#2A2A1A] ring-1 ring-[#F0D030]/40 animate-gold-pulse" : ""}
+        ${!encerrada && !isDone && !aguardaAudio && isNext ? "bg-[#1A1A00] border-[#2A2A1A] ring-1 ring-[#F0D030]/20" : ""}
+        ${!encerrada && !isDone && !aguardaAudio && !isNext ? "bg-[#1A1A1A] border-[#2A2A2A] opacity-90" : ""}
         ${isSwipeActive || isCompleting ? `ring-2 ring-[${swipeColor}]/30` : ""}
       `}
       style={{
         transform: isSwiping ? `translateX(${swipeX}px)` : isCompleting ? "translateX(100vw)" : undefined,
         transition: isSwiping ? "none" : "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-        filter: isNoShowTrip ? "grayscale(0.55)" : undefined,
+        // cancelada sem cinzento: o selo vermelho tem de se ler
+        filter: isNoShowTrip && !isCancelada ? "grayscale(0.55)" : undefined,
       }}
-      animate={isCompleting ? { x: "100vw", opacity: 0 } : { x: 0, opacity: (isDone && !isHistorical) ? 0.4 : isNoShowTrip ? 0.65 : 1 }}
+      animate={isCompleting ? { x: "100vw", opacity: 0 } : { x: 0, opacity: (isDone && !isHistorical && !isCancelada) ? 0.4 : isCancelada ? 0.8 : isNoShowTrip ? 0.65 : 1 }}
       transition={{ duration: 0.4 }}
     >
       {/* ── Copy toast ── */}
@@ -479,11 +484,9 @@ export default function DriverTripCard({
           {mode === "admin"
             ? <EsperaControl viagem={viagem} onRefresh={onRefresh} />
             : <EsperaControl viagem={viagem} variant="driver" />}
-          {mode === "admin" && onDelete && (
-            <button type="button" onClick={(e) => { e.stopPropagation(); onDelete(viagem); }} title="Apagar viagem"
-              className="text-[#666] hover:text-[#EF4444] transition-colors text-sm cursor-pointer">🗑️</button>
-          )}
-          {isNoShowTrip ? (
+          {isCancelada ? (
+            <SeloDesfecho desfecho="cancelada" className="text-[9px]" />
+          ) : isNoShowTrip ? (
             <span className="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded bg-[#7F1D1D]/50 text-[#F87171]">
               🚫 No-Show
             </span>
@@ -930,8 +933,14 @@ export default function DriverTripCard({
               )}
 
               {/* Swipe bar — both driver and admin modes.
-                  NO_SHOW: viagem encerrada — nada de swipe nem "Parabéns". */}
-              {isNoShowTrip ? (
+                  CANCELADA / NO_SHOW: viagem encerrada — nada de swipe nem "Parabéns". */}
+              {isCancelada ? (
+                <div className="w-full rounded-2xl py-5 px-4 text-center space-y-1.5"
+                  style={{ background: "#1A1414", border: "1px solid rgba(244,204,204,0.35)" }}>
+                  <SeloDesfecho desfecho="cancelada" className="text-xs" />
+                  <p className="text-xs text-[#999] font-mono">Viagem cancelada — já não se faz</p>
+                </div>
+              ) : isNoShowTrip ? (
                 /* Caixa clicável — tocar abre o formulário de provas (driver E admin).
                    O registerNoShow do GAS reutiliza a pasta, anexar depois é seguro. */
                 <div
@@ -962,17 +971,18 @@ export default function DriverTripCard({
                 />
               )}
 
-              {/* No-Show — driver: fluxo de provas; admin: marcar direto no GAS
-                  (funciona mesmo em viagens já concluídas, para corrigir enganos) */}
-              {mode === "admin" && onMarkNoShow ? (
-                !isNoShowTrip && (
-                  <button type="button" onClick={() => onMarkNoShow(viagem)}
+              {/* Admin: um só botão — janela Cancelar e avisar / Cancelar sem avisar /
+                  No-show (funciona em viagens já concluídas, para corrigir enganos).
+                  Motorista: o fluxo de provas do no-show, como antes. */}
+              {mode === "admin" && onCancelar ? (
+                !isCancelada && (
+                  <button type="button" onClick={() => onCancelar(viagem)}
                     className="w-full h-12 rounded-xl bg-transparent border border-[#EF4444]/30 text-[#EF4444] font-mono text-sm font-bold hover:bg-[#EF4444]/15 active:bg-[#EF4444]/20 transition-colors">
-                    🚫 Marcar No-Show
+                    🚫 Cancelar / No-show
                   </button>
                 )
               ) : (
-                !isDone && !isNoShowTrip && (
+                !isDone && !encerrada && (
                   <button type="button" onClick={() => setNoShowOpen(true)}
                     className="w-full h-12 rounded-xl bg-transparent border border-[#EF4444]/30 text-[#EF4444] font-mono text-sm font-bold hover:bg-[#EF4444]/15 active:bg-[#EF4444]/20 transition-colors">
                     🚫 Cliente No-Show

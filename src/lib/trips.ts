@@ -508,6 +508,28 @@ export function isNoShowViagem(v: { status?: unknown; statusMotorista?: unknown 
   return re.test(String(v?.status ?? '')) || re.test(String(v?.statusMotorista ?? ''));
 }
 
+/** CANCELADA — a coluna R (`status`) diz «Cancelado». A linha fica na folha. */
+export function isCanceladaViagem(v: { status?: unknown }): boolean {
+  return /CANCEL/i.test(String(v?.status ?? ''));
+}
+
+/**
+ * Desfecho de uma viagem que não se fez. Cancelada ganha: o backend nunca
+ * marca no-show numa viagem cancelada.
+ */
+export type Desfecho = 'cancelada' | 'noshow';
+export function desfechoViagem(v: { status?: unknown; statusMotorista?: unknown }): Desfecho | null {
+  if (isCanceladaViagem(v)) return 'cancelada';
+  if (isNoShowViagem(v)) return 'noshow';
+  return null;
+}
+
+/** Cores dos desfechos — as mesmas da folha HUB-Central. */
+export const DESFECHO_CORES: Record<Desfecho, { bg: string; fg: string; label: string; riscado: boolean }> = {
+  cancelada: { bg: '#F4CCCC', fg: '#990000', label: 'CANCELADA', riscado: true },
+  noshow:    { bg: '#FCE5CD', fg: '#B45F06', label: 'NO-SHOW',   riscado: false },
+};
+
 /**
  * Driver price — single source of truth for both the trip card and the admin
  * per-driver summary. The backend commission engine wins: it sends the value as

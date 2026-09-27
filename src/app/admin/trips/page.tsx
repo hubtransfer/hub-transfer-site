@@ -8,6 +8,7 @@ import DriverNameplate from "@/components/driver/DriverNameplate";
 import NoShowModal from "@/components/driver/NoShowModal";
 import RestaurantsTab from "@/components/admin/RestaurantsTab";
 import EsperaControl from "@/components/admin/EsperaControl";
+import CancelarViagemModal, { SeloDesfecho, type AlvoCancelar, type OpcaoCancelar } from "@/components/shared/CancelarViagem";
 import type { TabType, HubViagem, TripService } from "@/lib/trips";
 import {
   HUB_CENTRAL_URL,
@@ -21,6 +22,7 @@ import {
   todayStr,
   dateToISO,
   isNoShowViagem,
+  isCanceladaViagem,
 } from "@/lib/trips";
 import { validateLogin, getSession } from "@/lib/auth";
 import ChangePasswordModal from "@/components/shared/ChangePasswordModal";
@@ -125,143 +127,24 @@ export default function TripsPage() {
     setResetLoading(false);
   }, [resetTrip, resetPwd, store]);
 
-  // Delete trip modal — 2 passos: senha → avisar cliente por WhatsApp?
-  const [deleteTrip, setDeleteTrip] = useState<HubViagem | null>(null);
-  const [deleteStep, setDeleteStep] = useState<1 | 2>(1);
-  const [deletePwd, setDeletePwd] = useState("");
-  const [deleteError, setDeleteError] = useState("");
-  const [deleteLoading, setDeleteLoading] = useState<null | "sim" | "nao">(null);
-  const [deleteResult, setDeleteResult] = useState<{ tone: "success" | "warning"; mensagem: string; log: string[] } | null>(null);
-  const [deleteLogOpen, setDeleteLogOpen] = useState(false);
-
-  const openDeleteTrip = useCallback((viagem: HubViagem) => {
-    setDeleteTrip(viagem);
-    setDeleteStep(1);
-    setDeletePwd("");
-    setDeleteError("");
-  }, []);
-
-  const closeDeleteModal = useCallback(() => {
-    setDeleteTrip(null);
-    setDeleteStep(1);
-    setDeletePwd("");
-    setDeleteError("");
-  }, []);
-
-  // Auto-esconde o toast do resultado, excepto com os detalhes abertos
-  useEffect(() => {
-    if (!deleteResult || deleteLogOpen) return;
-    const t = setTimeout(() => setDeleteResult(null), 6000);
-    return () => clearTimeout(t);
-  }, [deleteResult, deleteLogOpen]);
-
-  const handleDeleteTrip = useCallback(async (notificar: boolean) => {
-    if (!deleteTrip || !deletePwd || deleteLoading) return;
-    setDeleteError("");
-    setDeleteLoading(notificar ? "sim" : "nao");
-    const trip = deleteTrip;
-    const tripId = String(trip.id || "");
-    try {
-      const res = await fetch("/api/transfers/apagar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: tripId,
-          senha: deletePwd,
-          notificar,
-        }),
-      });
-      const data = await res.json().catch(() => null);
-      if (!data) {
-        setDeleteError("Resposta inválida do servidor");
-      } else if (data.ok) {
-        closeDeleteModal();
-        setDeleteLogOpen(false);
-        setDeleteResult({
-          tone: "success",
-          mensagem: `🗑️ Viagem apagada: ${data.cliente || trip.client}${data.clienteNotificado ? " · cliente avisado por WhatsApp" : ""}`,
-          log: Array.isArray(data.log) ? data.log : [],
-        });
-        store.removeViagem(tripId);
-        store.syncViagensSilent();
-      } else {
-        const msg = String(data.mensagem || "");
-        if (/senha incorrecta/i.test(msg)) {
-          setDeleteStep(1);
-          setDeleteError("Senha incorrecta");
-        } else if (/apagada com avisos/i.test(msg) || /n[aã]o encontrada/i.test(msg)) {
-          // Nos dois casos a viagem já não está na folha — sai da lista na mesma
-          closeDeleteModal();
-          setDeleteLogOpen(false);
-          setDeleteResult({
-            tone: "warning",
-            mensagem: `⚠️ ${msg} — ${trip.client}`,
-            log: Array.isArray(data.log) ? data.log : [],
-          });
-          store.removeViagem(tripId);
-          store.syncViagensSilent();
-        } else if (data.naoConfirmado) {
-          // Resposta ilegível ou timeout: a viagem PODE ter sido apagada.
-          // Não mexer na lista às cegas — reconciliar com o backend.
-          closeDeleteModal();
-          setDeleteLogOpen(false);
-          setDeleteResult({
-            tone: "warning",
-            mensagem: `⚠️ ${msg} A lista vai ser actualizada a partir do backend.`,
-            log: Array.isArray(data.log) ? data.log : [],
-          });
-          store.syncViagensSilent();
-        } else {
-          setDeleteError(msg || "Erro ao apagar viagem");
-        }
-      }
-    } catch {
-      setDeleteError("Erro de conexão");
-    }
-    setDeleteLoading(null);
-  }, [deleteTrip, deletePwd, deleteLoading, closeDeleteModal, store]);
-
-  // Marcar No-Show (admin) — confirmação → GET marcarNoShow → refrescar → oferecer provas
-  const [markNoShowTrip, setMarkNoShowTrip] = useState<HubViagem | null>(null);
-  const [markNoShowLoading, setMarkNoShowLoading] = useState(false);
-  const [markNoShowError, setMarkNoShowError] = useState("");
-  const [markNoShowToast, setMarkNoShowToast] = useState("");
+  // Cancelar / No-show — uma só janela (CancelarViagemModal) para o botão do
+  // cartão e para o «No-Show» das Passadas. A viagem nunca se apaga.
+  const [cancelarAlvo, setCancelarAlvo] = useState<{ viagem: HubViagem; inicial?: OpcaoCancelar } | null>(null);
   const [proofOfferTrip, setProofOfferTrip] = useState<HubViagem | null>(null);
   const [proofModalTrip, setProofModalTrip] = useState<HubViagem | null>(null);
+  // no-show acabado de marcar: oferecer as provas quando a janela fechar
+  const [provasPendentes, setProvasPendentes] = useState<HubViagem | null>(null);
 
-  const openMarkNoShow = useCallback((viagem: HubViagem) => {
-    setMarkNoShowTrip(viagem);
-    setMarkNoShowError("");
+  const openCancelar = useCallback((viagem: HubViagem, inicial?: OpcaoCancelar) => {
+    setCancelarAlvo({ viagem, inicial });
   }, []);
 
-  const handleMarkNoShow = useCallback(async () => {
-    if (!markNoShowTrip) return;
-    const rowIndex = String(markNoShowTrip.rowIndex ?? "").trim();
-    if (!rowIndex) {
-      setMarkNoShowError("Viagem sem rowIndex — impossível marcar no-show.");
-      return;
-    }
-    setMarkNoShowError("");
-    setMarkNoShowLoading(true);
-    try {
-      const url = `${HUB_CENTRAL_URL}?action=marcarNoShow&rowIndex=${encodeURIComponent(rowIndex)}&t=${Date.now()}`;
-      const res = await fetch(url, { redirect: "follow" });
-      const data = await res.json();
-      if (data.success) {
-        const trip = markNoShowTrip;
-        setMarkNoShowToast(`🚫 ${String(trip.client ?? "Viagem")} marcada como no-show`);
-        setMarkNoShowTrip(null);
-        store.syncViagens(true);
-        setTimeout(() => setMarkNoShowToast(""), 3000);
-        setProofOfferTrip(trip);
-      } else {
-        setMarkNoShowError(String(data.message || data.error || "Erro ao marcar no-show"));
-      }
-    } catch {
-      setMarkNoShowError("Erro de conexão");
-    }
-    setMarkNoShowLoading(false);
-  }, [markNoShowTrip, store]);
+  const cancelarAlvoInfo = useMemo<AlvoCancelar | null>(() => cancelarAlvo && ({
+    id: String(cancelarAlvo.viagem.id ?? ""),
+    cliente: String(cancelarAlvo.viagem.client ?? ""),
+    data: String(cancelarAlvo.viagem.date || cancelarAlvo.viagem.flightDate || ""),
+    hora: cleanHora(String(cancelarAlvo.viagem.pickupTime ?? "")),
+  }), [cancelarAlvo]);
 
   // Local URL input
   const [urlInput, setUrlInput] = useState("");
@@ -661,8 +544,7 @@ export default function TripsPage() {
                     onSmsMsg={handleSmsMsg}
                     onShowNameplate={store.showNameplate}
                     onRefresh={store.syncViagensSilent}
-                    onDelete={openDeleteTrip}
-                    onMarkNoShow={openMarkNoShow}
+                    onCancelar={openCancelar}
                     mode="admin"
                     isHistorical={!store.isViewingToday}
                   />
@@ -721,7 +603,7 @@ export default function TripsPage() {
                         className="text-[10px] font-mono bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-amber-400 hover:border-amber-400/30 px-2 py-0.5 rounded cursor-pointer transition-colors">
                         🔄 Reactivar
                       </button>
-                      <button onClick={() => openMarkNoShow(viagem)}
+                      <button onClick={() => openCancelar(viagem, "noshow")}
                         className="text-[10px] font-mono bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-red-400 hover:border-red-400/30 px-2 py-0.5 rounded cursor-pointer transition-colors">
                         🚫 No-Show
                       </button>
@@ -744,8 +626,9 @@ export default function TripsPage() {
                     const tipo = detectTipo(viagem.origin || "", viagem.flight || "", viagem.type);
                     const hora = cleanHora(viagem.pickupTime || "");
                     const typeColor = tipo === "CHEGADA" ? "#D4A847" : tipo === "RECOLHA" ? "#8B9DAF" : "#C17E4A";
-                    const noShow = isNoShowViagem(viagem);
-                    const isDone = !noShow && (viagem.concluida || viagem.status === "CONCLUIDA" || viagem.status === "FINALIZOU");
+                    const cancelada = isCanceladaViagem(viagem);
+                    const noShow = !cancelada && isNoShowViagem(viagem);
+                    const isDone = !noShow && !cancelada && (viagem.concluida || viagem.status === "CONCLUIDA" || viagem.status === "FINALIZOU");
                     return (
                       <div key={vId}
                         className={`bg-hub-black-card border border-hub-gold/5 rounded-lg px-4 py-3 flex items-center gap-3 ${isDone || noShow ? "opacity-60" : ""}`}
@@ -757,14 +640,15 @@ export default function TripsPage() {
                         </div>
                         <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded" style={{ backgroundColor: `${typeColor}15`, color: typeColor }}>{tipo}</span>
                         <EsperaControl viagem={viagem} onRefresh={() => store.loadPastDate(store.pastDate)} variant="row" />
+                        {cancelada && <SeloDesfecho desfecho="cancelada" />}
                         {noShow && <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#7F1D1D]/50 text-[#F87171]">🚫 Cliente não compareceu</span>}
                         {isDone && <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#22C55E]/10 text-[#22C55E]">CONCLUÍDA</span>}
                         <button onClick={() => { setResetTrip(viagem); setResetPwd(""); setResetError(""); }}
                           className="text-[10px] font-mono bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-amber-400 hover:border-amber-400/30 px-2 py-0.5 rounded cursor-pointer transition-colors">
                           🔄 Reactivar
                         </button>
-                        {!noShow && (
-                          <button onClick={() => openMarkNoShow(viagem)}
+                        {!noShow && !cancelada && (
+                          <button onClick={() => openCancelar(viagem, "noshow")}
                             className="text-[10px] font-mono bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-red-400 hover:border-red-400/30 px-2 py-0.5 rounded cursor-pointer transition-colors">
                             🚫 No-Show
                           </button>
@@ -958,129 +842,20 @@ export default function TripsPage() {
         </div>
       )}
 
-      {deleteResult && (
-        <div className={`fixed bottom-5 left-1/2 -translate-x-1/2 z-[9999] w-[calc(100%-2rem)] max-w-md rounded-lg shadow-lg px-4 py-3 text-sm font-bold ${
-          deleteResult.tone === "success" ? "bg-[#22C55E] text-black" : "bg-amber-500 text-black"
-        }`}>
-          <div className="flex items-start justify-between gap-3">
-            <span>{deleteResult.mensagem}</span>
-            <button onClick={() => { setDeleteResult(null); setDeleteLogOpen(false); }}
-              className="opacity-60 hover:opacity-100 transition-opacity" aria-label="Fechar">✕</button>
-          </div>
-          {deleteResult.log.length > 0 && (
-            <button onClick={() => setDeleteLogOpen((v) => !v)}
-              className="mt-1 text-xs font-normal underline underline-offset-2 opacity-70 hover:opacity-100 transition-opacity">
-              {deleteLogOpen ? "esconder detalhes" : "ver detalhes"}
-            </button>
-          )}
-          {deleteLogOpen && (
-            <ul className="mt-2 space-y-0.5 text-xs font-mono font-normal bg-black/10 rounded p-2">
-              {deleteResult.log.map((line, i) => <li key={i}>{line}</li>)}
-            </ul>
-          )}
-        </div>
-      )}
-
-      {/* ─── DELETE TRIP MODAL (2 passos) ─── */}
-      {deleteTrip && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.8)" }}
-          onClick={() => { if (!deleteLoading) closeDeleteModal(); }}>
-          <div className="w-full max-w-sm bg-[#1A1A1A] border border-[#EF4444]/30 rounded-xl p-5 space-y-4" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-base font-bold text-[#EF4444]">🗑️ Apagar viagem</h3>
-            <div className="bg-[#7f1d1d]/30 border border-[#EF4444]/20 rounded-lg px-3 py-2.5 space-y-1">
-              <p className="text-sm text-white font-semibold">{deleteTrip.client}</p>
-              <p className="text-xs text-zinc-400 font-mono">{deleteTrip.date || deleteTrip.flightDate || "—"} · {cleanHora(deleteTrip.pickupTime || "")} · {deleteTrip.id || "—"}</p>
-              <p className="text-xs text-zinc-500 truncate">{deleteTrip.origin} → {deleteTrip.destination}</p>
-            </div>
-            {deleteStep === 1 ? (
-              <>
-                <p className="text-xs text-zinc-500">
-                  A viagem vai ser apagada de <span className="text-zinc-300 font-semibold">todos os sistemas</span> — não é possível desfazer.
-                  Insira a senha de administrador.
-                </p>
-                <input
-                  type="password"
-                  value={deletePwd}
-                  onChange={(e) => { setDeletePwd(e.target.value); setDeleteError(""); }}
-                  placeholder="Senha admin"
-                  autoFocus
-                  className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:border-[#EF4444] focus:outline-none font-mono"
-                  onKeyDown={(e) => { if (e.key === "Enter" && deletePwd) { setDeleteError(""); setDeleteStep(2); } }}
-                />
-                {deleteError && <p className="text-xs text-[#EF4444] font-mono">{deleteError}</p>}
-                <div className="flex gap-2">
-                  <button onClick={closeDeleteModal}
-                    className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 py-2.5 rounded-lg text-sm font-mono transition-colors">Cancelar</button>
-                  <button onClick={() => { setDeleteError(""); setDeleteStep(2); }} disabled={!deletePwd}
-                    className="flex-1 bg-[#EF4444] hover:bg-[#DC2626] text-white py-2.5 rounded-lg text-sm font-mono font-bold transition-colors disabled:opacity-50">
-                    Continuar
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <p className="text-sm text-zinc-300">Enviar mensagem de cancelamento ao cliente por WhatsApp?</p>
-                <p className="text-xs text-zinc-500 font-mono">📱 {deleteTrip.phone || "sem número"}</p>
-                {deleteError && <p className="text-xs text-[#EF4444] font-mono">{deleteError}</p>}
-                {deleteLoading && (
-                  <p className="text-xs text-zinc-500 flex items-center gap-2">
-                    <span className="w-3.5 h-3.5 border-2 border-zinc-600 border-t-[#EF4444] rounded-full animate-spin" />
-                    A apagar em todos os sistemas... pode demorar alguns segundos.
-                  </p>
-                )}
-                <div className="flex gap-2">
-                  <button onClick={() => handleDeleteTrip(false)} disabled={!!deleteLoading}
-                    className={`flex-1 py-2.5 rounded-lg text-sm font-mono transition-colors flex items-center justify-center gap-2 ${
-                      deleteLoading ? "bg-zinc-800 text-zinc-400 cursor-not-allowed" : "bg-zinc-800 hover:bg-zinc-700 text-zinc-300"
-                    }`}>
-                    {deleteLoading === "nao" ? (
-                      <><span className="w-4 h-4 border-2 border-zinc-500 border-t-white rounded-full animate-spin" />A apagar…</>
-                    ) : "Não avisar"}
-                  </button>
-                  <button onClick={() => handleDeleteTrip(true)} disabled={!!deleteLoading}
-                    className={`flex-1 py-2.5 rounded-lg text-sm font-mono font-bold transition-colors flex items-center justify-center gap-2 ${
-                      deleteLoading ? "bg-zinc-800 text-zinc-400 cursor-not-allowed" : "bg-[#25D366] hover:bg-[#1EBE5A] text-black"
-                    }`}>
-                    {deleteLoading === "sim" ? (
-                      <><span className="w-4 h-4 border-2 border-zinc-500 border-t-white rounded-full animate-spin" />A apagar…</>
-                    ) : "Sim, avisar"}
-                  </button>
-                </div>
-                {!deleteLoading && (
-                  <button onClick={() => setDeleteStep(1)}
-                    className="w-full text-center text-xs text-zinc-500 hover:text-zinc-300 transition-colors">← Voltar</button>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ─── MARCAR NO-SHOW: CONFIRMAÇÃO ─── */}
-      {markNoShowTrip && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.8)" }}
-          onClick={() => setMarkNoShowTrip(null)}>
-          <div className="w-full max-w-sm bg-[#1A1A1A] border border-[#EF4444]/30 rounded-xl p-5 space-y-4" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-base font-bold text-[#EF4444]">🚫 Marcar No-Show</h3>
-            <p className="text-sm text-zinc-300">
-              Marcar <span className="text-white font-semibold">{String(markNoShowTrip.client ?? "esta viagem")}</span> como no-show?
-              Isto substitui o estado atual.
-            </p>
-            <p className="text-xs text-zinc-500 font-mono">
-              {String(markNoShowTrip.date || markNoShowTrip.flightDate || "—")} · {cleanHora(String(markNoShowTrip.pickupTime ?? ""))} · {String(markNoShowTrip.id ?? "—")}
-            </p>
-            {markNoShowError && <p className="text-xs text-[#EF4444] font-mono">{markNoShowError}</p>}
-            <div className="flex gap-2">
-              <button onClick={() => setMarkNoShowTrip(null)}
-                className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 py-2.5 rounded-lg text-sm font-mono transition-colors">Cancelar</button>
-              <button onClick={handleMarkNoShow} disabled={markNoShowLoading}
-                className="flex-1 bg-[#EF4444] hover:bg-[#DC2626] text-white py-2.5 rounded-lg text-sm font-mono font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
-                {markNoShowLoading ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : "Confirmar No-Show"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ─── CANCELAR / NO-SHOW ─── */}
+      <CancelarViagemModal
+        alvo={cancelarAlvoInfo}
+        inicial={cancelarAlvo?.inicial}
+        onClose={() => {
+          setCancelarAlvo(null);
+          if (provasPendentes) { setProofOfferTrip(provasPendentes); setProvasPendentes(null); }
+        }}
+        onFeito={(r, opcao) => {
+          store.syncViagensSilent();
+          // no-show novo: oferecer as provas ao fechar, como no fluxo antigo
+          if (opcao === "noshow" && r.ok && !r.jaEstava && cancelarAlvo) setProvasPendentes(cancelarAlvo.viagem);
+        }}
+      />
 
       {/* ─── MARCAR NO-SHOW: OFERECER PROVAS ─── */}
       {proofOfferTrip && (
@@ -1115,12 +890,6 @@ export default function TripsPage() {
           onClose={() => setProofModalTrip(null)}
           onSubmit={() => { setProofModalTrip(null); store.syncViagens(true); }}
         />
-      )}
-
-      {markNoShowToast && (
-        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[9999] bg-[#7F1D1D] text-white text-sm font-bold px-5 py-2.5 rounded-lg shadow-lg">
-          {markNoShowToast}
-        </div>
       )}
 
       <ChangePasswordModal isOpen={changePwdOpen} onClose={() => setChangePwdOpen(false)} tipo="admin" userId={adminName} />

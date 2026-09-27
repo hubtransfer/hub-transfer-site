@@ -61,7 +61,6 @@ interface TransferStore {
   submitTransfer: (formData: Partial<Transfer>) => Promise<void>;
   editService: (id: number | string) => Transfer | undefined;
   changeStatus: (id: number | string) => void;
-  deleteService: (id: number | string) => void;
   exportCSV: () => void;
   setFilter: (key: string, value: string | null) => void;
   clearFilters: () => void;
@@ -426,19 +425,6 @@ export function useTransferStore(): TransferStore {
     [services, persistServices, showStatusMessage]
   );
 
-  // ─── deleteService ───
-  const deleteService = useCallback(
-    (id: number | string) => {
-      const confirmed = window.confirm("Tem certeza que deseja excluir este servico?");
-      if (!confirmed) return;
-
-      const updatedServices = services.filter((s) => s.id !== id);
-      persistServices(updatedServices);
-      showStatusMessage("Servico excluido com sucesso!", "success");
-    },
-    [services, persistServices, showStatusMessage]
-  );
-
   // ─── exportCSV ───
   const exportCSVAction = useCallback(() => {
     if (services.length === 0) {
@@ -566,7 +552,6 @@ export function useTransferStore(): TransferStore {
     submitTransfer,
     editService,
     changeStatus,
-    deleteService,
     exportCSV: exportCSVAction,
     setFilter,
     clearFilters,

@@ -13,6 +13,7 @@ import StatusToast from "@/components/portal/StatusToast";
 import LiveTab from "@/components/portal/LiveTab";
 import type { Transfer } from "@/lib/transfers";
 import { getSession, fetchHotelUrl, saveHotelUrl } from "@/lib/auth";
+import CancelarViagemModal, { type AlvoCancelar } from "@/components/shared/CancelarViagem";
 import ChangePasswordModal from "@/components/shared/ChangePasswordModal";
 
 type PortalTab = "form" | "viagens" | "live";
@@ -25,6 +26,8 @@ export default function PortalPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [changePwdOpen, setChangePwdOpen] = useState(false);
+  // Cancelar / No-show — a viagem nunca se apaga (substitui o antigo 🗑️)
+  const [cancelarAlvo, setCancelarAlvo] = useState<AlvoCancelar | null>(null);
   const [hotelName, setHotelName] = useState("");
   const [hotelCode, setHotelCode] = useState("");
   const [noUrl, setNoUrl] = useState(false);
@@ -278,7 +281,7 @@ export default function PortalPage() {
               onChangePageSize={store.changePageSize}
               onEdit={handleEdit}
               onChangeStatus={store.changeStatus}
-              onDelete={store.deleteService}
+              onCancelar={(s) => setCancelarAlvo({ id: String(s.id ?? ""), cliente: s.nomeCliente, data: s.data, hora: s.horaPickup })}
               filters={store.filters}
               onSetFilter={store.setFilter}
               onClearFilters={store.clearFilters}
@@ -321,6 +324,8 @@ export default function PortalPage() {
           to { opacity: 1; transform: translateY(0); }
         }
       `}} />
+
+      <CancelarViagemModal alvo={cancelarAlvo} onClose={() => setCancelarAlvo(null)} onFeito={() => store.loadFromSheets()} />
 
       <ChangePasswordModal isOpen={changePwdOpen} onClose={() => setChangePwdOpen(false)} tipo="hotel" userId={hotelCode || hotelName} />
     </div>

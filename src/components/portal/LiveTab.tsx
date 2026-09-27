@@ -3,12 +3,13 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import type { Transfer } from "@/lib/transfers";
 import type { HubViagem } from "@/lib/trips";
-import { HUB_CENTRAL_URL, detectTipo, cleanHora, todayStr } from "@/lib/trips";
+import { HUB_CENTRAL_URL, detectTipo, cleanHora, todayStr, desfechoViagem, DESFECHO_CORES } from "@/lib/trips";
 import { getOriginFlag } from "@/lib/countryFlags";
 import { computeFlightState, getDelayedTime, delayColor } from "@/lib/flightUtils";
 import LiveBoard from "@/components/live/LiveBoard";
 import LiveProgressStrip from "@/components/live/LiveProgressStrip";
 import { statusMotoristaToPasso } from "@/lib/live";
+import { SeloDesfecho } from "@/components/shared/CancelarViagem";
 
 interface LiveTabProps {
   services: Transfer[];     // hotel's own transfer data
@@ -247,19 +248,23 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
               );
 
               const passoMotorista = statusMotoristaToPasso(v.statusMotorista);
+              const desfecho = desfechoViagem(v);
               const cardKey = v.id || v.client || String(Math.random());
               const isExpanded = expandedId === cardKey;
 
               return (
                 <div key={cardKey}
                   className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl overflow-hidden cursor-pointer hover:bg-[#1A1A1A]/80 transition-all duration-200"
-                  style={{ borderLeftWidth: "3px", borderLeftColor: flight.cancelled ? "#EF4444" : isLanded ? "#22C55E" : "#F5C518" }}
+                  style={{ borderLeftWidth: "3px", borderLeftColor: desfecho ? DESFECHO_CORES[desfecho].fg : flight.cancelled ? "#EF4444" : isLanded ? "#22C55E" : "#F5C518" }}
                   onClick={() => setExpandedId(isExpanded ? null : cardKey)}>
 
                   {/* Type + arrow */}
                   <div className="px-4 pt-3 flex items-center justify-between">
                     <span className="text-[10px] font-bold uppercase font-mono" style={{ color: TYPE_COLORS[tipo] || "#F5C518" }}>{tipo}</span>
-                    <span className="text-[10px] text-[#555] transition-transform duration-300" style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
+                    <span className="flex items-center gap-2">
+                      {desfecho && <SeloDesfecho desfecho={desfecho} />}
+                      <span className="text-[10px] text-[#555] transition-transform duration-300" style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
+                    </span>
                   </div>
 
                   {/* Time + Name + Pax */}

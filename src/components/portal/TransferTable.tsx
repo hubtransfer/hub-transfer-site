@@ -1,7 +1,9 @@
 "use client";
 
 import React from "react";
-import { Pencil, Check, Trash2 } from "lucide-react";
+import { Pencil, Check, Ban } from "lucide-react";
+import { desfechoViagem, DESFECHO_CORES } from "@/lib/trips";
+import { SeloDesfecho } from "@/components/shared/CancelarViagem";
 import {
   Transfer,
   ActiveFilters,
@@ -25,7 +27,7 @@ interface TransferTableProps {
   onChangePageSize: (size: number) => void;
   onEdit: (id: number | string) => void;
   onChangeStatus: (id: number | string) => void;
-  onDelete: (id: number | string) => void;
+  onCancelar: (s: Transfer) => void;  // janela Cancelar / No-show
   filters: ActiveFilters;
   onSetFilter: (key: string, value: string | null) => void;
   onClearFilters: () => void;
@@ -84,7 +86,7 @@ export default function TransferTable({
   onChangePageSize,
   onEdit,
   onChangeStatus,
-  onDelete,
+  onCancelar,
   filters,
   onSetFilter,
   onClearFilters,
@@ -310,12 +312,19 @@ export default function TransferTable({
                   const airportHotel = isAirportToHotel(s.origem, s.destino);
                   const phone = cleanPhone(s.contacto);
                   const tripColor = tour ? "#C17E4A" : airportHotel ? "#D4A847" : "#8B9DAF";
+                  // Cancelada / no-show não saem da lista: a linha pinta-se com as
+                  // cores da folha (cancelada riscada). O cinzento é da HeyCars.
+                  const desfecho = desfechoViagem(s);
+                  const cor = desfecho ? DESFECHO_CORES[desfecho] : null;
 
                   return (
                     <tr
                       key={s.id}
-                      style={{ borderLeft: `3px solid ${tripColor}` }}
-                      className="border-b border-[#1A1A1A] bg-[#111] hover:bg-[#1A1A1A] transition-colors"
+                      style={{ borderLeft: `3px solid ${cor ? cor.fg : tripColor}`, ...(cor ? { backgroundColor: cor.bg } : {}) }}
+                      className={`border-b border-[#1A1A1A] transition-colors ${
+                        desfecho === "cancelada" ? "[&_*]:text-[#990000]! [&>td]:line-through"
+                        : desfecho === "noshow" ? "[&_*]:text-[#B45F06]!"
+                        : "bg-[#111] hover:bg-[#1A1A1A]"}`}
                     >
                       {/* ID — "…" enquanto aguarda o definitivo da folha */}
                       <td className="px-2 py-2 text-[#666] font-mono text-xs">
@@ -419,13 +428,13 @@ export default function TransferTable({
                         {s.pagoParaQuem || "—"}
                       </td>
 
-                      {/* Status */}
+                      {/* Status — cancelada / no-show: o selo em vez do botão de estado */}
                       <td className="px-2 py-2 text-center">
-                        <button onClick={() => onChangeStatus(s.id)}
+                        {desfecho ? <SeloDesfecho desfecho={desfecho} /> : <button onClick={() => onChangeStatus(s.id)}
                           className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold cursor-pointer transition-opacity hover:opacity-80 ${statusClass(s.status)}`}
                           title="Alterar status">
                           {s.status}
-                        </button>
+                        </button>}
                       </td>
 
                       {/* Acções */}
@@ -439,10 +448,12 @@ export default function TransferTable({
                             className="p-1.5 rounded-lg text-[#666] hover:text-[#7EAA6E] hover:bg-[#7EAA6E]/10 transition-colors" title="Confirmar">
                             <Check className="w-4 h-4" />
                           </button>
-                          <button onClick={() => onDelete(s.id)}
-                            className="p-1.5 rounded-lg text-[#666] hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors" title="Eliminar">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          {desfecho !== "cancelada" && (
+                            <button onClick={() => onCancelar(s)}
+                              className="p-1.5 rounded-lg text-[#666] hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors" title="Cancelar / No-show">
+                              <Ban className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
