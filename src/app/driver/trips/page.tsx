@@ -17,6 +17,7 @@ import {
   todayStr,
   dateToISO,
   isNoShowViagem,
+  isCanceladaViagem,
   fetchMotoristas,
   chaveMotorista,
 } from "@/lib/trips";
@@ -188,14 +189,16 @@ export default function DriverTripsPage() {
     let recolhas = 0;
     let totalPay = 0;
     let done = 0;
-    for (const v of driverTrips) {
+    // Cancelada não conta: nem no total nem no valor do dia (o no-show fica como está)
+    const contam = driverTrips.filter((v) => !isCanceladaViagem(v));
+    for (const v of contam) {
       const tipo = detectTipo(v.origin || "", v.flight || "", v.type);
       if (tipo === "CHEGADA") chegadas++;
       else recolhas++;
       totalPay += calcDriverPrice(v);
       if (v.concluida || v.status === "CONCLUIDA" || v.status === "FINALIZOU") done++;
     }
-    return { total: driverTrips.length, chegadas, recolhas, totalPay, done };
+    return { total: contam.length, chegadas, recolhas, totalPay, done };
   }, [driverTrips]);
 
   /* ── (heroId removed — cards self-expand on tap) ── */
@@ -280,6 +283,12 @@ export default function DriverTripsPage() {
       v.status !== "CONCLUIDA" &&
       v.status !== "FINALIZOU",
   );
+  // Canceladas ficam visíveis (com selo) mas no fim das activas: nunca «Próxima viagem»
+  const activeTrips = [
+    ...nonDoneTrips.filter((v) => !isCanceladaViagem(v)),
+    ...nonDoneTrips.filter((v) => isCanceladaViagem(v)),
+  ];
+  const nActivas = activeTrips.filter((v) => !isCanceladaViagem(v)).length;
   const doneTrips = driverTrips.filter(
     (v) =>
       isNoShowViagem(v) || v.concluida || v.status === "CONCLUIDA" || v.status === "FINALIZOU",
@@ -412,16 +421,16 @@ export default function DriverTripsPage() {
           </div>
         ) : (
           <>
-            {nonDoneTrips.map((viagem, i) => {
+            {activeTrips.map((viagem, i) => {
               const vId = viagem.id || (viagem.client || "x").replace(/\W/g, "");
               return (
                 <React.Fragment key={vId}>
-                  {i === 0 && nonDoneTrips.length > 1 && (
+                  {i === 0 && nActivas > 0 && activeTrips.length > 1 && (
                     <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#F0D030] px-1">
                       Próxima viagem
                     </p>
                   )}
-                  {i === 1 && (
+                  {i === 1 && nActivas > 1 && (
                     <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#666] px-1 pt-1">
                       Mais tarde
                     </p>
@@ -432,7 +441,7 @@ export default function DriverTripsPage() {
                     onDarBaixa={store.darBaixa}
                     onShowNameplate={openNameplate}
                     onRefresh={store.syncViagensSilent}
-                    isNext={i === 0}
+                    isNext={i === 0 && nActivas > 0}
                   />
                 </React.Fragment>
               );

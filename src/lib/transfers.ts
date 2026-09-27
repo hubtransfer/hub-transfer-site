@@ -29,6 +29,7 @@ export interface Transfer {
   modoPagamento: string;
   pagoParaQuem: string;
   status: string;
+  statusMotorista?: string;  // Status Motorista (BD) do getAllData — ex.: NO_SHOW
   observacoes: string;
   created: string;
 }
@@ -373,6 +374,7 @@ export function normalizeTransfer(
       (transfer["Pago Para"] as string) ||
       (transfer.pagoParaQuem as string) ||
       "",
+    statusMotorista: String((transfer.statusMotorista as string) || ""),
     status:
       (transfer.Status as string) ||
       (transfer.status as string) ||

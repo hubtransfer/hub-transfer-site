@@ -27,7 +27,7 @@ interface TransferTableProps {
   onChangePageSize: (size: number) => void;
   onEdit: (id: number | string) => void;
   onChangeStatus: (id: number | string) => void;
-  onCancelar: (s: Transfer) => void;  // janela Cancelar / No-show
+  onCancelar?: (s: Transfer) => void;  // janela Cancelar / No-show — só em modo admin
   filters: ActiveFilters;
   onSetFilter: (key: string, value: string | null) => void;
   onClearFilters: () => void;
@@ -448,7 +448,7 @@ export default function TransferTable({
                             className="p-1.5 rounded-lg text-[#666] hover:text-[#7EAA6E] hover:bg-[#7EAA6E]/10 transition-colors" title="Confirmar">
                             <Check className="w-4 h-4" />
                           </button>
-                          {desfecho !== "cancelada" && (
+                          {onCancelar && desfecho !== "cancelada" && (
                             <button onClick={() => onCancelar(s)}
                               className="p-1.5 rounded-lg text-[#666] hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors" title="Cancelar / No-show">
                               <Ban className="w-4 h-4" />

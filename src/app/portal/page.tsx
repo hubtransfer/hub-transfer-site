@@ -281,7 +281,7 @@ export default function PortalPage() {
               onChangePageSize={store.changePageSize}
               onEdit={handleEdit}
               onChangeStatus={store.changeStatus}
-              onCancelar={(s) => setCancelarAlvo({ id: String(s.id ?? ""), cliente: s.nomeCliente, data: s.data, hora: s.horaPickup })}
+              onCancelar={isAdmin ? (s) => setCancelarAlvo({ id: String(s.id ?? ""), cliente: s.nomeCliente, data: s.data, hora: s.horaPickup }) : undefined}
               filters={store.filters}
               onSetFilter={store.setFilter}
               onClearFilters={store.clearFilters}
@@ -325,7 +325,7 @@ export default function PortalPage() {
         }
       `}} />
 
-      <CancelarViagemModal alvo={cancelarAlvo} onClose={() => setCancelarAlvo(null)} onFeito={() => store.loadFromSheets()} />
+      {isAdmin && <CancelarViagemModal alvo={cancelarAlvo} onClose={() => setCancelarAlvo(null)} onFeito={() => store.loadFromSheets()} />}
 
       <ChangePasswordModal isOpen={changePwdOpen} onClose={() => setChangePwdOpen(false)} tipo="hotel" userId={hotelCode || hotelName} />
     </div>
