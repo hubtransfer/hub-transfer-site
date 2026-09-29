@@ -2,6 +2,7 @@
 // Feed sem preços por contrato: nunca inventar campos de dinheiro aqui.
 
 import { HUB_CENTRAL_URL } from "./trips";
+import { crachaParam } from "./cracha";
 
 // ── Tipos do feed ────────────────────────────────────────────
 
@@ -54,7 +55,7 @@ export interface LiveFeed {
 // ── Fetch ────────────────────────────────────────────────────
 
 function liveUrl(codigo: string, senha: string, formato: "ping" | "json"): string {
-  return `${HUB_CENTRAL_URL}?action=liveHotel&codigo=${encodeURIComponent(codigo)}&senha=${encodeURIComponent(senha)}&formato=${formato}&t=${Date.now()}`;
+  return `${HUB_CENTRAL_URL}?action=liveHotel&codigo=${encodeURIComponent(codigo)}&senha=${encodeURIComponent(senha)}&formato=${formato}&t=${Date.now()}${crachaParam()}`;
 }
 
 export async function fetchLivePing(codigo: string, senha: string): Promise<LivePing> {

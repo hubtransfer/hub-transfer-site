@@ -26,6 +26,7 @@ import SwipeBar from "@/components/shared/SwipeBar";
 import LiveProgressStrip from "@/components/live/LiveProgressStrip";
 import { statusMotoristaToPasso, type LiveTsPassos } from "@/lib/live";
 import EsperaControl from "@/components/admin/EsperaControl";
+import { crachaParam, comCracha } from "@/lib/cracha";
 
 
 
@@ -136,11 +137,11 @@ function urlDoAudio(v: HubViagem): string {
 // sendBeacon porque o clique navega para o wa.me/sms:: um fetch normal era
 // cancelado a meio pelo browser e o registo perdia-se sem erro nenhum.
 function registarContactoCliente(v: HubViagem, motorista: string, canal: string) {
-  const payload = JSON.stringify({
+  const payload = JSON.stringify(comCracha({
     rowIndex: v.rowIndex ?? "",  // o MESMO identificador do updateDriverStatus
     id: v.id,                    // reserva, se não houver rowIndex
     motorista: `${motorista} (${canal})`.trim(),
-  });
+  }));
   const url = "/api/motorista/mensagem-enviada";
   const enviou =
     typeof navigator !== "undefined" &&
@@ -1012,7 +1013,7 @@ export default function DriverTripCard({
           // Nunca "completar" aqui — escreveria CONCLUIDA por cima do no-show.
           const rowIndex = String(viagem.rowIndex ?? "").trim();
           if (rowIndex) {
-            fetch(`${HUB_CENTRAL_URL}?action=marcarNoShow&rowIndex=${encodeURIComponent(rowIndex)}&t=${Date.now()}`, { redirect: "follow" })
+            fetch(`${HUB_CENTRAL_URL}?action=marcarNoShow&rowIndex=${encodeURIComponent(rowIndex)}&t=${Date.now()}${crachaParam()}`, { redirect: "follow" })
               .catch((err) => console.error("marcarNoShow error:", err))
               .finally(() => { onRefresh?.(); });
           }

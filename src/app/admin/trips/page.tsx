@@ -8,6 +8,7 @@ import DriverNameplate from "@/components/driver/DriverNameplate";
 import NoShowModal from "@/components/driver/NoShowModal";
 import RestaurantsTab from "@/components/admin/RestaurantsTab";
 import EsperaControl from "@/components/admin/EsperaControl";
+import { crachaParam } from "@/lib/cracha";
 import CancelarViagemModal, { SeloDesfecho, type AlvoCancelar, type OpcaoCancelar } from "@/components/shared/CancelarViagem";
 import type { TabType, HubViagem, TripService } from "@/lib/trips";
 import {
@@ -109,7 +110,7 @@ export default function TripsPage() {
 
     // Send reset to GAS
     try {
-      const url = `${HUB_CENTRAL_URL}?action=resetTrip&rowIndex=${encodeURIComponent(resetTrip.rowIndex || "")}&t=${Date.now()}`;
+      const url = `${HUB_CENTRAL_URL}?action=resetTrip&rowIndex=${encodeURIComponent(resetTrip.rowIndex || "")}&t=${Date.now()}${crachaParam()}`;
       const res = await fetch(url, { redirect: "follow" });
       const data = await res.json();
       if (data.success) {

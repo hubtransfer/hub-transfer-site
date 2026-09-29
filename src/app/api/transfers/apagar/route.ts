@@ -14,6 +14,7 @@ interface ApagarBody {
   id?: string;
   senha?: string;
   notificar?: boolean;
+  cracha?: string;
 }
 
 function erro(mensagem: string, status: number) {
@@ -54,6 +55,7 @@ export async function POST(req: Request) {
         id: body.id,
         senha: body.senha,
         notificar: body.notificar === true,
+        ...(body.cracha ? { cracha: String(body.cracha) } : {}),
       }),
       redirect: "follow",
       cache: "no-store",

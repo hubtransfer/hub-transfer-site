@@ -12,6 +12,7 @@ import { HUB_CENTRAL_URL } from "@/lib/trips";
 const GAS_URL = process.env.GAS_WEBAPP_URL || HUB_CENTRAL_URL;
 
 interface MensagemEnviadaBody {
+  cracha?: string;
   rowIndex?: string;
   id?: string;
   motorista?: string;
@@ -48,6 +49,7 @@ export async function POST(req: Request) {
   if (rowIndex) params.set("rowIndex", rowIndex);
   else params.set("id", id);
   if (motorista) params.set("motorista", motorista);
+  if (body.cracha) params.set("cracha", String(body.cracha));  // reencaminha o crachá do motorista
 
   try {
     // O Apps Script responde 302 antes de dar o JSON — seguir o redirect.

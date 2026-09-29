@@ -48,7 +48,7 @@ export default function LoginPage() {
         const data = await res.json();
         if (data?.success && data.role === "restaurante") {
           // Store main session for auth guards
-          setSession({ name: data.nome || trimmedName, role: "restaurante" });
+          setSession({ name: data.nome || trimmedName, role: "restaurante", ...(data.cracha ? { cracha: String(data.cracha) } : {}) });
           // Store restaurant-specific data for dashboard
           localStorage.setItem("hub_restaurante_session", JSON.stringify({
             restauranteId: data.restauranteId,

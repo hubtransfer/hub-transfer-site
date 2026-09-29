@@ -10,7 +10,7 @@ import LiveBoard from "@/components/live/LiveBoard";
 import LiveProgressStrip from "@/components/live/LiveProgressStrip";
 import { statusMotoristaToPasso } from "@/lib/live";
 import { SeloDesfecho } from "@/components/shared/CancelarViagem";
-import { crachaParam } from "@/lib/auth";
+import { crachaParam } from "@/lib/cracha";
 
 interface LiveTabProps {
   services: Transfer[];     // hotel's own transfer data
@@ -107,7 +107,7 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
       if (document.visibilityState !== "visible") return;
       setBgSync(true);
       try {
-        const pingUrl = `${HUB_CENTRAL_URL}?action=lastChange&t=${Date.now()}`;
+        const pingUrl = `${HUB_CENTRAL_URL}?action=lastChange&t=${Date.now()}${crachaParam()}`;
         const pingRes = await fetch(pingUrl, { redirect: "follow" });
         const pingJson = await pingRes.json();
         const lc = (pingJson?.lastChange || "").toString();

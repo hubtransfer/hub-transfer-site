@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import type { HubViagem } from "@/lib/trips";
 import { HUB_CENTRAL_URL, cleanHora } from "@/lib/trips";
+import { crachaParam } from "@/lib/cracha";
 import {
   parseEspera,
   esperaChipTexto,
@@ -79,7 +80,7 @@ export default function EsperaControl({ viagem, onRefresh, variant = "card" }: E
     setErro("");
     setBusy(`${action}:${valor}`);
     try {
-      const url = `${HUB_CENTRAL_URL}?action=${action}&rowIndex=${encodeURIComponent(rowIndex)}&valor=${valor}&t=${Date.now()}`;
+      const url = `${HUB_CENTRAL_URL}?action=${action}&rowIndex=${encodeURIComponent(rowIndex)}&valor=${valor}&t=${Date.now()}${crachaParam()}`;
       const res = await fetch(url, { redirect: "follow" });
       const data = await res.json().catch(() => null);
       if (!res.ok || (data && data.success === false)) {

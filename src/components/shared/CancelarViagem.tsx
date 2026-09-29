@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { DESFECHO_CORES, type Desfecho } from "@/lib/trips";
+import { comCracha } from "@/lib/cracha";
 
 /* ================================================================== */
 /*  Uma viagem que não se faz não se apaga: fica CANCELADA (avisando   */
@@ -87,12 +88,12 @@ export default function CancelarViagemModal({ alvo, inicial, onClose, onFeito }:
       const res = await fetch("/api/transfers/cancelar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: JSON.stringify(comCracha({
           id: alvo.id,
           senha,
           desfecho: escolhida.desfecho === "cancelada" ? "cancelado" : "noshow",
           notificar: escolhida.key === "cancelar_avisar",
-        }),
+        })),
       });
       const data = (await res.json().catch(() => null)) as ResultadoCancelar | null;
       if (!data) {

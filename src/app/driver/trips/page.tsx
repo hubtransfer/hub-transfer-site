@@ -8,6 +8,7 @@ import DriverNameplate from "@/components/driver/DriverNameplate";
 import NoShowModal from "@/components/driver/NoShowModal";
 import { SkeletonList } from "@/components/trips/SkeletonCard";
 import { getSession, clearSession } from "@/lib/auth";
+import { crachaAtual } from "@/lib/cracha";
 import ChangePasswordModal from "@/components/shared/ChangePasswordModal";
 import {
   HUB_CENTRAL_URL,
@@ -153,6 +154,10 @@ export default function DriverTripsPage() {
     router.replace("/login");
   }, [router]);
 
+  /* ── Sessão antiga (antes do crachá): faixa discreta, nunca bloqueia ── */
+  const [semCracha, setSemCracha] = useState(false);
+  useEffect(() => { setSemCracha(!crachaAtual()); }, []);
+
   /* ── Nameplate ── */
   const openNameplate = useCallback((name: string, destination?: string) => {
     setNameplateName(name);
@@ -296,6 +301,12 @@ export default function DriverTripsPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      {semCracha && (
+        <button type="button" onClick={handleLogout}
+          className="w-full px-4 py-2 bg-[#F0D030]/10 border-b border-[#F0D030]/20 text-[#F0D030] text-[11px] font-mono text-center leading-snug">
+          Para continuar a ver os contactos dos clientes, sai e volta a entrar.
+        </button>
+      )}
       {/* ── TOP BAR ── */}
       <header className="sticky top-0 z-50 bg-black/95 backdrop-blur-sm border-b border-white/5 px-4 py-3 flex items-center justify-between">
         <div className="min-w-0">

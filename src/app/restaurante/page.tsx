@@ -6,6 +6,7 @@ import { HUB_CENTRAL_URL } from "@/lib/trips";
 import { getSession, clearSession as clearMainSession } from "@/lib/auth";
 import AddressAutocomplete from "@/components/shared/AddressAutocomplete";
 import ChangePasswordModal from "@/components/shared/ChangePasswordModal";
+import { crachaParam, crachaCampo } from "@/lib/cracha";
 
 // ─── Types ───
 
@@ -237,6 +238,7 @@ function ReservasTab({ session }: { session: RestauranteSession }) {
         mes: String(now.getMonth() + 1),
         ano: String(now.getFullYear()),
         t: String(Date.now()),
+        ...crachaCampo(),
       });
       const res = await fetch(`${HUB_CENTRAL_URL}?${params}`, { redirect: "follow" });
       const data = await res.json();
@@ -271,6 +273,7 @@ function ReservasTab({ session }: { session: RestauranteSession }) {
         valor: contaValor,
         restauranteId: String(session.restauranteId),
         t: String(Date.now()),
+        ...crachaCampo(),
       });
       const res = await fetch(`${HUB_CENTRAL_URL}?${params}`, { redirect: "follow" });
       const data = await res.json();
@@ -438,7 +441,7 @@ function TransferTab({ session }: { session: RestauranteSession }) {
 
   // Fetch restaurantes for autocomplete
   useEffect(() => {
-    fetch(`${HUB_CENTRAL_URL}?action=getRestaurantes&t=${Date.now()}`, { redirect: "follow" })
+    fetch(`${HUB_CENTRAL_URL}?action=getRestaurantes&t=${Date.now()}${crachaParam()}`, { redirect: "follow" })
       .then((r) => r.json())
       .then((d) => { if (d?.success && Array.isArray(d.restaurantes)) setRestaurantes(d.restaurantes); })
       .catch(() => {});
@@ -477,6 +480,7 @@ function TransferTab({ session }: { session: RestauranteSession }) {
         fonte: "RESTAURANTE",
         observacoes: "",
         t: String(Date.now()),
+        ...crachaCampo(),
       });
       const res = await fetch(`${HUB_CENTRAL_URL}?${params}`, { redirect: "follow" });
       const json = await res.json();
@@ -625,6 +629,7 @@ function ComissoesTab({ session }: { session: RestauranteSession }) {
         mes: String(mes),
         ano: String(ano),
         t: String(Date.now()),
+        ...crachaCampo(),
       });
       const res = await fetch(`${HUB_CENTRAL_URL}?${params}`, { redirect: "follow" });
       const data = await res.json();

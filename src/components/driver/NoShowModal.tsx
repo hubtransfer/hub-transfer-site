@@ -2,6 +2,8 @@
 
 import React, { useState, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
+import { ehHubCentral } from "@/lib/auth";
+import { comCracha } from "@/lib/cracha";
 
 /* ─── Types ─── */
 
@@ -203,7 +205,7 @@ export default function NoShowModal({ isOpen, tripId, clientName, driverName, ga
           const res = await fetch(gasUrl, {
             method: "POST",
             headers: { "Content-Type": "text/plain" },
-            body: JSON.stringify(payload),
+            body: JSON.stringify(ehHubCentral(gasUrl) ? comCracha(payload) : payload),
           });
 
           const result = await res.json();

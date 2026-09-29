@@ -8,7 +8,8 @@ import {
   TEST_EMAIL,
   normalizeTransfer,
 } from "./transfers";
-import { getSession } from "./auth";
+import { getSession, ehHubCentral, crachaPara } from "./auth";
+import { comCracha, crachaCampo } from "./cracha";
 
 function getWebAppUrl(): string {
   if (typeof window === "undefined") return WEBAPP_URL;
@@ -36,7 +37,7 @@ export async function testConnection(
   if (!url) return { success: false, message: "URL não configurada" };
 
   try {
-    const response = await fetch(url + "?action=test", {
+    const response = await fetch(url + "?action=test" + crachaPara(url), {
       method: "GET",
       mode: "cors",
     });
@@ -51,7 +52,7 @@ export async function testConnection(
       await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify({ action: "test" }),
+        body: JSON.stringify(ehHubCentral(url) ? comCracha({ action: "test" }) : { action: "test" }),
         mode: "no-cors",
       });
       saveWebappUrl(url);
@@ -68,7 +69,7 @@ export async function testBasicConnectivity(): Promise<{
 }> {
   const url = getWebAppUrl();
   try {
-    await fetch(url + "?ping=true", { method: "GET", mode: "no-cors" });
+    await fetch(url + "?ping=true" + crachaPara(url), { method: "GET", mode: "no-cors" });
     await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "text/plain" },
@@ -76,6 +77,7 @@ export async function testBasicConnectivity(): Promise<{
         action: "test",
         message: "HUB Transfer funcionando",
         timestamp: new Date().toISOString(),
+        ...(ehHubCentral(url) ? crachaCampo() : {}),
       }),
       mode: "no-cors",
     });
@@ -100,7 +102,7 @@ export async function loadTransfersFromSheets(): Promise<{
 
   try {
     const response = await fetch(
-      `${url}?action=getAllData&_t=${Date.now()}`,
+      `${url}?action=getAllData&_t=${Date.now()}${crachaPara(url)}`,
       {
         method: "GET",
         headers: { Accept: "application/json" },
@@ -182,6 +184,7 @@ export async function sendToSheets(
         idProvisorio,
         emailDestino: TEST_EMAIL,
         action: "addTransfer",
+        ...(ehHubCentral(url) ? crachaCampo() : {}),
       }),
       mode: "cors",
       redirect: "follow",

@@ -1,3 +1,4 @@
+import { crachaParam } from "./cracha";
 // ─────────────────────────────────────────────────────────────
 //  trips.ts — Types, constants & business logic for the
 //  HUB Transfer operations panel (viagens-ops)
@@ -131,7 +132,7 @@ export const chaveMotorista = (s: string): string =>
 
 /** Lista oficial de motoristas do HUB Central (?action=motoristas) */
 export async function fetchMotoristas(): Promise<Driver[]> {
-  const url = `${HUB_CENTRAL_URL}?action=motoristas&t=${Date.now()}`;
+  const url = `${HUB_CENTRAL_URL}?action=motoristas&t=${Date.now()}${crachaParam()}`;
   const res = await fetch(url, { redirect: 'follow' });
   if (!res.ok) throw new Error('HTTP ' + res.status);
   const data = await res.json();

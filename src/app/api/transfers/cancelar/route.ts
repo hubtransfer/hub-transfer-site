@@ -15,6 +15,7 @@ interface CancelarBody {
   senha?: string;
   desfecho?: string;
   notificar?: boolean;
+  cracha?: string;
 }
 
 function erro(mensagem: string, status: number) {
@@ -55,6 +56,7 @@ export async function POST(req: Request) {
         desfecho: body.desfecho,
         // no-show nunca avisa o cliente — nem que o pedido diga o contrário
         notificar: body.desfecho === "cancelado" && body.notificar === true,
+        ...(body.cracha ? { cracha: String(body.cracha) } : {}),
       }),
       redirect: "follow",
       cache: "no-store",

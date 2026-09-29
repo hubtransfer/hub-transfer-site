@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { HUB_CENTRAL_URL } from "@/lib/trips";
+import { crachaParam } from "@/lib/cracha";
 
 type TripStatus = "PENDENTE" | "NO_LOCAL" | "EM_VIAGEM" | "FINALIZADO";
 
@@ -35,7 +36,7 @@ function getGPS(): Promise<{ lat: number; lng: number } | null> {
 
 async function sendStatus(rowIndex: string, status: string, lat?: number, lng?: number) {
   try {
-    const url = `${HUB_CENTRAL_URL}?action=updateDriverStatus&rowIndex=${encodeURIComponent(rowIndex)}&status=${encodeURIComponent(status)}&lat=${lat ?? ""}&lng=${lng ?? ""}&t=${Date.now()}`;
+    const url = `${HUB_CENTRAL_URL}?action=updateDriverStatus&rowIndex=${encodeURIComponent(rowIndex)}&status=${encodeURIComponent(status)}&lat=${lat ?? ""}&lng=${lng ?? ""}&t=${Date.now()}${crachaParam()}`;
     await fetch(url, { redirect: "follow" });
   } catch (err) {
     console.error("[SwipeBar] sendStatus error:", err);

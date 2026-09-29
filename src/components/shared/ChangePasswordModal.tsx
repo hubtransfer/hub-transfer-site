@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { HUB_CENTRAL_URL } from "@/lib/trips";
+import { crachaCampo } from "@/lib/cracha";
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
@@ -35,6 +36,7 @@ export default function ChangePasswordModal({ isOpen, onClose, tipo, userId }: C
         senhaActual: senhaActual.trim(),
         novaSenha,
         t: String(Date.now()),
+        ...crachaCampo(),
       });
       const res = await fetch(`${HUB_CENTRAL_URL}?${params}`, { redirect: "follow" });
       const data = await res.json();

@@ -10,6 +10,7 @@ import {
   chaveMotorista,
 } from '@/lib/trips';
 import { getCachedTrips, setCachedTrips, clearCachedTrips } from '@/lib/trips-cache';
+import { crachaPara } from '@/lib/auth';
 
 // ── Helpers ─────────────────────────────────────────────────
 
@@ -98,7 +99,7 @@ export function useDriverStore(): DriverStore {
     try {
       const dateParam = selectedDateRef.current || '';
       // Em modo motorista o pedido leva SEMPRE &motorista= — o backend só devolve as viagens dele
-      const url = `${gasUrl}?action=viagens&t=${Date.now()}${dateParam ? `&data=${encodeURIComponent(dateParam)}` : ''}&motorista=${encodeURIComponent(name)}`;
+      const url = `${gasUrl}?action=viagens&t=${Date.now()}${dateParam ? `&data=${encodeURIComponent(dateParam)}` : ''}&motorista=${encodeURIComponent(name)}${crachaPara(gasUrl)}`;
       const res = await fetch(url, { redirect: 'follow' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const json = await res.json();
@@ -179,7 +180,7 @@ export function useDriverStore(): DriverStore {
   const darBaixa = useCallback(
     async (id: string, rowIndex: string, cardId: string) => {
       try {
-        const url = `${gasUrl}?action=completar&id=${encodeURIComponent(id)}&row=${encodeURIComponent(rowIndex)}&t=${Date.now()}`;
+        const url = `${gasUrl}?action=completar&id=${encodeURIComponent(id)}&row=${encodeURIComponent(rowIndex)}&t=${Date.now()}${crachaPara(gasUrl)}`;
         const res = await fetch(url, { redirect: 'follow' });
         const data = await res.json();
         if (data.success) {
@@ -252,7 +253,7 @@ export function useDriverStore(): DriverStore {
     const interval = setInterval(async () => {
       if (!driverNameRef.current || document.visibilityState !== 'visible') return;
       try {
-        const pingRes = await fetch(`${gasUrl}?action=lastChange&t=${Date.now()}`, { redirect: 'follow' });
+        const pingRes = await fetch(`${gasUrl}?action=lastChange&t=${Date.now()}${crachaPara(gasUrl)}`, { redirect: 'follow' });
         const pingJson = await pingRes.json();
         const lc = (pingJson?.lastChange || '').toString();
         if (lc && lc === lastChangeRef.current) return;

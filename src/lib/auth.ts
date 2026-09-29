@@ -1,6 +1,7 @@
 // Authentication via GAS backend
 
 import { HUB_CENTRAL_URL } from "./trips";
+import { crachaParam } from "./cracha";
 
 export interface AuthSession {
   name: string;
@@ -39,10 +40,15 @@ export function requireSession(expectedRole: "admin" | "driver" | "hotel" | "res
   return session;
 }
 
-/** «&cracha=…» para os action=viagens do admin e do portal; "" sem crachá (pedido segue como antes). */
-export function crachaParam(): string {
-  const c = getSession()?.cracha;
-  return c ? `&cracha=${encodeURIComponent(c)}` : "";
+/**
+ * Destino variável (GAS do hotel ou URL configurado no admin): o crachá é uma
+ * credencial da HUB-Central e só segue para a HUB-Central, nunca para outro /exec.
+ */
+export function ehHubCentral(url: string | null | undefined): boolean {
+  return !!url && url.split("?")[0].trim() === HUB_CENTRAL_URL;
+}
+export function crachaPara(url: string | null | undefined): string {
+  return ehHubCentral(url) ? crachaParam() : "";
 }
 
 export function setSession(session: AuthSession): void {
@@ -149,7 +155,7 @@ const FALLBACK_HOTEL_URLS: Record<string, string> = {
 /** Fetch hotel URL from backend, fallback to hardcoded if network fails */
 export async function fetchHotelUrl(code: string): Promise<string> {
   try {
-    const url = `${HUB_CENTRAL_URL}?action=getHotelUrl&code=${encodeURIComponent(code.toUpperCase())}&t=${Date.now()}`;
+    const url = `${HUB_CENTRAL_URL}?action=getHotelUrl&code=${encodeURIComponent(code.toUpperCase())}&t=${Date.now()}${crachaParam()}`;
     const res = await fetch(url, { redirect: "follow" });
     if (!res.ok) throw new Error("HTTP " + res.status);
     const data = await res.json();
@@ -169,7 +175,7 @@ export async function saveHotelUrl(
   newUrl: string,
 ): Promise<{ success: boolean; message: string }> {
   try {
-    const url = `${HUB_CENTRAL_URL}?action=updateHotelUrl&code=${encodeURIComponent(code.toUpperCase())}&url=${encodeURIComponent(newUrl)}&t=${Date.now()}`;
+    const url = `${HUB_CENTRAL_URL}?action=updateHotelUrl&code=${encodeURIComponent(code.toUpperCase())}&url=${encodeURIComponent(newUrl)}&t=${Date.now()}${crachaParam()}`;
     const res = await fetch(url, { redirect: "follow" });
     if (!res.ok) throw new Error("HTTP " + res.status);
     const data = await res.json();
@@ -199,7 +205,7 @@ export interface Hotel {
 
 export async function getPartners(): Promise<{ drivers: Partner[]; hotels: Hotel[] }> {
   try {
-    const url = `${HUB_CENTRAL_URL}?action=getPartners&t=${Date.now()}`;
+    const url = `${HUB_CENTRAL_URL}?action=getPartners&t=${Date.now()}${crachaParam()}`;
     const res = await fetch(url, { redirect: "follow" });
     if (!res.ok) throw new Error("HTTP " + res.status);
     const data = await res.json();
@@ -218,7 +224,7 @@ export async function updatePassword(
   newPassword: string,
 ): Promise<{ success: boolean; message: string }> {
   try {
-    const url = `${HUB_CENTRAL_URL}?action=updatePassword&type=${type}&rowIndex=${encodeURIComponent(rowIndex)}&newPassword=${encodeURIComponent(newPassword)}`;
+    const url = `${HUB_CENTRAL_URL}?action=updatePassword&type=${type}&rowIndex=${encodeURIComponent(rowIndex)}&newPassword=${encodeURIComponent(newPassword)}${crachaParam()}`;
     const res = await fetch(url, { redirect: "follow" });
     if (!res.ok) throw new Error("HTTP " + res.status);
     const data = await res.json();

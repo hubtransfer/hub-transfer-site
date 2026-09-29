@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { HUB_CENTRAL_URL } from "@/lib/trips";
+import { crachaParam, crachaCampo } from "@/lib/cracha";
 import AddressAutocomplete from "@/components/shared/AddressAutocomplete";
 
 // ─── Types ───
@@ -79,7 +80,7 @@ export default function RestaurantsTab() {
 
   const fetchRestaurantes = useCallback(async () => {
     try {
-      const res = await fetch(`${HUB_CENTRAL_URL}?action=getRestaurantes&t=${Date.now()}`, { redirect: "follow" });
+      const res = await fetch(`${HUB_CENTRAL_URL}?action=getRestaurantes&t=${Date.now()}${crachaParam()}`, { redirect: "follow" });
       const data = await res.json();
       if (data?.success && Array.isArray(data.restaurantes)) {
         setRestaurantes(data.restaurantes);
@@ -92,7 +93,7 @@ export default function RestaurantsTab() {
   const fetchReservas = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${HUB_CENTRAL_URL}?action=getReservasRestaurantes&t=${Date.now()}`, { redirect: "follow" });
+      const res = await fetch(`${HUB_CENTRAL_URL}?action=getReservasRestaurantes&t=${Date.now()}${crachaParam()}`, { redirect: "follow" });
       const data = await res.json();
       if (data?.success && Array.isArray(data.reservas)) {
         setReservas(data.reservas);
@@ -300,6 +301,7 @@ function NewReservationModal({ restaurantes, onClose, onSuccess }: ModalProps) {
         fonte: "HUB",
         observacoes: observacoes.trim(),
         t: String(Date.now()),
+        ...crachaCampo(),
       });
 
       const url = `${HUB_CENTRAL_URL}?${params.toString()}`;

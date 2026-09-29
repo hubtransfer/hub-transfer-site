@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { crachaParam } from "@/lib/auth";
+import { crachaPara } from "@/lib/auth";
+import { crachaParam } from "@/lib/cracha";
 import type {
   TripService,
   HubViagem,
@@ -254,7 +255,7 @@ export function useTripsStore(): TripsStore {
       if (!url) return;
       // Ping leve primeiro — só faz fetch completo se lastChange mudou
       try {
-        const pingRes = await fetch(`${url}?action=lastChange&t=${ts()}`, { redirect: "follow" });
+        const pingRes = await fetch(`${url}?action=lastChange&t=${ts()}${crachaPara(url)}`, { redirect: "follow" });
         const pingJson = await pingRes.json();
         const lc = (pingJson?.lastChange || "").toString();
         if (lc && lc === lastChangeRef.current) return;
@@ -607,7 +608,7 @@ export function useTripsStore(): TripsStore {
     const rowIndex = String(v?.rowIndex ?? "");
     if (!rowIndex || !driver) return;
     const base = hubViagensUrl || HUB_CENTRAL_URL;
-    const url = `${base}?action=trocarMotorista&rowIndex=${encodeURIComponent(rowIndex)}&motorista=${encodeURIComponent(driver)}&t=${ts()}`;
+    const url = `${base}?action=trocarMotorista&rowIndex=${encodeURIComponent(rowIndex)}&motorista=${encodeURIComponent(driver)}&t=${ts()}${crachaPara(base)}`;
     fetch(url, { redirect: "follow" }).catch((err) => {
       console.error("trocarMotorista error:", err);
     });
@@ -620,7 +621,7 @@ export function useTripsStore(): TripsStore {
       try {
         const url = `${hubViagensUrl}?action=completar&id=${encodeURIComponent(
           id
-        )}&row=${encodeURIComponent(rowIndex)}&t=${ts()}`;
+        )}&row=${encodeURIComponent(rowIndex)}&t=${ts()}${crachaPara(hubViagensUrl)}`;
 
         const res = await fetch(url);
         const data = await res.json();
@@ -672,7 +673,7 @@ export function useTripsStore(): TripsStore {
       if (!hubViagensUrl || !dateStr) return;
       setPastLoading(true);
       try {
-        const fetchUrl = `${hubViagensUrl}?action=viagens&t=${ts()}&data=${encodeURIComponent(dateStr)}${crachaParam()}`;
+        const fetchUrl = `${hubViagensUrl}?action=viagens&t=${ts()}&data=${encodeURIComponent(dateStr)}${crachaPara(hubViagensUrl)}`;
         const res = await fetch(fetchUrl);
         const data = await res.json();
         let viagens: HubViagem[] = [];
@@ -711,7 +712,7 @@ export function useTripsStore(): TripsStore {
     setHubCentralSyncMsg(manual ? "A sincronizar motoristas..." : "A carregar...");
 
     try {
-      const url = `${HUB_CENTRAL_URL}?action=motoristas&t=${ts()}`;
+      const url = `${HUB_CENTRAL_URL}?action=motoristas&t=${ts()}${crachaParam()}`;
       const res = await fetch(url);
       const data = await res.json();
 
@@ -785,7 +786,7 @@ export function useTripsStore(): TripsStore {
       const dateParam = dateOverride ?? selectedDate;
       const fetchUrl = `${url}?action=viagens&t=${ts()}${
         dateParam ? `&data=${encodeURIComponent(dateParam)}` : ""
-      }${crachaParam()}`;
+      }${crachaPara(url)}`;
 
       const res = await fetch(fetchUrl, { redirect: "follow" });
       const data = await res.json();
