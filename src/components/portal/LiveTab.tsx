@@ -10,6 +10,7 @@ import LiveBoard from "@/components/live/LiveBoard";
 import LiveProgressStrip from "@/components/live/LiveProgressStrip";
 import { statusMotoristaToPasso } from "@/lib/live";
 import { SeloDesfecho } from "@/components/shared/CancelarViagem";
+import { crachaParam } from "@/lib/auth";
 
 interface LiveTabProps {
   services: Transfer[];     // hotel's own transfer data
@@ -72,7 +73,7 @@ export default function LiveTab({ services, onRefresh, hotelName, hotelCode }: L
   // Fetch from HUB Central (stable — no deps). Returns true if data actually changed.
   const fetchHubCentral = useCallback(async (): Promise<boolean> => {
     try {
-      const url = `${HUB_CENTRAL_URL}?action=viagens&t=${Date.now()}`;
+      const url = `${HUB_CENTRAL_URL}?action=viagens&t=${Date.now()}${crachaParam()}`;
       const res = await fetch(url, { redirect: "follow" });
       const data = await res.json();
       let viagens: HubViagem[] = [];

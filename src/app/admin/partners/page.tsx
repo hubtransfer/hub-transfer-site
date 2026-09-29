@@ -355,7 +355,7 @@ export default function PartnersPage() {
                       <PasswordCell hasPassword={h.hasPassword} rowIndex={h.rowIndex} type="hotel" />
                       <button
                         onClick={() => {
-                          setSession({ name: h.name || adminName, role: "admin", code: h.code.toUpperCase() });
+                          setSession({ name: h.name || adminName, role: "admin", code: h.code.toUpperCase(), ...(getSession()?.cracha ? { cracha: getSession()!.cracha } : {}) });
                           if (url) localStorage.setItem("webappUrl", url);
                           router.push("/portal");
                         }}

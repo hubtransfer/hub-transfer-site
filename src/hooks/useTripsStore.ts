@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { crachaParam } from "@/lib/auth";
 import type {
   TripService,
   HubViagem,
@@ -671,7 +672,7 @@ export function useTripsStore(): TripsStore {
       if (!hubViagensUrl || !dateStr) return;
       setPastLoading(true);
       try {
-        const fetchUrl = `${hubViagensUrl}?action=viagens&t=${ts()}&data=${encodeURIComponent(dateStr)}`;
+        const fetchUrl = `${hubViagensUrl}?action=viagens&t=${ts()}&data=${encodeURIComponent(dateStr)}${crachaParam()}`;
         const res = await fetch(fetchUrl);
         const data = await res.json();
         let viagens: HubViagem[] = [];
@@ -784,7 +785,7 @@ export function useTripsStore(): TripsStore {
       const dateParam = dateOverride ?? selectedDate;
       const fetchUrl = `${url}?action=viagens&t=${ts()}${
         dateParam ? `&data=${encodeURIComponent(dateParam)}` : ""
-      }`;
+      }${crachaParam()}`;
 
       const res = await fetch(fetchUrl, { redirect: "follow" });
       const data = await res.json();

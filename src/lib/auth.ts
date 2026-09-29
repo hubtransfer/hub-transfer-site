@@ -7,6 +7,7 @@ export interface AuthSession {
   role: "admin" | "driver" | "hotel" | "restaurante";
   code?: string;
   phone?: string;
+  cracha?: string;   // devolvido pelo validateLogin — segue nos action=viagens do admin e do portal
   expiresAt?: number; // timestamp — session expires after 8 hours
 }
 
@@ -36,6 +37,12 @@ export function requireSession(expectedRole: "admin" | "driver" | "hotel" | "res
   if (!session) return null;
   if (session.role !== expectedRole) return null;
   return session;
+}
+
+/** «&cracha=…» para os action=viagens do admin e do portal; "" sem crachá (pedido segue como antes). */
+export function crachaParam(): string {
+  const c = getSession()?.cracha;
+  return c ? `&cracha=${encodeURIComponent(c)}` : "";
 }
 
 export function setSession(session: AuthSession): void {
@@ -122,6 +129,7 @@ export async function validateLogin(
         role: data.role,
         code: data.code,
         phone: data.phone,
+        ...(data.cracha ? { cracha: String(data.cracha) } : {}),
       };
       return { success: true, session };
     }
