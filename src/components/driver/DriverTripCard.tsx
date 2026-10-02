@@ -818,11 +818,11 @@ export default function DriverTripCard({
                   <p className="text-sm text-[#E5E5E5]">{originLoc.addr}</p>
                 </button>
                 <div className="grid grid-cols-2 gap-2.5 mt-3">
-                  <a href={getMapUrl(viagem.origin)} target="_blank" rel="noopener noreferrer"
+                  <a href={getMapUrl(viagem.origin, viagem.coordsOrigem)} target="_blank" rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2.5 h-14 rounded-xl bg-[#4285f4]/10 border border-[#4285f4]/20 text-[#4285f4] font-mono text-base font-bold active:bg-[#4285f4]/20 transition-colors">
                     <MapsIcon /> Google Maps
                   </a>
-                  <a href={getWazeUrl(viagem.origin)} target="_blank" rel="noopener noreferrer"
+                  <a href={getWazeUrl(viagem.origin, viagem.coordsOrigem)} target="_blank" rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2.5 h-14 rounded-xl bg-[#35c5f0]/10 border border-[#35c5f0]/20 text-[#35c5f0] font-mono text-base font-bold active:bg-[#35c5f0]/20 transition-colors">
                     <WazeIcon /> Waze
                   </a>
@@ -837,11 +837,11 @@ export default function DriverTripCard({
                     <p className="text-sm text-[#E5E5E5]">{destLoc.addr}</p>
                   </button>
                   <div className="grid grid-cols-2 gap-2.5 mt-3">
-                    <a href={getMapUrl(viagem.destination)} target="_blank" rel="noopener noreferrer"
+                    <a href={getMapUrl(viagem.destination, viagem.coordsDestino)} target="_blank" rel="noopener noreferrer"
                       className="flex items-center justify-center gap-2.5 h-14 rounded-xl bg-[#4285f4]/10 border border-[#4285f4]/20 text-[#4285f4] font-mono text-base font-bold active:bg-[#4285f4]/20 transition-colors">
                       <MapsIcon /> Google Maps
                     </a>
-                    <a href={getWazeUrl(viagem.destination)} target="_blank" rel="noopener noreferrer"
+                    <a href={getWazeUrl(viagem.destination, viagem.coordsDestino)} target="_blank" rel="noopener noreferrer"
                       className="flex items-center justify-center gap-2.5 h-14 rounded-xl bg-[#35c5f0]/10 border border-[#35c5f0]/20 text-[#35c5f0] font-mono text-base font-bold active:bg-[#35c5f0]/20 transition-colors">
                       <WazeIcon /> Waze
                     </a>

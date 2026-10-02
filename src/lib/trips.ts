@@ -630,17 +630,42 @@ export function dateToISO(dateStr: string): string {
 }
 
 /**
- * Google Maps directions URL (from current location to address).
+ * Coordenadas «lat,lng» (colunas DL/DM) → "lat,lng" normalizado, ou null.
+ * Só aceita dois números dentro de Portugal: continente, Madeira (com Porto
+ * Santo e Desertas) ou Açores. Qualquer outra coisa → null (usa-se a morada).
  */
-export function getMapUrl(addr: string): string {
-  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr)}`;
+const PT_CAIXAS: [number, number, number, number][] = [
+  // [latMin, latMax, lngMin, lngMax]
+  [36.8, 42.2, -9.6, -6.1],    // continente
+  [32.3, 33.2, -17.4, -16.2],  // Madeira
+  [36.8, 39.8, -31.4, -24.9],  // Açores
+];
+export function coordsPortugal(raw: string | null | undefined): string | null {
+  const m = /^\s*(-?\d{1,3}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)\s*$/.exec(String(raw ?? ""));
+  if (!m) return null;
+  const lat = Number(m[1]), lng = Number(m[2]);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  const dentro = PT_CAIXAS.some(([a, b, c, d]) => lat >= a && lat <= b && lng >= c && lng <= d);
+  return dentro ? `${lat},${lng}` : null;
 }
 
 /**
- * Waze navigation URL.
+ * Google Maps directions URL (from current location to address).
+ * Com coordenadas válidas em Portugal, o destino é o ponto exacto.
  */
-export function getWazeUrl(addr: string): string {
-  return `https://waze.com/ul?q=${encodeURIComponent(addr)}&navigate=yes`;
+export function getMapUrl(addr: string, coords?: string): string {
+  const ll = coordsPortugal(coords);
+  return `https://www.google.com/maps/dir/?api=1&destination=${ll ?? encodeURIComponent(addr)}`;
+}
+
+/**
+ * Waze navigation URL. Com coordenadas válidas em Portugal, navega para o ponto exacto.
+ */
+export function getWazeUrl(addr: string, coords?: string): string {
+  const ll = coordsPortugal(coords);
+  return ll
+    ? `https://waze.com/ul?ll=${ll}&navigate=yes`
+    : `https://waze.com/ul?q=${encodeURIComponent(addr)}&navigate=yes`;
 }
 
 /**
