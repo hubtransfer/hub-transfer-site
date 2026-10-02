@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { PAYMENT_METHODS } from "@/lib/constants";
 import {
   User, FileText, Car, Users, Briefcase, Calendar, Clock,
   Phone, Plane, MapPin, Navigation, DollarSign, CreditCard, MessageSquare,
@@ -18,6 +19,8 @@ interface TransferFormProps {
   isAdminMode: boolean;
   isLoading: boolean;
   onClear: () => void;
+  /** Avisa a página se há alterações por gravar numa viagem em edição. */
+  onDirtyChange?: (dirty: boolean) => void;
   hotelName?: string;
 }
 
@@ -55,7 +58,7 @@ const QUICK_OBS = [
 ];
 
 export default function TransferForm({
-  onSubmit, editingTransfer, isAdminMode, isLoading, onClear, hotelName,
+  onSubmit, editingTransfer, isAdminMode, isLoading, onClear, hotelName, onDirtyChange,
 }: TransferFormProps) {
   const [nomeCliente, setNomeCliente] = useState("");
   const [referencia, setReferencia] = useState("");
@@ -95,25 +98,55 @@ export default function TransferForm({
 
   const tourUnitPrice = useMemo(() => tourSelecionado ? getTourUnitPrice(tourSelecionado, numeroPessoas) : 0, [tourSelecionado, numeroPessoas]);
 
-  useEffect(() => {
-    if (editingTransfer) {
-      setNomeCliente(editingTransfer.nomeCliente || ""); setReferencia(editingTransfer.referencia || "");
-      setTipoServico(editingTransfer.tipoServico || "Transfer"); setTourSelecionado(editingTransfer.tourSelecionado || "");
-      setNumeroPessoas(editingTransfer.numeroPessoas || 1); setNumeroBagagens(editingTransfer.numeroBagagens || 1);
-      setData(editingTransfer.data ? formatDateForInput(editingTransfer.data) : ""); setHoraPickup(editingTransfer.horaPickup || "");
-      setContacto(editingTransfer.contacto || ""); setNumeroVoo(editingTransfer.numeroVoo || "");
-      setOrigem(editingTransfer.origem || ""); setDestino(editingTransfer.destino || "");
-      setValorTotal(editingTransfer.valorTotal || 0); setModoPagamento(editingTransfer.modoPagamento || "");
-      setPagoParaQuem(editingTransfer.pagoParaQuem || ""); setObservacoes(editingTransfer.observacoes || "");
-    }
-  }, [editingTransfer]);
-
   const clearForm = useCallback(() => {
     setNomeCliente(""); setReferencia(""); setTipoServico("Transfer"); setTourSelecionado("");
     setNumeroPessoas(1); setNumeroBagagens(1); setData(""); setHoraPickup("");
     setContacto(""); setNumeroVoo(""); setOrigem(""); setDestino("");
     setValorTotal(0); setModoPagamento(""); setPagoParaQuem(""); setObservacoes("");
   }, []);
+
+  // Valores antigos sem acento (antes de 02/10) → o valor certo, para o botão aparecer seleccionado
+  const pagamentoCanonico = (v: string): string =>
+    ({ Cartao: "Cartão", Transferencia: "Transferência" } as Record<string, string>)[v] ?? v;
+
+  // Os valores do formulário a partir de uma viagem — usado para carregar a edição
+  // e para saber se há alterações por gravar (formulário ≠ viagem carregada)
+  const valoresDe = (t: Transfer) => ({
+    nomeCliente: t.nomeCliente || "", referencia: t.referencia || "",
+    tipoServico: t.tipoServico || "Transfer", tourSelecionado: t.tourSelecionado || "",
+    numeroPessoas: t.numeroPessoas || 1, numeroBagagens: t.numeroBagagens || 1,
+    data: t.data ? formatDateForInput(t.data) : "", horaPickup: t.horaPickup || "",
+    contacto: t.contacto || "", numeroVoo: t.numeroVoo || "", origem: t.origem || "", destino: t.destino || "",
+    valorTotal: t.valorTotal || 0, modoPagamento: pagamentoCanonico(t.modoPagamento || ""),
+    pagoParaQuem: t.pagoParaQuem || "", observacoes: t.observacoes || "",
+  });
+  const valoresAtuais = { nomeCliente, referencia, tipoServico, tourSelecionado, numeroPessoas, numeroBagagens,
+    data, horaPickup, contacto, numeroVoo, origem, destino, valorTotal, modoPagamento, pagoParaQuem, observacoes };
+
+  useEffect(() => {
+    if (editingTransfer) {
+      const v = valoresDe(editingTransfer);
+      setNomeCliente(v.nomeCliente); setReferencia(v.referencia);
+      setTipoServico(v.tipoServico); setTourSelecionado(v.tourSelecionado);
+      setNumeroPessoas(v.numeroPessoas); setNumeroBagagens(v.numeroBagagens);
+      setData(v.data); setHoraPickup(v.horaPickup);
+      setContacto(v.contacto); setNumeroVoo(v.numeroVoo);
+      setOrigem(v.origem); setDestino(v.destino);
+      setValorTotal(v.valorTotal); setModoPagamento(v.modoPagamento);
+      setPagoParaQuem(v.pagoParaQuem); setObservacoes(v.observacoes);
+    }
+  }, [editingTransfer]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Sair da edição (Escape, Cancelar, mudar de aba, gravar) → formulário vazio, «Registar»
+  const estavaAEditar = useRef(false);
+  useEffect(() => {
+    if (editingTransfer) { estavaAEditar.current = true; return; }
+    if (estavaAEditar.current) { estavaAEditar.current = false; clearForm(); }
+  }, [editingTransfer]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Há alterações por gravar? (só conta em edição)
+  const dirty = !!editingTransfer && JSON.stringify(valoresAtuais) !== JSON.stringify(valoresDe(editingTransfer));
+  useEffect(() => { onDirtyChange?.(dirty); }, [dirty, onDirtyChange]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,7 +161,7 @@ export default function TransferForm({
     clearForm();
   };
 
-  const handleClear = () => { clearForm(); onClear(); };
+  const handleClear = () => { if (editingTransfer) onClear(); else clearForm(); };
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -318,7 +351,7 @@ export default function TransferForm({
           <div>
             <label className={lbl}><CreditCard className={iconCls} /> Pagamento <span className="text-[#C06060]">*</span></label>
             <div className="flex gap-1.5">
-              {[{l:"Dinheiro",v:"Dinheiro"},{l:"Cartão",v:"Cartao"},{l:"Transf.",v:"Transferencia"}].map(({l,v}) => (
+              {PAYMENT_METHODS.map((v) => ({ l: v === "Transferência" ? "Transf." : v, v })).map(({l,v}) => (
                 <button key={v} type="button" onClick={() => setModoPagamento(v)} className={chipLg(modoPagamento === v)}>{l}</button>
               ))}
             </div>
@@ -359,7 +392,7 @@ export default function TransferForm({
         </button>
         <button type="button" onClick={handleClear}
           className="h-12 px-6 bg-[#111] border border-[#2A2A2A] text-[#888] text-base rounded-lg hover:text-[#F5F5F5] transition-all cursor-pointer">
-          Limpar
+          {editingTransfer ? "Cancelar" : "Limpar"}
         </button>
       </div>
     </form>

@@ -35,6 +35,24 @@ export default function PortalPage() {
   const [urlSaving, setUrlSaving] = useState(false);
   const [urlToast, setUrlToast] = useState("");
   const [activeTab, setActiveTab] = useState<PortalTab>("form");
+  // Alterações por gravar na viagem em edição (o formulário avisa)
+  const editDirtyRef = useRef(false);
+  const onDirtyChange = useCallback((d: boolean) => { editDirtyRef.current = d; }, []);
+
+  /** Sai da edição. Com alterações por gravar, pergunta antes. Devolve false se o utilizador recusar. */
+  const sairDaEdicao = useCallback((): boolean => {
+    if (store.editingId === null) return true;
+    if (editDirtyRef.current && !window.confirm("Descartar as alterações?")) return false;
+    editDirtyRef.current = false;
+    store.setEditingId(null);
+    return true;
+  }, [store]);
+
+  /** Mudar de aba termina a edição (sem isto, voltar ao formulário reabria a mesma viagem). */
+  const mudarAba = useCallback((t: PortalTab) => {
+    if (t !== "form" && !sairDaEdicao()) return;
+    setActiveTab(t);
+  }, [sairDaEdicao]);
 
   // Auth guard + Auto-configure GAS URL
   useEffect(() => {
@@ -68,11 +86,11 @@ export default function PortalPage() {
     const handler = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === "e") { e.preventDefault(); store.exportCSV(); }
       if (e.ctrlKey && e.key === "r" && !e.shiftKey) { e.preventDefault(); store.loadFromSheets(); }
-      if (e.key === "Escape" && activeTab === "form") { store.setEditingId(null); }
+      if (e.key === "Escape" && activeTab === "form") { sairDaEdicao(); }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [activeTab, store]);
+  }, [activeTab, store, sairDaEdicao]);
 
   const handleEdit = useCallback(
     (id: number | string) => {
@@ -160,7 +178,7 @@ export default function PortalPage() {
           {/* Tabs */}
           <div className="flex gap-0">
             <button
-              onClick={() => setActiveTab("form")}
+              onClick={() => mudarAba("form")}
               className={`px-5 py-2.5 text-sm font-bold transition-colors relative ${
                 activeTab === "form" ? "text-[#F0D030]" : "text-[#666] hover:text-[#A0A0A0]"
               }`}
@@ -169,7 +187,7 @@ export default function PortalPage() {
               {activeTab === "form" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#F0D030]" />}
             </button>
             <button
-              onClick={() => setActiveTab("viagens")}
+              onClick={() => mudarAba("viagens")}
               className={`px-5 py-2.5 text-sm font-bold transition-colors relative ${
                 activeTab === "viagens" ? "text-[#F0D030]" : "text-[#666] hover:text-[#A0A0A0]"
               }`}
@@ -183,7 +201,7 @@ export default function PortalPage() {
               {activeTab === "viagens" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#F0D030]" />}
             </button>
             <button
-              onClick={() => setActiveTab("live")}
+              onClick={() => mudarAba("live")}
               className={`px-5 py-2.5 text-sm font-bold transition-colors relative flex items-center gap-1.5 ${
                 activeTab === "live" ? "text-[#F0D030]" : "text-[#666] hover:text-[#A0A0A0]"
               }`}
@@ -218,7 +236,8 @@ export default function PortalPage() {
             editingTransfer={editingTransfer}
             isAdminMode={store.isAdminMode}
             isLoading={store.syncInProgress}
-            onClear={() => store.setEditingId(null)}
+            onClear={sairDaEdicao}
+            onDirtyChange={onDirtyChange}
             hotelName={hotelName}
           />
         </div>
