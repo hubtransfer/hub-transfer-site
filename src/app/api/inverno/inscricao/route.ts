@@ -3,11 +3,12 @@ import { dadosPedido, enviarEventoMeta, texto } from "../_meta";
 
 /* Pré-inscrição de motoristas (campanha de inverno).
    Passo 1: cria a linha na folha "Candidatos Inverno" e avisa o Junior (WhatsApp + e-mail, no Apps Script).
-   Passo 2: completa a mesma linha (regime, carro, turnos).
+   Passo 2: completa a mesma linha (carro, marca, modelo, ano, lugares, regime, turnos).
    Variáveis: INSCRICOES_WEBAPP_URL (web app do Apps Script) e INSCRICOES_TOKEN (segredo partilhado com o script). */
 
 const REGIMES = ["Part-time", "Full-time"];
-const CARROS = ["Carro próprio", "Carro de frota", "Sem carro"];
+const CARROS = ["Próprio", "De frota", "Não tenho"];
+const LUGARES = ["5", "7"];
 const TURNOS = ["Madrugada", "Manhã", "Tarde", "Noite"];
 const ID_VALIDO = /^[A-Za-z0-9-]{8,64}$/;
 
@@ -117,8 +118,25 @@ export async function POST(req: Request) {
 
   const regime = REGIMES.includes(String(b.regime)) ? String(b.regime) : "";
   const carro = CARROS.includes(String(b.carro)) ? String(b.carro) : "";
+  const temCarro = carro === "Próprio" || carro === "De frota";
+  const marca = temCarro ? texto(b.marca, 40) : "";
+  const modelo = temCarro ? texto(b.modelo, 40) : "";
+  const anoTxt = temCarro ? texto(b.ano, 12) : "";
+  const anoNum = Number(anoTxt);
+  const ano = anoTxt === "Mais antigo" || (anoNum >= 2012 && anoNum <= new Date().getFullYear() + 1) ? anoTxt : "";
+  const lugares = temCarro && LUGARES.includes(String(b.lugares)) ? String(b.lugares) : "";
   const turnos = Array.isArray(b.turnos) ? b.turnos.map(String).filter((t) => TURNOS.includes(t)) : [];
-  const ok = await guardarNaFolha({ acao: "passo2", leadId, regime, carro, turnos: turnos.join(", ") });
+  const ok = await guardarNaFolha({
+    acao: "passo2",
+    leadId,
+    carro,
+    marca,
+    modelo,
+    ano,
+    lugares,
+    regime,
+    turnos: turnos.join(", "),
+  });
   if (!ok) return NextResponse.json({ ok: false }, { status: 502 });
 
   if (consentimentoCookies) {

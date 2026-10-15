@@ -47,20 +47,20 @@
 
 /* ── Topo ── */
 .inv-header {
-  padding: 22px 0 6px;
+  padding: 16px 0 4px;
 }
 .inv-header img {
   display: block;
-  width: 132px;
+  width: 118px;
   height: auto;
 }
 
 .inv-hero {
-  padding: 26px 0 8px;
+  padding: 14px 0 8px;
 }
 .inv-h1 {
   margin: 0;
-  font-size: clamp(46px, 13.2vw, 80px);
+  font-size: clamp(40px, 11.6vw, 80px);
   line-height: 0.94;
 }
 .inv-h1 span {
@@ -71,8 +71,8 @@
   margin-top: 0.12em;
 }
 .inv-sub {
-  margin: 18px 0 0;
-  font-size: 19px;
+  margin: 12px 0 0;
+  font-size: 18px;
   line-height: 1.4;
   color: var(--inv-white);
   max-width: 30ch;
@@ -133,7 +133,7 @@
 }
 
 .inv-cta-top {
-  margin: 30px 0 0;
+  margin: 20px 0 0;
 }
 
 /* ── Botão principal (um só pedido, repetido) ── */
@@ -374,9 +374,9 @@
 }
 .inv-check input {
   flex: none;
-  width: 22px;
-  height: 22px;
-  margin: 1px 0 0;
+  width: 26px;
+  height: 26px;
+  margin: 0;
   accent-color: var(--inv-yellow);
 }
 .inv-check a,
@@ -385,6 +385,11 @@
   color: var(--inv-yellow);
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+/* links dentro do texto: área de toque maior sem mexer no texto (padding em elemento inline) */
+.inv-check a,
+.inv-cookies a {
+  padding: 14px 2px;
 }
 .inv-garantias {
   list-style: none;
@@ -415,34 +420,6 @@
   overflow: hidden;
 }
 
-.inv-group {
-  margin: 0 0 20px;
-  padding: 0;
-  border: 0;
-}
-.inv-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-.inv-chip {
-  min-height: 48px;
-  padding: 10px 18px;
-  border: 1.5px solid #3a3a3a;
-  border-radius: 999px;
-  background: var(--inv-black);
-  color: var(--inv-white);
-  font: inherit;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
-}
-.inv-chip[aria-pressed="true"] {
-  background: var(--inv-yellow);
-  border-color: var(--inv-yellow);
-  color: var(--inv-black);
-}
 .inv-link-btn {
   display: block;
   margin: 14px auto 0;
@@ -465,6 +442,119 @@
   color: var(--inv-yellow);
 }
 
+/* ── Passo 2: quiz ── */
+.inv-quiz-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 10px;
+}
+.inv-quiz-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 0 12px 0 4px;
+  border: 0;
+  background: none;
+  color: var(--inv-white);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.inv-quiz-back svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.inv-quiz-back[disabled] {
+  visibility: hidden;
+}
+.inv-quiz-count {
+  font-size: 14px;
+  color: var(--inv-muted);
+}
+.inv-quiz-bar {
+  height: 6px;
+  margin: 0 0 22px;
+  border-radius: 3px;
+  background: var(--inv-line);
+  overflow: hidden;
+}
+.inv-quiz-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--inv-yellow);
+  transition: width 0.25s ease;
+}
+.inv-quiz-q {
+  margin: 0 0 16px;
+  font-size: 32px;
+  line-height: 1.02;
+}
+.inv-quiz-q:focus {
+  outline: none;
+}
+.inv-quiz-hint {
+  margin: -8px 0 14px;
+  font-size: 15px;
+  color: var(--inv-muted);
+}
+.inv-options {
+  display: grid;
+  gap: 10px;
+}
+.inv-options-grid {
+  grid-template-columns: 1fr 1fr;
+}
+.inv-options-years {
+  grid-template-columns: repeat(3, 1fr);
+}
+.inv-options-scroll {
+  max-height: 46vh;
+  overflow-y: auto;
+  padding: 2px 2px 26px;
+  overscroll-behavior: contain;
+  /* esbate o fundo da lista para se ver que há mais opções */
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 34px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 34px), transparent);
+}
+.inv-option {
+  min-height: 56px;
+  padding: 10px 14px;
+  border: 1.5px solid #3a3a3a;
+  border-radius: 14px;
+  background: var(--inv-black);
+  color: var(--inv-white);
+  font: inherit;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.15;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+.inv-option[aria-pressed="true"] {
+  background: var(--inv-yellow);
+  border-color: var(--inv-yellow);
+  color: var(--inv-black);
+}
+.inv-option-wide {
+  grid-column: 1 / -1;
+}
+.inv-search {
+  margin: 0 0 12px;
+}
+.inv-btn-next {
+  margin-top: 18px;
+}
+
 /* ── Rodapé ── */
 .inv-footer {
   margin-top: 64px;
@@ -474,6 +564,8 @@
   color: var(--inv-muted);
 }
 .inv-footer a {
+  display: inline-block;
+  padding: 12px 2px;
   color: var(--inv-muted);
 }
 .inv-footer p {
@@ -489,16 +581,16 @@
   z-index: 50;
   max-width: 540px;
   margin: 0 auto;
-  padding: 16px 16px 14px;
+  padding: 12px 14px;
   border: 1px solid var(--inv-line);
   border-radius: 16px;
   background: var(--inv-graphite);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
-  font-size: 15px;
-  line-height: 1.45;
+  font-size: 14px;
+  line-height: 1.4;
 }
 .inv-cookies p {
-  margin: 0 0 12px;
+  margin: 0 0 10px;
 }
 .inv-cookies-actions {
   display: grid;
@@ -506,7 +598,7 @@
   gap: 10px;
 }
 .inv-cookies-actions button {
-  min-height: 46px;
+  min-height: 44px;
   border-radius: 12px;
   font: inherit;
   font-weight: 600;

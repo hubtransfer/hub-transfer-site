@@ -3,19 +3,17 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { idsMeta, lerConsentimento, novoEventId, registarEvento } from "../_lib/medicao";
+import QuizPasso2, { type RespostasPasso2 } from "./QuizPasso2";
 
 /* Pré-inscrição em dois passos.
    Passo 1 guarda logo o contacto (nome, WhatsApp, concelho + consentimento).
-   Passo 2 são só toques: regime, carro, turnos. Nunca se pergunta idade, nacionalidade, género nem situação de imigração. */
+   Passo 2 é um quiz de toques (carro, marca, modelo, ano, lugares, regime, turnos), enviado só no fim. Nunca se pergunta idade, nacionalidade, género nem situação de imigração. */
 
 const CONCELHOS = [
   "Lisboa", "Amadora", "Sintra", "Oeiras", "Cascais", "Loures", "Odivelas", "Vila Franca de Xira", "Mafra",
   "Almada", "Seixal", "Barreiro", "Moita", "Montijo", "Alcochete", "Palmela", "Sesimbra", "Setúbal",
 ];
 
-const REGIMES = ["Part-time", "Full-time"] as const;
-const CARROS = ["Carro próprio", "Carro de frota", "Sem carro"] as const;
-const TURNOS = ["Madrugada", "Manhã", "Tarde", "Noite"] as const;
 
 type Passo = 1 | 2 | 3;
 type Erros = Partial<Record<"nome" | "whatsapp" | "concelho" | "consentimento" | "envio", string>>;
@@ -39,9 +37,6 @@ export default function InscricaoForm({ garantias }: { garantias: string[] }) {
   const [whatsapp, setWhatsapp] = useState("");
   const [concelho, setConcelho] = useState("");
   const [consentimento, setConsentimento] = useState(false);
-  const [regime, setRegime] = useState<string | null>(null);
-  const [carro, setCarro] = useState<string | null>(null);
-  const [turnos, setTurnos] = useState<string[]>([]);
   const [erros, setErros] = useState<Erros>({});
   const [aEnviar, setAEnviar] = useState(false);
   const leadId = useRef<string>("");
@@ -90,8 +85,7 @@ export default function InscricaoForm({ garantias }: { garantias: string[] }) {
     }
   }
 
-  async function submeterPasso2(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  async function concluirPasso2(r: RespostasPasso2) {
     setAEnviar(true);
     const eventId = novoEventId();
     try {
@@ -99,9 +93,7 @@ export default function InscricaoForm({ garantias }: { garantias: string[] }) {
         passo: 2,
         leadId: leadId.current,
         eventId,
-        regime,
-        carro,
-        turnos,
+        ...r,
         consentimentoCookies: lerConsentimento() === "sim",
       });
       registarEvento("CompleteRegistration", eventId);
@@ -112,9 +104,6 @@ export default function InscricaoForm({ garantias }: { garantias: string[] }) {
       irPara(3);
     }
   }
-
-  const alternarTurno = (t: string) =>
-    setTurnos((atual) => (atual.includes(t) ? atual.filter((x) => x !== t) : [...atual, t]));
 
   return (
     <div className="inv-form-card" ref={topo}>
@@ -205,57 +194,12 @@ export default function InscricaoForm({ garantias }: { garantias: string[] }) {
       )}
 
       {passo === 2 && (
-        <form onSubmit={submeterPasso2}>
+        <>
           <p className="inv-form-progress" role="status">
-            O teu contacto já está guardado. Só mais três toques, sem escrever nada.
+            O teu contacto já está guardado. Agora umas perguntas rápidas, só com toques.
           </p>
-
-          <fieldset className="inv-group">
-            <legend className="inv-legend">Como queres trabalhar?</legend>
-            <div className="inv-chips">
-              {REGIMES.map((r) => (
-                <button key={r} type="button" className="inv-chip" aria-pressed={regime === r} onClick={() => setRegime(r)}>
-                  {r}
-                </button>
-              ))}
-            </div>
-          </fieldset>
-
-          <fieldset className="inv-group">
-            <legend className="inv-legend">Carro</legend>
-            <div className="inv-chips">
-              {CARROS.map((c) => (
-                <button key={c} type="button" className="inv-chip" aria-pressed={carro === c} onClick={() => setCarro(c)}>
-                  {c}
-                </button>
-              ))}
-            </div>
-          </fieldset>
-
-          <fieldset className="inv-group">
-            <legend className="inv-legend">Turnos livres (podes escolher vários)</legend>
-            <div className="inv-chips">
-              {TURNOS.map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  className="inv-chip"
-                  aria-pressed={turnos.includes(t)}
-                  onClick={() => alternarTurno(t)}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-          </fieldset>
-
-          <button type="submit" className="inv-btn" disabled={aEnviar}>
-            {aEnviar ? "A guardar…" : "Concluir inscrição"}
-          </button>
-          <button type="button" className="inv-link-btn" onClick={() => irPara(3)}>
-            Agora não, fica só o contacto
-          </button>
-        </form>
+          <QuizPasso2 aEnviar={aEnviar} onConcluir={concluirPasso2} onSaltar={() => irPara(3)} />
+        </>
       )}
 
       {passo === 3 && (

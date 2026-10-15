@@ -3,7 +3,7 @@
  *
  * Vive numa folha Google própria ("Candidatos Inverno"), separada da HUB Central.
  * Passo 1: cria a linha e avisa por WhatsApp (Z-API) e por e-mail.
- * Passo 2: completa a mesma linha (regime, carro, turnos).
+ * Passo 2: completa a mesma linha (carro, marca, modelo, ano, lugares, regime, turnos).
  *
  * Propriedades do script (Definições do projeto → Propriedades do script):
  *   TOKEN              segredo partilhado com o site (o mesmo valor de INSCRICOES_TOKEN no Vercel)
@@ -17,8 +17,8 @@
 
 var SEPARADOR = 'Inscrições';
 var CABECALHOS = [
-  'Data', 'ID', 'Nome', 'WhatsApp', 'Concelho', 'Regime', 'Carro', 'Turnos', 'Passo', 'Consentimento',
-  'Página', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'Atualizado', 'Estado'
+  'Data', 'ID', 'Nome', 'WhatsApp', 'Concelho', 'Carro', 'Marca', 'Modelo', 'Ano', 'Lugares', 'Regime', 'Turnos',
+  'Passo', 'Consentimento', 'Página', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'Atualizado', 'Estado'
 ];
 
 function doPost(e) {
@@ -39,7 +39,7 @@ function doPost(e) {
       if (!procurarLinha(folha, d.leadId)) {        // um reenvio do mesmo passo não duplica a linha
         var agora = new Date();
         folha.appendRow([
-          agora, d.leadId, seguro(d.nome), "'" + seguro(d.whatsapp), seguro(d.concelho), '', '', '', 1,
+          agora, d.leadId, seguro(d.nome), "'" + seguro(d.whatsapp), seguro(d.concelho), '', '', '', '', '', '', '', 1,
           seguro(d.consentimento), seguro(d.pagina), seguro(d.utm_source), seguro(d.utm_medium),
           seguro(d.utm_campaign), seguro(d.utm_content), agora, 'Novo'
         ]);
@@ -50,8 +50,12 @@ function doPost(e) {
     if (d.acao === 'passo2') {
       var linha = procurarLinha(folha, d.leadId);
       if (!linha) return resposta({ ok: false, erro: 'id' });
-      folha.getRange(linha, 6, 1, 4).setValues([[seguro(d.regime), seguro(d.carro), seguro(d.turnos), 2]]);
-      folha.getRange(linha, 16).setValue(new Date());
+      // colunas 6 a 13: Carro, Marca, Modelo, Ano, Lugares, Regime, Turnos, Passo
+      folha.getRange(linha, 6, 1, 8).setValues([[
+        seguro(d.carro), seguro(d.marca), seguro(d.modelo), seguro(d.ano), seguro(d.lugares),
+        seguro(d.regime), seguro(d.turnos), 2
+      ]]);
+      folha.getRange(linha, 20).setValue(new Date());           // Atualizado
       return resposta({ ok: true });
     }
     return resposta({ ok: false, erro: 'acao' });
