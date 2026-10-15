@@ -1,0 +1,618 @@
+/* Campanha de inverno — identidade do filme (Barlow + amarelo HUB), só para /inverno.
+   Tokens próprios desta rota; não altera os tokens do resto do site. */
+
+.inv {
+  --inv-black: #000000;
+  --inv-graphite: #141414;
+  --inv-line: #2a2a2a;
+  --inv-yellow: #f4d032;
+  --inv-yellow-hover: #e2bf22;
+  --inv-white: #f5f5f5;
+  --inv-muted: #a3a3a3;
+  --inv-bubble: #ffffff;
+  --inv-bubble-text: #141414;
+  --inv-bubble-name: #1c785a;
+  --inv-bubble-time: #6b6b6b;
+  --inv-error: #ff8a80;
+
+  --inv-gutter: 20px;
+  --inv-max: 560px;
+
+  min-height: 100vh;
+  background: var(--inv-black);
+  color: var(--inv-white);
+  font-family: var(--inv-font-text), "Helvetica Neue", Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.inv *:focus-visible {
+  outline: 3px solid var(--inv-yellow);
+  outline-offset: 3px;
+}
+
+.inv-wrap {
+  width: 100%;
+  max-width: var(--inv-max);
+  margin: 0 auto;
+  padding: 0 var(--inv-gutter);
+}
+
+.inv-display {
+  font-family: var(--inv-font-display), "Arial Narrow", sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.005em;
+}
+
+/* ── Topo ── */
+.inv-header {
+  padding: 22px 0 6px;
+}
+.inv-header img {
+  display: block;
+  width: 132px;
+  height: auto;
+}
+
+.inv-hero {
+  padding: 26px 0 8px;
+}
+.inv-h1 {
+  margin: 0;
+  font-size: clamp(46px, 13.2vw, 80px);
+  line-height: 0.94;
+}
+.inv-h1 span {
+  display: block;
+}
+.inv-h1 .inv-h1-b {
+  color: var(--inv-yellow);
+  margin-top: 0.12em;
+}
+.inv-sub {
+  margin: 18px 0 0;
+  font-size: 19px;
+  line-height: 1.4;
+  color: var(--inv-white);
+  max-width: 30ch;
+}
+
+/* O colete + o balão das 9:30 (a demonstração) */
+.inv-demo {
+  position: relative;
+  margin: 30px 0 0;
+  height: 330px;
+}
+.inv-demo-colete {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 62%;
+  height: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--inv-graphite);
+}
+.inv-demo-colete img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 30%;
+}
+.inv-bubble {
+  position: absolute;
+  left: 0;
+  bottom: 22px;
+  width: min(300px, 82%);
+  padding: 14px 16px 12px;
+  border-radius: 18px 18px 18px 6px;
+  background: var(--inv-bubble);
+  color: var(--inv-bubble-text);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55);
+  font-size: 17px;
+  line-height: 1.35;
+}
+.inv-bubble-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+.inv-bubble-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--inv-bubble-name);
+}
+.inv-bubble-time {
+  font-size: 12px;
+  color: var(--inv-bubble-time);
+}
+.inv-bubble p {
+  margin: 0;
+}
+
+.inv-cta-top {
+  margin: 30px 0 0;
+}
+
+/* ── Botão principal (um só pedido, repetido) ── */
+.inv-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 58px;
+  padding: 14px 22px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--inv-yellow);
+  color: var(--inv-black);
+  font-family: var(--inv-font-display), "Arial Narrow", sans-serif;
+  font-weight: 800;
+  font-size: 24px;
+  line-height: 1.1;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+.inv-btn:hover {
+  background: var(--inv-yellow-hover);
+}
+.inv-btn:active {
+  transform: translateY(1px);
+}
+.inv-btn[disabled] {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+/* ── Secções ── */
+.inv-section {
+  padding: 54px 0 0;
+}
+.inv-h2 {
+  margin: 0 0 18px;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.inv-ganhos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--inv-line);
+}
+.inv-ganhos li {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--inv-line);
+  font-family: var(--inv-font-display), "Arial Narrow", sans-serif;
+  font-weight: 800;
+  font-size: 30px;
+  line-height: 1.05;
+}
+.inv-ganhos li::before {
+  content: "";
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: var(--inv-yellow);
+  transform: translateY(-2px);
+}
+
+/* Vídeo: capa leve; o ficheiro só carrega ao tocar */
+.inv-video {
+  position: relative;
+  width: min(100%, 340px);
+  aspect-ratio: 9 / 16;
+  margin: 0 auto;
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--inv-graphite);
+}
+.inv-video button {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.inv-video img,
+.inv-video video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.inv-play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 78px;
+  height: 78px;
+  margin: -39px 0 0 -39px;
+  border-radius: 50%;
+  background: var(--inv-yellow);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+.inv-play svg {
+  width: 30px;
+  height: 30px;
+  margin-left: 5px;
+  fill: var(--inv-black);
+}
+.inv-video-note {
+  margin: 12px 0 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--inv-muted);
+}
+
+/* Faixa amarela: a seleção (o bordão) */
+.inv-band {
+  margin-top: 54px;
+  padding: 40px 0;
+  background: var(--inv-yellow);
+  color: var(--inv-black);
+}
+.inv-band p {
+  margin: 0;
+  font-size: 34px;
+  line-height: 1.04;
+}
+
+.inv-text {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--inv-white);
+}
+.inv-text + .inv-text {
+  margin-top: 12px;
+}
+
+.inv-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: passo;
+}
+.inv-steps li {
+  position: relative;
+  padding: 0 0 0 54px;
+  font-size: 18px;
+  line-height: 1.5;
+  counter-increment: passo;
+}
+.inv-steps li + li {
+  margin-top: 18px;
+}
+.inv-steps li::before {
+  content: counter(passo);
+  position: absolute;
+  left: 0;
+  top: -2px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--inv-yellow);
+  color: var(--inv-yellow);
+  font-family: var(--inv-font-display), "Arial Narrow", sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  display: grid;
+  place-items: center;
+}
+
+/* ── Inscrição ── */
+.inv-form-card {
+  margin-top: 6px;
+  padding: 24px 18px 22px;
+  border: 1px solid var(--inv-line);
+  border-radius: 20px;
+  background: var(--inv-graphite);
+}
+.inv-form-progress {
+  margin: 0 0 16px;
+  font-size: 14px;
+  color: var(--inv-muted);
+}
+.inv-field {
+  margin: 0 0 16px;
+}
+.inv-field label,
+.inv-legend {
+  display: block;
+  margin: 0 0 7px;
+  font-weight: 600;
+  font-size: 16px;
+}
+.inv-input {
+  width: 100%;
+  height: 54px;
+  padding: 0 14px;
+  border: 1px solid #3a3a3a;
+  border-radius: 12px;
+  background: var(--inv-black);
+  color: var(--inv-white);
+  font: inherit;
+  font-size: 17px;
+}
+.inv-input::placeholder {
+  color: #7a7a7a;
+}
+.inv-input:focus {
+  border-color: var(--inv-yellow);
+  outline: none;
+}
+.inv-input[aria-invalid="true"] {
+  border-color: var(--inv-error);
+}
+.inv-error {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--inv-error);
+}
+.inv-check {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 4px 0 18px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--inv-white);
+}
+.inv-check input {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin: 1px 0 0;
+  accent-color: var(--inv-yellow);
+}
+.inv-check a,
+.inv-cookies a,
+.inv-legal a {
+  color: var(--inv-yellow);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.inv-garantias {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+}
+.inv-garantias li {
+  position: relative;
+  padding: 3px 0 3px 26px;
+  font-size: 16px;
+}
+.inv-garantias li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 10px;
+  width: 12px;
+  height: 7px;
+  border-left: 2.5px solid var(--inv-yellow);
+  border-bottom: 2.5px solid var(--inv-yellow);
+  transform: rotate(-45deg);
+}
+.inv-hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.inv-group {
+  margin: 0 0 20px;
+  padding: 0;
+  border: 0;
+}
+.inv-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.inv-chip {
+  min-height: 48px;
+  padding: 10px 18px;
+  border: 1.5px solid #3a3a3a;
+  border-radius: 999px;
+  background: var(--inv-black);
+  color: var(--inv-white);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+.inv-chip[aria-pressed="true"] {
+  background: var(--inv-yellow);
+  border-color: var(--inv-yellow);
+  color: var(--inv-black);
+}
+.inv-link-btn {
+  display: block;
+  margin: 14px auto 0;
+  padding: 8px;
+  border: 0;
+  background: none;
+  color: var(--inv-muted);
+  font: inherit;
+  font-size: 15px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.inv-done {
+  padding: 8px 0 4px;
+}
+.inv-done h3 {
+  margin: 0 0 10px;
+  font-size: 38px;
+  line-height: 1;
+  color: var(--inv-yellow);
+}
+
+/* ── Rodapé ── */
+.inv-footer {
+  margin-top: 64px;
+  padding: 26px 0 120px;
+  border-top: 1px solid var(--inv-line);
+  font-size: 14px;
+  color: var(--inv-muted);
+}
+.inv-footer a {
+  color: var(--inv-muted);
+}
+.inv-footer p {
+  margin: 0 0 6px;
+}
+
+/* ── Aviso de cookies ── */
+.inv-cookies {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 50;
+  max-width: 540px;
+  margin: 0 auto;
+  padding: 16px 16px 14px;
+  border: 1px solid var(--inv-line);
+  border-radius: 16px;
+  background: var(--inv-graphite);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
+  font-size: 15px;
+  line-height: 1.45;
+}
+.inv-cookies p {
+  margin: 0 0 12px;
+}
+.inv-cookies-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.inv-cookies-actions button {
+  min-height: 46px;
+  border-radius: 12px;
+  font: inherit;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+}
+.inv-cookies-accept {
+  border: 0;
+  background: var(--inv-yellow);
+  color: var(--inv-black);
+}
+.inv-cookies-refuse {
+  border: 1.5px solid #4a4a4a;
+  background: transparent;
+  color: var(--inv-white);
+}
+
+/* ── Página de privacidade ── */
+.inv-legal {
+  padding: 30px 0 0;
+}
+.inv-legal h1 {
+  margin: 0 0 8px;
+  font-size: 42px;
+  line-height: 1;
+}
+.inv-legal h2 {
+  margin: 30px 0 8px;
+  font-size: 26px;
+  line-height: 1.05;
+}
+.inv-legal p,
+.inv-legal li {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* ── O único momento animado: a entrada do topo (ritmo do final do filme) ── */
+@media (prefers-reduced-motion: no-preference) {
+  .inv-h1 span {
+    animation: inv-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .inv-h1 .inv-h1-b {
+    animation-delay: 0.16s;
+  }
+  .inv-sub {
+    animation: inv-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.32s both;
+  }
+  .inv-demo-colete {
+    animation: inv-fade 0.9s ease-out 0.35s both;
+  }
+  .inv-bubble {
+    animation: inv-bubble 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.95s both;
+  }
+}
+@keyframes inv-rise {
+  from {
+    opacity: 0.18;
+    transform: translateY(26px);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+@keyframes inv-fade {
+  from {
+    opacity: 0.2;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes inv-bubble {
+  from {
+    opacity: 0;
+    transform: translate(-18px, 14px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Ecrãs largos: o topo passa a duas colunas */
+@media (min-width: 900px) {
+  .inv {
+    --inv-max: 1040px;
+  }
+  .inv-hero {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 56px;
+    align-items: end;
+    padding-top: 48px;
+  }
+  .inv-h1 {
+    font-size: 92px;
+  }
+  .inv-demo {
+    margin-top: 0;
+    height: 440px;
+  }
+  .inv-wrap.inv-narrow {
+    max-width: 560px;
+  }
+}
