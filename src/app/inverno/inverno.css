@@ -389,7 +389,7 @@
 /* links dentro do texto: área de toque maior sem mexer no texto (padding em elemento inline) */
 .inv-check a,
 .inv-cookies a {
-  padding: 14px 2px;
+  padding: 14px 0;
 }
 .inv-garantias {
   list-style: none;
