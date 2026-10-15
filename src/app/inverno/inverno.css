@@ -636,55 +636,6 @@
   line-height: 1.6;
 }
 
-/* ── O único momento animado: a entrada do topo (ritmo do final do filme) ── */
-@media (prefers-reduced-motion: no-preference) {
-  .inv-h1 span {
-    animation: inv-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-  .inv-h1 .inv-h1-b {
-    animation-delay: 0.16s;
-  }
-  .inv-sub {
-    animation: inv-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.32s both;
-  }
-  .inv-demo-colete {
-    animation: inv-fade 0.9s ease-out 0.35s both;
-  }
-  .inv-bubble {
-    animation: inv-bubble 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.95s both;
-  }
-}
-@keyframes inv-rise {
-  from {
-    opacity: 0.18;
-    transform: translateY(26px);
-    filter: blur(8px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-    filter: blur(0);
-  }
-}
-@keyframes inv-fade {
-  from {
-    opacity: 0.2;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes inv-bubble {
-  from {
-    opacity: 0;
-    transform: translate(-18px, 14px) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
 /* Ecrãs largos: o topo passa a duas colunas */
 @media (min-width: 900px) {
   .inv {

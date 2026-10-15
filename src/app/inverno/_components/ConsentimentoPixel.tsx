@@ -37,7 +37,7 @@ export default function ConsentimentoPixel() {
     <div className="inv-cookies" role="dialog" aria-live="polite" aria-label="Aviso de cookies">
       <p>
         Usamos cookies da Meta para saber que anúncios trazem motoristas até aqui. Só os ativamos se aceitares.{" "}
-        <Link href="/inverno/privacidade">Saber mais</Link>
+        <Link href="/inverno/privacidade" prefetch={false}>Saber mais</Link>
       </p>
       <div className="inv-cookies-actions">
         <button type="button" className="inv-cookies-refuse" onClick={() => escolher("nao")}>

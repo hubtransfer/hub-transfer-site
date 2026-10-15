@@ -17,7 +17,7 @@ export default function InvernoPage() {
     <main>
       <div className="inv-wrap">
         <header className="inv-header">
-          <Image src="/images/logo.png" alt="HUB Transfer" width={828} height={204} priority />
+          <Image src="/images/logo.png" alt="HUB Transfer" width={828} height={204} sizes="118px" priority />
         </header>
 
         <section className="inv-hero" aria-labelledby="inv-titulo">
@@ -99,7 +99,7 @@ export default function InvernoPage() {
         <footer className="inv-footer">
           <p>HUB Transfer · Jornadas e Possibilidades, Unipessoal Lda</p>
           <p>
-            <Link href="/inverno/privacidade">Privacidade</Link> · <PreferenciasCookies />
+            <Link href="/inverno/privacidade" prefetch={false}>Privacidade</Link> · <PreferenciasCookies />
           </p>
         </footer>
       </div>

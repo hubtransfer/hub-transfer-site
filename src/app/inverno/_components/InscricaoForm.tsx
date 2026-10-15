@@ -175,7 +175,7 @@ export default function InscricaoForm({ garantias }: { garantias: string[] }) {
             />
             <span>
               Autorizo a HUB Transfer a guardar estes dados e a contactar-me por WhatsApp ou telefone sobre esta
-              inscrição. Li a <Link href="/inverno/privacidade">política de privacidade</Link>.
+              inscrição. Li a <Link href="/inverno/privacidade" prefetch={false}>política de privacidade</Link>.
             </span>
           </label>
           {erros.consentimento && <p className="inv-error" style={{ marginTop: -10, marginBottom: 14 }}>{erros.consentimento}</p>}
