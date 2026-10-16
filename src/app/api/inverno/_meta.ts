@@ -26,10 +26,13 @@ export type EventoMeta = {
   cidade?: string;
 };
 
-export async function enviarEventoMeta(e: EventoMeta): Promise<void> {
+/** Resultado do envio: "sem-config", o código HTTP da Meta ou o erro de rede. */
+export type ResultadoMeta = { estado: string; recebidos?: number };
+
+export async function enviarEventoMeta(e: EventoMeta): Promise<ResultadoMeta> {
   const pixel = process.env.NEXT_PUBLIC_META_PIXEL_ID;
   const token = process.env.META_CAPI_TOKEN;
-  if (!pixel || !token) return;
+  if (!pixel || !token) return { estado: "sem-config" };
 
   const user_data: Record<string, unknown> = {
     client_ip_address: e.ip,
@@ -64,10 +67,24 @@ export async function enviarEventoMeta(e: EventoMeta): Promise<void> {
       body: JSON.stringify(corpo),
       signal: AbortSignal.timeout(4000),
     });
-    if (!r.ok) console.warn("[inverno] API de Conversões respondeu", r.status, (await r.text()).slice(0, 300));
+    const t = await r.text();
+    if (!r.ok) console.warn("[inverno] API de Conversões respondeu", r.status, t.slice(0, 300));
+    let recebidos: number | undefined;
+    try {
+      recebidos = JSON.parse(t).events_received;
+    } catch {
+      /* resposta sem JSON */
+    }
+    return { estado: String(r.status), recebidos };
   } catch (err) {
     console.warn("[inverno] API de Conversões falhou:", (err as Error).message);
+    return { estado: (err as Error).name };
   }
+}
+
+/** Só em pré-visualização (com META_TEST_EVENT_CODE): junta o resultado da Meta à resposta, para os testes. */
+export function diagnostico(m: ResultadoMeta | undefined) {
+  return process.env.META_TEST_EVENT_CODE && m ? { meta: m } : {};
 }
 
 export function dadosPedido(req: Request) {

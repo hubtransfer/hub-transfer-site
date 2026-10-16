@@ -84,10 +84,20 @@ export function iniciarPixel() {
     document.head.appendChild(s);
   }
 
+  // Sem eventos automáticos (cliques nos botões) nem correspondência avançada automática: só enviamos o que está no aviso de privacidade.
+  window.fbq!("set", "autoConfig", false, PIXEL_ID);
   window.fbq!("init", PIXEL_ID);
   const eventId = novoEventId();
   window.fbq!("track", "PageView", {}, { eventID: eventId });
-  void enviarEventoServidor("PageView", eventId);
+  void esperarFbp().then(() => enviarEventoServidor("PageView", eventId));
+}
+
+/** O cookie _fbp só existe depois de o script da Meta carregar; espera por ele até 3 s (sem ele, o evento segue na mesma). */
+async function esperarFbp(limite = 3000) {
+  const inicio = Date.now();
+  while (!lerCookie("_fbp") && Date.now() - inicio < limite) {
+    await new Promise((r) => setTimeout(r, 100));
+  }
 }
 
 /** Evento no browser, com o mesmo eventID que o servidor envia (a Meta junta os dois). */

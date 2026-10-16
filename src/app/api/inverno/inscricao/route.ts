@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { dadosPedido, enviarEventoMeta, texto } from "../_meta";
+import { dadosPedido, diagnostico, enviarEventoMeta, texto, type ResultadoMeta } from "../_meta";
 
 /* Pré-inscrição de motoristas (campanha de inverno).
    Passo 1: cria a linha na folha "Candidatos Inverno" e avisa o Junior (WhatsApp + e-mail, no Apps Script).
@@ -99,8 +99,9 @@ export async function POST(req: Request) {
     });
     if (!ok) return NextResponse.json({ ok: false }, { status: 502 });
 
+    let meta: ResultadoMeta | undefined;
     if (consentimentoCookies) {
-      await enviarEventoMeta({
+      meta = await enviarEventoMeta({
         nome: "Lead",
         eventId,
         url,
@@ -113,7 +114,7 @@ export async function POST(req: Request) {
         cidade: concelho,
       });
     }
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, ...diagnostico(meta) });
   }
 
   const regime = REGIMES.includes(String(b.regime)) ? String(b.regime) : "";
@@ -139,8 +140,9 @@ export async function POST(req: Request) {
   });
   if (!ok) return NextResponse.json({ ok: false }, { status: 502 });
 
+  let meta: ResultadoMeta | undefined;
   if (consentimentoCookies) {
-    await enviarEventoMeta({ nome: "CompleteRegistration", eventId, url, ip, userAgent, fbp, fbc });
+    meta = await enviarEventoMeta({ nome: "CompleteRegistration", eventId, url, ip, userAgent, fbp, fbc });
   }
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, ...diagnostico(meta) });
 }

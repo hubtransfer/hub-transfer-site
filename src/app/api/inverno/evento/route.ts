@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { dadosPedido, enviarEventoMeta, texto } from "../_meta";
+import { dadosPedido, diagnostico, enviarEventoMeta, texto } from "../_meta";
 
 /* Visita à página (PageView) para a API de Conversões, com o mesmo eventID do pixel.
    Só é chamada pelo browser depois de a pessoa aceitar os cookies. */
@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false }, { status: 400 });
   }
   const { ip, userAgent } = dadosPedido(req);
-  await enviarEventoMeta({
+  const meta = await enviarEventoMeta({
     nome: "PageView",
     eventId,
     url: texto(b.url, 600),
@@ -25,5 +25,5 @@ export async function POST(req: Request) {
     fbp: texto(b.fbp, 200) || undefined,
     fbc: texto(b.fbc, 300) || undefined,
   });
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, ...diagnostico(meta) });
 }
