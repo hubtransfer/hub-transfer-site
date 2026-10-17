@@ -658,4 +658,34 @@
   .inv-wrap.inv-narrow {
     max-width: 560px;
   }
+  /* aviso de cookies: barra fina a toda a largura, texto e botões na mesma linha */
+  .inv-cookies {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-width: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 8px 24px;
+    border-width: 1px 0 0;
+    border-radius: 0;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.45);
+  }
+  .inv-cookies p {
+    margin: 0;
+  }
+  .inv-cookies a {
+    padding: 0;
+  }
+  .inv-cookies-actions {
+    flex: none;
+    display: flex;
+  }
+  .inv-cookies-actions button {
+    min-height: 36px;
+    padding: 0 18px;
+    font-size: 14px;
+  }
 }

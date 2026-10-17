@@ -3,6 +3,9 @@ import { createHash } from "node:crypto";
 /* API de Conversões da Meta (servidor). Só é chamada com consentimento de cookies.
    Variáveis: NEXT_PUBLIC_META_PIXEL_ID, META_CAPI_TOKEN, META_API_VERSION (opcional), META_TEST_EVENT_CODE (opcional). */
 
+/** Código de "Testar eventos" da Meta: nunca em Production, mesmo que a variável lá apareça por engano. */
+const codigoTeste = () => (process.env.VERCEL_ENV === "production" ? "" : process.env.META_TEST_EVENT_CODE || "");
+
 const sha = (v: string) => createHash("sha256").update(v.trim().toLowerCase()).digest("hex");
 
 /** Telefone em formato internacional só com dígitos (números portugueses de 9 dígitos ganham o 351). */
@@ -57,7 +60,8 @@ export async function enviarEventoMeta(e: EventoMeta): Promise<ResultadoMeta> {
       },
     ],
   };
-  if (process.env.META_TEST_EVENT_CODE) corpo.test_event_code = process.env.META_TEST_EVENT_CODE;
+  const teste = codigoTeste();
+  if (teste) corpo.test_event_code = teste;
 
   const versao = process.env.META_API_VERSION || "v23.0";
   try {
@@ -82,9 +86,9 @@ export async function enviarEventoMeta(e: EventoMeta): Promise<ResultadoMeta> {
   }
 }
 
-/** Só em pré-visualização (com META_TEST_EVENT_CODE): junta o resultado da Meta à resposta, para os testes. */
+/** Só em pré-visualização (com META_TEST_EVENT_CODE, nunca em Production): junta o resultado da Meta à resposta, para os testes. */
 export function diagnostico(m: ResultadoMeta | undefined) {
-  return process.env.META_TEST_EVENT_CODE && m ? { meta: m } : {};
+  return codigoTeste() && m ? { meta: m } : {};
 }
 
 export function dadosPedido(req: Request) {
