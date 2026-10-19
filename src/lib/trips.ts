@@ -511,7 +511,7 @@ export function isNoShowViagem(v: { status?: unknown; statusMotorista?: unknown 
 
 /** Estado em maiúsculas e sem acentos: «Cancelada», «CANCELADO», «cancelação» comparam-se igual. */
 function normalizarEstado(valor: unknown): string {
-  return String(valor ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase();
+  return String(valor ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
 }
 
 /**
