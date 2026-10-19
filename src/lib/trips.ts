@@ -505,19 +505,27 @@ export function calcFlightProgress(depTime: string, arrTime: string): number {
  * estado (R ou BD/56) contiver NO-SHOW/NO_SHOW. Blindado contra null/número.
  */
 export function isNoShowViagem(v: { status?: unknown; statusMotorista?: unknown }): boolean {
-  const re = /NO[-_\s]?SHOW/i;
-  return re.test(String(v?.status ?? '')) || re.test(String(v?.statusMotorista ?? ''));
+  const re = /NO[-_\s]?SHOW/;
+  return re.test(normalizarEstado(v?.status)) || re.test(normalizarEstado(v?.statusMotorista));
 }
 
-/** CANCELADA — a coluna R (`status`) diz «Cancelado». A linha fica na folha. */
-export function isCanceladaViagem(v: { status?: unknown }): boolean {
-  return /CANCEL/i.test(String(v?.status ?? ''));
+/** Estado em maiúsculas e sem acentos: «Cancelada», «CANCELADO», «cancelação» comparam-se igual. */
+function normalizarEstado(valor: unknown): string {
+  return String(valor ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase();
 }
 
 /**
- * Desfecho de uma viagem que não se fez. Cancelada ganha: o backend nunca
- * marca no-show numa viagem cancelada.
+ * CANCELADA — a coluna R (`status`) diz «Cancelado» (Talixo, HeyCars, site
+ * ou à mão; qualquer maiúscula ou acento). A linha fica na folha. Um no-show
+ * nunca é cancelada. Regra única do selo, das listas, dos contadores e dos
+ * resumos: no admin a cancelada sai do plano do dia e das contas e fica só
+ * em «Canceladas»; na app do motorista continua visível com o selo.
  */
+export function isCanceladaViagem(v: { status?: unknown; statusMotorista?: unknown }): boolean {
+  return /CANCEL/.test(normalizarEstado(v?.status)) && !isNoShowViagem(v);
+}
+
+/** Desfecho de uma viagem que não se fez. Um no-show nunca é cancelada. */
 export type Desfecho = 'cancelada' | 'noshow';
 export function desfechoViagem(v: { status?: unknown; statusMotorista?: unknown }): Desfecho | null {
   if (isCanceladaViagem(v)) return 'cancelada';

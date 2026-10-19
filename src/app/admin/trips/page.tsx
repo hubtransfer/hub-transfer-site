@@ -24,6 +24,7 @@ import {
   dateToISO,
   isNoShowViagem,
   isCanceladaViagem,
+  getSourceLabel,
 } from "@/lib/trips";
 import { validateLogin, getSession } from "@/lib/auth";
 import ChangePasswordModal from "@/components/shared/ChangePasswordModal";
@@ -258,6 +259,8 @@ export default function TripsPage() {
   /* ================================================================ */
 
   const info = TAB_INFO[store.currentTab];
+  // Passadas de outra data: as canceladas não entram (ficam só em «Canceladas»)
+  const pastPlano = store.pastViagens.filter((v) => !isCanceladaViagem(v));
 
   if (!authChecked) {
     return (
@@ -525,6 +528,9 @@ export default function TripsPage() {
                   <div className="text-center py-16">
                     <div className="text-4xl mb-3 opacity-30">{"\u{1F5D3}"}</div>
                     <p className="text-zinc-500 text-sm">Nenhuma viagem para esta data</p>
+                    {store.diaCanceladaList.length > 0 && (
+                      <p className="text-zinc-600 text-xs mt-1">{store.diaCanceladaList.length} cancelada(s) em «Canceladas»</p>
+                    )}
                   </div>
                 );
                 if (filtered.length === 0) return (
@@ -574,7 +580,7 @@ export default function TripsPage() {
               {store.pastLoading && <span className="text-xs text-hub-gold animate-pulse font-mono">A carregar...</span>}
               {store.pastDate && !store.pastLoading && (
                 <span className="text-xs text-zinc-500 font-mono">
-                  {store.pastViagens.length} viagens em {store.pastDate}
+                  {pastPlano.length} viagens em {store.pastDate}
                 </span>
               )}
             </div>
@@ -617,12 +623,12 @@ export default function TripsPage() {
             {/* Fetched past viagens for selected date */}
             {store.pastDate && !store.pastLoading && (
               <>
-                {store.pastViagens.length === 0 ? (
+                {pastPlano.length === 0 ? (
                   <div className="text-center py-10">
                     <p className="text-zinc-500 text-sm">Nenhuma viagem para {store.pastDate}</p>
                   </div>
                 ) : (
-                  store.pastViagens.map((viagem) => {
+                  pastPlano.map((viagem) => {
                     const vId = viagem.id || (viagem.client || "x").replace(/\W/g, "");
                     const tipo = detectTipo(viagem.origin || "", viagem.flight || "", viagem.type);
                     const hora = cleanHora(viagem.pickupTime || "");
@@ -671,42 +677,48 @@ export default function TripsPage() {
           </div>
         )}
 
-        {/* ── CANCELLED TAB — no-shows ── */}
+        {/* ── CANCELLED TAB — canceladas (fora do plano e das contas) + no-shows ── */}
         {store.currentTab === "cancelled" && (
           <div className="px-4 sm:px-6 space-y-2 pb-4">
-            {store.diaNoShowList.length === 0 ? (
+            {store.diaCanceladaList.length === 0 && store.diaNoShowList.length === 0 ? (
               <div className="text-center py-16">
                 <div className="text-4xl mb-3 opacity-30">✕</div>
                 <p className="text-zinc-500 text-sm">Nenhuma viagem cancelada / no-show</p>
               </div>
             ) : (
-              store.diaNoShowList.map((viagem) => {
+              [...store.diaCanceladaList, ...store.diaNoShowList].map((viagem) => {
                 const vId = viagem.id || (viagem.client || "x").replace(/\W/g, "");
                 const tipo = detectTipo(viagem.origin || "", viagem.flight || "", viagem.type);
                 const hora = cleanHora(viagem.pickupTime || "");
                 const typeColor = tipo === "CHEGADA" ? "#D4A847" : tipo === "RECOLHA" ? "#8B9DAF" : "#C17E4A";
+                const cancelada = isCanceladaViagem(viagem);
                 return (
                   <div
                     key={vId}
                     className="bg-hub-black-card border border-hub-gold/5 rounded-lg px-4 py-3 flex items-center gap-3 opacity-60"
-                    style={{ borderLeftWidth: "3px", borderLeftColor: "#EF4444" }}
+                    style={{ borderLeftWidth: "3px", borderLeftColor: cancelada ? "#990000" : "#EF4444" }}
                   >
                     <span className="font-mono text-sm font-bold text-zinc-500">{hora}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-zinc-300 truncate">{viagem.client}</p>
+                      <p className={`text-sm text-zinc-300 truncate ${cancelada ? "line-through" : ""}`}>{viagem.client}</p>
                       {viagem.driver && (
                         <p className="text-[10px] text-zinc-500 truncate">{viagem.driver}</p>
                       )}
                     </div>
+                    <span className="text-[10px] font-bold font-mono text-zinc-500">{getSourceLabel(viagem)}</span>
                     <span
                       className="text-[10px] font-bold uppercase px-2 py-0.5 rounded"
                       style={{ backgroundColor: `${typeColor}15`, color: typeColor }}
                     >
                       {tipo}
                     </span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#EF4444]/10 text-[#EF4444]">
-                      NO-SHOW
-                    </span>
+                    {cancelada ? (
+                      <SeloDesfecho desfecho="cancelada" />
+                    ) : (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#EF4444]/10 text-[#EF4444]">
+                        NO-SHOW
+                      </span>
+                    )}
                   </div>
                 );
               })

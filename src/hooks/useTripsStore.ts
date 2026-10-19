@@ -18,6 +18,7 @@ import {
   calcDriverPrice,
   todayStr,
   isNoShowViagem,
+  isCanceladaViagem,
 } from "@/lib/trips";
 
 // ─── LocalStorage Keys ───
@@ -108,6 +109,7 @@ interface TripsStore {
   diaActiveList: HubViagem[];
   diaDoneList: HubViagem[];
   diaNoShowList: HubViagem[];
+  diaCanceladaList: HubViagem[];
   isViewingToday: boolean;
   diaStats: DiaStats;
   diaPaySummary: Record<string, { count: number; total: number }>;
@@ -280,19 +282,22 @@ export function useTripsStore(): TripsStore {
       (s) => s.type === "RECOLHA"
     ).length;
 
-    // Count completed/no-show hubViagens — no-show conta SEMPRE à parte, nunca como concluída
-    const hubNoShow = hubViagens.filter((v) => isNoShowViagem(v)).length;
-    const hubDone = hubViagens.filter(
+    // Canceladas saem de todas as contas e contam só em «Canceladas».
+    // No-show conta SEMPRE à parte, nunca como concluída
+    const hubCanceladas = hubViagens.filter((v) => isCanceladaViagem(v)).length;
+    const hubVivas = hubViagens.filter((v) => !isCanceladaViagem(v));
+    const hubNoShow = hubVivas.filter((v) => isNoShowViagem(v)).length;
+    const hubDone = hubVivas.filter(
       (v) => (v.concluida || v.status === "CONCLUIDA" || v.status === "FINALIZOU" || v.status === "concluida") && !isNoShowViagem(v),
     ).length;
-    const hubActive = hubViagens.length - hubDone - hubNoShow;
+    const hubActive = hubVivas.length - hubDone - hubNoShow;
 
     return {
       current: services.current.length,
       chegadas,
       recolhas,
       past: services.past.length + hubDone,
-      cancelled: services.cancelled.length + hubNoShow,
+      cancelled: services.cancelled.length + hubCanceladas + hubNoShow,
       dia: hubActive,
     };
   }, [services, hubViagens]);
@@ -349,27 +354,35 @@ export function useTripsStore(): TripsStore {
   }, [hubViagens, selectedDate, selectedDriver, diaDriverMap]);
 
   // ──────────────────────────────────────────────
+  // Computed: Canceladas fora do plano do dia
+  // diaList fica completa (procura por id nas acções); tudo o que se mostra ou
+  // conta no plano parte de diaPlanoList. Canceladas só em «Canceladas».
+  // ──────────────────────────────────────────────
+  const diaPlanoList = useMemo<HubViagem[]>(() => diaList.filter((v) => !isCanceladaViagem(v)), [diaList]);
+  const diaCanceladaList = useMemo<HubViagem[]>(() => diaList.filter((v) => isCanceladaViagem(v)), [diaList]);
+
+  // ──────────────────────────────────────────────
   // Computed: Dia Active + Done split
   // Today: hide completed from Dia Completo. Past dates: show all.
   // ──────────────────────────────────────────────
   const isViewingToday = !selectedDate || selectedDate === todayStr();
 
   const diaActiveList = useMemo<HubViagem[]>(() => {
-    if (!isViewingToday) return diaList; // Past dates: show ALL including completed
-    return diaList.filter(
+    if (!isViewingToday) return diaPlanoList; // Past dates: show ALL including completed
+    return diaPlanoList.filter(
       (v) => !v.concluida && v.status !== "CONCLUIDA" && v.status !== "FINALIZOU" && v.status !== "concluida" && !isNoShowViagem(v),
     );
-  }, [diaList, isViewingToday]);
+  }, [diaPlanoList, isViewingToday]);
 
   const diaDoneList = useMemo<HubViagem[]>(() => {
-    return diaList.filter(
+    return diaPlanoList.filter(
       (v) => (v.concluida || v.status === "CONCLUIDA" || v.status === "FINALIZOU" || v.status === "concluida") && !isNoShowViagem(v),
     );
-  }, [diaList]);
+  }, [diaPlanoList]);
 
   const diaNoShowList = useMemo<HubViagem[]>(() => {
-    return diaList.filter((v) => isNoShowViagem(v));
-  }, [diaList]);
+    return diaPlanoList.filter((v) => isNoShowViagem(v));
+  }, [diaPlanoList]);
 
   // ──────────────────────────────────────────────
   // Computed: Dia Stats (active only)
@@ -406,7 +419,7 @@ export function useTripsStore(): TripsStore {
   >(() => {
     const summary: Record<string, { count: number; total: number }> = {};
 
-    for (const v of diaList) {
+    for (const v of diaPlanoList) {
       const driver = v.driver || "Sem Motorista";
       if (!summary[driver]) {
         summary[driver] = { count: 0, total: 0 };
@@ -416,7 +429,7 @@ export function useTripsStore(): TripsStore {
     }
 
     return summary;
-  }, [diaList]);
+  }, [diaPlanoList]);
 
   // ──────────────────────────────────────────────
   // Computed: Current List for active tab
@@ -906,6 +919,7 @@ export function useTripsStore(): TripsStore {
     diaActiveList,
     diaDoneList,
     diaNoShowList,
+    diaCanceladaList,
     isViewingToday,
     diaStats,
     diaPaySummary,
