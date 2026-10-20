@@ -37,6 +37,7 @@ const TYPE_COLORS = {
   CHEGADA: { text: "text-[#D4A847]", bg: "bg-[#D4A847]/10", border: "border-l-[#D4A847]", hex: "#D4A847" },
   RECOLHA: { text: "text-[#10b981]", bg: "bg-[#10b981]/10", border: "border-l-[#10b981]", hex: "#10b981" },
   TOUR:    { text: "text-[#a855f7]", bg: "bg-[#a855f7]/10", border: "border-l-[#a855f7]", hex: "#a855f7" },
+  TRANSFER: { text: "text-[#2DD4BF]", bg: "bg-[#2DD4BF]/10", border: "border-l-[#2DD4BF]", hex: "#2DD4BF" },
 } as const;
 
 function getTypeStyle(tipo: string) {
@@ -120,7 +121,7 @@ export default function TripCard({
   viagem, drivers, onSetDriver, onDarBaixa, onDispatch, onClientMsg, onSmsMsg, onShowNameplate,
 }: TripCardProps) {
   const cardId = viagem.id || (viagem.client || "x").replace(/\W/g, "");
-  const tipo = detectTipo(viagem.origin || "", viagem.flight || "");
+  const tipo = detectTipo(viagem.origin || "", viagem.flight || "", viagem.type, viagem.tipoViagem);
   const hora = cleanHora(viagem.pickupTime || "");
   const lang = resolveLanguage(viagem.language || "", viagem.phone);
   const price = calcDriverPrice(viagem);

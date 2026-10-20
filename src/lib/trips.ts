@@ -40,6 +40,7 @@ export interface HubViagem {
   id: string;
   rowIndex?: string;
   type?: string;
+  tipoViagem?: string;    // W do backend: CHEGADA / RECOLHA / TRANSFER / TOUR / RESTAURANTE
   date?: string;          // DD/MM/YYYY — trip date
   client: string;
   phone: string;
@@ -363,10 +364,13 @@ export function guessDepAirport(flight: string): string | null {
 
 // ── Airport / hotel keyword lists (for location splitting) ───
 
-const AIRPORT_KEYWORDS = [
+// «terminal» não é aeroporto (Terminal de Cruzeiros, rodoviário…): fica só na
+// separação nome/morada, na mesma posição de antes.
+const AIRPORT_NAME_KEYWORDS = [
   'aeroporto', 'airport', 'aéroport', 'flughafen', 'aeropuerto', 'aeroporti',
-  'terminal', 'arrivals', 'departures', 'chegadas', 'partidas',
 ];
+const AIRPORT_AREA_KEYWORDS = ['arrivals', 'departures', 'chegadas', 'partidas'];
+const AIRPORT_KEYWORDS = [...AIRPORT_NAME_KEYWORDS, ...AIRPORT_AREA_KEYWORDS];
 
 const HOTEL_KEYWORDS = [
   'hotel', 'hostel', 'guest house', 'guesthouse', 'aparthotel', 'apart-hotel',
@@ -383,26 +387,45 @@ const PLACE_KEYWORDS = [
 
 // ── Business logic functions ─────────────────────────────────
 
+/** Tipos que a W do backend (campo tipoViagem do getViagens) pode trazer. */
+const TIPOS_VIAGEM = ['CHEGADA', 'RECOLHA', 'TRANSFER', 'TOUR', 'RESTAURANTE'];
+
+/** O texto de um local fala de um aeroporto? */
+export function temAeroporto(local: string): boolean {
+  const o = (local || '').toLowerCase();
+  return AIRPORT_KEYWORDS.some((kw) => o.includes(kw)) ||
+    /\b(lis|opo|fao|fnc|pdl)\b/i.test(o) ||
+    /lisbon\s*airport|lisboa\s*aeroporto|humberto\s*delgado/i.test(o);
+}
+
 /**
- * Detect trip type: CHEGADA (arrival), RECOLHA (pick-up) or TOUR
- * based on whether the origin mentions an airport and a flight exists.
+ * Tipo da viagem: CHEGADA, RECOLHA (ida para o aeroporto), TRANSFER (sem
+ * aeroporto), TOUR ou RESTAURANTE. Manda a W do backend (tipoViagem) sempre
+ * que vier preenchida; só sem ela se adivinha pelo texto da origem.
  */
-export function detectTipo(origin: string, flight: string, backendType?: string): string {
+export function detectTipo(origin: string, flight: string, backendType?: string, tipoViagem?: string): string {
+  // 0. A W do backend
+  const tv = String(tipoViagem ?? '').toUpperCase().trim();
+  if (TIPOS_VIAGEM.includes(tv)) return tv;
+
   // 1. If backend says TOUR or RESTAURANTE, respect it
   const bt = (backendType || '').toUpperCase().trim();
   if (bt === 'TOUR') return 'TOUR';
   if (bt.includes('RESTAURANTE') || bt.includes('RESTAURANT')) return 'RESTAURANTE';
 
   // 2. If origin is the airport → CHEGADA (arrival)
-  const o = (origin || '').toLowerCase();
-  const hasAirport = AIRPORT_KEYWORDS.some((kw) => o.includes(kw)) ||
-    /\b(lis|opo|fao|fnc|pdl)\b/i.test(o) ||
-    /lisbon\s*airport|lisboa\s*aeroporto|humberto\s*delgado/i.test(o);
-
-  if (hasAirport) return 'CHEGADA';
+  if (temAeroporto(origin)) return 'CHEGADA';
 
   // 3. Everything else → RECOLHA
   return 'RECOLHA';
+}
+
+/**
+ * Para contar, filtrar e escolher a mensagem, um TRANSFER fica com as
+ * recolhas, onde o site o punha antes de a W chegar.
+ */
+export function grupoTipo(tipo: string): string {
+  return tipo === 'TRANSFER' ? 'RECOLHA' : tipo;
 }
 
 /**
@@ -413,7 +436,7 @@ export function splitLocation(raw: string): { name: string; addr: string; full: 
   const full = raw.trim();
 
   // Try splitting on common separators: " - ", " — ", " , " (after a keyword)
-  const allKeywords = [...HOTEL_KEYWORDS, ...AIRPORT_KEYWORDS, ...PLACE_KEYWORDS];
+  const allKeywords = [...HOTEL_KEYWORDS, ...AIRPORT_NAME_KEYWORDS, 'terminal', ...AIRPORT_AREA_KEYWORDS, ...PLACE_KEYWORDS];
   const lower = full.toLowerCase();
 
   let name = full;

@@ -5,6 +5,7 @@ import {
   HubViagem,
   HUB_CENTRAL_URL,
   detectTipo,
+  grupoTipo,
   calcDriverPrice,
   cleanHora,
   chaveMotorista,
@@ -221,7 +222,7 @@ export function useDriverStore(): DriverStore {
     let totalPay = 0;
 
     for (const v of viagens) {
-      const tipo = detectTipo(v.origin, v.flight, v.type);
+      const tipo = grupoTipo(detectTipo(v.origin, v.flight, v.type, v.tipoViagem));
       if (tipo === 'CHEGADA') chegadas++;
       else if (tipo === 'RECOLHA') recolhas++;
       totalPay += calcDriverPrice(v);

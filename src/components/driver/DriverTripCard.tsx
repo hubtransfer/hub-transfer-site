@@ -6,6 +6,8 @@ import type { HubViagem, Driver } from "@/lib/trips";
 import {
   HUB_CENTRAL_URL,
   detectTipo,
+  grupoTipo,
+  temAeroporto,
   splitLocation,
   cleanHora,
   calcDriverPrice,
@@ -56,6 +58,7 @@ const TYPE_COLORS = {
   RECOLHA:      { text: "text-[#3B82F6]", bg: "bg-[#3B82F6]/15", border: "border-l-[#3B82F6]", hex: "#3B82F6" },
   TOUR:         { text: "text-[#A855F7]", bg: "bg-[#A855F7]/15", border: "border-l-[#A855F7]", hex: "#A855F7" },
   RESTAURANTE:  { text: "text-[#C084FC]", bg: "bg-[#C084FC]/15", border: "border-l-[#C084FC]", hex: "#C084FC" },
+  TRANSFER:     { text: "text-[#2DD4BF]", bg: "bg-[#2DD4BF]/15", border: "border-l-[#2DD4BF]", hex: "#2DD4BF" },
 } as const;
 function ts(tipo: string) { return TYPE_COLORS[tipo as keyof typeof TYPE_COLORS] ?? { text: "text-gray-400", bg: "bg-gray-500/10", border: "border-l-gray-500", hex: "#999" }; }
 
@@ -214,7 +217,7 @@ export default function DriverTripCard({
 
   /* ─ Derived data ─ */
   const cardId = viagem.id || (viagem.client || "x").replace(/\W/g, "");
-  const tipo = detectTipo(viagem.origin || "", viagem.flight || "", viagem.type);
+  const tipo = detectTipo(viagem.origin || "", viagem.flight || "", viagem.type, viagem.tipoViagem);
   const hora = cleanHora(viagem.pickupTime || "");
   const lang = resolveLanguage(viagem.language || "", viagem.phone);
   const price = calcDriverPrice(viagem);
@@ -244,7 +247,8 @@ export default function DriverTripCard({
   const hasFlightNumber = !!(viagem.flight && viagem.flight.trim());
   // "🇧🇷 Brasil" → só o emoji junto ao voo; o nome do país fica no title
   const bandeiraEmoji = (viagem.bandeira || "").trim().split(" ")[0];
-  const hasFlight = hasFlightNumber && (tipo === "CHEGADA" || !!(viagem.depAirport || viagem.depIata || viagem.arrTime));
+  // TRANSFER: sem aeroporto, sem linha de voo
+  const hasFlight = tipo !== "TRANSFER" && hasFlightNumber && (tipo === "CHEGADA" || !!(viagem.depAirport || viagem.depIata || viagem.arrTime));
 
   // Real-time flight state — recalculates every 30s
   const [flightTick, setFlightTick] = useState(0);
@@ -831,7 +835,7 @@ export default function DriverTripCard({
               {/* Destination */}
               {viagem.destination && (
                 <div>
-                  <p className="font-mono text-xs uppercase tracking-wider text-[#F0D030] mb-1.5">Destino</p>
+                  <p className="font-mono text-xs uppercase tracking-wider text-[#F0D030] mb-1.5">{tipo === "RECOLHA" && temAeroporto(viagem.destination) ? "Destino — Aeroporto" : "Destino"}</p>
                   <button type="button" onClick={() => copyWithToast(viagem.destination)} className="text-left w-full active:opacity-70 transition-opacity">
                     {destLoc.name && <p className="text-base font-bold text-white">{destLoc.name}</p>}
                     <p className="text-sm text-[#E5E5E5]">{destLoc.addr}</p>
@@ -930,7 +934,7 @@ export default function DriverTripCard({
                 </select>
               )}
               {mode === "admin" && onDispatch && (
-                <button type="button" onClick={() => onDispatch(cardId, tipo, viagem.client, lang, viagem.origin, hora)}
+                <button type="button" onClick={() => onDispatch(cardId, grupoTipo(tipo), viagem.client, lang, viagem.origin, hora)}
                   className="w-full h-14 rounded-xl border transition-colors font-mono text-base font-bold"
                   style={{ backgroundColor: `${c.hex}15`, color: c.hex, borderColor: `${c.hex}33` }}>
                   ⚡ Enviar Template Motorista

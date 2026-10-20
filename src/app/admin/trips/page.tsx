@@ -16,6 +16,7 @@ import {
   TAB_INFO,
   TEMPLATES,
   detectTipo,
+  grupoTipo,
   resolveLanguage,
   cleanHora,
   getWhatsAppUrl,
@@ -521,8 +522,8 @@ export default function TripsPage() {
                 const filtered = filtroTipo === "TODOS"
                   ? store.diaActiveList
                   : store.diaActiveList.filter((v) => {
-                      const t = detectTipo(v.origin || "", v.flight || "", v.type);
-                      return t === filtroTipo;
+                      const t = detectTipo(v.origin || "", v.flight || "", v.type, v.tipoViagem);
+                      return grupoTipo(t) === filtroTipo;
                     });
                 if (store.diaActiveList.length === 0 && store.diaDoneList.length === 0) return (
                   <div className="text-center py-16">
@@ -591,9 +592,9 @@ export default function TripsPage() {
                 <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-mono">Concluídas hoje</p>
                 {store.diaDoneList.map((viagem) => {
                   const vId = viagem.id || (viagem.client || "x").replace(/\W/g, "");
-                  const tipo = detectTipo(viagem.origin || "", viagem.flight || "", viagem.type);
+                  const tipo = detectTipo(viagem.origin || "", viagem.flight || "", viagem.type, viagem.tipoViagem);
                   const hora = cleanHora(viagem.pickupTime || "");
-                  const typeColor = tipo === "CHEGADA" ? "#D4A847" : tipo === "RECOLHA" ? "#8B9DAF" : "#C17E4A";
+                  const typeColor = tipo === "CHEGADA" ? "#D4A847" : tipo === "RECOLHA" ? "#8B9DAF" : tipo === "TRANSFER" ? "#2DD4BF" : "#C17E4A";
                   return (
                     <div key={vId}
                       className="bg-hub-black-card border border-hub-gold/5 rounded-lg px-4 py-3 flex items-center gap-3 opacity-60"
@@ -630,9 +631,9 @@ export default function TripsPage() {
                 ) : (
                   pastPlano.map((viagem) => {
                     const vId = viagem.id || (viagem.client || "x").replace(/\W/g, "");
-                    const tipo = detectTipo(viagem.origin || "", viagem.flight || "", viagem.type);
+                    const tipo = detectTipo(viagem.origin || "", viagem.flight || "", viagem.type, viagem.tipoViagem);
                     const hora = cleanHora(viagem.pickupTime || "");
-                    const typeColor = tipo === "CHEGADA" ? "#D4A847" : tipo === "RECOLHA" ? "#8B9DAF" : "#C17E4A";
+                    const typeColor = tipo === "CHEGADA" ? "#D4A847" : tipo === "RECOLHA" ? "#8B9DAF" : tipo === "TRANSFER" ? "#2DD4BF" : "#C17E4A";
                     const cancelada = isCanceladaViagem(viagem);
                     const noShow = !cancelada && isNoShowViagem(viagem);
                     const isDone = !noShow && !cancelada && (viagem.concluida || viagem.status === "CONCLUIDA" || viagem.status === "FINALIZOU");
@@ -688,9 +689,9 @@ export default function TripsPage() {
             ) : (
               [...store.diaCanceladaList, ...store.diaNoShowList].map((viagem) => {
                 const vId = viagem.id || (viagem.client || "x").replace(/\W/g, "");
-                const tipo = detectTipo(viagem.origin || "", viagem.flight || "", viagem.type);
+                const tipo = detectTipo(viagem.origin || "", viagem.flight || "", viagem.type, viagem.tipoViagem);
                 const hora = cleanHora(viagem.pickupTime || "");
-                const typeColor = tipo === "CHEGADA" ? "#D4A847" : tipo === "RECOLHA" ? "#8B9DAF" : "#C17E4A";
+                const typeColor = tipo === "CHEGADA" ? "#D4A847" : tipo === "RECOLHA" ? "#8B9DAF" : tipo === "TRANSFER" ? "#2DD4BF" : "#C17E4A";
                 const cancelada = isCanceladaViagem(viagem);
                 return (
                   <div

@@ -15,6 +15,7 @@ import {
   DRIVERS_FALLBACK,
   TAB_INFO,
   detectTipo,
+  grupoTipo,
   calcDriverPrice,
   todayStr,
   isNoShowViagem,
@@ -398,7 +399,7 @@ export function useTripsStore(): TripsStore {
     };
 
     for (const v of diaActiveList) {
-      const tipo = detectTipo(v.origin || "", v.flight || "", v.type);
+      const tipo = grupoTipo(detectTipo(v.origin || "", v.flight || "", v.type, v.tipoViagem));
       if (tipo === "CHEGADA") stats.chegadas++;
       else if (tipo === "RECOLHA") stats.recolhas++;
       else if (tipo === "TOUR") stats.tours++;

@@ -197,7 +197,7 @@ export default function DriverTripsPage() {
     // Cancelada não conta: nem no total nem no valor do dia (o no-show fica como está)
     const contam = driverTrips.filter((v) => !isCanceladaViagem(v));
     for (const v of contam) {
-      const tipo = detectTipo(v.origin || "", v.flight || "", v.type);
+      const tipo = detectTipo(v.origin || "", v.flight || "", v.type, v.tipoViagem);
       if (tipo === "CHEGADA") chegadas++;
       else recolhas++;
       totalPay += calcDriverPrice(v);
@@ -473,9 +473,9 @@ export default function DriverTripsPage() {
                 </div>
                 {doneTrips.map((viagem) => {
                   const vId = viagem.id || (viagem.client || "x").replace(/\W/g, "");
-                  const tipo = detectTipo(viagem.origin || "", viagem.flight || "", viagem.type);
+                  const tipo = detectTipo(viagem.origin || "", viagem.flight || "", viagem.type, viagem.tipoViagem);
                   const hora = cleanHora(viagem.pickupTime || "");
-                  const typeColor = tipo === "CHEGADA" ? "#D4A847" : tipo === "RECOLHA" ? "#8B9DAF" : "#C17E4A";
+                  const typeColor = tipo === "CHEGADA" ? "#D4A847" : tipo === "RECOLHA" ? "#8B9DAF" : tipo === "TRANSFER" ? "#2DD4BF" : "#C17E4A";
                   const noShow = isNoShowViagem(viagem);
                   return (
                     <div
