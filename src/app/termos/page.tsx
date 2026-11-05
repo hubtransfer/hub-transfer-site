@@ -11,7 +11,7 @@ export default function TermosPage() {
       </header>
       <main className="max-w-3xl mx-auto px-6 py-12 space-y-8 text-sm leading-relaxed">
         <h1 className="text-2xl font-bold text-white">Termos e Condições</h1>
-        <p className="text-[#888] text-xs font-mono">Ultima actualização: Abril 2026</p>
+        <p className="text-[#888] text-xs font-mono">Última atualização: 5 de novembro de 2026</p>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">1. Identificação do prestador</h2>
@@ -35,15 +35,15 @@ export default function TermosPage() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">4. Cancelamento</h2>
           <ul className="list-disc pl-6 space-y-1">
-            <li><strong className="text-white">Gratuito</strong> ate 3 horas antes da hora de pickup.</li>
-            <li>Cancelamentos com menos de 3 horas podem estar sujeitos a cobrança de 50% do valor.</li>
-            <li>No-show (não comparência) sem aviso previo: cobrança total.</li>
+            <li><strong className="text-white">Gratuito</strong> até 3 horas antes da recolha.</li>
+            <li>Com menos de 3 horas, cobra-se o valor total da viagem.</li>
+            <li>Não comparência: se, no fim do tempo de espera, não for possível falar com o cliente, cobra-se o valor total da viagem.</li>
           </ul>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">5. Atrasos de voo</h2>
-          <p>A HUB Transfer monitoriza os voos em tempo real. Em caso de atraso, o horario de pickup é automaticamente ajustado sem custo adicional. O tempo de espera incluido e as condições de espera estendida constam da nossa <a href="/politica-de-espera" className="text-[#D4A017] hover:underline">Política de Espera</a>.</p>
+          <p>A HUB Transfer acompanha os voos em tempo real. Se o voo se atrasar, a hora da recolha ajusta-se sem custo. O tempo de espera e o que acontece quando não encontramos o cliente estão na nossa <a href="/politica-de-espera" className="text-[#D4A017] hover:underline">Política de Espera</a>.</p>
         </section>
 
         <section className="space-y-3">

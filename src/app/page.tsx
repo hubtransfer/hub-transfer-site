@@ -384,6 +384,15 @@ function ReviewCard({ review, t, lang, featured = false }: { review: ReviewItem;
 
 /* ================================================================== */
 
+/* A política de espera na língua escolhida (05/11/2026). */
+const POLITICA_ESPERA: Record<LandingLang, string> = {
+  PT: "/politica-de-espera",
+  EN: "/waiting-policy",
+  ES: "/es/politica-de-espera",
+  FR: "/fr/politique-d-attente",
+  IT: "/it/politica-di-attesa",
+};
+
 export default function LandingPage() {
   const [lang, setLang] = useState<LandingLang>("PT");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -947,7 +956,7 @@ export default function LandingPage() {
             {/* Link para a Política de Espera */}
             <Reveal delay={0.15}>
               <a
-                href={lang === "PT" ? "/politica-de-espera" : "/waiting-policy"}
+                href={POLITICA_ESPERA[lang]}
                 className="inline-block mt-4 text-[var(--hub-gold)] text-sm font-medium hover:underline rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--hub-gold)]"
               >
                 {t.policyLink}
@@ -1041,7 +1050,7 @@ export default function LandingPage() {
                 <div className="space-y-2.5 text-xs">
                   <a href="/privacidade" className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">Política de Privacidade</a>
                   <a href="/termos" className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">Termos e Condições</a>
-                  <a href={lang === "PT" ? "/politica-de-espera" : "/waiting-policy"} className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">{lang === "PT" ? "Política de Espera" : lang === "ES" ? "Política de Espera" : lang === "FR" ? "Politique d'Attente" : lang === "IT" ? "Politica di Attesa" : "Waiting Policy"}</a>
+                  <a href={POLITICA_ESPERA[lang]} className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">{lang === "PT" ? "Política de Espera" : lang === "ES" ? "Política de Espera" : lang === "FR" ? "Politique d'Attente" : lang === "IT" ? "Politica di Attesa" : "Waiting Policy"}</a>
                   <a href="https://www.livroreclamacoes.pt/" target="_blank" rel="noopener noreferrer" className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">Livro de Reclamações</a>
                   <a href="/login" className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">Área Reservada (Parceiros)</a>
                 </div>

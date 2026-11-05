@@ -175,12 +175,12 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     pax7Marker: '👥 Grupo de 7+ passageiros — pedido de orçamento',
 
     // Commitment block
-    commitTitle: 'Ou apertamos a sua mão, ou pagamos a conta.',
+    commitTitle: 'A espera conta a partir da aterragem real.',
 
     // Guarantee
     guaranteeDesc:
-      'Monitorizamos o seu voo em tempo real e coordenamos a sua chegada ao minuto. E nunca cancelamos sem falar consigo.',
-    guaranteeBadge: 'Garantia 100%',
+      'Acompanhamos o seu voo e ajustamos a recolha à hora real de chegada.',
+    guaranteeBadge: 'Política de espera',
     policyLink: 'Consultar a Política de Espera →',
 
     // CTA Final
@@ -233,14 +233,14 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Guarantee badges
     badgePrice: 'Preço fixo',
-    badgePunctual: 'Sempre pontual',
+    badgePunctual: 'Um carro por reserva',
     badgeCancel: 'Cancelamento grátis até 3h antes',
     badgeFlight: 'Voo monitorizado',
 
     // Nav
     navHow: 'Como Funciona',
     navWhy: 'Porquê Nós',
-    navGuarantee: 'Garantia',
+    navGuarantee: 'Espera',
     navBook: 'Reservar',
   },
 
@@ -299,12 +299,12 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     pax7Marker: '👥 Group of 7+ passengers — quote request',
 
     // Commitment block
-    commitTitle: 'We shake your hand, or we pay the bill.',
+    commitTitle: 'Waiting starts at the actual landing.',
 
     // Guarantee
     guaranteeDesc:
-      "We track your flight in real time and coordinate your arrival to the minute. And we never cancel without talking to you.",
-    guaranteeBadge: '100% Guarantee',
+      'We follow your flight and adjust the pickup to the actual arrival time.',
+    guaranteeBadge: 'Waiting policy',
     policyLink: 'Read our Waiting Policy →',
 
     // CTA Final
@@ -357,14 +357,14 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Guarantee badges
     badgePrice: 'Fixed price',
-    badgePunctual: 'Always on time',
+    badgePunctual: 'One car per booking',
     badgeCancel: 'Free cancellation up to 3h before',
     badgeFlight: 'Flight tracked',
 
     // Nav
     navHow: 'How It Works',
     navWhy: 'Why Us',
-    navGuarantee: 'Guarantee',
+    navGuarantee: 'Waiting',
     navBook: 'Book Now',
   },
 
@@ -423,12 +423,12 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     pax7Marker: '👥 Grupo de 7+ pasajeros — solicitud de presupuesto',
 
     // Commitment block
-    commitTitle: 'O le damos la mano, o pagamos la cuenta.',
+    commitTitle: 'La espera empieza con el aterrizaje real.',
 
     // Guarantee
     guaranteeDesc:
-      'Monitorizamos su vuelo en tiempo real y coordinamos su llegada al minuto. Y nunca cancelamos sin hablar con usted.',
-    guaranteeBadge: 'Garantía 100%',
+      'Seguimos su vuelo y ajustamos la recogida a la hora real de llegada.',
+    guaranteeBadge: 'Política de espera',
     policyLink: 'Consultar la Política de Espera →',
 
     // CTA Final
@@ -481,14 +481,14 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Guarantee badges
     badgePrice: 'Precio fijo',
-    badgePunctual: 'Siempre puntual',
+    badgePunctual: 'Un coche por reserva',
     badgeCancel: 'Cancelación gratis hasta 3h antes',
     badgeFlight: 'Vuelo monitorizado',
 
     // Nav
     navHow: 'Cómo Funciona',
     navWhy: 'Por Qué Nosotros',
-    navGuarantee: 'Garantía',
+    navGuarantee: 'Espera',
     navBook: 'Reservar',
   },
 
@@ -547,12 +547,12 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     pax7Marker: '👥 Groupe de 7+ passagers — demande de devis',
 
     // Commitment block
-    commitTitle: "On vous serre la main, ou on paie l'addition.",
+    commitTitle: "L'attente commence à l'atterrissage réel.",
 
     // Guarantee
     guaranteeDesc:
-      "Nous suivons votre vol en temps réel et coordonnons votre arrivée à la minute près. Et nous n'annulons jamais sans vous parler.",
-    guaranteeBadge: 'Garantie 100%',
+      "Nous suivons votre vol et ajustons la prise en charge à l'heure réelle d'arrivée.",
+    guaranteeBadge: "Politique d'attente",
     policyLink: "Consulter la Politique d'Attente →",
 
     // CTA Final
@@ -605,14 +605,14 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Guarantee badges
     badgePrice: 'Prix fixe',
-    badgePunctual: 'Toujours ponctuel',
+    badgePunctual: 'Une voiture par réservation',
     badgeCancel: 'Annulation gratuite jusqu\'à 3h avant',
     badgeFlight: 'Vol surveillé',
 
     // Nav
     navHow: 'Comment Ça Marche',
     navWhy: 'Pourquoi Nous',
-    navGuarantee: 'Garantie',
+    navGuarantee: 'Attente',
     navBook: 'Réserver',
   },
 
@@ -671,12 +671,12 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     pax7Marker: '👥 Gruppo di 7+ passeggeri — richiesta di preventivo',
 
     // Commitment block
-    commitTitle: 'O vi stringiamo la mano, o paghiamo il conto.',
+    commitTitle: "L'attesa parte dall'atterraggio effettivo.",
 
     // Guarantee
     guaranteeDesc:
-      "Monitoriamo il suo volo in tempo reale e coordiniamo il suo arrivo al minuto. E non cancelliamo mai senza parlarle.",
-    guaranteeBadge: 'Garanzia 100%',
+      "Seguiamo il suo volo e adeguiamo il ritiro all'orario effettivo di arrivo.",
+    guaranteeBadge: 'Politica di attesa',
     policyLink: 'Consultare la Politica di Attesa →',
 
     // CTA Final
@@ -729,14 +729,14 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
     // Guarantee badges
     badgePrice: 'Prezzo fisso',
-    badgePunctual: 'Sempre puntuale',
+    badgePunctual: "Un'auto per prenotazione",
     badgeCancel: 'Cancellazione gratuita fino a 3h prima',
     badgeFlight: 'Volo monitorato',
 
     // Nav
     navHow: 'Come Funziona',
     navWhy: 'Perché Noi',
-    navGuarantee: 'Garanzia',
+    navGuarantee: 'Attesa',
     navBook: 'Prenota',
   },
 };
