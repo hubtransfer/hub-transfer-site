@@ -44,9 +44,9 @@ function N({ children }: { children: string }) {
 
 export default function PoliticaDeEsperaPage() {
   return (
-    <div lang="pt" className="min-h-screen bg-[var(--hub-black)] text-[#D0D0D0]">
-      <header className="border-b border-[var(--hub-line)] px-6 py-4">
-        <div className="max-w-3xl mx-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+    <div lang="pt-PT" className="min-h-screen bg-[var(--hub-black)] text-[#D0D0D0]">
+      <header className="border-b border-[var(--hub-line)] py-4">
+        <div className="max-w-3xl mx-auto px-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
           <a href="/" className="order-1"><Image src="/images/logo.png" alt="HUB Transfer" width={140} height={40} className="h-9 w-auto" /></a>
           <nav className="order-3 w-full sm:order-2 sm:w-auto sm:ml-auto flex gap-1">
             {LINGUAS.map((l) => (
@@ -64,42 +64,42 @@ export default function PoliticaDeEsperaPage() {
       <main className="max-w-3xl mx-auto px-6 py-12 space-y-8 text-sm leading-relaxed">
         <div className="space-y-2">
           <h1 className="text-2xl md:text-3xl font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>{"Política de espera"}</h1>
-          <p className="text-[#888] text-xs"><N>{"Última atualização: 5 de novembro de 2026."}</N></p>
+          <p className="max-w-[68ch] text-[#888] text-xs"><N>{"Última atualização: 5 de novembro de 2026."}</N></p>
         </div>
 
-        <p><N>{"A recolha acompanha o seu voo. Se o voo se atrasar ou chegar mais cedo, ajustamos a hora da recolha, sem que tenha de nos avisar."}</N></p>
+        <p className="max-w-[68ch]"><N>{"A recolha acompanha o seu voo. Se o voo se atrasar ou chegar mais cedo, ajustamos a hora da recolha, sem que tenha de nos avisar."}</N></p>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">{"Recolhas no aeroporto"}</h2>
-          <p><N>{"O motorista espera 60 minutos, contados desde a aterragem real do voo."}</N></p>
-          <p><N>{"Se precisar de mais tempo, por exemplo na bagagem ou no controlo de fronteiras, escreva-nos por WhatsApp: combinamos consigo a espera a mais."}</N></p>
+          <p className="max-w-[68ch]"><N>{"O motorista espera 60 minutos, contados desde a aterragem real do voo."}</N></p>
+          <p className="max-w-[68ch]"><N>{"Se precisar de mais tempo, por exemplo na bagagem ou no controlo de fronteiras, escreva-nos por WhatsApp: combinamos consigo a espera a mais."}</N></p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">{"Recolhas no hotel ou noutra morada"}</h2>
-          <p><N>{"O motorista espera 15 minutos, contados desde a hora marcada."}</N></p>
-          <p><N>{"Pedimos que esteja pronto à hora marcada, sobretudo quando vai para o aeroporto."}</N></p>
+          <p className="max-w-[68ch]"><N>{"O motorista espera 15 minutos, contados desde a hora marcada."}</N></p>
+          <p className="max-w-[68ch]"><N>{"Pedimos que esteja pronto à hora marcada, sobretudo quando vai para o aeroporto."}</N></p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">{"Quando não o encontramos"}</h2>
-          <p><N>{"Durante o tempo de espera, o motorista tenta contactá-lo por vários meios, incluindo mensagens de WhatsApp e chamadas, e a equipa da HUB também. O motorista espera no ponto de encontro combinado e regista que lá esteve."}</N></p>
-          <p><N>{"Se, no fim do tempo de espera, não for possível falar consigo, a viagem conta como não comparência: o motorista pode sair e cobra-se o valor total da viagem."}</N></p>
+          <p className="max-w-[68ch]"><N>{"Durante o tempo de espera, o motorista tenta contactá-lo por vários meios, incluindo mensagens de WhatsApp e chamadas, e a equipa da HUB também. O motorista espera no ponto de encontro combinado e regista que lá esteve."}</N></p>
+          <p className="max-w-[68ch]"><N>{"Se, no fim do tempo de espera, não for possível falar consigo, a viagem conta como não comparência: o motorista pode sair e cobra-se o valor total da viagem."}</N></p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">{"Cancelamentos"}</h2>
-          <p><N>{"O cancelamento é grátis até 3 horas antes da recolha. Depois disso, cobra-se o valor total da viagem. A mesma regra vale nos termos e condições."}</N></p>
+          <p className="max-w-[68ch]"><N>{"O cancelamento é grátis até 3 horas antes da recolha. Depois disso, cobra-se o valor total da viagem. A mesma regra vale nos termos e condições."}</N></p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">{"Reservas feitas através de agências, operadores ou hotéis"}</h2>
-          <p><N>{"Valem as regras de espera, de cancelamento e de não comparência combinadas com quem fez a reserva."}</N></p>
+          <p className="max-w-[68ch]"><N>{"Valem as regras de espera, de cancelamento e de não comparência combinadas com quem fez a reserva."}</N></p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">{"Contacto"}</h2>
-          <p>
+          <p className="max-w-[68ch]">
             {"Para avisar de um atraso ou combinar a espera: "}
             <a href={WA} target="_blank" rel="noopener noreferrer" className="text-[var(--hub-gold)] hover:underline">{"o WhatsApp da HUB"}</a>
             {" ("}<span className="font-mono text-white">{COMPANY.whatsappFormatted}</span>{")"}

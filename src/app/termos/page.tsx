@@ -38,6 +38,7 @@ export default function TermosPage() {
             <li><strong className="text-white">Gratuito</strong> até 3 horas antes da recolha.</li>
             <li>Com menos de 3 horas, cobra-se o valor total da viagem.</li>
             <li>Não comparência: se, no fim do tempo de espera, não for possível falar com o cliente, cobra-se o valor total da viagem.</li>
+            <li>Nas reservas feitas através de agências, operadores ou hotéis, valem as regras combinadas com quem fez a reserva.</li>
           </ul>
         </section>
 

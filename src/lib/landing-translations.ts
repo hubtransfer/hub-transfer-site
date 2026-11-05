@@ -121,9 +121,9 @@ export interface LandingTranslations {
 export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
   PT: {
     // Hero
-    heroEyebrow: 'MONITORIZAÇÃO ATIVA · LISBOA · PORTO · FARO',
-    headline: 'O seu voo atrasa.',
-    headlineHighlight: 'Nós não.',
+    heroEyebrow: 'MONITORIZAÇÃO ATIVA · LISBOA E REGIÃO',
+    headline: 'O voo atrasou.',
+    headlineHighlight: 'O motorista já sabia.',
     subheadline:
       'Enquanto outras empresas esperam que avise do atraso, o nosso sistema já reagendou o seu motorista. Desembarca e já lá estamos. Sem stress, sem esperas.',
     ctaBook: 'GARANTIR O MEU TRANSFER AGORA',
@@ -135,7 +135,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     // Partners
     partnersTitle: 'Conectados a todos os sinais que cruzam o céu de Portugal.',
     partnersDesc:
-      'O nosso Cérebro não olha para a bandeira do avião nem para o aeroporto de onde descolou. Liga-se diretamente ao sinal de radar de cada aeronave que se aproxima de Lisboa, Porto ou Faro. Se está a voar para Portugal, já está no nosso radar.',
+      'O nosso Cérebro não olha para a bandeira do avião nem para o aeroporto de onde descolou. Liga-se diretamente ao sinal de radar de cada aeronave que se aproxima de Lisboa. Se está a voar para Lisboa, já está no nosso radar.',
 
     // Pain
     painTitle: 'Chegar a Lisboa não devia ser uma prova de resistência.',
@@ -156,10 +156,10 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     fleetEyebrow: 'O SERVIÇO',
     fleetTitle: 'A mesma tecnologia, do radar à estrada.',
     fleetDesc:
-      'O sistema que monitoriza o seu voo é o mesmo que coordena o carro à sua espera. E no serviço executivo, a tecnologia entra no próprio carro: Tesla 100% elétrico — silencioso, confortável, sem emissões.',
-    fleetFeature1: 'Pontualidade com garantia real',
+      'O sistema que monitoriza o seu voo é o mesmo que coordena o carro à sua espera.',
+    fleetFeature1: 'Recolha ajustada à hora real do voo',
     fleetFeature2: 'Monitorização de voo em tempo real',
-    fleetFeature3: 'Suporte 24/7',
+    fleetFeature3: 'Suporte por WhatsApp',
     catLabel: 'CATEGORIA',
     cat1Title: 'MPV',
     cat1Line: 'Espaço para a família e para as malas, do aeroporto ao destino.',
@@ -168,7 +168,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     cat2Line: 'Conforto direto e discreto para viagens a dois ou três.',
     cat2Cap: 'Até 3 passageiros + bagagem',
     cat3Title: 'Sedan Executivo',
-    cat3Line: 'Tesla 100% elétrico. Silencioso, pontual, discreto.',
+    cat3Line: 'Silencioso e discreto, para viagens de negócios.',
     cat3Cap: 'Até 3 passageiros',
     toursLine: 'Tours Privados — Sintra e arredores de Lisboa ao seu ritmo, com motorista dedicado. Roteiro personalizado.',
     fleetFootnote: 'Veículo atribuído conforme a categoria reservada.',
@@ -246,9 +246,9 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
   EN: {
     // Hero
-    heroEyebrow: 'LIVE MONITORING · LISBON · PORTO · FARO',
-    headline: 'Flights delay.',
-    headlineHighlight: "We don't.",
+    heroEyebrow: 'LIVE MONITORING · LISBON AREA',
+    headline: 'The flight was late.',
+    headlineHighlight: 'The driver already knew.',
     subheadline:
       'Our system tracks your flight in real-time. If the schedule changes, we handle everything automatically. You land, and we\'re already there waiting.',
     ctaBook: 'Book my stress-free ride',
@@ -260,7 +260,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     // Partners
     partnersTitle: 'Connected to every signal crossing Portugal\'s skies.',
     partnersDesc:
-      'Our Brain doesn\'t look at the airline logo or where you took off from. It connects directly to the radar signal of every aircraft approaching Lisbon, Porto or Faro. If you\'re flying to Portugal, you\'re already on our radar.',
+      "Our Brain doesn't look at the airline logo or where you took off from. It connects directly to the radar signal of every aircraft approaching Lisbon. If you're flying to Lisbon, you're already on our radar.",
 
     // Pain
     painTitle: 'The Chaos of Taxi Queues',
@@ -280,10 +280,10 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     fleetEyebrow: 'THE SERVICE',
     fleetTitle: 'The same technology, from radar to road.',
     fleetDesc:
-      'The system tracking your flight is the same one coordinating the car waiting for you. And in our executive service, the technology extends to the car itself: a 100% electric Tesla — quiet, comfortable, zero emissions.',
-    fleetFeature1: 'Punctuality with a real guarantee',
+      'The system tracking your flight is the same one coordinating the car waiting for you.',
+    fleetFeature1: 'Pickup adjusted to the actual flight time',
     fleetFeature2: 'Real-time flight monitoring',
-    fleetFeature3: '24/7 Support',
+    fleetFeature3: 'WhatsApp support',
     catLabel: 'CATEGORY',
     cat1Title: 'MPV',
     cat1Line: 'Room for the family and the luggage, from airport to destination.',
@@ -292,7 +292,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     cat2Line: 'Straightforward, discreet comfort for two or three.',
     cat2Cap: 'Up to 3 passengers + luggage',
     cat3Title: 'Executive Sedan',
-    cat3Line: '100% electric Tesla. Quiet, punctual, discreet.',
+    cat3Line: 'Quiet and discreet, for business travel.',
     cat3Cap: 'Up to 3 passengers',
     toursLine: 'Private Tours — Sintra and the Lisbon area at your own pace, with a dedicated driver. Custom itinerary.',
     fleetFootnote: 'Vehicle assigned according to the booked category.',
@@ -370,9 +370,9 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
   ES: {
     // Hero
-    heroEyebrow: 'MONITORIZACIÓN ACTIVA · LISBOA · OPORTO · FARO',
-    headline: 'Tu vuelo se atrasa.',
-    headlineHighlight: 'Nosotros no.',
+    heroEyebrow: 'MONITORIZACIÓN ACTIVA · LISBOA Y SU REGIÓN',
+    headline: 'El vuelo se retrasó.',
+    headlineHighlight: 'El conductor ya lo sabía.',
     subheadline:
       'Nuestro sistema vigila tu vuelo en tiempo real. Si el horario cambia, ajustamos todo automáticamente para que nunca te quedes tirado. Tú aterrizas y nosotros ya estamos ahí.',
     ctaBook: 'Reservar mi transfer ahora',
@@ -384,7 +384,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     // Partners
     partnersTitle: 'Conectados a todas las señales que cruzan el cielo de Portugal.',
     partnersDesc:
-      'Nuestro Cerebro no mira la bandera del avión ni el aeropuerto desde donde despegaste. Se conecta directamente a la señal de radar de cada aeronave que se acerca a Lisboa, Oporto o Faro. Si estás volando a Portugal, ya estás en nuestro radar.',
+      'Nuestro Cerebro no mira la bandera del avión ni el aeropuerto desde donde despegaste. Se conecta directamente a la señal de radar de cada aeronave que se acerca a Lisboa. Si estás volando a Lisboa, ya estás en nuestro radar.',
 
     // Pain
     painTitle: 'El Caos de las Colas de Taxis',
@@ -404,10 +404,10 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     fleetEyebrow: 'EL SERVICIO',
     fleetTitle: 'La misma tecnología, del radar a la carretera.',
     fleetDesc:
-      'El sistema que monitoriza su vuelo es el mismo que coordina el coche que le espera. Y en el servicio ejecutivo, la tecnología llega al propio coche: Tesla 100% eléctrico — silencioso, cómodo, sin emisiones.',
-    fleetFeature1: 'Puntualidad con garantía real',
+      'El sistema que monitoriza su vuelo es el mismo que coordina el coche que le espera.',
+    fleetFeature1: 'Recogida ajustada a la hora real del vuelo',
     fleetFeature2: 'Monitorización de vuelo en tiempo real',
-    fleetFeature3: 'Soporte 24/7',
+    fleetFeature3: 'Soporte por WhatsApp',
     catLabel: 'CATEGORÍA',
     cat1Title: 'MPV',
     cat1Line: 'Espacio para la familia y el equipaje, del aeropuerto al destino.',
@@ -416,7 +416,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     cat2Line: 'Confort directo y discreto para dos o tres.',
     cat2Cap: 'Hasta 3 pasajeros + equipaje',
     cat3Title: 'Sedán Ejecutivo',
-    cat3Line: 'Tesla 100% eléctrico. Silencioso, puntual, discreto.',
+    cat3Line: 'Silencioso y discreto, para viajes de negocios.',
     cat3Cap: 'Hasta 3 pasajeros',
     toursLine: 'Tours Privados — Sintra y los alrededores de Lisboa a su ritmo, con conductor dedicado. Itinerario personalizado.',
     fleetFootnote: 'Vehículo asignado según la categoría reservada.',
@@ -494,9 +494,9 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
   FR: {
     // Hero
-    heroEyebrow: 'SURVEILLANCE ACTIVE · LISBONNE · PORTO · FARO',
-    headline: 'Votre vol est en retard.',
-    headlineHighlight: 'Pas nous.',
+    heroEyebrow: 'SURVEILLANCE ACTIVE · LISBONNE ET SA RÉGION',
+    headline: 'Le vol a eu du retard.',
+    headlineHighlight: 'Le chauffeur le savait déjà.',
     subheadline:
       "Notre système surveille votre vol en temps réel. Si l'horaire change, on ajuste tout automatiquement pour vous éviter l'attente. Vous atterrissez, on est déjà là.",
     ctaBook: 'Réserver mon transfert maintenant',
@@ -508,7 +508,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     // Partners
     partnersTitle: 'Connectés à tous les signaux qui traversent le ciel du Portugal.',
     partnersDesc:
-      "Notre Cerveau ne regarde pas le drapeau de l'avion ni l'aéroport d'où vous avez décollé. Il se connecte directement au signal radar de chaque aéronef qui s'approche de Lisbonne, Porto ou Faro. Si vous volez vers le Portugal, vous êtes déjà sur notre radar.",
+      "Notre Cerveau ne regarde pas le drapeau de l'avion ni l'aéroport d'où vous avez décollé. Il se connecte directement au signal radar de chaque aéronef qui s'approche de Lisbonne. Si vous volez vers Lisbonne, vous êtes déjà sur notre radar.",
 
     // Pain
     painTitle: 'Le Chaos des Files de Taxis',
@@ -528,10 +528,10 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     fleetEyebrow: 'LE SERVICE',
     fleetTitle: 'La même technologie, du radar à la route.',
     fleetDesc:
-      "Le système qui suit votre vol est le même qui coordonne la voiture qui vous attend. Et pour le service executive, la technologie s'étend à la voiture elle-même : Tesla 100 % électrique — silencieuse, confortable, zéro émission.",
-    fleetFeature1: 'Ponctualité avec une vraie garantie',
+      'Le système qui suit votre vol est le même qui coordonne la voiture qui vous attend.',
+    fleetFeature1: "Prise en charge ajustée à l'heure réelle du vol",
     fleetFeature2: 'Surveillance de vol en temps réel',
-    fleetFeature3: 'Assistance 24h/24',
+    fleetFeature3: 'Assistance par WhatsApp',
     catLabel: 'CATÉGORIE',
     cat1Title: 'Monospace',
     cat1Line: "De la place pour la famille et les bagages, de l'aéroport à destination.",
@@ -540,7 +540,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     cat2Line: 'Un confort simple et discret pour deux ou trois.',
     cat2Cap: "Jusqu'à 3 passagers + bagages",
     cat3Title: 'Berline Executive',
-    cat3Line: 'Tesla 100 % électrique. Silencieuse, ponctuelle, discrète.',
+    cat3Line: "Silencieux et discret, pour les voyages d'affaires.",
     cat3Cap: "Jusqu'à 3 passagers",
     toursLine: 'Excursions Privées — Sintra et les environs de Lisbonne à votre rythme, avec chauffeur dédié. Itinéraire personnalisé.',
     fleetFootnote: 'Véhicule attribué selon la catégorie réservée.',
@@ -618,9 +618,9 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
 
   IT: {
     // Hero
-    heroEyebrow: 'MONITORAGGIO ATTIVO · LISBONA · PORTO · FARO',
-    headline: 'Il tuo volo ritarda.',
-    headlineHighlight: 'Noi no.',
+    heroEyebrow: 'MONITORAGGIO ATTIVO · LISBONA E DINTORNI',
+    headline: 'Il volo era in ritardo.',
+    headlineHighlight: "L'autista lo sapeva già.",
     subheadline:
       'Il nostro sistema monitora il tuo volo in tempo reale. Se l\'orario cambia, riorganizziamo tutto noi. Tu atterri e noi siamo già lì ad aspettarti.',
     ctaBook: 'Prenota il mio transfer ora',
@@ -632,7 +632,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     // Partners
     partnersTitle: 'Connessi a tutti i segnali che attraversano il cielo del Portogallo.',
     partnersDesc:
-      "Il nostro Cervello non guarda la bandiera dell'aereo o l'aeroporto da cui sei decollato. Si collega direttamente al segnale radar di ogni aeromobile che si avvicina a Lisbona, Porto o Faro. Se stai volando verso il Portogallo, sei già sul nostro radar.",
+      "Il nostro Cervello non guarda la bandiera dell'aereo o l'aeroporto da cui sei decollato. Si collega direttamente al segnale radar di ogni aeromobile che si avvicina a Lisbona. Se stai volando verso Lisbona, sei già sul nostro radar.",
 
     // Pain
     painTitle: 'Il Caos delle Code dei Taxi',
@@ -652,10 +652,10 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     fleetEyebrow: 'IL SERVIZIO',
     fleetTitle: 'La stessa tecnologia, dal radar alla strada.',
     fleetDesc:
-      "Il sistema che monitora il suo volo è lo stesso che coordina l'auto che la aspetta. E nel servizio executive, la tecnologia arriva fino all'auto: Tesla 100% elettrica — silenziosa, confortevole, a zero emissioni.",
-    fleetFeature1: 'Puntualità con garanzia reale',
+      "Il sistema che monitora il suo volo è lo stesso che coordina l'auto che la aspetta.",
+    fleetFeature1: "Ritiro adeguato all'orario effettivo del volo",
     fleetFeature2: 'Monitoraggio del volo in tempo reale',
-    fleetFeature3: 'Supporto 24/7',
+    fleetFeature3: 'Assistenza su WhatsApp',
     catLabel: 'CATEGORIA',
     cat1Title: 'Monovolume',
     cat1Line: "Spazio per la famiglia e i bagagli, dall'aeroporto a destinazione.",
@@ -664,7 +664,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     cat2Line: 'Comfort diretto e discreto per due o tre.',
     cat2Cap: 'Fino a 3 passeggeri + bagagli',
     cat3Title: 'Berlina Executive',
-    cat3Line: 'Tesla 100% elettrica. Silenziosa, puntuale, discreta.',
+    cat3Line: 'Silenzioso e discreto, per i viaggi di lavoro.',
     cat3Cap: 'Fino a 3 passeggeri',
     toursLine: 'Tour Privati — Sintra e i dintorni di Lisbona al suo ritmo, con autista dedicato. Itinerario personalizzato.',
     fleetFootnote: 'Veicolo assegnato in base alla categoria prenotata.',

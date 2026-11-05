@@ -174,77 +174,6 @@ function RadarIllustration({ variant = "default", states }: { variant?: "default
 }
 const WA_URL = `https://wa.me/${COMPANY.whatsapp.replace(/\+/g, "")}`;
 
-/* ─── Selo do designer (imagem por idioma) com animação de carimbo.
-   Restaurado na Fase 5.1: a animação de stamp é A ÚNICA animação da secção
-   Garantia (disciplina mantida). Nota: o selo PT (selo_br) contém a voz BR do
-   designer — variante PT-PT fica a cargo do designer, futuramente. ─── */
-const SEAL_MAP: Record<string, string> = {
-  PT: "/images/selo_br.png",
-  EN: "/images/selo_en.png",
-  ES: "/images/selo_es.png",
-  FR: "/images/selo_fr.png",
-  IT: "/images/selo_it.png",
-};
-
-function SealImage({ lang: sealLang }: { lang: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [stamped, setStamped] = useState(false);
-  const [ring, setRing] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting && !stamped) {
-          setStamped(true);
-          setTimeout(() => setRing(true), 350);
-        }
-      },
-      { threshold: 0.4 },
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [stamped]);
-
-  const src = SEAL_MAP[sealLang] || SEAL_MAP.EN;
-
-  return (
-    <div ref={ref} className="flex justify-center mt-10">
-      <div className="relative">
-        {/* Impact ring */}
-        {ring && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-[160px] h-[160px] md:w-[220px] md:h-[220px] rounded-full border border-[var(--hub-gold)]/40"
-              style={{ animation: "stampRing 0.6s ease-out forwards" }} />
-          </div>
-        )}
-
-        {/* Seal image */}
-        <Image
-          src={src}
-          alt="Selo de Garantia HUB Transfer"
-          width={220}
-          height={220}
-          className="w-[160px] h-auto md:w-[220px]"
-          style={{
-            opacity: stamped ? 1 : 0,
-            transform: stamped ? "scale(1) rotate(-5deg)" : "scale(2) rotate(-15deg)",
-            transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.15s ease-out",
-          }}
-        />
-      </div>
-
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes stampRing {
-          0% { transform: scale(0.8); opacity: 0.4; }
-          100% { transform: scale(2.2); opacity: 0; }
-        }
-      `}} />
-    </div>
-  );
-}
-
 /* ─── Números/condições em mono (dados de sistema): envolve "90", "3h", etc. ─── */
 function MonoNums({ text }: { text: string }) {
   const parts = text.split(/(\d+h?)/g);
@@ -962,9 +891,6 @@ export default function LandingPage() {
                 {t.policyLink}
               </a>
             </Reveal>
-
-            {/* Selo do designer — carimbo (única animação da secção) */}
-            <SealImage lang={lang} />
 
             {/* 4 guarantee badges — estáticos (sem fades a competir com o carimbo) */}
             <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-8">

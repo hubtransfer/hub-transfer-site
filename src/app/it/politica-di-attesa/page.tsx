@@ -45,8 +45,8 @@ function N({ children }: { children: string }) {
 export default function PoliticaDiAttesaPage() {
   return (
     <div lang="it" className="min-h-screen bg-[var(--hub-black)] text-[#D0D0D0]">
-      <header className="border-b border-[var(--hub-line)] px-6 py-4">
-        <div className="max-w-3xl mx-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+      <header className="border-b border-[var(--hub-line)] py-4">
+        <div className="max-w-3xl mx-auto px-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
           <a href="/" className="order-1"><Image src="/images/logo.png" alt="HUB Transfer" width={140} height={40} className="h-9 w-auto" /></a>
           <nav className="order-3 w-full sm:order-2 sm:w-auto sm:ml-auto flex gap-1">
             {LINGUAS.map((l) => (
@@ -64,42 +64,42 @@ export default function PoliticaDiAttesaPage() {
       <main className="max-w-3xl mx-auto px-6 py-12 space-y-8 text-sm leading-relaxed">
         <div className="space-y-2">
           <h1 className="text-2xl md:text-3xl font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>{"Politica di attesa"}</h1>
-          <p className="text-[#888] text-xs"><N>{"Ultimo aggiornamento: 5 novembre 2026."}</N></p>
+          <p className="max-w-[68ch] text-[#888] text-xs"><N>{"Ultimo aggiornamento: 5 novembre 2026."}</N></p>
         </div>
 
-        <p><N>{"Il ritiro segue il suo volo. Se il volo è in ritardo o arriva in anticipo, adeguiamo l'orario del ritiro, senza che debba avvisarci."}</N></p>
+        <p className="max-w-[68ch]"><N>{"Il ritiro segue il suo volo. Se il volo è in ritardo o arriva in anticipo, adeguiamo l'orario del ritiro, senza che debba avvisarci."}</N></p>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">{"Ritiri in aeroporto"}</h2>
-          <p><N>{"L'autista attende 60 minuti, a partire dall'atterraggio effettivo del volo."}</N></p>
-          <p><N>{"Se le serve più tempo, ad esempio al ritiro bagagli o al controllo di frontiera, ci scriva su WhatsApp: concordiamo con lei l'attesa aggiuntiva."}</N></p>
+          <p className="max-w-[68ch]"><N>{"L'autista attende 60 minuti, a partire dall'atterraggio effettivo del volo."}</N></p>
+          <p className="max-w-[68ch]"><N>{"Se le serve più tempo, ad esempio al ritiro bagagli o al controllo di frontiera, ci scriva su WhatsApp: concordiamo con lei l'attesa aggiuntiva."}</N></p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">{"Ritiri in hotel o a un altro indirizzo"}</h2>
-          <p><N>{"L'autista attende 15 minuti, a partire dall'orario prenotato."}</N></p>
-          <p><N>{"Le chiediamo di essere pronto all'orario prenotato, soprattutto se va in aeroporto."}</N></p>
+          <p className="max-w-[68ch]"><N>{"L'autista attende 15 minuti, a partire dall'orario prenotato."}</N></p>
+          <p className="max-w-[68ch]"><N>{"Le chiediamo di essere pronto all'orario prenotato, soprattutto se va in aeroporto."}</N></p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">{"Se non riusciamo a trovarla"}</h2>
-          <p><N>{"Durante il tempo di attesa, l'autista cerca di contattarla in diversi modi, compresi messaggi WhatsApp e chiamate, e lo fa anche il team HUB. L'autista attende al punto d'incontro concordato e registra di esserci stato."}</N></p>
-          <p><N>{"Se alla fine del tempo di attesa non è possibile contattarla, il viaggio viene considerato una mancata presentazione (no-show): l'autista può andare via e viene addebitato il prezzo intero del viaggio."}</N></p>
+          <p className="max-w-[68ch]"><N>{"Durante il tempo di attesa, l'autista cerca di contattarla in diversi modi, compresi messaggi WhatsApp e chiamate, e lo fa anche il team HUB. L'autista attende al punto d'incontro concordato e registra di esserci stato."}</N></p>
+          <p className="max-w-[68ch]"><N>{"Se alla fine del tempo di attesa non è possibile contattarla, il viaggio viene considerato una mancata presentazione (no-show): l'autista può andare via e viene addebitato il prezzo intero del viaggio."}</N></p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">{"Cancellazioni"}</h2>
-          <p><N>{"La cancellazione è gratuita fino a 3 ore prima del ritiro. Dopo, viene addebitato il prezzo intero del viaggio. La stessa regola vale nei termini e condizioni."}</N></p>
+          <p className="max-w-[68ch]"><N>{"La cancellazione è gratuita fino a 3 ore prima del ritiro. Dopo, viene addebitato il prezzo intero del viaggio. La stessa regola vale nei termini e condizioni."}</N></p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">{"Prenotazioni fatte tramite agenzie, operatori o hotel"}</h2>
-          <p><N>{"Valgono le regole di attesa, di cancellazione e di mancata presentazione concordate con chi ha fatto la prenotazione."}</N></p>
+          <p className="max-w-[68ch]"><N>{"Valgono le regole di attesa, di cancellazione e di mancata presentazione concordate con chi ha fatto la prenotazione."}</N></p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">{"Contatti"}</h2>
-          <p>
+          <p className="max-w-[68ch]">
             {"Per avvisarci di un ritardo o concordare l'attesa: "}
             <a href={WA} target="_blank" rel="noopener noreferrer" className="text-[var(--hub-gold)] hover:underline">{"il WhatsApp di HUB"}</a>
             {" ("}<span className="font-mono text-white">{COMPANY.whatsappFormatted}</span>{")"}

@@ -8,7 +8,7 @@ import { readFileSync } from "node:fs";
 const BASE = process.argv[2] || "http://127.0.0.1:3022";
 const PAGINAS = {
  "/politica-de-espera": {
-  "lang": "pt",
+  "lang": "pt-PT",
   "frases": [
    "Política de Espera | HUB Transfer",
    "60 minutos de espera nas recolhas no aeroporto, desde a aterragem real do voo, e 15 minutos nas outras recolhas. Cancelamentos e não comparência.",
@@ -144,6 +144,7 @@ const PAGINAS = {
    "Gratuito até 3 horas antes da recolha.",
    "Com menos de 3 horas, cobra-se o valor total da viagem.",
    "Não comparência: se, no fim do tempo de espera, não for possível falar com o cliente, cobra-se o valor total da viagem.",
+   "Nas reservas feitas através de agências, operadores ou hotéis, valem as regras combinadas com quem fez a reserva.",
    "A HUB Transfer acompanha os voos em tempo real. Se o voo se atrasar, a hora da recolha ajusta-se sem custo. O tempo de espera e o que acontece quando não encontramos o cliente estão na nossa Política de Espera."
   ]
  }
@@ -183,6 +184,62 @@ const TABELA = {
   "ES": "Un coche por reserva",
   "FR": "Une voiture par réservation",
   "IT": "Un'auto per prenotazione"
+ },
+ "headline": {
+  "PT": "O voo atrasou.",
+  "EN": "The flight was late.",
+  "ES": "El vuelo se retrasó.",
+  "FR": "Le vol a eu du retard.",
+  "IT": "Il volo era in ritardo."
+ },
+ "headlineHighlight": {
+  "PT": "O motorista já sabia.",
+  "EN": "The driver already knew.",
+  "ES": "El conductor ya lo sabía.",
+  "FR": "Le chauffeur le savait déjà.",
+  "IT": "L'autista lo sapeva già."
+ },
+ "fleetFeature3": {
+  "PT": "Suporte por WhatsApp",
+  "EN": "WhatsApp support",
+  "ES": "Soporte por WhatsApp",
+  "FR": "Assistance par WhatsApp",
+  "IT": "Assistenza su WhatsApp"
+ },
+ "heroEyebrow": {
+  "PT": "MONITORIZAÇÃO ATIVA · LISBOA E REGIÃO",
+  "EN": "LIVE MONITORING · LISBON AREA",
+  "ES": "MONITORIZACIÓN ACTIVA · LISBOA Y SU REGIÓN",
+  "FR": "SURVEILLANCE ACTIVE · LISBONNE ET SA RÉGION",
+  "IT": "MONITORAGGIO ATTIVO · LISBONA E DINTORNI"
+ },
+ "partnersDesc": {
+  "PT": "O nosso Cérebro não olha para a bandeira do avião nem para o aeroporto de onde descolou. Liga-se diretamente ao sinal de radar de cada aeronave que se aproxima de Lisboa. Se está a voar para Lisboa, já está no nosso radar.",
+  "EN": "Our Brain doesn't look at the airline logo or where you took off from. It connects directly to the radar signal of every aircraft approaching Lisbon. If you're flying to Lisbon, you're already on our radar.",
+  "ES": "Nuestro Cerebro no mira la bandera del avión ni el aeropuerto desde donde despegaste. Se conecta directamente a la señal de radar de cada aeronave que se acerca a Lisboa. Si estás volando a Lisboa, ya estás en nuestro radar.",
+  "FR": "Notre Cerveau ne regarde pas le drapeau de l'avion ni l'aéroport d'où vous avez décollé. Il se connecte directement au signal radar de chaque aéronef qui s'approche de Lisbonne. Si vous volez vers Lisbonne, vous êtes déjà sur notre radar.",
+  "IT": "Il nostro Cervello non guarda la bandiera dell'aereo o l'aeroporto da cui sei decollato. Si collega direttamente al segnale radar di ogni aeromobile che si avvicina a Lisbona. Se stai volando verso Lisbona, sei già sul nostro radar."
+ },
+ "fleetDesc": {
+  "PT": "O sistema que monitoriza o seu voo é o mesmo que coordena o carro à sua espera.",
+  "EN": "The system tracking your flight is the same one coordinating the car waiting for you.",
+  "ES": "El sistema que monitoriza su vuelo es el mismo que coordina el coche que le espera.",
+  "FR": "Le système qui suit votre vol est le même qui coordonne la voiture qui vous attend.",
+  "IT": "Il sistema che monitora il suo volo è lo stesso che coordina l'auto che la aspetta."
+ },
+ "cat3Line": {
+  "PT": "Silencioso e discreto, para viagens de negócios.",
+  "EN": "Quiet and discreet, for business travel.",
+  "ES": "Silencioso y discreto, para viajes de negocios.",
+  "FR": "Silencieux et discret, pour les voyages d'affaires.",
+  "IT": "Silenzioso e discreto, per i viaggi di lavoro."
+ },
+ "fleetFeature1": {
+  "PT": "Recolha ajustada à hora real do voo",
+  "EN": "Pickup adjusted to the actual flight time",
+  "ES": "Recogida ajustada a la hora real del vuelo",
+  "FR": "Prise en charge ajustée à l'heure réelle du vol",
+  "IT": "Ritiro adeguato all'orario effettivo del volo"
  }
 };
 const PROIBIDAS = ["90", "reembols", "refund", "rembours", "rimbors", "10 €", "€10", "Garantia", "Guarantee", "Garantía", "Garantie", "Garanzia"];
@@ -243,6 +300,26 @@ for (const [chave, porLingua] of Object.entries(TABELA)) {
   }
   console.log(`  ${chave}: ${erradas.length ? "ERRADO " + erradas.join(" · ") : "as cinco certas"}`);
   if (erradas.length) falhas++;
+}
+// O início, nas cinco línguas (o bloco de cada língua no landing-translations.ts e o início servido, em PT):
+// sem «Nós não», «Tesla», «24/7», «24h/24», Porto, Oporto ou Faro (palavras inteiras).
+const INICIO_PROIBIDAS = ["Nós não", "We don't", "Nosotros no", "Pas nous", "Tesla", "24/7", "24h/24", "Porto", "Oporto", "Faro"];
+const inteira = (w) => new RegExp(`(?<![\\p{L}\\d])${w}(?![\\p{L}\\d])`, "u");
+console.log("\ninício, palavras que saíram:");
+for (const L of ["PT", "EN", "ES", "FR", "IT"]) {
+  const ini = src.indexOf(`\n  ${L}: {`);
+  const fim = src.indexOf("\n  },", ini);
+  const bloco = src.slice(ini, fim);
+  const achadas = INICIO_PROIBIDAS.filter((w) => inteira(w).test(bloco));
+  console.log(`  ${L}: ${achadas.length ? "ACHADAS " + achadas.join(", ") : "nenhuma"}`);
+  if (achadas.length) falhas++;
+}
+{
+  const r = await fetch(BASE + "/");
+  const visto = textoVisivel(await r.text());
+  const achadas = INICIO_PROIBIDAS.filter((w) => inteira(w).test(visto));
+  console.log(`  / servido (HTTP ${r.status}): ${achadas.length ? "ACHADAS " + achadas.join(", ") : "nenhuma"}`);
+  if (achadas.length || r.status !== 200) falhas++;
 }
 console.log(falhas ? `\n${falhas} falha(s).` : "\nTudo certo.");
 process.exit(falhas ? 1 : 0);
