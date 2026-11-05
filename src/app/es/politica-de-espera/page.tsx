@@ -23,8 +23,8 @@ export const metadata: Metadata = {
 const WA = `https://wa.me/${COMPANY.whatsapp.replace(/\+/g, "")}`;
 
 const LINGUAS = [
-  { code: "pt", href: "/politica-de-espera" },
   { code: "en", href: "/waiting-policy" },
+  { code: "pt", href: "/politica-de-espera" },
   { code: "es", href: "/es/politica-de-espera" },
   { code: "fr", href: "/fr/politique-d-attente" },
   { code: "it", href: "/it/politica-di-attesa" },
@@ -45,15 +45,19 @@ function N({ children }: { children: string }) {
 export default function PoliticaDeEsperaEsPage() {
   return (
     <div lang="es" className="min-h-screen bg-[var(--hub-black)] text-[#D0D0D0]">
+      {/* Abrir esta página guarda a língua: o início abre nela (sem a língua do browser nem o país). */}
+      <script dangerouslySetInnerHTML={{ __html: `try{localStorage.setItem("hub-lang","${ESTA}")}catch(e){}` }} />
       <header className="border-b border-[var(--hub-line)] py-4">
         <div className="max-w-3xl mx-auto px-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
           <a href="/" className="order-1"><Image src="/images/logo.png" alt="HUB Transfer" width={140} height={40} className="h-9 w-auto" /></a>
           <nav className="order-3 w-full sm:order-2 sm:w-auto sm:ml-auto flex gap-1">
             {LINGUAS.map((l) => (
               <a key={l.code} href={l.href} hrefLang={l.code} aria-current={l.code === ESTA ? "page" : undefined}
-                className={`w-8 h-6 rounded overflow-hidden border transition-all ${l.code === ESTA ? "border-[var(--hub-gold)]/60 opacity-100" : "border-transparent opacity-40 hover:opacity-70"}`}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`/flags/${l.code}.jpg`} alt={l.code.toUpperCase()} className="w-full h-full object-cover" />
+                className="w-11 h-11 flex items-center justify-center group">
+                <span className={`w-8 h-6 rounded overflow-hidden border transition-all ${l.code === ESTA ? "border-[var(--hub-gold)]/60 opacity-100" : "border-transparent opacity-40 group-hover:opacity-70"}`}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={`/flags/${l.code}.jpg`} alt={l.code.toUpperCase()} className="w-full h-full object-cover" />
+                </span>
               </a>
             ))}
           </nav>
@@ -64,42 +68,42 @@ export default function PoliticaDeEsperaEsPage() {
       <main className="max-w-3xl mx-auto px-6 py-12 space-y-8 text-sm leading-relaxed">
         <div className="space-y-2">
           <h1 className="text-2xl md:text-3xl font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>{"Política de espera"}</h1>
-          <p className="max-w-[68ch] text-[#888] text-xs"><N>{"Última actualización: 5 de noviembre de 2026."}</N></p>
+          <p className="max-w-[32em] text-[#888] text-xs"><N>{"Última actualización: 5 de noviembre de 2026."}</N></p>
         </div>
 
-        <p className="max-w-[68ch]"><N>{"La recogida sigue su vuelo. Si el vuelo se retrasa o llega antes, ajustamos la hora de recogida, sin que tenga que avisarnos."}</N></p>
+        <p className="max-w-[32em]"><N>{"La recogida sigue su vuelo. Si el vuelo se retrasa o llega antes, ajustamos la hora de recogida, sin que tenga que avisarnos."}</N></p>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">{"Recogidas en el aeropuerto"}</h2>
-          <p className="max-w-[68ch]"><N>{"El conductor espera 60 minutos, contados desde el aterrizaje real del vuelo."}</N></p>
-          <p className="max-w-[68ch]"><N>{"Si necesita más tiempo, por ejemplo en la recogida de equipaje o en el control de fronteras, escríbanos por WhatsApp y acordamos con usted el tiempo de espera adicional."}</N></p>
+          <p className="max-w-[32em]"><N>{"El conductor espera 60 minutos, contados desde el aterrizaje real del vuelo."}</N></p>
+          <p className="max-w-[32em]"><N>{"Si necesita más tiempo, por ejemplo en la recogida de equipaje o en el control de fronteras, escríbanos por WhatsApp y acordamos con usted el tiempo de espera adicional."}</N></p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">{"Recogidas en el hotel o en otra dirección"}</h2>
-          <p className="max-w-[68ch]"><N>{"El conductor espera 15 minutos, contados desde la hora reservada."}</N></p>
-          <p className="max-w-[68ch]"><N>{"Le pedimos que esté listo a la hora reservada, sobre todo si va al aeropuerto."}</N></p>
+          <p className="max-w-[32em]"><N>{"El conductor espera 15 minutos, contados desde la hora reservada."}</N></p>
+          <p className="max-w-[32em]"><N>{"Le pedimos que esté listo a la hora reservada, sobre todo si va al aeropuerto."}</N></p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">{"Si no podemos encontrarle"}</h2>
-          <p className="max-w-[68ch]"><N>{"Durante el tiempo de espera, el conductor intenta contactarle por varios medios, incluidos mensajes de WhatsApp y llamadas, y el equipo de HUB también. El conductor espera en el punto de encuentro acordado y deja constancia de que estuvo allí."}</N></p>
-          <p className="max-w-[68ch]"><N>{"Si al terminar el tiempo de espera no es posible hablar con usted, el viaje se considera una no presentación (no-show): el conductor puede marcharse y se cobra el precio total del viaje."}</N></p>
+          <p className="max-w-[32em]"><N>{"Durante el tiempo de espera, el conductor intenta contactarle por varios medios, incluidos mensajes de WhatsApp y llamadas, y el equipo de HUB también. El conductor espera en el punto de encuentro acordado y deja constancia de que estuvo allí."}</N></p>
+          <p className="max-w-[32em]"><N>{"Si al terminar el tiempo de espera no es posible hablar con usted, el viaje se considera una no presentación (no-show): el conductor puede marcharse y se cobra el precio total del viaje."}</N></p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">{"Cancelaciones"}</h2>
-          <p className="max-w-[68ch]"><N>{"La cancelación es gratuita hasta 3 horas antes de la recogida. Después, se cobra el precio total del viaje. La misma regla se aplica en los términos y condiciones."}</N></p>
+          <p className="max-w-[32em]"><N>{"La cancelación es gratuita hasta 3 horas antes de la recogida. Después, se cobra el precio total del viaje. La misma regla se aplica en los términos y condiciones."}</N></p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">{"Reservas hechas a través de agencias, operadores u hoteles"}</h2>
-          <p className="max-w-[68ch]"><N>{"Se aplican las reglas de espera, de cancelación y de no presentación acordadas con quien hizo la reserva."}</N></p>
+          <p className="max-w-[32em]"><N>{"Se aplican las reglas de espera, de cancelación y de no presentación acordadas con quien hizo la reserva."}</N></p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">{"Contacto"}</h2>
-          <p className="max-w-[68ch]">
+          <p className="max-w-[32em]">
             {"Para avisarnos de un retraso o acordar la espera: "}
             <a href={WA} target="_blank" rel="noopener noreferrer" className="text-[var(--hub-gold)] hover:underline">{"el WhatsApp de HUB"}</a>
             {" ("}<span className="font-mono text-white">{COMPANY.whatsappFormatted}</span>{")"}

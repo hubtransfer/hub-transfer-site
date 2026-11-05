@@ -240,7 +240,106 @@ const TABELA = {
   "ES": "Recogida ajustada a la hora real del vuelo",
   "FR": "Prise en charge ajustée à l'heure réelle du vol",
   "IT": "Ritiro adeguato all'orario effettivo del volo"
+ },
+ "algoTitle": {
+  "PT": "Não é magia, é monitorização.",
+  "EN": "It's not magic, it's monitoring.",
+  "ES": "No es magia, es monitorización.",
+  "FR": "Ce n'est pas de la magie, c'est de la surveillance.",
+  "IT": "Non è magia, è monitoraggio."
  }
+};
+const RODAPE = {
+ "PT": [
+  "Serviço premium de transfers em Lisboa e na região.",
+  "Serviços",
+  "Transfers Aeroporto",
+  "Transfers Hotel",
+  "Tours Privados",
+  "Transfers Restaurante",
+  "Serviço Corporativo",
+  "Contacto",
+  "Legal",
+  "Política de Privacidade",
+  "Termos e Condições",
+  "Política de Espera",
+  "Livro de Reclamações",
+  "Área Reservada (Parceiros)",
+  "Todos os direitos reservados",
+  "Licenciado pelo Turismo de Portugal"
+ ],
+ "EN": [
+  "Premium transfer service in Lisbon and the surrounding region.",
+  "Services",
+  "Airport transfers",
+  "Hotel transfers",
+  "Private tours",
+  "Restaurant transfers",
+  "Corporate service",
+  "Contact",
+  "Legal",
+  "Privacy Policy",
+  "Terms and Conditions",
+  "Waiting Policy",
+  "Livro de Reclamações (Complaints Book)",
+  "Restricted Area (Partners)",
+  "All rights reserved",
+  "Licensed by Turismo de Portugal"
+ ],
+ "ES": [
+  "Servicio premium de traslados en Lisboa y su región.",
+  "Servicios",
+  "Traslados al aeropuerto",
+  "Traslados al hotel",
+  "Tours privados",
+  "Traslados a restaurantes",
+  "Servicio corporativo",
+  "Contacto",
+  "Legal",
+  "Política de privacidad",
+  "Términos y condiciones",
+  "Política de Espera",
+  "Livro de Reclamações (Libro de Reclamaciones)",
+  "Área reservada (Socios)",
+  "Todos los derechos reservados",
+  "Con licencia de Turismo de Portugal"
+ ],
+ "FR": [
+  "Service premium de transferts à Lisbonne et dans sa région.",
+  "Services",
+  "Transferts aéroport",
+  "Transferts hôtel",
+  "Visites privées",
+  "Transferts restaurant",
+  "Service entreprises",
+  "Contact",
+  "Mentions légales",
+  "Politique de confidentialité",
+  "Conditions générales",
+  "Politique d'Attente",
+  "Livro de Reclamações (Livre des réclamations)",
+  "Espace réservé (Partenaires)",
+  "Tous droits réservés",
+  "Agréé par Turismo de Portugal"
+ ],
+ "IT": [
+  "Servizio premium di transfer a Lisbona e dintorni.",
+  "Servizi",
+  "Transfer aeroporto",
+  "Transfer hotel",
+  "Tour privati",
+  "Transfer ristorante",
+  "Servizio aziendale",
+  "Contatti",
+  "Note legali",
+  "Informativa sulla privacy",
+  "Termini e condizioni",
+  "Politica di Attesa",
+  "Livro de Reclamações (Libro dei reclami)",
+  "Area riservata (Partner)",
+  "Tutti i diritti riservati",
+  "Autorizzato da Turismo de Portugal"
+ ]
 };
 const PROIBIDAS = ["90", "reembols", "refund", "rembours", "rimbors", "10 €", "€10", "Garantia", "Guarantee", "Garantía", "Garantie", "Garanzia"];
 const NUMERO_WA = " (+351 968 698 138)"; // o número a seguir ao «WhatsApp da HUB», fora da frase aprovada
@@ -320,6 +419,26 @@ for (const L of ["PT", "EN", "ES", "FR", "IT"]) {
   const achadas = INICIO_PROIBIDAS.filter((w) => inteira(w).test(visto));
   console.log(`  / servido (HTTP ${r.status}): ${achadas.length ? "ACHADAS " + achadas.join(", ") : "nenhuma"}`);
   if (achadas.length || r.status !== 200) falhas++;
+}
+// Títulos antigos que saíram (as cinco línguas) e o rodapé de cada língua no page.tsx do início.
+const SAIRAM = ["Technology that Guarantees", "Tecnología que Garantiza", "Technologie qui Garantit", "Tecnologia che Garantisce", "quedes tirado"];
+const pagina = readFileSync(new URL("../src/app/page.tsx", import.meta.url), "utf8");
+{
+  const achadas = SAIRAM.filter((w) => src.includes(w) || pagina.includes(w));
+  console.log("\ntítulos antigos: " + (achadas.length ? "ACHADOS " + achadas.join(", ") : "nenhum"));
+  if (achadas.length) falhas++;
+}
+{
+  const ini = pagina.indexOf("const RODAPE");
+  const bloco = pagina.slice(ini, pagina.indexOf("\n};", ini));
+  console.log("rodapé (page.tsx):");
+  for (const [L, textos] of Object.entries(RODAPE)) {
+    const a = bloco.indexOf(`\n  ${L}: {`);
+    const b = bloco.slice(a, bloco.indexOf("\n  },", a));
+    const faltam = textos.filter((x) => !b.includes(JSON.stringify(x)));
+    console.log(`  ${L}: ${textos.length - faltam.length}/${textos.length}` + (faltam.length ? "  FALTAM: " + faltam.join(" · ") : ""));
+    if (faltam.length) falhas++;
+  }
 }
 console.log(falhas ? `\n${falhas} falha(s).` : "\nTudo certo.");
 process.exit(falhas ? 1 : 0);

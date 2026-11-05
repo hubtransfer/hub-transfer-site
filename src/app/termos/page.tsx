@@ -27,7 +27,7 @@ export default function TermosPage() {
           <h2 className="text-lg font-semibold text-white">3. Reservas e confirmação</h2>
           <ul className="list-disc pl-6 space-y-1">
             <li>As reservas podem ser efectuadas através do website, WhatsApp, hotéis parceiros ou restaurantes parceiros.</li>
-            <li>A reserva é confirmada apos resposta da HUB Transfer (via WhatsApp, email ou sistema do hotel).</li>
+            <li>A reserva é confirmada após resposta da HUB Transfer (via WhatsApp, email ou sistema do hotel).</li>
             <li>Os preços apresentados são fixos e finais — sem taxas ocultas.</li>
           </ul>
         </section>
@@ -50,7 +50,7 @@ export default function TermosPage() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">6. Pagamento</h2>
           <ul className="list-disc pl-6 space-y-1">
-            <li>Métodos aceites: dinheiro, cartão (no veiculo) e transferência bancaria.</li>
+            <li>Métodos aceites: dinheiro, cartão (no veículo) e transferência bancária.</li>
             <li>O pagamento é efectuado conforme acordado na reserva (ao motorista, na recepção do hotel, ou antecipado).</li>
           </ul>
         </section>
@@ -58,24 +58,24 @@ export default function TermosPage() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">7. Responsabilidade</h2>
           <ul className="list-disc pl-6 space-y-1">
-            <li>Todos os veículos possuem seguro de responsabilidade civil obrigatorio.</li>
-            <li>A HUB Transfer não se responsabiliza por atrasos causados por transito, condições meteorologicas adversas ou eventos de forca maior.</li>
-            <li>A bagagem transportada e da responsabilidade do passageiro.</li>
+            <li>Todos os veículos possuem seguro de responsabilidade civil obrigatório.</li>
+            <li>A HUB Transfer não se responsabiliza por atrasos causados por trânsito, condições meteorológicas adversas ou eventos de força maior.</li>
+            <li>A bagagem transportada é da responsabilidade do passageiro.</li>
           </ul>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">8. Reclamações</h2>
-          <p>As reclamações podem ser apresentadas por email para <a href="mailto:contacto@hubtransfer.pt" className="text-[#D4A017] hover:underline">contacto@hubtransfer.pt</a> ou atraves do <a href="https://www.livroreclamacoes.pt/" target="_blank" rel="noopener noreferrer" className="text-[#D4A017] hover:underline">Livro de Reclamações Online</a>.</p>
+          <p>As reclamações podem ser apresentadas por email para <a href="mailto:contacto@hubtransfer.pt" className="text-[#D4A017] hover:underline">contacto@hubtransfer.pt</a> ou através do <a href="https://www.livroreclamacoes.pt/" target="_blank" rel="noopener noreferrer" className="text-[#D4A017] hover:underline">Livro de Reclamações Online</a>.</p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">9. Foro competente</h2>
-          <p>Para a resolução de litígios emergentes dos presentes termos, sera competente o foro da Comarca de Lisboa, com renuncia a qualquer outro.</p>
+          <p>Para a resolução de litígios emergentes dos presentes termos, será competente o foro da Comarca de Lisboa, com renúncia a qualquer outro.</p>
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-white">10. Legislação aplicavel</h2>
+          <h2 className="text-lg font-semibold text-white">10. Legislação aplicável</h2>
           <p>Os presentes termos são regidos pela legislação portuguesa, nomeadamente o Decreto-Lei n.º 17/2018, de 8 de Março (regime de acesso e exercício da actividade das agências de viagens e turismo).</p>
         </section>
       </main>

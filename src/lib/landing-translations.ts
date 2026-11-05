@@ -269,7 +269,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     painSubtext: 'This doesn\'t happen with HUB Transfer.',
 
     // Algorithm
-    algoTitle: 'HUB Brain: Technology that Guarantees',
+    algoTitle: "It's not magic, it's monitoring.",
     algoDesc:
       'Our system tracks your flight in real-time. If the schedule changes, we handle everything automatically. You land, and we\'re already there waiting.',
     algoFeature1: 'Flight synchronisation every 30 seconds',
@@ -374,7 +374,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     headline: 'El vuelo se retrasó.',
     headlineHighlight: 'El conductor ya lo sabía.',
     subheadline:
-      'Nuestro sistema vigila tu vuelo en tiempo real. Si el horario cambia, ajustamos todo automáticamente para que nunca te quedes tirado. Tú aterrizas y nosotros ya estamos ahí.',
+      'Nuestro sistema vigila tu vuelo en tiempo real. Si el horario cambia, ajustamos todo automáticamente para que no tengas que preocuparte. Tú aterrizas y nosotros ya estamos ahí.',
     ctaBook: 'Reservar mi transfer ahora',
     ctaSupport: 'Confirmación inmediata y sin esperas.',
     heroRadarState1: 'TP 1234 · GRU→LIS · MONITORIZANDO',
@@ -393,7 +393,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     painSubtext: 'Esto no sucede con HUB Transfer.',
 
     // Algorithm
-    algoTitle: 'Cerebro HUB: Tecnología que Garantiza',
+    algoTitle: 'No es magia, es monitorización.',
     algoDesc:
       'Nuestro sistema vigila tu vuelo en tiempo real. Si el horario cambia, ajustamos todo automáticamente. Tú aterrizas y nosotros ya estamos ahí.',
     algoFeature1: 'Sincronización aérea cada 30 segundos',
@@ -517,7 +517,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     painSubtext: 'Cela ne se produit pas avec HUB Transfer.',
 
     // Algorithm
-    algoTitle: 'Cerveau HUB: Technologie qui Garantit',
+    algoTitle: "Ce n'est pas de la magie, c'est de la surveillance.",
     algoDesc:
       "Notre système surveille votre vol en temps réel. Si l'horaire change, on ajuste tout automatiquement. Vous atterrissez, on est déjà là.",
     algoFeature1: 'Synchronisation aérienne toutes les 30 secondes',
@@ -641,7 +641,7 @@ export const LANDING_TRANSLATIONS: Record<LandingLang, LandingTranslations> = {
     painSubtext: 'Questo non accade con HUB Transfer.',
 
     // Algorithm
-    algoTitle: 'Cervello HUB: Tecnologia che Garantisce',
+    algoTitle: 'Non è magia, è monitoraggio.',
     algoDesc:
       'Il nostro sistema traccia il tuo volo in tempo reale. Se ritardato, il nostro conducente lo sa già. Tu atterri e noi siamo già lì.',
     algoFeature1: 'Sincronizzazione aerea ogni 30 secondi',

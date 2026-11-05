@@ -11,7 +11,68 @@ import { getLandingT, type LandingLang } from "@/lib/landing-translations";
 import { FEATURED_REVIEW, GRID_REVIEWS, LANG_NAMES, GOOGLE_PROFILE_URL, siteLangToReviewLang, type ReviewItem } from "@/lib/reviews";
 // import ThemeToggle, { useTheme } from "@/components/ThemeToggle";
 
-const LANGS: LandingLang[] = ["PT", "EN", "ES", "FR", "IT"];
+const LANGS: LandingLang[] = ["EN", "PT", "ES", "FR", "IT"];
+
+/* A língua do início (05/11/2026): o endereço (/?lang=pt), depois a escolha
+   guardada (ao carregar numa bandeira ou ao abrir uma página da política),
+   depois o inglês. Nunca pela língua do browser nem pelo país. */
+const LANG_KEY = "hub-lang";
+function langValida(v: string | null): LandingLang | null {
+  const u = (v || "").toUpperCase();
+  return (LANGS as string[]).includes(u) ? (u as LandingLang) : null;
+}
+
+/* O rodapé na língua escolhida. Nomes próprios e contactos ficam como estão. */
+const RODAPE: Record<LandingLang, {
+  frase: string; servicos: string; lista: string[]; contacto: string; legal: string;
+  privacidade: string; termos: string; espera: string; reclamacoes: string; area: string; direitos: string; licenca: string;
+}> = {
+  PT: {
+    frase: "Serviço premium de transfers em Lisboa e na região.",
+    servicos: "Serviços",
+    lista: ["Transfers Aeroporto", "Transfers Hotel", "Tours Privados", "Transfers Restaurante", "Serviço Corporativo"],
+    contacto: "Contacto", legal: "Legal",
+    privacidade: "Política de Privacidade", termos: "Termos e Condições", espera: "Política de Espera",
+    reclamacoes: "Livro de Reclamações", area: "Área Reservada (Parceiros)",
+    direitos: "Todos os direitos reservados", licenca: "Licenciado pelo Turismo de Portugal",
+  },
+  EN: {
+    frase: "Premium transfer service in Lisbon and the surrounding region.",
+    servicos: "Services",
+    lista: ["Airport transfers", "Hotel transfers", "Private tours", "Restaurant transfers", "Corporate service"],
+    contacto: "Contact", legal: "Legal",
+    privacidade: "Privacy Policy", termos: "Terms and Conditions", espera: "Waiting Policy",
+    reclamacoes: "Livro de Reclamações (Complaints Book)", area: "Restricted Area (Partners)",
+    direitos: "All rights reserved", licenca: "Licensed by Turismo de Portugal",
+  },
+  ES: {
+    frase: "Servicio premium de traslados en Lisboa y su región.",
+    servicos: "Servicios",
+    lista: ["Traslados al aeropuerto", "Traslados al hotel", "Tours privados", "Traslados a restaurantes", "Servicio corporativo"],
+    contacto: "Contacto", legal: "Legal",
+    privacidade: "Política de privacidad", termos: "Términos y condiciones", espera: "Política de Espera",
+    reclamacoes: "Livro de Reclamações (Libro de Reclamaciones)", area: "Área reservada (Socios)",
+    direitos: "Todos los derechos reservados", licenca: "Con licencia de Turismo de Portugal",
+  },
+  FR: {
+    frase: "Service premium de transferts à Lisbonne et dans sa région.",
+    servicos: "Services",
+    lista: ["Transferts aéroport", "Transferts hôtel", "Visites privées", "Transferts restaurant", "Service entreprises"],
+    contacto: "Contact", legal: "Mentions légales",
+    privacidade: "Politique de confidentialité", termos: "Conditions générales", espera: "Politique d'Attente",
+    reclamacoes: "Livro de Reclamações (Livre des réclamations)", area: "Espace réservé (Partenaires)",
+    direitos: "Tous droits réservés", licenca: "Agréé par Turismo de Portugal",
+  },
+  IT: {
+    frase: "Servizio premium di transfer a Lisbona e dintorni.",
+    servicos: "Servizi",
+    lista: ["Transfer aeroporto", "Transfer hotel", "Tour privati", "Transfer ristorante", "Servizio aziendale"],
+    contacto: "Contatti", legal: "Note legali",
+    privacidade: "Informativa sulla privacy", termos: "Termini e condizioni", espera: "Politica di Attesa",
+    reclamacoes: "Livro de Reclamações (Libro dei reclami)", area: "Area riservata (Partner)",
+    direitos: "Tutti i diritti riservati", licenca: "Autorizzato da Turismo de Portugal",
+  },
+};
 
 /* ─── ATC Flight Radar — all animations via CSS classes, zero JS ─── */
 function RadarIllustration({ variant = "default", states }: { variant?: "default" | "hero"; states?: readonly [string, string, string] }) {
@@ -323,7 +384,20 @@ const POLITICA_ESPERA: Record<LandingLang, string> = {
 };
 
 export default function LandingPage() {
-  const [lang, setLang] = useState<LandingLang>("PT");
+  const [lang, setLangState] = useState<LandingLang>("EN");
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const setLang = (l: LandingLang) => {
+    setLangState(l);
+    try { localStorage.setItem(LANG_KEY, l.toLowerCase()); } catch { /* sem armazenamento: fica só nesta visita */ }
+  };
+  /* Lido só depois de a página abrir, para não dar erro de hidratação. */
+  useEffect(() => {
+    let escolhida = langValida(new URLSearchParams(window.location.search).get("lang"));
+    if (!escolhida) {
+      try { escolhida = langValida(localStorage.getItem(LANG_KEY)); } catch { /* sem armazenamento */ }
+    }
+    if (escolhida) setLangState(escolhida);
+  }, []);
   const [menuOpen, setMenuOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const t = getLandingT(lang);
@@ -481,7 +555,7 @@ export default function LandingPage() {
     <>
       <Script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBe4UwnVYRP5KAUOtHg3diD6kPTif3VN30&libraries=places" strategy="lazyOnload" />
 
-      <div className="bg-background text-foreground min-h-screen overflow-x-hidden transition-colors duration-300">
+      <div lang={lang.toLowerCase()} className="bg-background text-foreground min-h-screen overflow-x-hidden transition-colors duration-300">
 
         {/* ═══════════════════════════════════════════════════════════ */}
         {/*  NAVBAR                                                     */}
@@ -505,26 +579,52 @@ export default function LandingPage() {
               ))}
             </div>
 
-            <div className="hidden md:flex items-center gap-4">
-              {/* Lang */}
-              <div className="flex gap-1">
-                {LANGS.map((l) => (
-                  <button key={l} onClick={() => setLang(l)}
-                    className={`w-8 h-6 rounded overflow-hidden border transition-all cursor-pointer ${lang === l ? "border-[var(--hub-gold)]/60 opacity-100" : "border-transparent opacity-40 hover:opacity-70"}`}>
-                    <img src={`/flags/${l.toLowerCase()}.jpg`} alt={l} className="w-full h-full object-cover" />
+            <div className="flex items-center gap-1 md:gap-4">
+              <div className="hidden md:flex items-center gap-4">
+                {/* Lang — as cinco, com 44×44 de área de toque (ecrãs largos) */}
+                <div className="hidden lg:flex gap-1">
+                  {LANGS.map((l) => (
+                  <button key={l} type="button" onClick={() => setLang(l)} aria-label={l} aria-pressed={lang === l}
+                    className="w-11 h-11 flex items-center justify-center cursor-pointer group">
+                    <span className={`w-8 h-6 rounded overflow-hidden border transition-all ${lang === l ? "border-[var(--hub-gold)]/60 opacity-100" : "border-transparent opacity-40 group-hover:opacity-70"}`}>
+                      <img src={`/flags/${l.toLowerCase()}.jpg`} alt={l} className="w-full h-full object-cover" />
+                    </span>
                   </button>
-                ))}
+                  ))}
+                </div>
+                <button onClick={() => setDrawerOpen(true)}
+                  className="text-[13px] font-semibold tracking-wider uppercase px-5 py-2 border border-[var(--hub-gold)]/30 text-[var(--hub-gold)] hover:bg-[var(--hub-gold)] hover:text-black transition-all duration-300 cursor-pointer">
+                  {t.navBook}
+                </button>
               </div>
-              <button onClick={() => setDrawerOpen(true)}
-                className="text-[13px] font-semibold tracking-wider uppercase px-5 py-2 border border-[var(--hub-gold)]/30 text-[var(--hub-gold)] hover:bg-[var(--hub-gold)] hover:text-black transition-all duration-300 cursor-pointer">
-                {t.navBook}
+
+              {/* Lang — a bandeira da língua que se vê; ao tocar, as cinco (telemóvel e ecrãs médios) */}
+              <div className="relative lg:hidden">
+                <button type="button" onClick={() => setLangMenuOpen((o) => !o)} aria-label={lang} aria-haspopup="true" aria-expanded={langMenuOpen}
+                  className="w-11 h-11 flex items-center justify-center cursor-pointer">
+                  <span className="w-8 h-6 rounded overflow-hidden border border-[var(--hub-gold)]/60">
+                    <img src={`/flags/${lang.toLowerCase()}.jpg`} alt={lang} className="w-full h-full object-cover" />
+                  </span>
+                </button>
+                {langMenuOpen && (
+                  <div className="absolute right-0 top-full mt-1 flex flex-col gap-1 p-1 rounded-md bg-background/95 backdrop-blur-md border border-foreground/10 shadow-lg">
+                    {LANGS.map((l) => (
+                    <button key={l} type="button" onClick={() => { setLang(l); setLangMenuOpen(false); }} aria-label={l} aria-pressed={lang === l}
+                    className="w-11 h-11 flex items-center justify-center cursor-pointer group">
+                    <span className={`w-8 h-6 rounded overflow-hidden border transition-all ${lang === l ? "border-[var(--hub-gold)]/60 opacity-100" : "border-transparent opacity-40 group-hover:opacity-70"}`}>
+                      <img src={`/flags/${l.toLowerCase()}.jpg`} alt={l} className="w-full h-full object-cover" />
+                    </span>
+                  </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Mobile hamburger */}
+              <button className="md:hidden w-11 h-11 flex items-center justify-center text-[#D0D0D0] cursor-pointer" aria-label="Menu" onClick={() => { setLangMenuOpen(false); setMenuOpen(!menuOpen); }}>
+                {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
             </div>
-
-            {/* Mobile hamburger */}
-            <button className="md:hidden text-[#D0D0D0] cursor-pointer" onClick={() => setMenuOpen(!menuOpen)}>
-              {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
           </div>
 
           {/* Mobile menu */}
@@ -541,10 +641,12 @@ export default function LandingPage() {
                   </button>
                   <div className="flex gap-1 pt-2">
                     {LANGS.map((l) => (
-                      <button key={l} onClick={() => { setLang(l); setMenuOpen(false); }}
-                        className={`w-8 h-6 rounded overflow-hidden border transition-all cursor-pointer ${lang === l ? "border-[var(--hub-gold)]/60 opacity-100" : "border-transparent opacity-40"}`}>
-                        <img src={`/flags/${l.toLowerCase()}.jpg`} alt={l} className="w-full h-full object-cover" />
-                      </button>
+                  <button key={l} type="button" onClick={() => { setLang(l); setMenuOpen(false); }} aria-label={l} aria-pressed={lang === l}
+                    className="w-11 h-11 flex items-center justify-center cursor-pointer group">
+                    <span className={`w-8 h-6 rounded overflow-hidden border transition-all ${lang === l ? "border-[var(--hub-gold)]/60 opacity-100" : "border-transparent opacity-40 group-hover:opacity-70"}`}>
+                      <img src={`/flags/${l.toLowerCase()}.jpg`} alt={l} className="w-full h-full object-cover" />
+                    </span>
+                  </button>
                     ))}
                   </div>
                 </div>
@@ -933,7 +1035,7 @@ export default function LandingPage() {
                 <Image src="/images/logo.png" alt="HUB Transfer" width={160} height={50} className="h-11 w-auto mb-3" />
                 <p className="text-[var(--hub-gold)] text-xs font-medium tracking-wider mb-2">Transfer and Tourism</p>
                 <p className="text-[#999] text-xs leading-relaxed mb-4">
-                  Serviço premium de transfers em Lisboa e Portugal. Segurança, pontualidade e conforto em cada viagem.
+                  {RODAPE[lang].frase}
                 </p>
                 <div className="flex gap-3">
                   <a href={COMPANY.instagram} target="_blank" rel="noopener noreferrer" title="Instagram" className="text-[#888] hover:text-[var(--hub-gold)] transition-colors"><Instagram className="w-4 h-4" /></a>
@@ -946,19 +1048,15 @@ export default function LandingPage() {
 
               {/* Col 2 — Services */}
               <div>
-                <p className="text-white text-xs tracking-wider uppercase mb-4 font-semibold">{lang === "PT" ? "Serviços" : "Services"}</p>
+                <p className="text-white text-xs tracking-wider uppercase mb-4 font-semibold">{RODAPE[lang].servicos}</p>
                 <ul className="space-y-2 text-[#999] text-xs">
-                  <li>Transfers Aeroporto</li>
-                  <li>Transfers Hotel</li>
-                  <li>Tours Privados</li>
-                  <li>Transfers Restaurante</li>
-                  <li>Serviço Corporativo</li>
+                  {RODAPE[lang].lista.map((x) => <li key={x}>{x}</li>)}
                 </ul>
               </div>
 
               {/* Col 3 — Contact */}
               <div>
-                <p className="text-white text-xs tracking-wider uppercase mb-4 font-semibold">{lang === "PT" ? "Contacto" : "Contact"}</p>
+                <p className="text-white text-xs tracking-wider uppercase mb-4 font-semibold">{RODAPE[lang].contacto}</p>
                 <div className="space-y-2.5 text-xs">
                   <a href={`tel:${COMPANY.whatsapp}`} className="flex items-center gap-2 text-[#999] hover:text-[var(--hub-gold)] transition-colors"><Phone className="w-3.5 h-3.5 text-[var(--hub-gold)]" />{COMPANY.whatsappFormatted}</a>
                   <a href={`mailto:${COMPANY.email}`} className="flex items-center gap-2 text-[#999] hover:text-[var(--hub-gold)] transition-colors"><Mail className="w-3.5 h-3.5 text-[var(--hub-gold)]" />{COMPANY.email}</a>
@@ -972,13 +1070,13 @@ export default function LandingPage() {
 
               {/* Col 4 — Legal & Partners */}
               <div>
-                <p className="text-white text-xs tracking-wider uppercase mb-4 font-semibold">Legal</p>
+                <p className="text-white text-xs tracking-wider uppercase mb-4 font-semibold">{RODAPE[lang].legal}</p>
                 <div className="space-y-2.5 text-xs">
-                  <a href="/privacidade" className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">Política de Privacidade</a>
-                  <a href="/termos" className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">Termos e Condições</a>
-                  <a href={POLITICA_ESPERA[lang]} className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">{lang === "PT" ? "Política de Espera" : lang === "ES" ? "Política de Espera" : lang === "FR" ? "Politique d'Attente" : lang === "IT" ? "Politica di Attesa" : "Waiting Policy"}</a>
-                  <a href="https://www.livroreclamacoes.pt/" target="_blank" rel="noopener noreferrer" className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">Livro de Reclamações</a>
-                  <a href="/login" className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">Área Reservada (Parceiros)</a>
+                  <a href="/privacidade" className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">{RODAPE[lang].privacidade}</a>
+                  <a href="/termos" className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">{RODAPE[lang].termos}</a>
+                  <a href={POLITICA_ESPERA[lang]} className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">{RODAPE[lang].espera}</a>
+                  <a href="https://www.livroreclamacoes.pt/" target="_blank" rel="noopener noreferrer" className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">{RODAPE[lang].reclamacoes}</a>
+                  <a href="/login" className="block text-[#999] hover:text-[var(--hub-gold)] transition-colors">{RODAPE[lang].area}</a>
                 </div>
                 <p className="text-[#666] text-[10px] mt-4 font-mono">RNAVT {COMPANY.rnavt} | NIF {COMPANY.nif}</p>
               </div>
@@ -989,8 +1087,8 @@ export default function LandingPage() {
           <div className="border-t border-[var(--hub-gold)]/15">
             <div className="max-w-6xl mx-auto px-6 py-4 text-center">
               <p className="text-[#666] text-[10px] font-mono leading-relaxed">
-                © {new Date().getFullYear()} {COMPANY.legalName} — Todos os direitos reservados<br />
-                RNAVT {COMPANY.rnavt} · NIF {COMPANY.nif} · Licenciado pelo Turismo de Portugal
+                © {new Date().getFullYear()} {COMPANY.legalName} — {RODAPE[lang].direitos}<br />
+                RNAVT {COMPANY.rnavt} · NIF {COMPANY.nif} · {RODAPE[lang].licenca}
               </p>
             </div>
           </div>

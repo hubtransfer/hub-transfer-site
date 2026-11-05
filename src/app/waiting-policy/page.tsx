@@ -23,8 +23,8 @@ export const metadata: Metadata = {
 const WA = `https://wa.me/${COMPANY.whatsapp.replace(/\+/g, "")}`;
 
 const LINGUAS = [
-  { code: "pt", href: "/politica-de-espera" },
   { code: "en", href: "/waiting-policy" },
+  { code: "pt", href: "/politica-de-espera" },
   { code: "es", href: "/es/politica-de-espera" },
   { code: "fr", href: "/fr/politique-d-attente" },
   { code: "it", href: "/it/politica-di-attesa" },
@@ -45,15 +45,19 @@ function N({ children }: { children: string }) {
 export default function WaitingPolicyPage() {
   return (
     <div lang="en" className="min-h-screen bg-[var(--hub-black)] text-[#D0D0D0]">
+      {/* Abrir esta página guarda a língua: o início abre nela (sem a língua do browser nem o país). */}
+      <script dangerouslySetInnerHTML={{ __html: `try{localStorage.setItem("hub-lang","${ESTA}")}catch(e){}` }} />
       <header className="border-b border-[var(--hub-line)] py-4">
         <div className="max-w-3xl mx-auto px-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
           <a href="/" className="order-1"><Image src="/images/logo.png" alt="HUB Transfer" width={140} height={40} className="h-9 w-auto" /></a>
           <nav className="order-3 w-full sm:order-2 sm:w-auto sm:ml-auto flex gap-1">
             {LINGUAS.map((l) => (
               <a key={l.code} href={l.href} hrefLang={l.code} aria-current={l.code === ESTA ? "page" : undefined}
-                className={`w-8 h-6 rounded overflow-hidden border transition-all ${l.code === ESTA ? "border-[var(--hub-gold)]/60 opacity-100" : "border-transparent opacity-40 hover:opacity-70"}`}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`/flags/${l.code}.jpg`} alt={l.code.toUpperCase()} className="w-full h-full object-cover" />
+                className="w-11 h-11 flex items-center justify-center group">
+                <span className={`w-8 h-6 rounded overflow-hidden border transition-all ${l.code === ESTA ? "border-[var(--hub-gold)]/60 opacity-100" : "border-transparent opacity-40 group-hover:opacity-70"}`}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={`/flags/${l.code}.jpg`} alt={l.code.toUpperCase()} className="w-full h-full object-cover" />
+                </span>
               </a>
             ))}
           </nav>
@@ -64,42 +68,42 @@ export default function WaitingPolicyPage() {
       <main className="max-w-3xl mx-auto px-6 py-12 space-y-8 text-sm leading-relaxed">
         <div className="space-y-2">
           <h1 className="text-2xl md:text-3xl font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>{"Waiting policy"}</h1>
-          <p className="max-w-[68ch] text-[#888] text-xs"><N>{"Last updated: 5 November 2026."}</N></p>
+          <p className="max-w-[32em] text-[#888] text-xs"><N>{"Last updated: 5 November 2026."}</N></p>
         </div>
 
-        <p className="max-w-[68ch]"><N>{"Your pickup follows your flight. If the flight is delayed or lands early, we adjust the pickup time, and you don't need to tell us."}</N></p>
+        <p className="max-w-[32em]"><N>{"Your pickup follows your flight. If the flight is delayed or lands early, we adjust the pickup time, and you don't need to tell us."}</N></p>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">{"Airport pickups"}</h2>
-          <p className="max-w-[68ch]"><N>{"The driver waits 60 minutes from the actual landing time of the flight."}</N></p>
-          <p className="max-w-[68ch]"><N>{"If you need more time, for example at baggage claim or border control, message us on WhatsApp and we will agree the extra waiting time with you."}</N></p>
+          <p className="max-w-[32em]"><N>{"The driver waits 60 minutes from the actual landing time of the flight."}</N></p>
+          <p className="max-w-[32em]"><N>{"If you need more time, for example at baggage claim or border control, message us on WhatsApp and we will agree the extra waiting time with you."}</N></p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">{"Pickups at a hotel or any other address"}</h2>
-          <p className="max-w-[68ch]"><N>{"The driver waits 15 minutes from the booked time."}</N></p>
-          <p className="max-w-[68ch]"><N>{"Please be ready at the booked time, especially when you are going to the airport."}</N></p>
+          <p className="max-w-[32em]"><N>{"The driver waits 15 minutes from the booked time."}</N></p>
+          <p className="max-w-[32em]"><N>{"Please be ready at the booked time, especially when you are going to the airport."}</N></p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">{"If we can't find you"}</h2>
-          <p className="max-w-[68ch]"><N>{"During the waiting time, the driver tries to reach you in several ways, including WhatsApp messages and phone calls, and so does the HUB team. The driver waits at the agreed meeting point and records being there."}</N></p>
-          <p className="max-w-[68ch]"><N>{"If we cannot reach you by the end of the waiting time, the trip counts as a no-show: the driver may leave and the full trip price is charged."}</N></p>
+          <p className="max-w-[32em]"><N>{"During the waiting time, the driver tries to reach you in several ways, including WhatsApp messages and phone calls, and so does the HUB team. The driver waits at the agreed meeting point and records being there."}</N></p>
+          <p className="max-w-[32em]"><N>{"If we cannot reach you by the end of the waiting time, the trip counts as a no-show: the driver may leave and the full trip price is charged."}</N></p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">{"Cancellations"}</h2>
-          <p className="max-w-[68ch]"><N>{"Cancellation is free up to 3 hours before pickup. After that, the full trip price is charged. The same rule applies in the terms and conditions."}</N></p>
+          <p className="max-w-[32em]"><N>{"Cancellation is free up to 3 hours before pickup. After that, the full trip price is charged. The same rule applies in the terms and conditions."}</N></p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">{"Bookings made through agencies, operators or hotels"}</h2>
-          <p className="max-w-[68ch]"><N>{"The waiting, cancellation and no-show rules agreed with whoever made the booking apply."}</N></p>
+          <p className="max-w-[32em]"><N>{"The waiting, cancellation and no-show rules agreed with whoever made the booking apply."}</N></p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white">{"Contact"}</h2>
-          <p className="max-w-[68ch]">
+          <p className="max-w-[32em]">
             {"To tell us about a delay or agree the waiting time: "}
             <a href={WA} target="_blank" rel="noopener noreferrer" className="text-[var(--hub-gold)] hover:underline">{"HUB's WhatsApp"}</a>
             {" ("}<span className="font-mono text-white">{COMPANY.whatsappFormatted}</span>{")"}
