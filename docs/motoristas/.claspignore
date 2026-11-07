@@ -1,0 +1,6 @@
+# Só o código do Apps Script vai para o projeto (o LEIA-ME e o protótipo ficam de fora).
+**/**
+!apps-script-motoristas.gs
+!appsscript.json
+!_token.gs
+!_segredos.gs
