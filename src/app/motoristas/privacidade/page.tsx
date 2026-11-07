@@ -57,8 +57,9 @@ export default function PrivacidadeMotoristas() {
           Google Drive da HUB, sem link público.
         </li>
         <li>
-          <strong>Quanto tempo ficam guardadas:</strong> <span className="mot-preencher">[PRAZO POR PREENCHER]</span>, ou
-          menos se pedires para as apagarmos. Se passares a colaborar connosco, passam a seguir as regras dessa colaboração.
+          <strong>Quanto tempo ficam guardadas:</strong> As fotos e os dados de quem não for contratado são apagados ao
+          fim de 12 meses. De quem entrar na equipa, guardam-se enquanto trabalhar com a HUB Transfer. Se pedires,
+          apagamo-los antes.
         </li>
       </ul>
 

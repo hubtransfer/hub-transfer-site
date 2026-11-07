@@ -78,6 +78,6 @@ O aviso (WhatsApp + e-mail) chega só quando uma ficha fica completa, com o nome
 
 ## 5. Antes de publicar
 
-- Preencher o prazo das fotos em `/motoristas/privacidade` (está a amarelo, «[PRAZO POR PREENCHER]») e rever o texto.
+- Prazo das fotos em `/motoristas/privacidade`: 12 meses para quem não for contratado; enquanto trabalhar com a HUB para quem entrar na equipa (07/11).
 - Fazer uma candidatura real a partir do telemóvel e confirmar a linha, a pasta no Drive (as duas fotos e a FICHA.txt), o WhatsApp e o e-mail.
 - No Gestor de Eventos, com `META_TEST_EVENT_CODE`, confirmar os três eventos e a deduplicação.
