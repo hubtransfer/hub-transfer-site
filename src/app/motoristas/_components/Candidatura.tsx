@@ -5,6 +5,7 @@ import Link from "next/link";
 import { idsMeta, lerConsentimento, novoEventId, registarEvento } from "../_lib/medicao";
 import { reduzirFoto } from "../_lib/fotos";
 import {
+  AEROPORTOS,
   CARROS,
   INGLES,
   LISTA_MARCAS,
@@ -24,7 +25,7 @@ import {
    Passo 1 guarda logo o contacto. Passo 2: quiz de uma pergunta por ecrã e, no fim, duas fotos do carro.
    O candidato nunca vê o estado nem a prioridade. Nunca se pergunta idade, nacionalidade, origem, género nem situação de imigração. */
 
-const PERGUNTAS = ["carro", "marca", "modelo", "ano", "lugares", "carta", "aeroporto", "trabalho", "ingles", "regime", "turnos"] as const;
+const PERGUNTAS = ["base", "carro", "marca", "modelo", "ano", "lugares", "carta", "aeroporto", "trabalho", "ingles", "regime", "turnos"] as const;
 type Pergunta = (typeof PERGUNTAS)[number];
 type Ecra = "p1" | Pergunta | "fotos" | "semCarro" | "final";
 type TipoFoto = "lado" | "bagageira";
@@ -32,9 +33,18 @@ type Foto = { estado: "vazio" | "a-preparar" | "a-enviar" | "enviada" | "erro"; 
 
 const TOTAL = PERGUNTAS.length + 2; // passo 1 + perguntas + fotos
 
+/** Sugestões do campo "Concelho" (o campo continua livre): Grande Lisboa, Grande Porto e Algarve. */
 const CONCELHOS = [
-  "Lisboa", "Amadora", "Sintra", "Oeiras", "Cascais", "Loures", "Odivelas", "Vila Franca de Xira", "Mafra",
+  // Grande Lisboa e Setúbal
+  "Lisboa", "Sintra", "Oeiras", "Cascais", "Loures", "Odivelas", "Vila Franca de Xira", "Mafra",
   "Almada", "Seixal", "Barreiro", "Moita", "Montijo", "Alcochete", "Palmela", "Sesimbra", "Setúbal",
+  // Grande Porto
+  "Porto", "Vila Nova de Gaia", "Matosinhos", "Maia", "Gondomar", "Valongo", "Póvoa de Varzim", "Vila do Conde",
+  "Santo Tirso", "Trofa", "Paredes", "Espinho", "Santa Maria da Feira", "São João da Madeira", "Oliveira de Azeméis",
+  "Arouca", "Vale de Cambra",
+  // Algarve
+  "Faro", "Loulé", "Albufeira", "Portimão", "Olhão", "Lagoa", "Lagos", "Silves", "Tavira", "São Brás de Alportel",
+  "Vila Real de Santo António", "Castro Marim", "Alcoutim", "Aljezur", "Monchique", "Vila do Bispo",
 ];
 
 const digitos = (v: string) => v.replace(/\D/g, "");
@@ -97,7 +107,7 @@ const IconeVisto = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
-export default function Candidatura({ numero }: { numero: string | null }) {
+export default function Candidatura() {
   const [ecra, setEcra] = useState<Ecra>("p1");
   const [nome, setNome] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
@@ -165,7 +175,7 @@ export default function Candidatura({ numero }: { numero: string | null }) {
         leadRegistado.current = true;
         registarEvento("Lead", eventId);
       }
-      setEcra("carro");
+      setEcra(PERGUNTAS[0]);
     } catch {
       setErroEnvio("Não conseguimos guardar os teus dados. Verifica a ligação à internet e tenta outra vez.");
     } finally {
@@ -193,7 +203,7 @@ export default function Candidatura({ numero }: { numero: string | null }) {
 
   const escolherCarro = (v: string) => {
     if (v === "Não tenho") {
-      const novo = { ...RESPOSTAS_VAZIAS, carro: v };
+      const novo = { ...RESPOSTAS_VAZIAS, base: r.base, carro: v };
       setR(novo);
       setMarcaOutra(false);
       setModeloOutro(false);
@@ -234,11 +244,11 @@ export default function Candidatura({ numero }: { numero: string | null }) {
   };
 
   const voltar = () => {
-    if (ecra === "carro") return irPara("p1");
     if (ecra === "semCarro") return irPara("carro");
     if (ecra === "fotos") return irPara("turnos");
     const i = PERGUNTAS.indexOf(ecra as Pergunta);
     if (i > 0) irPara(PERGUNTAS[i - 1]);
+    else if (i === 0) irPara("p1");
   };
 
   /* ── Fotos ── */
@@ -456,6 +466,15 @@ export default function Candidatura({ numero }: { numero: string | null }) {
               </p>
             )}
           </form>
+        </>
+      )}
+
+      {ecra === "base" && (
+        <>
+          {topo("2 de 2")}
+          {pergunta("Em que aeroporto queres trabalhar?")}
+          {opcoes("base", AEROPORTOS, "")}
+          {botaoVoltar}
         </>
       )}
 
@@ -687,25 +706,7 @@ export default function Candidatura({ numero }: { numero: string | null }) {
           <p>
             A tua ficha <span className="mot-codigo-placa">{codigo}</span> está em análise.
           </p>
-          {numero ? (
-            <>
-              <p>
-                Se fores selecionado, o responsável pela contratação fala contigo pelo WhatsApp da HUB Transfer, a partir do número{" "}
-                <span className="mot-numero">{numero}</span>.
-              </p>
-              <p>Guarda-o nos teus contactos para veres a mensagem.</p>
-              <a className="mot-secundario" href="/motoristas/contacto.vcf" download="HUB-Transfer-Contratacao.vcf">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <circle cx="10" cy="8" r="4" />
-                  <path d="M3 21c0-3.9 3.1-7 7-7 1.4 0 2.7.4 3.8 1.1" />
-                  <path d="M18 14v6M15 17h6" />
-                </svg>
-                Guardar o número nos contactos
-              </a>
-            </>
-          ) : (
-            <p>Se fores selecionado, o responsável pela contratação fala contigo pelo WhatsApp da HUB Transfer.</p>
-          )}
+          <p>Se fores selecionado, o responsável pela contratação fala contigo pelo WhatsApp da HUB Transfer.</p>
         </div>
       )}
     </div>

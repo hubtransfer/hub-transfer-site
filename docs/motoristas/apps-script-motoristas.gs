@@ -5,11 +5,11 @@
  * Não usa a folha "Candidatos Inverno" nem o script da /inverno, que ficam intactos.
  * Fuso horário: Europe/Lisbon (no projeto e na folha; o script acerta o da folha na primeira vez).
  * Escreve no separador "Candidatos Motoristas" dessa folha e guarda as fotos no Google Drive, uma pasta por ficha:
- * "AAAA-MM-DD — Nome — HUB-XXXX", com as duas fotos e a FICHA.txt (todas as respostas).
+ * "AAAA-MM-DD — Aeroporto — Nome — HUB-XXXX", com as duas fotos e a FICHA.txt (todas as respostas).
  *
  * Ações (todas com o TOKEN):
  *   passo1     cria a linha (ou atualiza nome/WhatsApp/concelho se a pessoa voltou atrás) e devolve o código HUB-XXXX
- *   respostas  grava as respostas do quiz
+ *   respostas  grava as respostas do quiz (a primeira é o aeroporto: Lisboa, Porto ou Faro)
  *   foto       guarda uma foto (lado | bagageira) na pasta da ficha e põe o link na folha
  *   concluir   grava as respostas, confirma as duas fotos, calcula o estado, escreve a FICHA.txt e avisa por WhatsApp e e-mail
  *
@@ -32,7 +32,7 @@ var SEPARADOR = 'Candidatos Motoristas';
 var NOME_PASTA = 'Candidaturas Motoristas · Fotos';
 
 var CABECALHOS = [
-  'Data', 'Código', 'Nome', 'WhatsApp', 'Concelho',
+  'Data', 'Código', 'Nome', 'WhatsApp', 'Concelho', 'Aeroporto',
   'Carro', 'Marca', 'Modelo', 'Ano', 'Lugares',
   'Carta há mais de 1 ano', 'Já faz transfers ou trabalha no aeroporto', 'Outro trabalho ou negócio', 'Inglês',
   'Regime', 'Turnos',
@@ -68,7 +68,7 @@ var CORES_ESTADO = {
 };
 
 var LARGURAS = {
-  'Data': 120, 'Código': 90, 'Nome': 180, 'WhatsApp': 130, 'Concelho': 120,
+  'Data': 120, 'Código': 90, 'Nome': 180, 'WhatsApp': 130, 'Concelho': 120, 'Aeroporto': 90,
   'Carro': 130, 'Marca': 100, 'Modelo': 110, 'Ano': 100, 'Lugares': 70,
   'Carta há mais de 1 ano': 90, 'Já faz transfers ou trabalha no aeroporto': 120, 'Outro trabalho ou negócio': 110,
   'Inglês': 90, 'Regime': 110, 'Turnos': 150,
@@ -165,6 +165,7 @@ function passo1(folha, d) {
 }
 
 var CAMPOS_RESPOSTAS = [
+  ['base', 'Aeroporto'], // "Em que aeroporto queres trabalhar?" (o campo 'aeroporto' é outra pergunta)
   ['carro', 'Carro'], ['marca', 'Marca'], ['modelo', 'Modelo'], ['ano', 'Ano'], ['lugares', 'Lugares'],
   ['carta', 'Carta há mais de 1 ano'], ['aeroporto', 'Já faz transfers ou trabalha no aeroporto'],
   ['trabalho', 'Outro trabalho ou negócio'], ['ingles', 'Inglês'], ['regime', 'Regime'], ['turnos', 'Turnos']
@@ -176,6 +177,12 @@ function gravarRespostas(folha, linha, d) {
   });
   folha.getRange(linha, col('Prioridade')).setValue(d.trabalho === 'Sim' ? 'Sim' : '');
   folha.getRange(linha, col('Atualizado')).setValue(new Date());
+  // se a pessoa voltou atrás e mudou o aeroporto depois de enviar fotos, a pasta acompanha
+  var pasta = pastaExistente(folha, linha);
+  if (pasta) {
+    var nome = nomePasta(folha, linha);
+    if (pasta.getName() !== nome) pasta.setName(nome);
+  }
 }
 
 function guardarFoto(folha, linha, d) {
@@ -267,7 +274,21 @@ function obterFolha() {
     folha.appendRow(CABECALHOS);
     formatarFolha(folha);
   }
+  migrarColunas(folha);
   return folha;
+}
+
+/**
+ * Folhas feitas antes da coluna "Aeroporto": insere-a a seguir ao Concelho (a folha desloca os dados, os formatos,
+ * as regras e o filtro sozinha). Corre em cada pedido, mas só lê duas células; não faz nada se a coluna já existir.
+ */
+function migrarColunas(folha) {
+  var c = col('Aeroporto');
+  var atual = folha.getRange(1, c).getValue();
+  if (atual === 'Aeroporto') return;
+  if (folha.getRange(1, c - 1).getValue() !== 'Concelho' || atual !== 'Carro') return;
+  folha.insertColumnAfter(c - 1);
+  folha.getRange(1, c).setValue('Aeroporto');
 }
 
 /** O link fica clicável e o texto da célula continua a ser o endereço (o script lê-o de volta). */
@@ -426,12 +447,13 @@ function pastaPrincipal() {
   return pasta;
 }
 
-/** "AAAA-MM-DD — Nome — HUB-XXXX" (a data é a do passo 1, na hora de Lisboa). */
+/** "AAAA-MM-DD — Aeroporto — Nome — HUB-XXXX" (a data é a do passo 1, na hora de Portugal; sem aeroporto, fica sem ele). */
 function nomePasta(folha, linha) {
   var data = folha.getRange(linha, col('Data')).getValue();
   var dia = Utilities.formatDate(data instanceof Date ? data : new Date(), 'Europe/Lisbon', 'yyyy-MM-dd');
   var nome = String(folha.getRange(linha, col('Nome')).getValue()).replace(/^'/, '').replace(/[\\/:*?"<>|]/g, ' ').replace(/\s+/g, ' ').trim();
-  return dia + ' — ' + (nome || 'Sem nome') + ' — ' + folha.getRange(linha, col('Código')).getValue();
+  var aeroporto = String(folha.getRange(linha, col('Aeroporto')).getValue() || '').trim();
+  return [dia, aeroporto, nome || 'Sem nome', folha.getRange(linha, col('Código')).getValue()].filter(String).join(' — ');
 }
 
 /** A pasta já criada para esta ficha (pelo link na folha), ou null. */
@@ -499,6 +521,7 @@ function avisar(folha, linha, estado) {
   var texto =
     'Nova candidatura de motorista (ficha completa)\n' +
     'Ficha: ' + val('Código') + '\n' +
+    'Aeroporto: ' + (val('Aeroporto') || '—') + '\n' +
     'Nome: ' + val('Nome') + '\n' +
     'WhatsApp: ' + whatsapp + ' — https://wa.me/' + digitos + '\n' +
     'Carro: ' + carro + '\n' +
@@ -506,7 +529,8 @@ function avisar(folha, linha, estado) {
     'Fotos: ' + val('Pasta das fotos') + '\n' +
     'Folha: ' + folha.getParent().getUrl() + '#gid=' + folha.getSheetId();
 
-  var r = enviarAviso('Nova candidatura de motorista: ' + val('Nome') + ' (' + val('Código') + ')', texto);
+  var r = enviarAviso('Nova candidatura de motorista' + (val('Aeroporto') ? ' (' + val('Aeroporto') + ')' : '') + ': ' +
+    val('Nome') + ' (' + val('Código') + ')', texto);
   if (r.whatsapp !== 'saiu') console.error('Aviso WhatsApp: ' + r.whatsapp);
   if (r.email !== 'saiu') console.error('Aviso por e-mail: ' + r.email);
 }
@@ -570,6 +594,6 @@ function testarTudo() {
   var pixel = Utilities.base64Decode('/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AKp//2Q==');
   guardarFoto(folha, linha, { tipo: 'lado', imagem: Utilities.base64Encode(pixel) });
   guardarFoto(folha, linha, { tipo: 'bagageira', imagem: Utilities.base64Encode(pixel) });
-  concluir(folha, linha, { carro: 'Próprio', marca: 'Toyota', modelo: 'Corolla', ano: '2019', lugares: '5', carta: 'Sim', aeroporto: 'Não', trabalho: 'Sim', ingles: 'Bem', regime: 'Part-time', turnos: 'Manhã, Tarde' });
+  concluir(folha, linha, { base: 'Lisboa', carro: 'Próprio', marca: 'Toyota', modelo: 'Corolla', ano: '2019', lugares: '5', carta: 'Sim', aeroporto: 'Não', trabalho: 'Sim', ingles: 'Bem', regime: 'Part-time', turnos: 'Manhã, Tarde' });
   console.log('Ficha de teste: ' + r.codigo + ' na linha ' + linha);
 }

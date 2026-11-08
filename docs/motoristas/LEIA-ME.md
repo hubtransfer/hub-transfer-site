@@ -1,6 +1,6 @@
 # Página /motoristas — candidatura de motoristas
 
-Código: `src/app/motoristas/` (página, ficha, cookies, privacidade, contacto .vcf) e `src/app/api/motoristas/`
+Código: `src/app/motoristas/` (página, ficha, cookies, privacidade) e `src/app/api/motoristas/`
 (candidatura, fotos, API de Conversões). A /inverno não foi alterada; a /motoristas só lê a lista de carros dela
 (`src/app/inverno/_lib/carros.ts`).
 
@@ -25,7 +25,7 @@ Já não usa a folha **Candidatos Inverno** nem o script da /inverno, que ficam 
 5. No editor, escolhe a função `testarTudo` e carrega em **Executar**. Autoriza o script quando pedir
    (folha, Google Drive, e-mail e pedidos externos). Deves ver:
    - o separador **Candidatos Motoristas** na folha, com uma ficha "Teste HUB" em "Em análise" e Prioridade "Sim";
-   - a pasta **Candidaturas Motoristas · Fotos** no teu Drive, com a subpasta **AAAA-MM-DD — Teste HUB — HUB-XXXX**,
+   - a pasta **Candidaturas Motoristas · Fotos** no teu Drive, com a subpasta **AAAA-MM-DD — Lisboa — Teste HUB — HUB-XXXX**,
      as duas fotos (`lado.jpg`, `bagageira.jpg`) e a **FICHA.txt**;
    - o aviso por e-mail (e por WhatsApp, se a Z-API estiver preenchida).
    Depois apaga a linha de teste e a subpasta de teste.
@@ -33,7 +33,7 @@ Já não usa a folha **Candidatos Inverno** nem o script da /inverno, que ficam 
    Copia o URL que termina em `/exec`. Abri-lo no browser deve mostrar `{"ok":true,"servico":"candidatos-motoristas"}`.
 
 As fotos ficam privadas no teu Drive (só tu e quem tu partilhares as vê). Os links na folha só abrem para essas contas.
-Cada ficha tem uma pasta **AAAA-MM-DD — Nome — HUB-XXXX** (data do passo 1, hora de Lisboa) com as duas fotos e a
+Cada ficha tem uma pasta **AAAA-MM-DD — Aeroporto — Nome — HUB-XXXX** (data do passo 1, hora de Portugal) com as duas fotos e a
 **FICHA.txt**, escrita quando a candidatura fica completa. Se a pessoa corrigir o nome, a pasta muda de nome.
 
 ## 2. Variáveis de ambiente (Vercel → Settings → Environment Variables, e `.env.local` para testar)
@@ -42,17 +42,15 @@ Cada ficha tem uma pasta **AAAA-MM-DD — Nome — HUB-XXXX** (data do passo 1, 
 |---|---|
 | `MOTORISTAS_WEBAPP_URL` | URL `/exec` do passo 1.6 |
 | `MOTORISTAS_TOKEN` | o mesmo valor de `TOKEN` do passo 1.4 |
-| `MOTORISTAS_WHATSAPP_CONTRATACAO` | número que aparece no ecrã final e no contacto a guardar, ex.: `+351 963 705 509` |
 | `NEXT_PUBLIC_META_PIXEL_ID`, `META_CAPI_TOKEN` | os que já existem (mesmo pixel da /inverno) |
 | `MOTORISTAS_SIMULAR` | só em local: `1` para testar sem escrever na folha (nunca funciona em produção) |
 
 Sem `MOTORISTAS_WEBAPP_URL` (e sem simular), a candidatura dá erro em vez de se perder em silêncio.
-Sem `MOTORISTAS_WHATSAPP_CONTRATACAO`, o ecrã final omite o número e o botão de guardar o contacto.
-O número é lido no build: depois de o mudares no Vercel, faz um novo deploy.
+A página não mostra nenhum número de telefone (nem nos metadados). `MOTORISTAS_WHATSAPP_CONTRATACAO` deixou de ser usada.
 
 ## 3. A folha
 
-Folha **Candidatos Motoristas**, separador **Candidatos Motoristas**: Data, Código, Nome, WhatsApp, Concelho, todas as respostas, links das duas fotos e da
+Folha **Candidatos Motoristas**, separador **Candidatos Motoristas**: Data, Código, Nome, WhatsApp, Concelho, **Aeroporto** (Lisboa, Porto ou Faro: a primeira pergunta do quiz), as outras respostas, links das duas fotos e da
 pasta, **Estado**, **Prioridade**, consentimento, página, utm (origem do anúncio). As três últimas colunas estão escondidas:
 servem ao script.
 

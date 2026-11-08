@@ -32,7 +32,7 @@ export default function PrivacidadeMotoristas() {
       <ul>
         <li>Passo 1: nome, número de WhatsApp e concelho onde moras.</li>
         <li>
-          Passo 2: se tens carro (próprio, alugado ou de frota), a marca, o modelo, o ano e os lugares; se tens carta há mais
+          Passo 2: em que aeroporto queres trabalhar (Lisboa, Porto ou Faro); se tens carro (próprio, alugado ou de frota), a marca, o modelo, o ano e os lugares; se tens carta há mais
           de um ano; se já fazes transfers ou trabalhas no aeroporto; se tens outro trabalho ou negócio; se falas inglês; se
           procuras part-time ou full-time e os turnos em que estás livre.
         </li>

@@ -13,7 +13,7 @@ import { TITULO_A } from "./_lib/titulos";
 const TITULO = TITULO_A;
 
 const VAGA: [string, string][] = [
-  ["Serviço", "Transfers entre o aeroporto de Lisboa e hotéis."],
+  ["Serviço", "Transfers entre os aeroportos de Lisboa, Porto e Faro e os hotéis."],
   ["Marcação", "Viagens marcadas com antecedência, com hora e cliente à espera."],
   ["Horários", "Temos vagas só para alguns horários."],
 ];
@@ -39,8 +39,6 @@ const Tracos = ({ pequenos }: { pequenos?: boolean }) => (
 );
 
 export default function MotoristasPage() {
-  const numero = process.env.MOTORISTAS_WHATSAPP_CONTRATACAO?.trim() || null;
-
   return (
     <>
       <header className="mot-wrap mot-topo">
@@ -55,7 +53,7 @@ export default function MotoristasPage() {
           <div>
             <p className="mot-etiqueta">
               <b>Candidaturas abertas</b>
-              <span>Aeroporto de Lisboa</span>
+              <span>Aeroportos de Lisboa, Porto e Faro</span>
             </p>
             <div className="mot-placa">
               <Tracos />
@@ -97,7 +95,7 @@ export default function MotoristasPage() {
           <div className="mot-wrap">
             <div className="mot-marca" aria-hidden="true" />
             <p>
-              Para quem aterra, o motorista é a primeira pessoa com quem fala em Lisboa. Por isso, não aceitamos toda a gente:
+              Para quem aterra, o motorista é a primeira pessoa com quem fala em Portugal. Por isso, não aceitamos toda a gente:
               temos critérios e padrões, e conhecemos cada motorista pessoalmente antes da primeira viagem.
             </p>
           </div>
@@ -141,7 +139,7 @@ export default function MotoristasPage() {
 
         <section className="mot-zona-ficha" id="ficha" aria-label="Ficha de candidatura">
           <div className="mot-wrap">
-            <Candidatura numero={numero} />
+            <Candidatura />
           </div>
         </section>
       </main>

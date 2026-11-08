@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { chamarBackend } from "../_backend";
 import { dadosPedido, diagnostico, enviarEventoMeta, ID_VALIDO, texto, type ResultadoMeta } from "../_meta";
-import { ANO_MINIMO, ANTES_2010, CARROS, INGLES, LUGARES, REGIMES, SIM_NAO, TURNOS } from "@/app/motoristas/_lib/ficha";
+import { AEROPORTOS, ANO_MINIMO, ANTES_2010, CARROS, INGLES, LUGARES, REGIMES, SIM_NAO, TURNOS } from "@/app/motoristas/_lib/ficha";
 
 /* Candidatura de motoristas (/motoristas).
    acao "passo1":    cria (ou atualiza) a linha na folha "Candidatos Motoristas" e devolve o código HUB-XXXX. Evento Lead.
@@ -34,6 +34,7 @@ function respostas(b: Record<string, unknown>) {
   const ano = anoTxt === ANTES_2010 || (Number.isInteger(anoNum) && anoNum >= ANO_MINIMO && anoNum <= new Date().getFullYear() + 1) ? anoTxt : "";
   const turnos = Array.isArray(b.turnos) ? b.turnos.map(String).filter((t) => (TURNOS as readonly string[]).includes(t)) : [];
   return {
+    base: um(AEROPORTOS, b.base),
     carro,
     marca: temCarro ? texto(b.marca, 40) : "",
     modelo: temCarro ? texto(b.modelo, 40) : "",
