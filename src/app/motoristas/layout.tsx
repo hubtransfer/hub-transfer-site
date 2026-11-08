@@ -23,7 +23,7 @@ const barlowCondensed = Barlow_Condensed({
 export const metadata: Metadata = {
   title: "Candidatura de motoristas | HUB Transfer",
   description:
-    "Estamos a escolher os próximos motoristas da HUB Transfer. Transfers entre o aeroporto de Lisboa e hotéis, com viagens marcadas na véspera.",
+    "Estamos a escolher os próximos motoristas da HUB Transfer. Transfers entre o aeroporto de Lisboa e hotéis, com viagens marcadas com antecedência.",
   alternates: { canonical: "/motoristas" },
   openGraph: {
     title: "Estamos a escolher os próximos motoristas da HUB Transfer.",
