@@ -3,6 +3,8 @@
 
 export { MARCAS, LISTA_MARCAS, OUTRA_MARCA, OUTRO_MODELO } from "../../inverno/_lib/carros";
 
+/** Aeroporto onde a pessoa quer trabalhar (primeira pergunta do quiz; na folha, coluna "Aeroporto"). */
+export const AEROPORTOS = ["Lisboa", "Porto", "Faro"] as const;
 export const CARROS = ["Próprio", "Alugado ou de frota", "Não tenho"] as const;
 export const SIM_NAO = ["Sim", "Não"] as const;
 export const INGLES = ["Bem", "Um pouco", "Não"] as const;
@@ -21,6 +23,7 @@ export function listaAnos(anoAtual = new Date().getFullYear()): string[] {
 }
 
 export type Respostas = {
+  base: string; // "Em que aeroporto queres trabalhar?" (aeroporto, abaixo, é "Já fazes transfers ou trabalhas no aeroporto?")
   carro: string;
   marca: string;
   modelo: string;
@@ -35,6 +38,7 @@ export type Respostas = {
 };
 
 export const RESPOSTAS_VAZIAS: Respostas = {
+  base: "",
   carro: "",
   marca: "",
   modelo: "",

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, JetBrains_Mono, Dancing_Script } from "next/font/google";
 import "@/styles/globals.css";
+import DadosEstruturados from "./_dados-estruturados";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -80,48 +81,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "TransportationService",
-              name: "HUB Transfer",
-              description:
-                "Transfer privado no Aeroporto de Lisboa com monitorização de voo em tempo real",
-              url: SITE_URL,
-              logo: `${SITE_URL}/images/logo.png`,
-              telephone: "+351968698138",
-              email: "juniorguitierez@hubtransferencia.com",
-              address: {
-                "@type": "PostalAddress",
-                addressLocality: "Amadora",
-                addressRegion: "Lisboa",
-                addressCountry: "PT",
-              },
-              geo: {
-                "@type": "GeoCoordinates",
-                latitude: 38.7223,
-                longitude: -9.1393,
-              },
-              areaServed: { "@type": "City", name: "Lisboa" },
-              priceRange: "€€",
-              openingHoursSpecification: {
-                "@type": "OpeningHoursSpecification",
-                dayOfWeek: [
-                  "Monday", "Tuesday", "Wednesday", "Thursday",
-                  "Friday", "Saturday", "Sunday",
-                ],
-                opens: "00:00",
-                closes: "23:59",
-              },
-              sameAs: [
-                "https://www.facebook.com/hubtransfer",
-                "https://www.instagram.com/hubtransfer",
-              ],
-            }),
-          }}
-        />
+        <DadosEstruturados />
       </head>
       <body className="min-h-screen bg-background text-foreground antialiased">
         {children}

@@ -20,14 +20,20 @@ const barlowCondensed = Barlow_Condensed({
   weight: ["700", "800"],
 });
 
+/* Metadados próprios: nada herdado do site de clientes (palavras-chave de transfer, título do Twitter).
+   Na comunicação de recrutamento falamos sempre dos três aeroportos: Lisboa, Porto e Faro. */
+const TITULO = "Candidatura de motoristas | HUB Transfer";
+const DESCRICAO = "Candidaturas abertas para motoristas de transfer nos aeroportos de Lisboa, Porto e Faro. Preenche a ficha em poucos minutos.";
+
 export const metadata: Metadata = {
-  title: "Candidatura de motoristas | HUB Transfer",
-  description:
-    "Estamos a escolher os próximos motoristas da HUB Transfer. Transfers entre o aeroporto de Lisboa e hotéis, com viagens marcadas com antecedência.",
+  title: TITULO,
+  description: DESCRICAO,
+  keywords: null,
   alternates: { canonical: "/motoristas" },
+  twitter: { card: "summary", title: TITULO, description: DESCRICAO },
   openGraph: {
-    title: "Estamos a escolher os próximos motoristas da HUB Transfer.",
-    description: "Lemos cada candidatura. Os perfis escolhidos são chamados para uma entrevista.",
+    title: TITULO,
+    description: DESCRICAO,
     url: "/motoristas",
     siteName: "HUB Transfer",
     locale: "pt_PT",
