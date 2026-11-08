@@ -237,14 +237,63 @@ html:has(.mot) ::selection {
   margin: 0;
   border-radius: var(--raio-placa);
   overflow: hidden;
-  background: var(--betao);
   aspect-ratio: 4 / 5;
   max-height: 620px;
 }
-.mot-foto img {
+.mot-foto picture,
+.mot-foto img,
+.mot-foto-video {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+/* a animação por cima da capa; aparece suavemente quando começa a tocar e fica no último fotograma */
+.mot-foto-video {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.mot-foto-video-on {
+  opacity: 1;
+}
+/* o loop entra por cima da introdução sem passagem: o primeiro fotograma é igual ao último da introdução */
+.mot-foto-video-ja {
+  transition: none;
+}
+/* pausa e retoma: pequeno e discreto, em cima à direita (o triângulo amarelo está em baixo à esquerda) */
+.mot-foto-pausa {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid rgba(11, 12, 12, 0.12);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--asfalto);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+.mot-foto-pausa:hover,
+.mot-foto-pausa:focus-visible {
+  opacity: 1;
+}
+.mot-foto-pausa:focus-visible {
+  outline: 2px solid var(--asfalto);
+  outline-offset: 2px;
+}
+/* área de toque maior do que o botão, sem o tornar maior à vista */
+.mot-foto-pausa::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
 }
 .mot-foto::after {
   content: "";

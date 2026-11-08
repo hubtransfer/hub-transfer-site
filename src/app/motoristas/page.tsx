@@ -1,4 +1,5 @@
 import Image from "next/image";
+import HeroiAnimado from "./_components/HeroiAnimado";
 import Link from "next/link";
 import Candidatura from "./_components/Candidatura";
 import PreferenciasCookies from "./_components/PreferenciasCookies";
@@ -13,14 +14,13 @@ const TITULO = TITULO_A;
 
 const VAGA: [string, string][] = [
   ["Serviço", "Transfers entre o aeroporto de Lisboa e hotéis."],
-  ["Marcação", "Viagens marcadas na véspera, com hora e cliente à espera."],
-  ["Horário", "Também em part-time: encaixas as viagens no teu horário."],
-  ["Gorjeta", "A gorjeta é toda tua."],
+  ["Marcação", "Viagens marcadas com antecedência, com hora e cliente à espera."],
+  ["Horários", "Temos vagas só para alguns horários."],
 ];
 
 const REQUISITOS = [
-  "Carro próprio, de 2010 ou mais recente, em bom estado e com bagageira grande.",
-  "Carta há mais de um ano. Falar inglês é uma vantagem.",
+  "Carro próprio, de 2010 ou mais recente, em bom estado.",
+  "Carta há mais de um ano.",
   "Não precisas de experiência em transfers. Ensinamos tudo, no terreno.",
 ];
 
@@ -76,17 +76,7 @@ export default function MotoristasPage() {
               Leva poucos minutos. Tem o telemóvel à mão para tirares duas fotos ao teu carro.
             </p>
           </div>
-          <figure className="mot-foto">
-            {/* Foto provisória (a da /inverno) até haver uma nova */}
-            <Image
-              src="/inverno/colete.webp"
-              alt="Motorista com o colete preto da HUB Transfer"
-              width={480}
-              height={560}
-              sizes="(min-width: 760px) 440px, 100vw"
-              priority
-            />
-          </figure>
+          <HeroiAnimado />
         </section>
 
         <section className="mot-seccao mot-sem-topo" aria-labelledby="mot-vaga">
@@ -107,8 +97,8 @@ export default function MotoristasPage() {
           <div className="mot-wrap">
             <div className="mot-marca" aria-hidden="true" />
             <p>
-              Para quem aterra, o motorista é a primeira pessoa de Lisboa com quem fala. Por isso, não aceitamos toda a gente:
-              vemos a ficha, vemos o carro e conhecemos cada motorista pessoalmente antes da primeira viagem.
+              Para quem aterra, o motorista é a primeira pessoa com quem fala em Lisboa. Por isso, não aceitamos toda a gente:
+              temos critérios e padrões, e conhecemos cada motorista pessoalmente antes da primeira viagem.
             </p>
           </div>
         </section>
