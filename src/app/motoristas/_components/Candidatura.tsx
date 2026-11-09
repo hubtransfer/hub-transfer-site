@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { idsMeta, lerConsentimento, novoEventId, registarEvento } from "../_lib/medicao";
 import { reduzirFoto } from "../_lib/fotos";
+import { vibrarDuplo } from "../_lib/vibrar";
 import {
   AEROPORTOS,
   CARROS,
@@ -296,6 +297,7 @@ export default function Candidatura() {
         consentimentoCookies: lerConsentimento() === "sim",
       });
       registarEvento("CompleteRegistration", eventId);
+      vibrarDuplo(); // a pessoa acabou de tocar em enviar: duas vibrações curtas com o ecrã "Candidatura recebida"
       irPara("final");
     } catch {
       setErroEnvio("Não conseguimos enviar a candidatura. Verifica a ligação à internet e tenta outra vez.");
