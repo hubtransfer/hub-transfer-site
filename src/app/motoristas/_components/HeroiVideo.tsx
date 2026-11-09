@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
-/* A animação do topo, por cima da capa (ver HeroiAnimado). Um só vídeo (heroi-video, 5 s) em loop:
-   os faróis acendem, o telemóvel vibra, aparece o logótipo da HUB e depois a app com a nova viagem. Os últimos 0,3 s
+/* A animação do topo, por cima da capa (ver HeroiAnimado). Um só vídeo (heroi-video, 3 s) em loop:
+   os faróis acendem, o telemóvel vibra e o ecrã acende (0,2 s) já com a app e a nova viagem. Os últimos 0,3 s
    fundem-se no primeiro fotograma, por isso o recomeço não parece um corte.
    - Só é pedido depois do load + 1,5 s + um momento livre: a página assenta primeiro (texto, fontes, capa).
      Com "reduzir movimento" ou "poupar dados" ligados, nunca é pedido.
