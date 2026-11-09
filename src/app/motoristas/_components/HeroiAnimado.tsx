@@ -1,14 +1,15 @@
 import { preload } from "react-dom";
 import HeroiVideo from "./HeroiVideo";
 
-/* Topo da /motoristas: o colete, a chave e o telemóvel; o ecrã acende, aparece o visto verde, o visto passa a carro
-   e o carro fica pintado com as cores da HUB dentro do telemóvel.
-   - Desenhado no servidor: a capa (ecrã apagado, da imagem 2K "inicio") é o que a página mostra primeiro e conta para o LCP.
+/* Topo da /motoristas: o carro, o colete da HUB e o telemóvel; os faróis acendem, o telemóvel vibra, o ecrã acende com
+   o logótipo da HUB e mostra a app com "NOVA VIAGEM" e o botão "ACEITAR VIAGEM".
+   - Desenhado no servidor: a capa (primeiro fotograma do vídeo, ecrã apagado: "inicio") é o que a página mostra primeiro
+     e conta para o LCP.
      Ficheiros feitos à mão em public/motoristas (AVIF e WebP, 480 a 1440 px, 4:5), sem o otimizador do Next.
-   - A animação (HeroiVideo, no browser): um só vídeo em loop, ~5 s.
-   - Com "reduzir movimento" ligado, não há vídeo: o <picture> mostra só o último fotograma do vídeo ("fim"), parado. */
+   - A animação (HeroiVideo, no browser): um só vídeo em loop, 5 s.
+   - Com "reduzir movimento" ligado, não há vídeo: o <picture> mostra o fotograma com a app legível ("fim"), parado. */
 
-const ALT = "Colete preto da HUB Transfer, chave do carro e telemóvel";
+const ALT = "Colete preto da HUB Transfer, carro preto e telemóvel com a app da HUB Transfer a mostrar uma nova viagem";
 const SIZES = "(min-width: 760px) 440px, 100vw";
 const LARGURAS = [480, 750, 1080, 1440];
 const LARGURAS_FIM = [480, 750, 1064]; // o vídeo original só tem 1064 px de largura útil: sem ampliar
