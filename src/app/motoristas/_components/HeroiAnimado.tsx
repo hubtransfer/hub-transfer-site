@@ -6,7 +6,7 @@ import HeroiVideo from "./HeroiVideo";
    - Desenhado no servidor: a capa (primeiro fotograma do vídeo, ecrã apagado: "inicio") é o que a página mostra primeiro
      e conta para o LCP.
      Ficheiros feitos à mão em public/motoristas (AVIF e WebP, 480 a 1440 px, 4:5), sem o otimizador do Next.
-   - A animação (HeroiVideo, no browser): um só vídeo em loop, 3 s.
+   - A animação (HeroiVideo, no browser): um só vídeo em loop, 3,1 s.
    - Com "reduzir movimento" ligado, não há vídeo: o <picture> mostra o fotograma com a app legível ("fim"), parado. */
 
 const ALT = "Colete preto da HUB Transfer, carro preto e telemóvel com a app da HUB Transfer a mostrar uma nova viagem";
