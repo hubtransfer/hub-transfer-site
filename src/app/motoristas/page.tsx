@@ -2,6 +2,7 @@ import Image from "next/image";
 import HeroiAnimado from "./_components/HeroiAnimado";
 import Link from "next/link";
 import Candidatura from "./_components/Candidatura";
+import BotaoCandidatar from "./_components/BotaoCandidatar";
 import PreferenciasCookies from "./_components/PreferenciasCookies";
 import { TITULO_A } from "./_lib/titulos";
 
@@ -63,9 +64,7 @@ export default function MotoristasPage() {
               Lemos cada candidatura. Os perfis escolhidos são chamados para uma entrevista. Os bons perfis que não couberem agora
               ficam em lista de espera.
             </p>
-            <a className="mot-cta" href="#ficha">
-              Quero candidatar-me à vaga
-            </a>
+            <BotaoCandidatar />
             <p className="mot-micro">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M4 8h3l2-3h6l2 3h3v11H4z" />
@@ -131,9 +130,7 @@ export default function MotoristasPage() {
                 <li key={p}>{p}</li>
               ))}
             </ol>
-            <a className="mot-cta" href="#ficha">
-              Quero candidatar-me à vaga
-            </a>
+            <BotaoCandidatar />
           </div>
         </section>
 
