@@ -14,11 +14,11 @@ const SIZES = "(min-width: 760px) 440px, 100vw";
 const LARGURAS = [480, 750, 1080, 1440];
 const LARGURAS_FIM = [480, 750, 1064]; // o vídeo original só tem 1064 px de largura útil: sem ampliar
 const conjunto = (nome: string, ext: string, larguras = LARGURAS) =>
-  larguras.map((w) => `/motoristas/heroi-${nome}-${w}.${ext} ${w}w`).join(", ");
+  larguras.map((w) => `/motoristas/heroi-v7-${nome}-${w}.${ext} ${w}w`).join(", ");
 
 export default function HeroiAnimado() {
   // como o <Image priority>: a capa é pedida logo no <head> (só em AVIF; quem não o lê vai ao WebP pelo <picture>)
-  preload("/motoristas/heroi-inicio-750.avif", {
+  preload("/motoristas/heroi-v7-inicio-750.avif", {
     as: "image",
     type: "image/avif",
     imageSrcSet: conjunto("inicio", "avif"),
@@ -33,7 +33,7 @@ export default function HeroiAnimado() {
         <source media="(prefers-reduced-motion: reduce)" type="image/webp" srcSet={conjunto("fim", "webp", LARGURAS_FIM)} sizes={SIZES} />
         <source type="image/avif" srcSet={conjunto("inicio", "avif")} sizes={SIZES} />
         <img
-          src="/motoristas/heroi-inicio-750.webp"
+          src="/motoristas/heroi-v7-inicio-750.webp"
           srcSet={conjunto("inicio", "webp")}
           sizes={SIZES}
           width={1440}

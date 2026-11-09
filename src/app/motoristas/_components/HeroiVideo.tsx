@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-/* A animação do topo, por cima da capa (ver HeroiAnimado). Um só vídeo (heroi-video, 3,1 s) em loop:
+/* A animação do topo, por cima da capa (ver HeroiAnimado). Um só vídeo (heroi-v7, 3,1 s) em loop:
    os faróis acendem, o telemóvel vibra (a vibração inteira) e o ecrã acende (0,2 s) já com a app e a nova viagem, com o
    reflexo do vidro sempre por cima, para o telemóvel não mudar de aspeto. Os últimos 0,3 s
    fundem-se no primeiro fotograma, por isso o recomeço não parece um corte.
@@ -93,8 +93,8 @@ export default function HeroiVideo() {
         tabIndex={-1}
         onPlaying={() => setATocar(true)}
       >
-        <source src="/motoristas/heroi-video.webm" type="video/webm" />
-        <source src="/motoristas/heroi-video.mp4" type="video/mp4" />
+        <source src="/motoristas/heroi-v7.webm" type="video/webm" />
+        <source src="/motoristas/heroi-v7.mp4" type="video/mp4" />
       </video>
     </div>
   );
