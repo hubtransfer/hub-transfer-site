@@ -48,11 +48,11 @@ export default function PaginaLisboa({ lingua }: { lingua: Lingua }) {
       {/* a) Topo */}
       <header className={hero ? "lx-hero" : "lx-hero lx-hero--sem"}>
         {hero && (
-          <Image src={hero} alt="" fill priority fetchPriority="high" sizes="100vw" className="lx-hero-img" />
+          <Image src={hero} alt="" fill priority fetchPriority="high" sizes="100vw" quality={60} className="lx-hero-img" />
         )}
         <div className="lx-hero-veu" aria-hidden="true" />
         <div className="lx-wrap lx-hero-top">
-          <Link href="/" aria-label="HUB Transfer">
+          <Link href="/" aria-label="HUB Transfer" prefetch={false}>
             <Image src="/images/logo.png" alt="HUB Transfer" width={828} height={204} sizes="140px" className="lx-logo" priority />
           </Link>
           <nav className="lx-linguas" aria-label={t.aLingua}>
