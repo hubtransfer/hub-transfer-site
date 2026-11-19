@@ -136,17 +136,17 @@ export const PRATOS: Prato[] = [
     sobre: {
       pt: [
         "Amêijoas abertas ao lume em azeite e alho, com coentros frescos e umas gotas de limão.",
-        "O nome homenageia Raimundo Bulhão Pato, poeta lisboeta do século XIX.",
+        "O nome homenageia Raimundo Bulhão Pato, poeta português do século XIX.",
         "Servem-se como entrada ou petisco, a meio da mesa. O molho que fica no fundo é para o pão.",
       ],
       en: [
         "Clams opened over the heat in olive oil and garlic, with fresh coriander and a squeeze of lemon.",
-        "The name honours Raimundo Bulhão Pato, a 19th-century Lisbon poet.",
+        "The name honours Raimundo Bulhão Pato, a 19th-century Portuguese poet.",
         "They are served as a starter or snack, in the middle of the table. The sauce left at the bottom is for the bread.",
       ],
       es: [
         "Almejas abiertas al fuego en aceite y ajo, con cilantro fresco y unas gotas de limón.",
-        "El nombre homenajea a Raimundo Bulhão Pato, poeta lisboeta del siglo XIX.",
+        "El nombre homenajea a Raimundo Bulhão Pato, poeta portugués del siglo XIX.",
         "Se sirven como entrante o tapa, en el centro de la mesa. La salsa que queda en el fondo es para el pan.",
       ],
     },
