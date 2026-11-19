@@ -925,6 +925,347 @@
   line-height: 1.2;
 }
 
+/* ---------- E6: cartões de restaurante (página do prato e «Uma mesa com vista») ---------- */
+.lx-etiqueta {
+  align-self: flex-start;
+  padding: 3px 9px;
+  border-radius: 99px;
+  background: var(--lx-yel-soft);
+  color: #6b5600;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.lx-bairro {
+  margin: -2px 0 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--lx-mut);
+}
+.lx-rest .lx-btn--bloco {
+  margin-top: auto;
+}
+.lx-legenda {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  z-index: 2;
+  max-width: calc(100% - 16px);
+  padding: 4px 9px;
+  border-radius: 8px;
+  background: rgba(17, 17, 16, 0.78);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+@media (min-width: 640px) {
+  .lx-grelha--rest {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1040px) {
+  .lx-grelha--rest {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ---------- E6: página do prato ---------- */
+.lx-topo {
+  background: var(--lx-ink);
+  color: #fff;
+  padding: max(10px, env(safe-area-inset-top)) 0 10px;
+}
+.lx-main--prato {
+  padding-top: 4px;
+  padding-bottom: calc(48px + env(safe-area-inset-bottom));
+}
+.lx-voltar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  color: var(--lx-mut);
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.lx-prato-topo {
+  display: grid;
+  gap: 16px;
+}
+@media (min-width: 768px) {
+  .lx-prato-topo {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 28px;
+  }
+}
+.lx-ph--grande {
+  aspect-ratio: 3 / 2;
+  border-radius: var(--lx-radius);
+}
+.lx-h1--prato {
+  font-size: clamp(30px, 7.5vw, 46px);
+  font-style: italic;
+  text-transform: uppercase;
+}
+.lx-prato-frase {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+.lx-prato-texto .lx-t + .lx-t {
+  margin-top: 8px;
+}
+.lx-deixe {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 22px 18px;
+  border-radius: 16px;
+  background: var(--lx-ink);
+  color: #fff;
+}
+.lx-deixe::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0;
+  border-right: 48px solid var(--lx-yel);
+  border-bottom: 48px solid transparent;
+}
+.lx-deixe p {
+  margin: 0;
+  max-width: 88%;
+  font-size: 18px;
+  font-weight: 700;
+}
+.lx-mente {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 28px;
+  padding: 18px;
+  border: 2px dashed var(--lx-line);
+  border-radius: var(--lx-radius);
+}
+.lx-mente p {
+  margin: 0;
+  font-weight: 600;
+}
+@media (min-width: 640px) {
+  .lx-mente {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .lx-mente .lx-btn {
+    flex: none;
+  }
+}
+/* «Ver outros pratos»: uma linha que se arrasta para o lado */
+.lx-fila {
+  display: flex;
+  gap: 12px;
+  margin: 12px calc(-1 * var(--lx-gr)) 0 calc(-1 * var(--lx-gl));
+  padding: 0 var(--lx-gr) 8px var(--lx-gl);
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: var(--lx-gl);
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+}
+.lx-fila li {
+  flex: 0 0 auto;
+  width: 168px;
+  scroll-snap-align: start;
+}
+.lx-mini-prato {
+  display: block;
+  color: var(--lx-ink);
+  text-decoration: none;
+}
+.lx-mini-prato .lx-ph {
+  display: block;
+  border-radius: 12px;
+}
+.lx-mini-prato .lx-ph::after {
+  border-right-width: 22px;
+  border-top-width: 22px;
+}
+.lx-mini-prato b {
+  display: block;
+  margin-top: 6px;
+  font-size: 15px;
+  line-height: 1.3;
+}
+@media (hover: hover) {
+  .lx-mini-prato:hover b {
+    text-decoration: underline;
+  }
+}
+
+/* ---------- E6: formulário da mesa (folha em baixo no telemóvel, cartão ao centro no computador) ---------- */
+:root:has(.lx-folha[open]) {
+  overflow: hidden;
+}
+.lx-folha {
+  width: 100%;
+  max-width: 100%;
+  max-height: 92svh;
+  margin: auto 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 18px 18px 0 0;
+  background: #fff;
+  color: var(--lx-ink);
+  overscroll-behavior: contain;
+}
+.lx-folha::backdrop {
+  background: rgba(17, 17, 16, 0.6);
+}
+@media (min-width: 640px) {
+  .lx-folha {
+    width: min(520px, calc(100% - 32px));
+    margin: auto;
+    border-radius: 18px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lx-folha[open] {
+    animation: lx-sobe 0.28s var(--lx-ease);
+  }
+}
+@keyframes lx-sobe {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+}
+.lx-folha-in {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px var(--lx-gr) calc(18px + env(safe-area-inset-bottom)) var(--lx-gl);
+}
+@media (min-width: 640px) {
+  .lx-folha-in {
+    padding: 22px;
+  }
+}
+.lx-folha-topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.lx-folha-prato {
+  margin: 2px 0 0;
+  color: var(--lx-mut);
+  font-weight: 700;
+}
+.lx-fechar {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  margin: -8px -8px 0 0;
+  border: 0;
+  border-radius: 99px;
+  background: var(--lx-soft);
+  color: var(--lx-ink);
+  font: inherit;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+.lx-escolhido {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2px 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--lx-yel-soft);
+}
+.lx-escolhido > span {
+  grid-column: 1 / -1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--lx-mut);
+}
+.lx-escolhido b {
+  display: block;
+  font-size: 17px;
+}
+.lx-escolhido small {
+  font-size: 14px;
+  color: var(--lx-mut);
+}
+.lx-mudar {
+  min-height: 44px;
+  padding: 0 10px;
+  border: 0;
+  background: none;
+  color: var(--lx-ink);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.lx-folha .lx-campos {
+  align-items: start;
+}
+.lx-transporte {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--lx-line);
+  border-radius: 12px;
+  cursor: pointer;
+}
+.lx .lx-transporte > span {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--lx-ink);
+}
+.lx-transporte input {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  accent-color: var(--lx-ink);
+}
+.lx-folha-botao {
+  width: 100%;
+  font-size: 16px;
+}
+.lx-privado {
+  margin: -4px 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--lx-mut);
+}
+.lx-erro {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #b42318;
+}
+.lx input[aria-invalid="true"] {
+  border-color: #b42318;
+}
+
 /* ---------- telemóvel ---------- */
 /* Telemóvel ao alto: a fotografia do topo fica em cima, inteira na altura (a mesa e o prato à vista),
    e o texto entra por baixo, sobre o preto — em vez de tapar o prato. */

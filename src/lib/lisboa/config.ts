@@ -16,19 +16,24 @@ export const CONFIG_LISBOA = {
 } as const;
 
 /** Código no início de cada mensagem: diz à equipa de que botão veio o pedido e em que língua.
-    Ex.: #MESA · PT, #MESA-LIVRE · EN, #MESA-P05 · ES, #ROTA 3·7·14 · PT */
-export type OrigemWhats = { tipo: "MESA" } | { tipo: "MESA-LIVRE" } | { tipo: "PRATO"; prato: number } | { tipo: "ROTA"; lugares: number[] };
+    Mesa (formulário):
+      #MESA-P05-R07 · PT   prato 05, restaurante R07 escolhido em «Escolher este»
+      #MESA-P05-LIVRE · PT prato 05, restaurante escrito pelo cliente (ou em branco: «escolham por mim»)
+      #MESA-R10 · PT       restaurante escolhido sem prato (bloco «Uma mesa com vista»)
+      #MESA · PT           formulário aberto no topo ou na barra, sem prato
+    Dia montado: #ROTA 3·7·14 · PT */
+export type OrigemWhats = { tipo: "MESA"; prato?: number; restaurante?: string } | { tipo: "ROTA"; lugares: number[] };
+
+const dois = (n: number) => String(n).padStart(2, "0");
 
 export function codigoWhats(origem: OrigemWhats, lingua: Lingua): string {
   const l = lingua.toUpperCase();
-  switch (origem.tipo) {
-    case "PRATO":
-      return `#MESA-P${String(origem.prato).padStart(2, "0")} · ${l}`;
-    case "ROTA":
-      return `#ROTA${origem.lugares.length ? " " + origem.lugares.join("·") : ""} · ${l}`;
-    default:
-      return `#${origem.tipo} · ${l}`;
-  }
+  if (origem.tipo === "ROTA") return `#ROTA${origem.lugares.length ? " " + origem.lugares.join("·") : ""} · ${l}`;
+  const partes = ["#MESA"];
+  if (origem.prato) partes.push(`P${dois(origem.prato)}`);
+  if (origem.restaurante) partes.push(origem.restaurante);
+  else if (origem.prato) partes.push("LIVRE");
+  return `${partes.join("-")} · ${l}`;
 }
 
 export function linkWhatsapp(texto: string, origem: OrigemWhats, lingua: Lingua): string {

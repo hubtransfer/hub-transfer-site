@@ -10,21 +10,25 @@ type Props = {
   /** rótulos de acessibilidade: anterior, seguinte, "Imagem {i} de {t}" */
   rotulos: { anterior: string; seguinte: string; imagem: string };
   children?: React.ReactNode;
+  /** classe extra da caixa (ex.: lx-ph--grande, em 3:2) */
+  classe?: string;
+  /** a primeira fotografia é a principal da página: carrega logo, sem esperar */
+  prioridade?: boolean;
 };
 
 /** Fotografia(s) de um cartão. Sem imagens: fundo escuro com o canto amarelo.
     Uma imagem: só a imagem. Várias: arrasta-se com o dedo (scroll-snap nativo), com pontos e setas. */
-export default function Carrossel({ imagens, alt, sizes, rotulos, children }: Props) {
+export default function Carrossel({ imagens, alt, sizes, rotulos, children, classe, prioridade }: Props) {
   const caixa = useRef<HTMLDivElement>(null);
   const pista = useRef<HTMLDivElement>(null);
   // As fotografias só começam a descarregar quando o cartão se aproxima do ecrã: assim não disputam a rede com o topo.
-  const [perto, setPerto] = useState(false);
+  const [perto, setPerto] = useState(!!prioridade);
   const [atual, setAtual] = useState(0);
   const varias = imagens.length > 1;
 
   useEffect(() => {
     const el = caixa.current;
-    if (!el || !imagens.length) return;
+    if (!el || !imagens.length || prioridade) return;
     if (!("IntersectionObserver" in window)) return setPerto(true);
     const io = new IntersectionObserver(
       (entradas) => {
@@ -37,7 +41,7 @@ export default function Carrossel({ imagens, alt, sizes, rotulos, children }: Pr
     );
     io.observe(el);
     return () => io.disconnect();
-  }, [imagens.length]);
+  }, [imagens.length, prioridade]);
 
   const irPara = (i: number) => {
     const el = pista.current;
@@ -54,7 +58,7 @@ export default function Carrossel({ imagens, alt, sizes, rotulos, children }: Pr
   };
 
   return (
-    <div ref={caixa} className="lx-ph" data-vazio={imagens.length === 0 || undefined}>
+    <div ref={caixa} className={classe ? `lx-ph ${classe}` : "lx-ph"} data-vazio={imagens.length === 0 || undefined}>
       {perto && imagens.length > 0 && (
         <div
           ref={pista}
@@ -69,7 +73,7 @@ export default function Carrossel({ imagens, alt, sizes, rotulos, children }: Pr
               role={varias ? "group" : undefined}
               aria-label={varias ? rotulos.imagem.replace("{i}", String(i + 1)).replace("{t}", String(imagens.length)) : undefined}
             >
-              <Image src={src} alt={i === 0 ? alt : ""} fill sizes={sizes} quality={60} className="lx-img" draggable={false} />
+              <Image src={src} alt={i === 0 ? alt : ""} fill sizes={sizes} quality={60} priority={prioridade && i === 0} className="lx-img" draggable={false} />
             </div>
           ))}
         </div>

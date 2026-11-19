@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Carrossel from "./Carrossel";
 import { CONFIG_LISBOA, linkWhatsapp } from "@/lib/lisboa/config";
+import { abrirMesa } from "@/lib/lisboa/mesa";
 import { medir } from "@/lib/lisboa/medicao";
 import { formatarMin, ordenarMaisCurto, planearDia, somarHora } from "@/lib/lisboa/rota";
 import type { Textos } from "@/lib/lisboa/textos";
@@ -492,16 +493,23 @@ export default function Planeador({ lingua, t, lugares, estilos }: Props) {
               </>
             )}
           </div>
-          <a
-            className="lx-cta"
-            href={temDia ? linkWhatsapp(mensagem(), { tipo: "ROTA", lugares: paragens.map((p) => p.n) }, lingua) : linkWhatsapp(t.msgOwn, { tipo: "MESA" }, lingua)}
-            target="_blank"
-            rel="noopener"
-            onClick={() => (temDia ? medir("FalarConsultor", { lugares: paragens.length, lingua }) : medir("PedirMesa", { origem: "barra", lingua }))}
-          >
-            {temDia ? t.cta : t.own2}
-            <span className="lx-sr"> ({t.aWhats})</span>
-          </a>
+          {temDia ? (
+            <a
+              className="lx-cta"
+              href={linkWhatsapp(mensagem(), { tipo: "ROTA", lugares: paragens.map((p) => p.n) }, lingua)}
+              target="_blank"
+              rel="noopener"
+              onClick={() => medir("FalarConsultor", { lugares: paragens.length, lingua })}
+            >
+              {t.cta}
+              <span className="lx-sr"> ({t.aWhats})</span>
+            </a>
+          ) : (
+            // «Pedir a minha mesa»: abre o formulário da mesa (sem prato, restaurante em branco)
+            <button type="button" className="lx-cta" aria-haspopup="dialog" onClick={() => abrirMesa({ origem: "barra" })}>
+              {t.own2}
+            </button>
+          )}
         </div>
       </div>
     </>

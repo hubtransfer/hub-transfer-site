@@ -1,20 +1,29 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Montserrat } from "next/font/google";
-import BotaoWhats from "./BotaoWhats";
+import BotaoMesa from "./BotaoMesa";
 import Carrossel from "./Carrossel";
+import FormularioMesa from "./FormularioMesa";
 import Planeador, { type LugarVista } from "./Planeador";
 import ProtecaoFotos from "./ProtecaoFotos";
-import { CONFIG_LISBOA, linkWhatsapp } from "@/lib/lisboa/config";
+import { CONFIG_LISBOA } from "@/lib/lisboa/config";
 import { imagensHero, imagensLugar, imagensPrato } from "@/lib/lisboa/imagens";
 import { LUGARES } from "@/lib/lisboa/lugares";
 import { ESTILOS_JANTAR, PRATOS } from "@/lib/lisboa/pratos";
-import { ROTAS, TEXTOS } from "@/lib/lisboa/textos";
+import { paraVista, restaurantesComVista } from "@/lib/lisboa/restaurantes";
+import { ROTAS, TEXTOS, rotaPrato } from "@/lib/lisboa/textos";
 import { LINGUAS, type Lingua } from "@/lib/lisboa/tipos";
 import "./lisboa.css";
 
 /* «Lisboa à sua mesa» — /lisboa, /en/lisboa, /es/lisboa.
    Estrutura, textos e identidade do protótipo validado (19/11/2026). A página NUNCA mostra preços. */
+
+/* «Uma mesa com vista»: a fotografia é a de um lugar nosso dessa zona, com a legenda da vista
+   (nunca apresentada como o restaurante: não temos autorização para usar fotografias dos restaurantes). */
+const VISTAS: Record<string, { lugar: number; legenda: Record<Lingua, string> }> = {
+  R10: { lugar: 7, legenda: { pt: "Vista da Graça", en: "View from Graça", es: "Vista desde Graça" } },
+  R11: { lugar: 16, legenda: { pt: "Vista de Belém", en: "View from Belém", es: "Vista desde Belém" } },
+};
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -76,15 +85,9 @@ export default function PaginaLisboa({ lingua }: { lingua: Lingua }) {
             <a className="lx-cta" href="#pratos">
               {t.sug}
             </a>
-            <BotaoWhats
-              className="lx-cta lx-cta--linha"
-              href={linkWhatsapp(t.msgOwn, { tipo: "MESA-LIVRE" }, lingua)}
-              evento="PedirMesa"
-              dados={{ origem: "topo", lingua }}
-              extra={t.aWhats}
-            >
+            <BotaoMesa className="lx-cta lx-cta--linha" pedido={{ origem: "topo" }}>
               {t.own}
-            </BotaoWhats>
+            </BotaoMesa>
           </div>
           <p className="lx-dica">{t.hint}</p>
         </div>
@@ -106,15 +109,10 @@ export default function PaginaLisboa({ lingua }: { lingua: Lingua }) {
                   <div className="lx-card-body">
                     <h3>{nome}</h3>
                     <p className="lx-t">{frase}</p>
-                    <BotaoWhats
-                      className="lx-btn lx-btn--ink lx-btn--bloco"
-                      href={linkWhatsapp(t.msgDish.replace("{d}", nome.toLowerCase()), { tipo: "PRATO", prato: p.n }, lingua)}
-                      evento="QueroProvar"
-                      dados={{ prato: p.n, lingua }}
-                      extra={`${nome}, ${t.aWhats}`}
-                    >
+                    <Link className="lx-btn lx-btn--ink lx-btn--bloco" href={rotaPrato(lingua, p.slug)} prefetch={false}>
                       {t.provar}
-                    </BotaoWhats>
+                      <span className="lx-sr"> ({nome})</span>
+                    </Link>
                   </div>
                 </article>
               );
@@ -131,6 +129,41 @@ export default function PaginaLisboa({ lingua }: { lingua: Lingua }) {
         {/* d) e) f) h) */}
         <Planeador lingua={lingua} t={t} lugares={lugares} estilos={ESTILOS_JANTAR} />
 
+        {/* Uma mesa com vista (antes do rodapé) */}
+        <section className="lx-sec" aria-labelledby="vista">
+          <h2 id="vista" className="lx-h2">
+            {t.vT}
+          </h2>
+          <p className="lx-sub">{t.vS}</p>
+          <div className="lx-grelha lx-grelha--rest">
+            {restaurantesComVista().map((r) => {
+              const v = paraVista(r, lingua);
+              const vista = VISTAS[r.codigo];
+              const foto = vista ? imagensLugar(vista.lugar)[0] : undefined;
+              return (
+                <article key={r.codigo} className="lx-card lx-rest" data-revelar>
+                  <Carrossel imagens={foto ? [foto] : []} alt="" rotulos={rotulos} sizes="(min-width: 640px) 33vw, (min-width: 560px) 50vw, 40vw">
+                    {vista && <span className="lx-legenda">{vista.legenda[lingua]}</span>}
+                  </Carrossel>
+                  <div className="lx-card-body">
+                    <span className="lx-etiqueta">{t.pReco}</span>
+                    <h3>{v.nome}</h3>
+                    <p className="lx-bairro">{v.bairro}</p>
+                    <p className="lx-t">{v.ambiente}</p>
+                    <BotaoMesa
+                      className="lx-btn lx-btn--ink lx-btn--bloco"
+                      pedido={{ origem: "vista", restaurante: { codigo: v.codigo, nome: v.nome, bairro: v.bairro } }}
+                      evento={{ nome: "EscolherRestaurante", dados: { prato: "-", restaurante: v.codigo, lingua } }}
+                    >
+                      {t.pEscolher}
+                    </BotaoMesa>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+
         {/* g) Rodapé de confiança */}
         <footer className="lx-confianca">
           <p>
@@ -141,6 +174,7 @@ export default function PaginaLisboa({ lingua }: { lingua: Lingua }) {
           )}
         </footer>
       </main>
+      <FormularioMesa lingua={lingua} t={t} />
     </div>
   );
 }

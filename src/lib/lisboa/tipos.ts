@@ -25,9 +25,13 @@ export type TextoPrato = [string, string];
 
 export type Prato = {
   n: number;
+  /** endereço da página do prato, igual nas três línguas: /lisboa/prato/{slug} */
+  slug: string;
   pt: TextoPrato;
   en: TextoPrato;
   es: TextoPrato;
+  /** 3 ou 4 linhas da página do prato: o que é, como se come, quando sabe melhor */
+  sobre: Record<Lingua, string[]>;
 };
 
 export type EstiloJantar = {

@@ -3,7 +3,9 @@
    (no site só arranca nas campanhas, depois do «Aceitar» do aviso de cookies); quando estiver carregado,
    os eventos seguem. Sem Pixel, não acontece nada: a medição nunca impede a página de funcionar. */
 
-export type EventoLisboa = "PedirMesa" | "QueroProvar" | "AdicionarLugar" | "FalarConsultor";
+/* VerPrato (prato) · EscolherRestaurante (prato, restaurante) · PedirMesa (prato, restaurante, transporte sim/não, origem)
+   AdicionarLugar (lugar) · FalarConsultor (lugares). Todos levam também a língua. */
+export type EventoLisboa = "VerPrato" | "EscolherRestaurante" | "PedirMesa" | "AdicionarLugar" | "FalarConsultor";
 
 export function medir(evento: EventoLisboa, dados: Record<string, string | number> = {}) {
   try {
