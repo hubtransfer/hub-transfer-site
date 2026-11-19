@@ -69,7 +69,7 @@ export default function Carrossel({ imagens, alt, sizes, rotulos, children }: Pr
               role={varias ? "group" : undefined}
               aria-label={varias ? rotulos.imagem.replace("{i}", String(i + 1)).replace("{t}", String(imagens.length)) : undefined}
             >
-              <Image src={src} alt={i === 0 ? alt : ""} fill sizes={sizes} quality={60} className="lx-img" />
+              <Image src={src} alt={i === 0 ? alt : ""} fill sizes={sizes} quality={60} className="lx-img" draggable={false} />
             </div>
           ))}
         </div>

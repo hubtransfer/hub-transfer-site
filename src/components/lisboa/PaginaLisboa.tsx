@@ -4,6 +4,7 @@ import { Montserrat } from "next/font/google";
 import BotaoWhats from "./BotaoWhats";
 import Carrossel from "./Carrossel";
 import Planeador, { type LugarVista } from "./Planeador";
+import ProtecaoFotos from "./ProtecaoFotos";
 import { CONFIG_LISBOA, linkWhatsapp } from "@/lib/lisboa/config";
 import { imagensHero, imagensLugar, imagensPrato } from "@/lib/lisboa/imagens";
 import { LUGARES } from "@/lib/lisboa/lugares";
@@ -44,11 +45,12 @@ export default function PaginaLisboa({ lingua }: { lingua: Lingua }) {
     <div lang={lingua} className={`lx ${montserrat.variable}`}>
       {/* Abrir esta página guarda a língua: o início do site abre nela (como nas outras páginas). */}
       <script dangerouslySetInnerHTML={{ __html: `try{localStorage.setItem("hub-lang","${lingua}")}catch(e){}` }} />
+      <ProtecaoFotos />
 
       {/* a) Topo */}
       <header className={hero ? "lx-hero" : "lx-hero lx-hero--sem"}>
         {hero && (
-          <Image src={hero} alt="" fill priority fetchPriority="high" sizes="100vw" quality={60} className="lx-hero-img" />
+          <Image src={hero} alt="" fill priority fetchPriority="high" sizes="(max-width: 767px) and (orientation: portrait) 82vh, 100vw" quality={60} className="lx-hero-img" draggable={false} />
         )}
         <div className="lx-hero-veu" aria-hidden="true" />
         <div className="lx-wrap lx-hero-top">
@@ -76,7 +78,7 @@ export default function PaginaLisboa({ lingua }: { lingua: Lingua }) {
             </a>
             <BotaoWhats
               className="lx-cta lx-cta--linha"
-              href={linkWhatsapp(t.msgOwn)}
+              href={linkWhatsapp(t.msgOwn, { tipo: "MESA-LIVRE" }, lingua)}
               evento="PedirMesa"
               dados={{ origem: "topo", lingua }}
               extra={t.aWhats}
@@ -100,13 +102,13 @@ export default function PaginaLisboa({ lingua }: { lingua: Lingua }) {
               const [nome, frase] = p[lingua];
               return (
                 <article key={p.n} className="lx-card lx-prato" data-revelar>
-                  <Carrossel imagens={imagensPrato(p.n)} alt={nome} rotulos={rotulos} sizes="(min-width: 1040px) 240px, (min-width: 640px) 33vw, 50vw" />
+                  <Carrossel imagens={imagensPrato(p.n)} alt={nome} rotulos={rotulos} sizes="(min-width: 1040px) 240px, (min-width: 640px) 33vw, (min-width: 560px) 50vw, 80vw" />
                   <div className="lx-card-body">
                     <h3>{nome}</h3>
                     <p className="lx-t">{frase}</p>
                     <BotaoWhats
                       className="lx-btn lx-btn--ink lx-btn--bloco"
-                      href={linkWhatsapp(t.msgDish.replace("{d}", nome.toLowerCase()))}
+                      href={linkWhatsapp(t.msgDish.replace("{d}", nome.toLowerCase()), { tipo: "PRATO", prato: p.n }, lingua)}
                       evento="QueroProvar"
                       dados={{ prato: p.n, lingua }}
                       extra={`${nome}, ${t.aWhats}`}

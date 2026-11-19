@@ -11,6 +11,10 @@
   --lx-line: #e4e2dc;
   --lx-radius: 14px;
   --lx-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  /* margens laterais: 16px, ou mais se o iPhone deitado tiver o recorte do ecrã desse lado */
+  --lx-gl: max(16px, env(safe-area-inset-left));
+  --lx-gr: max(16px, env(safe-area-inset-right));
+  overflow-x: clip;
   min-height: 100vh;
   background: #fff;
   color: var(--lx-ink);
@@ -44,8 +48,8 @@
   width: 100%;
   max-width: 1040px;
   margin: 0 auto;
-  padding-left: 16px;
-  padding-right: 16px;
+  padding-left: var(--lx-gl);
+  padding-right: var(--lx-gr);
 }
 
 /* ---------- a) Topo ---------- */
@@ -54,7 +58,7 @@
   overflow: hidden;
   background: var(--lx-ink);
   color: #fff;
-  padding: 18px 0 40px;
+  padding: max(18px, env(safe-area-inset-top)) 0 40px;
   min-height: min(88svh, 720px);
   display: flex;
   flex-direction: column;
@@ -93,6 +97,11 @@
   justify-content: space-between;
   align-items: center;
 }
+.lx-hero-top > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
 .lx-logo {
   height: 32px;
   width: auto;
@@ -107,11 +116,11 @@
   align-items: center;
   justify-content: center;
   min-width: 44px;
-  min-height: 32px;
+  min-height: 44px;
   border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 99px;
   color: #fff;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-decoration: none;
@@ -161,7 +170,7 @@
 }
 .lx-dica {
   margin: 14px 0 0;
-  font-size: 13px;
+  font-size: 16px;
   color: rgba(255, 255, 255, 0.78);
 }
 
@@ -208,7 +217,8 @@
 /* ---------- secções ---------- */
 .lx-main {
   padding-top: 8px;
-  padding-bottom: 140px;
+  /* espaço para a barra fixa (até duas linhas no botão) e para a zona segura do iPhone */
+  padding-bottom: calc(150px + env(safe-area-inset-bottom));
 }
 .lx-sec {
   margin-top: 36px;
@@ -229,7 +239,7 @@
 .lx-sub {
   margin: 0 0 16px;
   color: var(--lx-mut);
-  font-size: 15px;
+  font-size: 16px;
 }
 #pratos {
   scroll-margin-top: 16px;
@@ -282,14 +292,14 @@
 }
 .lx-card h3 {
   margin: 0;
-  font-size: 15px;
+  font-size: 17px;
   line-height: 1.25;
   font-weight: 700;
 }
 .lx-t {
   margin: 0;
   color: var(--lx-mut);
-  font-size: 13.5px;
+  font-size: 16px;
   line-height: 1.45;
 }
 .lx-prato .lx-btn--bloco {
@@ -344,9 +354,9 @@
   position: absolute;
   top: 50%;
   z-index: 2;
-  width: 32px;
-  height: 32px;
-  margin-top: -16px;
+  width: 44px;
+  height: 44px;
+  margin-top: -22px;
   border: 0;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.92);
@@ -433,7 +443,7 @@
   border-radius: 99px;
   background: rgba(17, 17, 16, 0.72);
   color: #fff;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -453,7 +463,7 @@
 .lx-hist p {
   margin: 4px 0 2px;
   padding: 10px;
-  font-size: 13.5px;
+  font-size: 16px;
   line-height: 1.5;
   background: var(--lx-soft);
   border-left: 3px solid var(--lx-yel);
@@ -470,7 +480,7 @@
   transform: none;
 }
 .lx-dur {
-  font-size: 12.5px;
+  font-size: 14px;
   color: var(--lx-mut);
 }
 .lx-acoes {
@@ -485,14 +495,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 40px;
+  min-height: 44px;
   padding: 8px 12px;
   border: 1px solid var(--lx-line);
   border-radius: 10px;
   background: #fff;
   color: var(--lx-ink);
   font: inherit;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
@@ -521,8 +531,8 @@
 .lx-zonas {
   display: flex;
   gap: 6px;
-  margin: 0 -16px 16px;
-  padding: 0 16px 2px;
+  margin: 0 calc(-1 * var(--lx-gr)) 16px calc(-1 * var(--lx-gl));
+  padding: 0 var(--lx-gr) 2px var(--lx-gl);
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -538,14 +548,14 @@
 }
 .lx-zonas button {
   flex: none;
-  min-height: 36px;
-  padding: 6px 14px;
+  min-height: 44px;
+  padding: 6px 16px;
   border: 1px solid var(--lx-line);
   border-radius: 99px;
   background: #fff;
   color: var(--lx-ink);
   font: inherit;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
@@ -573,7 +583,7 @@
 }
 .lx-ponte span {
   color: var(--lx-mut);
-  font-size: 15px;
+  font-size: 16px;
 }
 
 /* ---------- e) O seu dia ---------- */
@@ -584,8 +594,12 @@
 }
 .lx-campos {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: end;
   gap: 10px;
+}
+.lx-campos > label {
+  min-width: 0;
 }
 /* no telemóvel: dia e hora lado a lado; o último campo (nome / preferência) ocupa a linha toda */
 @media (max-width: 559px) {
@@ -602,7 +616,7 @@
 }
 .lx label > span {
   display: block;
-  font-size: 12.5px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--lx-mut);
 }
@@ -662,14 +676,14 @@
   line-height: 1.3;
 }
 .lx-info > span {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--lx-mut);
   font-variant-numeric: tabular-nums;
 }
 .lx-trajeto {
   position: relative;
   padding: 6px 0 8px 44px;
-  font-size: 12.5px;
+  font-size: 14px;
   color: var(--lx-mut);
 }
 .lx-trajeto::before {
@@ -689,13 +703,13 @@
   margin-left: -6px;
 }
 .lx-mini button {
-  min-height: 32px;
-  padding: 4px 6px;
+  min-height: 44px;
+  padding: 4px 8px;
   border: 0;
   background: none;
   color: var(--lx-mut);
   font: inherit;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -709,8 +723,8 @@
   gap: 4px;
 }
 .lx-passo button {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border: 1px solid var(--lx-line);
   border-radius: 10px;
   background: #fff;
@@ -719,9 +733,9 @@
   cursor: pointer;
 }
 .lx-passo span {
-  min-width: 56px;
+  min-width: 52px;
   text-align: center;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
@@ -730,8 +744,8 @@
 }
 .lx-aviso {
   margin: 10px 0 0;
-  padding: 8px 10px;
-  font-size: 13px;
+  padding: 10px 12px;
+  font-size: 16px;
   color: #5c4400;
   background: var(--lx-yel-soft);
   border-radius: 8px;
@@ -822,7 +836,7 @@
   display: block;
 }
 .lx-estilo span {
-  font-size: 13px;
+  font-size: 15px;
   color: rgba(255, 255, 255, 0.75);
 }
 .lx-estilo:has(input:checked) {
@@ -840,7 +854,7 @@
 .lx-confianca {
   margin-top: 32px;
   text-align: center;
-  font-size: 12.5px;
+  font-size: 14px;
   color: var(--lx-mut);
 }
 .lx-confianca p {
@@ -860,7 +874,7 @@
   background: rgba(255, 255, 255, 0.96);
   border-top: 1px solid var(--lx-line);
   box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.07);
-  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  padding: 10px var(--lx-gr) calc(10px + env(safe-area-inset-bottom)) var(--lx-gl);
 }
 @supports (backdrop-filter: blur(8px)) {
   .lx-bar {
@@ -878,7 +892,7 @@
 .lx-bar-resumo {
   flex: 1;
   min-width: 0;
-  font-size: 12.5px;
+  font-size: 14px;
   color: var(--lx-mut);
   line-height: 1.3;
 }
@@ -909,6 +923,93 @@
   font-size: 14px;
   padding: 12px 14px;
   line-height: 1.2;
+}
+
+/* ---------- telemóvel ---------- */
+/* Telemóvel ao alto: a fotografia do topo fica em cima, inteira na altura (a mesa e o prato à vista),
+   e o texto entra por baixo, sobre o preto — em vez de tapar o prato. */
+@media (max-width: 767px) and (orientation: portrait) {
+  .lx-hero-img {
+    height: 46svh !important;
+    bottom: auto !important;
+    object-position: 76% 50%;
+  }
+  .lx-hero-veu {
+    height: 46svh;
+    bottom: auto;
+    background: linear-gradient(180deg, rgba(17, 17, 16, 0.6) 0%, rgba(17, 17, 16, 0) 26%, rgba(17, 17, 16, 0) 70%, #111110 100%);
+  }
+  .lx-hero {
+    min-height: 0;
+  }
+  .lx-hero-corpo {
+    margin-top: 0;
+    padding-top: calc(46svh - 96px);
+  }
+}
+/* Telemóvel deitado (ecrã baixo): título mais pequeno, texto à esquerda sobre o escuro, a mesa à direita. */
+@media (orientation: landscape) and (max-height: 520px) {
+  .lx-hero {
+    min-height: 0;
+    padding-bottom: 28px;
+  }
+  .lx-hero-img {
+    object-position: 70% 75%;
+  }
+  .lx-hero-veu {
+    background: linear-gradient(90deg, rgba(17, 17, 16, 0.95) 0%, rgba(17, 17, 16, 0.8) 40%, rgba(17, 17, 16, 0.1) 78%, rgba(17, 17, 16, 0) 100%);
+  }
+  .lx-hero-corpo {
+    margin-top: 8px;
+    padding-top: 0;
+  }
+  .lx-hero-corpo > * {
+    max-width: 52%;
+  }
+  .lx-hero-corpo > .lx-ctas {
+    max-width: none;
+  }
+  .lx-h1 {
+    font-size: clamp(26px, 4.4vw, 36px);
+  }
+}
+/* Cartões no telemóvel: um por linha, fotografia à esquerda e texto à direita,
+   para o texto caber a 16px sem ficar em colunas estreitas. */
+@media (max-width: 559px) {
+  .lx-grelha {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .lx-card {
+    display: grid;
+    grid-template-columns: 40% minmax(0, 1fr);
+  }
+  .lx-card > .lx-ph {
+    aspect-ratio: auto;
+    height: 100%;
+    min-height: 170px;
+  }
+  .lx-zona {
+    top: auto;
+    bottom: 8px;
+    right: 8px;
+    max-width: calc(100% - 16px);
+  }
+  .lx-acoes {
+    flex-direction: column;
+  }
+}
+
+/* ---------- fotografias protegidas (só nesta página) ----------
+   Sem menu de «guardar imagem» no toque longo, sem arrastar; o texto continua a poder ser selecionado. */
+.lx-ph,
+.lx-hero-img {
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+.lx-ph img,
+.lx-hero-img {
+  pointer-events: none;
 }
 
 /* ---------- movimento ---------- */

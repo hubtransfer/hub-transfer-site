@@ -37,4 +37,5 @@ export function metadadosLisboa(lingua: Lingua): Metadata {
   };
 }
 
-export const viewportLisboa: Viewport = { themeColor: "#111110" };
+// viewportFit cover: a barra de baixo e as margens usam a zona segura do iPhone (env(safe-area-inset-*)).
+export const viewportLisboa: Viewport = { themeColor: "#111110", viewportFit: "cover" };

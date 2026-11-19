@@ -234,7 +234,7 @@ export default function Planeador({ lingua, t, lugares, estilos }: Props) {
             const aberto = !!abertos[l.id];
             return (
               <article key={l.id} id={`p-${l.n}`} className={`lx-card lx-lugar${sel ? " sel" : ""}${aberto ? " aberto" : ""}`} data-revelar>
-                <Carrossel imagens={l.imagens} alt={l.nome} rotulos={rotulos} sizes="(min-width: 1040px) 240px, (min-width: 640px) 33vw, 50vw">
+                <Carrossel imagens={l.imagens} alt={l.nome} rotulos={rotulos} sizes="(min-width: 1040px) 240px, (min-width: 640px) 33vw, (min-width: 560px) 50vw, 80vw">
                   <span className="lx-num" aria-hidden="true">
                     {l.n}
                   </span>
@@ -494,7 +494,7 @@ export default function Planeador({ lingua, t, lugares, estilos }: Props) {
           </div>
           <a
             className="lx-cta"
-            href={temDia ? linkWhatsapp(mensagem()) : linkWhatsapp(t.msgOwn)}
+            href={temDia ? linkWhatsapp(mensagem(), { tipo: "ROTA", lugares: paragens.map((p) => p.n) }, lingua) : linkWhatsapp(t.msgOwn, { tipo: "MESA" }, lingua)}
             target="_blank"
             rel="noopener"
             onClick={() => (temDia ? medir("FalarConsultor", { lugares: paragens.length, lingua }) : medir("PedirMesa", { origem: "barra", lingua }))}
