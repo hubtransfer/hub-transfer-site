@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {
   imagens: string[];
@@ -15,9 +15,29 @@ type Props = {
 /** Fotografia(s) de um cartão. Sem imagens: fundo escuro com o canto amarelo.
     Uma imagem: só a imagem. Várias: arrasta-se com o dedo (scroll-snap nativo), com pontos e setas. */
 export default function Carrossel({ imagens, alt, sizes, rotulos, children }: Props) {
+  const caixa = useRef<HTMLDivElement>(null);
   const pista = useRef<HTMLDivElement>(null);
+  // As fotografias só começam a descarregar quando o cartão se aproxima do ecrã: assim não disputam a rede com o topo.
+  const [perto, setPerto] = useState(false);
   const [atual, setAtual] = useState(0);
   const varias = imagens.length > 1;
+
+  useEffect(() => {
+    const el = caixa.current;
+    if (!el || !imagens.length) return;
+    if (!("IntersectionObserver" in window)) return setPerto(true);
+    const io = new IntersectionObserver(
+      (entradas) => {
+        if (entradas.some((x) => x.isIntersecting)) {
+          setPerto(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "400px 0px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [imagens.length]);
 
   const irPara = (i: number) => {
     const el = pista.current;
@@ -34,8 +54,8 @@ export default function Carrossel({ imagens, alt, sizes, rotulos, children }: Pr
   };
 
   return (
-    <div className="lx-ph" data-vazio={imagens.length === 0 || undefined}>
-      {imagens.length > 0 && (
+    <div ref={caixa} className="lx-ph" data-vazio={imagens.length === 0 || undefined}>
+      {perto && imagens.length > 0 && (
         <div
           ref={pista}
           className={varias ? "lx-pista" : "lx-pista lx-pista--uma"}
@@ -49,12 +69,12 @@ export default function Carrossel({ imagens, alt, sizes, rotulos, children }: Pr
               role={varias ? "group" : undefined}
               aria-label={varias ? rotulos.imagem.replace("{i}", String(i + 1)).replace("{t}", String(imagens.length)) : undefined}
             >
-              <Image src={src} alt={i === 0 ? alt : ""} fill sizes={sizes} className="lx-img" />
+              <Image src={src} alt={i === 0 ? alt : ""} fill sizes={sizes} quality={60} className="lx-img" />
             </div>
           ))}
         </div>
       )}
-      {varias && (
+      {perto && varias && (
         <>
           <button type="button" className="lx-seta lx-seta--ant" aria-label={rotulos.anterior} onClick={() => irPara(atual - 1)} disabled={atual === 0}>
             ‹
