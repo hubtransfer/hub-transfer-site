@@ -81,6 +81,8 @@ export interface HubViagem {
   platform: string;
   platformCode?: string;   // TALIXO/WT/HEY/LIOZ/ELH/DIRETO — código da operadora (backend)
   sourceLabel?: string;    // TLX/WT/HEY/LIOZ/ELH/EMH/GDA/HUB — sigla do badge (backend)
+  categoria?: string;      // NORMAL / MPV / EXECUTIVA / LUXO (HUB-Central v329+)
+  categoriaNome?: string;  // nome a mostrar: Sedan / MPV / Business / Luxo — ver src/lib/rotuloViagem.ts
   comissao?: string | number;     // valor ao motorista, calculado pelo motor de comissões
   comissaoNivel?: string;         // OPERADORA / ... — nível que originou o valor
   driverPrice?: string | number;  // alias aceite caso o feed passe a usar este nome
