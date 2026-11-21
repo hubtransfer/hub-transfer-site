@@ -169,7 +169,7 @@ export default function EsperaControl({ viagem, onRefresh, variant = "card" }: E
               <div>
                 <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5">Linha do tempo</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {eventosVisiveis.map((ev, i) => <EventoPill key={i} ev={ev} />)}
+                  {eventosVisiveis.map((ev, i) => <EventoPill key={i} ev={ev} semOperadora={isDriver} />)}
                 </div>
               </div>
             )}
@@ -266,13 +266,17 @@ const PILL_NAO  = `${PILL_BASE} bg-[#EF4444]/15 text-[#F87171] border-[#EF4444]/
 const PILL_SYS  = `${PILL_BASE} bg-zinc-800/70 text-zinc-400 border-zinc-600/50`;
 const PILL_PAGA = `${PILL_BASE} bg-[#D4A017]/15 text-[#D4A017] border-[#D4A017]/40`;
 
-function EventoPill({ ev }: { ev: EsperaEvento }) {
+// semOperadora: o motorista nunca vê a operadora («regra Talixo» → «regra»)
+function EventoPill({ ev, semOperadora = false }: { ev: EsperaEvento; semOperadora?: boolean }) {
   switch (ev.kind) {
     case "resposta":
       return ev.sim
         ? <span className={PILL_SIM}>✅ SIM {ev.hora}</span>
         : <span className={PILL_NAO}>❌ NÃO {ev.hora}</span>;
-    case "regra":     return <span className={PILL_SYS}>📋 regra {nomeOperadora(ev.operadora)} {ev.hora}</span>;
+    case "regra":
+      return semOperadora
+        ? <span className={PILL_SYS}>📋 regra {ev.hora}</span>
+        : <span className={PILL_SYS}>📋 regra {nomeOperadora(ev.operadora)} {ev.hora}</span>;
     case "equipa":    return <span className={PILL_SYS}>🚨 equipa avisada {ev.hora}</span>;
     case "mudo":      return <span className={PILL_SYS}>🔇 motorista sem resposta {ev.hora}</span>;
     case "ligar":     return <span className={PILL_SYS}>📞 ligar 75&apos; {ev.hora}</span>;

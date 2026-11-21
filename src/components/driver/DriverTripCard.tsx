@@ -29,6 +29,7 @@ import LiveProgressStrip from "@/components/live/LiveProgressStrip";
 import { statusMotoristaToPasso, type LiveTsPassos } from "@/lib/live";
 import EsperaControl from "@/components/admin/EsperaControl";
 import { crachaParam, comCracha } from "@/lib/cracha";
+import { rotuloMotorista, rotuloGestor, tipoNoCartao } from "@/lib/rotuloViagem";
 
 
 
@@ -222,7 +223,12 @@ export default function DriverTripCard({
   const lang = resolveLanguage(viagem.language || "", viagem.phone);
   const price = calcDriverPrice(viagem);
   const isDone = viagem.concluida || viagem.status === "CONCLUIDA" || viagem.status === "FINALIZOU";
+  // sourceLabel (TLX/HEY/WT…) é só para a lógica e para o gestor — o motorista
+  // nunca vê a operadora (decisão do Junior, 22/11/2026): usar sempre `rotulo`.
   const sourceLabel = getSourceLabel(viagem);
+  const rotulo = mode === "admin"
+    ? rotuloGestor({ tipo, categoriaNome: viagem.categoriaNome, operadora: sourceLabel })
+    : rotuloMotorista({ tipo, categoriaNome: viagem.categoriaNome });
   const c = ts(tipo);
   const passo = statusMotoristaToPasso(viagem.statusMotorista);
   // Horas reais por etapa (getViagens ainda não as envia — enquanto vierem
@@ -482,9 +488,10 @@ export default function DriverTripCard({
       {/*  COLLAPSED VIEW (always visible)                */}
       {/* ════════════════════════════════════════════════ */}
       <div className="cursor-pointer" onClick={toggleExpand}>
-        {/* L1: Source · Tipo + Driver Status Badge + Delete */}
+        {/* L1: Tipo · Categoria (motorista) ou Operadora · Tipo · Categoria (gestor) + estado.
+            Sem «uppercase»: a categoria mostra-se como vem («Sedan», «MPV»). */}
         <div className="px-4 pt-3 flex items-center justify-between">
-          <span className="font-semibold uppercase font-mono leading-none" style={{ fontSize: "0.65rem", letterSpacing: "0.5px", color: c.hex }}>{sourceLabel} · {tipo}</span>
+          <span className="font-semibold font-mono leading-none" style={{ fontSize: "0.65rem", letterSpacing: "0.5px", color: c.hex }}>{rotulo}</span>
           <div className="flex items-center gap-2">
           {/* Controlo de espera — o chip só existe com esperaEstado preenchido.
               Gestão: painel completo com acções. Motorista: variante SÓ LEITURA
@@ -685,7 +692,7 @@ export default function DriverTripCard({
           >
             {/* ── Trip details (expanded only) ── */}
             <div className="px-4 py-2.5 border-t border-[#2A2A2A] flex items-center gap-2 flex-wrap">
-              <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${c.bg} ${c.text}`}>{tipo}</span>
+              <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${c.bg} ${c.text}`}>{tipoNoCartao(tipo)}</span>
               {viagem.pax && <span className="text-xs font-mono text-[#D0D0D0]">{viagem.pax} pax</span>}
               {viagem.bags && <span className="text-xs font-mono text-[#999]">{viagem.bags} bag</span>}
               {viagem.notes && <span className="text-[10px] text-[#888] truncate max-w-[200px]">{viagem.notes}</span>}
