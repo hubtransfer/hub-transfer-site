@@ -13,6 +13,7 @@
 // ───────────────────────────────────────────────────────────────
 import type {
   CancelarPedido,
+  ConfirmarReserva,
   MotoristaRef,
   PedidoAjuda,
   PedidoRecebido,
@@ -27,7 +28,7 @@ import { clienteSimulado } from "./simulado";
 
 /** O que a app sabe da viagem quando pede a lista de colegas. */
 export interface ViagemParaAjuda {
-  /** rowIndex da viagem no HUB-Central — nunca se mostra */
+  /** ID da viagem (coluna A da Central), NÃO o rowIndex — nunca se mostra nem vai em links */
   viagemRef: string;
   /** categoriaNome do cartão («MPV»); vazio = qualquer carro */
   categoria: string;
@@ -44,7 +45,11 @@ export interface ClienteAjuda {
   /** GET ?action=ajudaMeusPedidos&motorista=<id> — o último pedido de cada viagem minha */
   meusPedidos(motoristaId: string): Promise<PedidoAjuda[]>;
   recebidos(motoristaId: string): Promise<PedidoRecebido[]>;
+  /** GET ?action=ajudaRecebido&pedido=<id>&motorista=<id> — a entrada pelo link do WhatsApp; null = não existe / não é para si */
+  recebido(pedidoId: string, motoristaId: string): Promise<PedidoRecebido | null>;
   responder(p: ResponderPedido): Promise<RespostaResponder>;
+  /** POST ?action=ajudaConfirmar — a segunda confirmação do grupo */
+  confirmar(p: ConfirmarReserva): Promise<RespostaResponder>;
   /** opcional: avisar a app quando algo muda (o real faz polling) */
   aoMudar?(f: () => void): () => void;
 }

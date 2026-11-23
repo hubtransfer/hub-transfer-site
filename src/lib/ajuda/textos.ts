@@ -5,57 +5,89 @@
 //  Sem «ele/ela»: a app não sabe o género de quem está do outro lado.
 //  Tom: o do cartão do motorista («consigo», «Deslize»).
 // ───────────────────────────────────────────────────────────────
-import type { ColegaPossivel, PedidoAjuda, PedidoRecebido, ResumoViagemAjuda } from "./tipos";
+import type { ColegaPossivel, MotivoAjuda, PedidoAjuda, PedidoRecebido, ResumoViagemAjuda } from "./tipos";
 
 export const T = {
   botao: "Ajuda",
   titulo: "Pedir ajuda",
-  subtitulo: "Quem pode fazer esta viagem",
-  aCarregar: "A procurar colegas livres…",
+  // as duas escolhas no topo
+  escolhaTitulo: "Quem pode ficar com esta viagem?",
+  pedirColega: "Pedir a um colega",
+  pedirColegaDica: "Escolhe um colega livre, com o carro certo",
+  pedirGrupo: "Pedir ao grupo",
+  pedirGrupoDica: "Fica com quem aceitar primeiro e confirmar",
+  // a lista
+  subtitulo: "Colegas que podem fazer esta viagem",
+  aCarregar: "A procurar colegas…",
   erro: "Não foi possível ver os colegas. Tente outra vez.",
   tentar: "Tentar outra vez",
-  nenhum: "Nenhum colega está livre para esta viagem.",
-  nenhumDica: "Peça ao grupo: fica com a viagem quem carregar primeiro em «Fico eu».",
-  pedirGrupo: "Pedir ao grupo",
-  pedirGrupoDica: "Fica com quem carregar primeiro em «Fico eu»",
+  nenhum: "Nenhum colega pode fazer esta viagem.",
+  nenhumDica: "Peça ao grupo: fica com quem aceitar primeiro.",
+  // o motivo
+  motivoTitulo: "Porque precisa de ajuda?",
+  motivoDica: "Só a gestão vê o motivo. Os colegas não.",
+  motivoFalta: "Escolha o motivo para poder enviar.",
   deslizarGrupo: "Deslize para pedir ao grupo",
+  // navegação
   voltar: "Voltar",
   fechar: "Fechar",
   cancelar: "Cancelar pedido",
   aCancelar: "A cancelar…",
   pedirOutro: "Pedir a outro colega",
   voltarViagens: "Voltar às viagens",
+  erroEnviar: "Não foi possível enviar o pedido. Tente outra vez.",
+  // quem pediu, grupo
   grupoEspera: "Pedido enviado ao grupo",
-  grupoEsperaDica: "A viagem continua consigo até alguém carregar em «Fico eu».",
+  grupoEsperaDica: "A viagem continua consigo até um colega aceitar e confirmar.",
+  grupoReservada: "Um colega aceitou",
+  grupoReservadaDica: "Falta a confirmação dele. A viagem continua consigo até lá.",
   cancelado: "Pedido cancelado. A viagem continua consigo.",
   // quem recebe
   recebidoTitulo: "Pedido de ajuda",
   recebidoGrupoTitulo: "Pedido ao grupo",
   simFaco: "Sim, faço",
   naoPosso: "Não posso",
-  ficoEu: "Fico eu",
+  aceitar: "Aceitar",
+  aAceitar: "A aceitar…",
   confirmarTitulo: "Ficar com esta viagem?",
   deslizarFicar: "Deslize para ficar com a viagem",
-  semCliente: "O nome e o contacto do cliente aparecem depois de aceitar.",
-  jaFicou: "Esta viagem já ficou com um colega.",
+  semCliente: "O nome e o contacto do cliente aparecem depois de ficar com a viagem.",
+  grupoComoFunciona: "Fica com quem aceitar primeiro. Depois confirma na mensagem que recebe no WhatsApp.",
+  jaFicou: "Já ficou com um colega.",
+  outroAConfirmar: "Um colega já aceitou e está a confirmar. Se não confirmar, o pedido volta ao grupo.",
   recebidoCancelado: "O pedido foi cancelado.",
   recebidoExpirou: "Este pedido já não está à espera de resposta.",
   recusadoPorMim: "Respondeu «Não posso».",
+  // a segunda confirmação (grupo)
+  reservadaTitulo: "Reservada para si",
+  reservadaFrase: "Confirme na mensagem que recebeu no WhatsApp.",
+  segundaTitulo: "Confirmar a viagem",
+  segundaFrase: "Aceitou esta viagem no grupo. Só depois desta confirmação a viagem passa para si.",
+  deslizarSegunda: "Confirmo que faço esta viagem",
+  prazoAcabou: "O prazo acabou: o pedido voltou ao grupo.",
+  prazoAcabouDica: "Ainda pode aceitar outra vez, se o pedido continuar no grupo.",
+  // entrada pelo link
+  linkACarregar: "A abrir o pedido…",
+  linkNaoExiste: "Este pedido já não existe ou não é para si.",
+  linkProprio: "Este pedido é seu. Acompanhe-o no cartão da viagem.",
 } as const;
+
+/** Os motivos, como aparecem nos botões. */
+export const NOME_MOTIVO: Record<MotivoAjuda, string> = {
+  doente: "Doente",
+  carro_avariado: "Carro avariado",
+  atrasado: "Atrasado",
+  outro: "Outro",
+};
 
 /** «Deslize para pedir a Rui Costa» */
 export function textoDeslizarColega(nome: string): string {
   return `Deslize para pedir a ${nome}`;
 }
 
-/** Linha do colega na lista: «MPV · livre até 18:00» / «Sedan · próxima viagem às 16:30» */
-export function linhaColega(c: Pick<ColegaPossivel, "categoria" | "livreAte" | "proximaViagem">): string {
-  const extra = c.proximaViagem
-    ? `próxima viagem às ${c.proximaViagem}`
-    : c.livreAte
-      ? `livre até ${c.livreAte}`
-      : "livre o resto do dia";
-  return `${c.categoria} · ${extra}`;
+/** Linha do colega na lista: só a categoria do carro («MPV»). Sem horas. */
+export function linhaColega(c: Pick<ColegaPossivel, "categoria">): string {
+  return c.categoria;
 }
 
 /** Cartão à espera: título e frase. */
@@ -73,6 +105,12 @@ export function textoFaltam(min: number): string {
     : `Sem resposta, avisamos daqui a ${min} min`;
 }
 
+/** Prazo da segunda confirmação: «Tem até às 14:35 · faltam 7 min». */
+export function textoPrazoReserva(hora: string, min: number): string {
+  const falta = min <= 1 ? "falta 1 min" : `faltam ${min} min`;
+  return hora ? `Tem até às ${hora} · ${falta}` : `Tem ${min <= 1 ? "1 min" : `${min} min`}`;
+}
+
 /** A pílula no cartão da viagem, conforme o pedido. */
 export function textoPilula(
   p: { tipo: "colega" | "grupo"; para?: { nome: string }; ficouCom?: { nome: string } } | null,
@@ -81,6 +119,7 @@ export function textoPilula(
   if (!p || !estado || estado === "cancelado" || estado === "recusado") return { texto: T.botao, tom: "normal" };
   if (estado === "aceite" && p.ficouCom) return { texto: `Passou para ${primeiroNome(p.ficouCom.nome)}`, tom: "feito" };
   if (estado === "sem_resposta") return { texto: "Sem resposta", tom: "alerta" };
+  if (estado === "reservada") return { texto: "Aceite · a confirmar", tom: "espera" };
   if (p.tipo === "grupo") return { texto: "Pedido ao grupo", tom: "espera" };
   return { texto: `À espera · ${primeiroNome(p.para?.nome ?? "")}`, tom: "espera" };
 }
@@ -113,7 +152,7 @@ export function textoQuemPede(p: Pick<PedidoRecebido, "tipo" | "de">): string {
   return p.tipo === "grupo" ? `${p.de.nome} pede ajuda ao grupo` : `${p.de.nome} pede-lhe esta viagem`;
 }
 
-/** Depois de «Sim, faço» / «Fico eu» confirmado. */
+/** Depois de «Sim, faço» confirmado, ou da segunda confirmação do grupo. */
 export function textoFicou(): { titulo: string; frase: string } {
   return {
     titulo: "A viagem é sua",
@@ -131,9 +170,15 @@ export function textoValor(valor: number): string {
   return valor > 0 ? `€${Math.round(valor)}` : "";
 }
 
+/** «Voo TP1352» ou "" */
+export function textoVoo(voo: string | undefined): string {
+  const v = String(voo ?? "").trim();
+  return v ? `Voo ${v}` : "";
+}
+
 /** Todas as frases de um resumo de viagem, como aparecem no ecrã. */
 export function linhasResumo(r: ResumoViagemAjuda): string[] {
-  return [r.rotulo, r.hora, r.data, r.origem, r.destino, textoValor(r.valor)].filter(Boolean);
+  return [r.rotulo, r.hora, r.data, textoVoo(r.voo), r.origem, r.destino, textoValor(r.valor)].filter(Boolean);
 }
 
 /**
@@ -149,6 +194,7 @@ export function textosDoPedido(p: PedidoAjuda | PedidoRecebido): string[] {
     const s = textoSemResposta(nomePara); out.push(s.titulo, s.frase);
     out.push(textoRecusado(nomePara));
   }
+  if ("motivo" in p && p.motivo) out.push(NOME_MOTIVO[p.motivo]);
   if (p.ficouCom) { const a = textoAceite(p.ficouCom.nome); out.push(a.titulo, a.frase); }
   if ("viagem" in p) {
     out.push(textoQuemPede(p), textoConfirmarFicar(p.de.nome), ...linhasResumo(p.viagem));

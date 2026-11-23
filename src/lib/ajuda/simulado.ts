@@ -9,6 +9,7 @@
 // ───────────────────────────────────────────────────────────────
 import type {
   CancelarPedido,
+  ConfirmarReserva,
   MotoristaNoDia,
   MotoristaRef,
   PedidoAjuda,
@@ -20,7 +21,7 @@ import type {
   RespostaResponder,
   ResumoViagemAjuda,
 } from "./tipos";
-import { colegasPossiveis, prazoDoPedido, estadoEfectivo } from "./regras";
+import { colegasPossiveis, prazoDoPedido, prazoDaReserva, estadoEfectivo, motivoValido } from "./regras";
 import type { ClienteAjuda, ViagemParaAjuda } from "./cliente";
 
 /** Motoristas inventados para um dia qualquer. */
@@ -36,15 +37,18 @@ export const MOTORISTAS_INVENTADOS: MotoristaNoDia[] = [
   { id: "paulo-nunes", nome: "Paulo Nunes", categoria: "Business", trabalhaNoDia: true, turnoInicio: "07:00", turnoFim: "19:00",
     viagens: [{ hora: "11:40", duracaoMin: 45 }] },
   { id: "ines-carvalho", nome: "Inês Carvalho", categoria: "MPV", trabalhaNoDia: false, viagens: [] },
+  { id: "sofia-ramos", nome: "Sofia Ramos", categoria: "Business", trabalhaNoDia: true, turnoInicio: "06:00", turnoFim: "22:00",
+    viagens: [] },
   { id: "bruno-teixeira", nome: "Bruno Teixeira", categoria: "MPV", trabalhaNoDia: true, turnoInicio: "12:00", turnoFim: "23:59",
     viagens: [{ hora: "14:20", duracaoMin: 60 }] },
 ];
 
 /** Viagens inventadas usadas nos pedidos recebidos de exemplo. */
 export const RESUMOS_INVENTADOS: Record<string, ResumoViagemAjuda> = {
-  "demo-101": { rotulo: "CHEGADA · MPV", data: "24/11/2026", hora: "14:30", origem: "Aeroporto de Lisboa", destino: "Hotel Jardim do Rio", valor: 35 },
+  "demo-101": { rotulo: "CHEGADA · MPV", data: "24/11/2026", hora: "14:30", voo: "XZ4821", origem: "Aeroporto de Lisboa", destino: "Hotel Jardim do Rio", valor: 35 },
   "demo-102": { rotulo: "PARTIDA · Sedan", data: "24/11/2026", hora: "10:15", origem: "Hotel Colina Azul", destino: "Aeroporto de Lisboa", valor: 28 },
-  "demo-103": { rotulo: "TRANSFER · Business", data: "24/11/2026", hora: "21:00", origem: "Cascais", destino: "Sintra", valor: 0 },
+  "demo-103": { rotulo: "CHEGADA · Sedan", data: "24/11/2026", hora: "21:00", voo: "XZ7310", origem: "Aeroporto de Lisboa", destino: "Hotel Miradouro", valor: 32 },
+  "demo-104": { rotulo: "TRANSFER · Business", data: "24/11/2026", hora: "18:00", origem: "Cascais", destino: "Sintra", valor: 0 },
 };
 
 type Registo = PedidoAjuda & { resumo: ResumoViagemAjuda };
@@ -61,17 +65,33 @@ function copia<T>(x: T): T { return JSON.parse(JSON.stringify(x)) as T; }
 function nomeDe(id: string): string {
   return MOTORISTAS_INVENTADOS.find((m) => m.id === id)?.nome ?? id;
 }
+/** Id opaco, como o backend o vai gerar: não diz nada da viagem nem da operadora. */
+function novoId(): string {
+  seq += 1;
+  return `aj${seq.toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+}
+/** Reserva do grupo que passou dos 10 min: volta ao grupo (o backend faz o mesmo). */
+function normalizar(r: Registo) {
+  if (r.estado === "reservada" && estadoEfectivo(r, relogio()) === "a_espera") {
+    r.estado = "a_espera"; delete r.reservadaPara; delete r.reservaExpiraEm;
+  }
+}
 function semResumo(r: Registo): PedidoAjuda {
+  normalizar(r);
   const { resumo, ...p } = r; void resumo; return copia(p);
 }
-function paraRecebido(r: Registo): PedidoRecebido {
+/** O que um colega recebe: sem motivo, sem cliente, sem a identidade de quem reservou. */
+function paraRecebido(r: Registo, motoristaId: string): PedidoRecebido {
+  normalizar(r);
+  const minha = r.estado === "reservada" && r.reservadaPara?.id === motoristaId;
   return copia({
     id: r.id, tipo: r.tipo, de: r.de, viagem: r.resumo, estado: r.estado,
     criadoEm: r.criadoEm, ...(r.expiraEm ? { expiraEm: r.expiraEm } : {}),
+    ...(minha ? { reservadaParaMim: true, reservaExpiraEm: r.reservaExpiraEm } : {}),
     ...(r.ficouCom ? { ficouCom: r.ficouCom } : {}),
   });
 }
-/** O pedido activo (o último que não foi cancelado) de uma viagem. */
+/** O pedido activo (o último) de uma viagem. */
 function ultimoDaViagem(viagemRef: string): Registo | undefined {
   let ult: Registo | undefined;
   pedidos.forEach((p) => { if (p.viagemRef === viagemRef && (!ult || p.criadoEm >= ult.criadoEm)) ult = p; });
@@ -96,9 +116,10 @@ export const clienteSimulado: ClienteAjuda = {
 
   async pedirAColega(p: PedirAColega, resumo: ResumoViagemAjuda, deNome: string): Promise<PedidoAjuda> {
     await espera();
+    if (!motivoValido(p.motivo)) throw new Error("simulado: falta o motivo");
     const criadoEm = agoraISO();
     const r: Registo = {
-      id: `aj-${++seq}`, viagemRef: p.viagemRef, tipo: "colega",
+      id: novoId(), viagemRef: p.viagemRef, tipo: "colega", motivo: p.motivo,
       de: { id: p.de, nome: deNome }, para: { id: p.para, nome: nomeDe(p.para) },
       estado: "a_espera", criadoEm, expiraEm: prazoDoPedido(criadoEm), resumo,
     };
@@ -108,8 +129,9 @@ export const clienteSimulado: ClienteAjuda = {
 
   async pedirAoGrupo(p: PedirAoGrupo, resumo: ResumoViagemAjuda, deNome: string): Promise<PedidoAjuda> {
     await espera();
+    if (!motivoValido(p.motivo)) throw new Error("simulado: falta o motivo");
     const r: Registo = {
-      id: `aj-${++seq}`, viagemRef: p.viagemRef, tipo: "grupo",
+      id: novoId(), viagemRef: p.viagemRef, tipo: "grupo", motivo: p.motivo,
       de: { id: p.de, nome: deNome }, estado: "a_espera", criadoEm: agoraISO(), resumo,
     };
     pedidos.set(r.id, r); avisar();
@@ -120,7 +142,10 @@ export const clienteSimulado: ClienteAjuda = {
     await espera();
     const r = pedidos.get(p.pedidoId);
     if (!r || r.de.id !== p.de) throw new Error("simulado: pedido não encontrado");
-    if (r.estado === "a_espera") { r.estado = "cancelado"; r.respondidoEm = agoraISO(); }
+    normalizar(r);
+    if (r.estado === "a_espera" || r.estado === "reservada") {
+      r.estado = "cancelado"; r.respondidoEm = agoraISO(); delete r.reservadaPara; delete r.reservaExpiraEm;
+    }
     avisar();
     return semResumo(r);
   },
@@ -142,31 +167,68 @@ export const clienteSimulado: ClienteAjuda = {
       if (r.de.id === motoristaId) return;
       if (r.estado === "cancelado") return;
       if (r.tipo === "colega" && r.para?.id !== motoristaId) return;
-      out.push(paraRecebido(r));
+      out.push(paraRecebido(r, motoristaId));
     });
     return out;
+  },
+
+  async recebido(pedidoId: string, motoristaId: string): Promise<PedidoRecebido | null> {
+    await espera(300);
+    const r = pedidos.get(pedidoId);
+    if (!r) return null;
+    if (r.tipo === "colega" && r.para?.id !== motoristaId && r.de.id !== motoristaId) return null;
+    return paraRecebido(r, motoristaId);
   },
 
   async responder(p: ResponderPedido): Promise<RespostaResponder> {
     await espera();
     const r = pedidos.get(p.pedidoId);
     if (!r) throw new Error("simulado: pedido não encontrado");
-    const estado = estadoEfectivo(r, relogio());
-    if (r.estado === "cancelado") return { ok: false, motivo: "cancelado", pedido: paraRecebido(r) };
-    if (r.ficouCom) return { ok: false, motivo: "ja_ficou", pedido: paraRecebido(r) };
-    if (estado === "sem_resposta") {
-      // Fora de prazo mas ainda ninguém pediu a outro: a resposta conta na mesma.
-      // DÚVIDA PARA O JUNIOR: aceitar fora dos 15 min, ou fechar o pedido?
-    }
+    normalizar(r);
+    const out = (ok: boolean, motivo?: RespostaResponder["motivo"]): RespostaResponder =>
+      ({ ok, ...(motivo ? { motivo } : {}), pedido: paraRecebido(r, p.motorista) });
+    if (r.estado === "cancelado") return out(false, "cancelado");
+    if (r.ficouCom) return out(false, "ja_ficou");
     const quem = { id: p.motorista, nome: nomeDe(p.motorista) };
-    if (p.resposta === "sim") {
-      r.estado = "aceite"; r.ficouCom = quem;
-    } else if (r.tipo === "colega") {
-      r.estado = "recusado";
+
+    if (r.tipo === "grupo") {
+      // No grupo só há «Aceitar». Fica reservada para o primeiro; o HUB-Central
+      // manda-lhe a mensagem privada da segunda confirmação (10 min).
+      if (p.resposta !== "sim") return out(true);
+      if (r.estado === "reservada") return r.reservadaPara?.id === p.motorista ? out(true) : out(false, "reservada");
+      const agora = agoraISO();
+      r.estado = "reservada"; r.reservadaPara = quem; r.reservaExpiraEm = prazoDaReserva(agora); r.respondidoEm = agora;
+      avisar();
+      return out(true);
     }
+
+    // Pedido a um colega: «Sim, faço» (já confirmado a deslizar) ou «Não posso».
+    // Fora dos 15 min, enquanto ninguém pediu a outro, a resposta conta na mesma.
+    if (p.resposta === "sim") { r.estado = "aceite"; r.ficouCom = quem; }
+    else r.estado = "recusado";
     r.respondidoEm = agoraISO();
     avisar();
-    return { ok: true, pedido: paraRecebido(r) };
+    return out(true);
+  },
+
+  async confirmar(p: ConfirmarReserva): Promise<RespostaResponder> {
+    await espera();
+    const r = pedidos.get(p.pedidoId);
+    if (!r) throw new Error("simulado: pedido não encontrado");
+    const caiu = r.estado === "reservada" && estadoEfectivo(r, relogio()) === "a_espera";
+    normalizar(r);
+    const out = (ok: boolean, motivo?: RespostaResponder["motivo"]): RespostaResponder =>
+      ({ ok, ...(motivo ? { motivo } : {}), pedido: paraRecebido(r, p.motorista) });
+    if (r.estado === "cancelado") return out(false, "cancelado");
+    if (r.ficouCom) return r.ficouCom.id === p.motorista ? out(true) : out(false, "ja_ficou");
+    if (caiu || r.estado !== "reservada" || r.reservadaPara?.id !== p.motorista) {
+      avisar();
+      return out(false, r.estado === "reservada" ? "reservada" : "expirou");
+    }
+    r.estado = "aceite"; r.ficouCom = r.reservadaPara; r.respondidoEm = agoraISO();
+    delete r.reservaExpiraEm;
+    avisar();
+    return out(true);
   },
 
   aoMudar(f: () => void) { ouvintes.add(f); return () => { ouvintes.delete(f); }; },
@@ -175,24 +237,29 @@ export const clienteSimulado: ClienteAjuda = {
 // ── Só para a página de demonstração (dev): mexer no «outro lado» ──
 
 export const simular = {
-  /** Põe o relógio do simulado a andar n minutos à frente (para os 15 min). */
+  /** Põe o relógio do simulado a andar n minutos à frente (15 min / 10 min). */
   avancarMinutos(n: number) {
     const base = relogio; relogio = () => base() + n * 60000; avisar();
   },
   agora(): number { return relogio(); },
-  /** O colega do pedido activo desta viagem responde. */
+  /** Fixa o relógio do simulado (para as imagens). */
+  fixarRelogio(t: number) { relogio = () => t; avisar(); },
+  /** O colega do pedido activo desta viagem responde (no grupo: a Ana aceita e confirma). */
   respostaDoColega(viagemRef: string, resposta: "sim" | "nao") {
     const r = ultimoDaViagem(viagemRef);
     if (!r || r.estado !== "a_espera") return;
-    const id = r.tipo === "colega" ? r.para!.id : "ana-ferreira";
-    void clienteSimulado.responder({ pedidoId: r.id, motorista: id, resposta });
+    if (r.tipo === "colega") { void clienteSimulado.responder({ pedidoId: r.id, motorista: r.para!.id, resposta }); return; }
+    if (resposta === "sim") {
+      void clienteSimulado.responder({ pedidoId: r.id, motorista: "ana-ferreira", resposta: "sim" })
+        .then(() => clienteSimulado.confirmar({ pedidoId: r.id, motorista: "ana-ferreira" }));
+    }
   },
-  /** Cria um pedido recebido por `paraId` (ou pelo grupo, sem `paraId`). */
-  receber(viagemRef: string, deId: string, paraId?: string, minutosAtras = 2): string {
+  /** Cria um pedido recebido por `paraId` (ou pelo grupo, sem `paraId`). Devolve o id opaco. */
+  receber(viagemRef: string, deId: string, paraId?: string, minutosAtras = 2, id?: string): string {
     const resumo = RESUMOS_INVENTADOS[viagemRef];
     const criadoEm = new Date(relogio() - minutosAtras * 60000).toISOString();
     const r: Registo = {
-      id: `aj-${++seq}`, viagemRef, tipo: paraId ? "colega" : "grupo",
+      id: id ?? novoId(), viagemRef, tipo: paraId ? "colega" : "grupo", motivo: "doente",
       de: { id: deId, nome: nomeDe(deId) },
       ...(paraId ? { para: { id: paraId, nome: nomeDe(paraId) }, expiraEm: prazoDoPedido(criadoEm) } : {}),
       estado: "a_espera", criadoEm, resumo,
@@ -200,17 +267,26 @@ export const simular = {
     pedidos.set(r.id, r); avisar();
     return r.id;
   },
-  /** No pedido ao grupo, outro colega foi mais rápido. */
+  /** No grupo: `quemId` carregou «Aceitar» há `minutosAtras` minutos (fica reservada). */
+  reservar(pedidoId: string, quemId: string, minutosAtras = 0) {
+    const r = pedidos.get(pedidoId);
+    if (!r) return;
+    const em = new Date(relogio() - minutosAtras * 60000).toISOString();
+    r.estado = "reservada"; r.reservadaPara = { id: quemId, nome: nomeDe(quemId) };
+    r.reservaExpiraEm = prazoDaReserva(em); r.respondidoEm = em; avisar();
+  },
+  /** Outro colega ficou com a viagem (já confirmou). */
   outroFicou(pedidoId: string, quemId: string) {
     const r = pedidos.get(pedidoId);
     if (!r) return;
-    r.estado = "aceite"; r.ficouCom = { id: quemId, nome: nomeDe(quemId) }; r.respondidoEm = agoraISO(); avisar();
+    r.estado = "aceite"; r.ficouCom = { id: quemId, nome: nomeDe(quemId) }; r.respondidoEm = agoraISO();
+    delete r.reservadaPara; delete r.reservaExpiraEm; avisar();
   },
   /** Regista já uma recusa (para a lista deixar de mostrar esse colega). */
   registarRecusa(viagemRef: string, deId: string, paraId: string) {
     const criadoEm = agoraISO();
     const r: Registo = {
-      id: `aj-${++seq}`, viagemRef, tipo: "colega",
+      id: novoId(), viagemRef, tipo: "colega", motivo: "carro_avariado",
       de: { id: deId, nome: nomeDe(deId) }, para: { id: paraId, nome: nomeDe(paraId) },
       estado: "recusado", criadoEm, expiraEm: prazoDoPedido(criadoEm), respondidoEm: criadoEm,
       resumo: RESUMOS_INVENTADOS["demo-101"],
