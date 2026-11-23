@@ -24,6 +24,13 @@ import {
 } from "@/lib/trips";
 import type { HubViagem, Driver } from "@/lib/trips";
 import { clearCachedTrips } from "@/lib/trips-cache";
+import { AJUDA_ACTIVA } from "@/lib/ajuda/cliente";
+import { estadoEfectivo } from "@/lib/ajuda/regras";
+import { textoPilula } from "@/lib/ajuda/textos";
+import { useAjuda } from "@/components/driver/ajuda/useAjuda";
+import EcraPedirAjuda from "@/components/driver/ajuda/EcraPedirAjuda";
+import PedidosRecebidos from "@/components/driver/ajuda/PedidosRecebidos";
+import { viagemParaAjuda, viagemAceitaAjuda, refDaViagem } from "@/components/driver/ajuda/viagemParaAjuda";
 
 /* ================================================================== */
 /*  Constants                                                          */
@@ -206,6 +213,23 @@ export default function DriverTripsPage() {
     return { total: contam.length, chegadas, recolhas, totalPay, done };
   }, [driverTrips]);
 
+  /* ── Ajuda entre motoristas (dados inventados; só fora de produção — ver lib/ajuda/cliente.ts) ── */
+  const eu = useMemo(
+    () => (AJUDA_ACTIVA && identity ? { id: chaveMotorista(identity), nome: identity } : null),
+    [identity],
+  );
+  const ajudaDados = useAjuda(eu);
+  const [ajudaViagem, setAjudaViagem] = useState<HubViagem | null>(null);
+  const ajudaResumo = useMemo(() => (ajudaViagem ? viagemParaAjuda(ajudaViagem) : null), [ajudaViagem]);
+  // Viagens que passaram para um colega: saem já da lista (o getViagens confirma no próximo sync)
+  const [passaram, setPassaram] = useState<Set<string>>(new Set());
+  const ajudaDoCartao = useCallback((v: HubViagem) => {
+    if (!eu || !viagemAceitaAjuda(v)) return undefined;
+    const p = ajudaDados.meus[refDaViagem(v)] ?? null;
+    const pil = textoPilula(p, p ? estadoEfectivo(p, ajudaDados.agora) : null);
+    return { ...pil, onAbrir: () => setAjudaViagem(v) };
+  }, [eu, ajudaDados.meus, ajudaDados.agora]);
+
   /* ── (heroId removed — cards self-expand on tap) ── */
 
   /* ================================================================ */
@@ -283,6 +307,7 @@ export default function DriverTripsPage() {
   // NO_SHOW dá baixa: sai das ativas e junta-se às terminadas (com selo próprio)
   const nonDoneTrips = driverTrips.filter(
     (v) =>
+      !passaram.has(refDaViagem(v)) &&
       !isNoShowViagem(v) &&
       !v.concluida &&
       v.status !== "CONCLUIDA" &&
@@ -417,6 +442,10 @@ export default function DriverTripsPage() {
 
       {/* ── TRIP CARDS ── */}
       <div className="px-4 pb-8 space-y-2">
+        {/* ── PEDIDOS DE AJUDA RECEBIDOS — no topo ── */}
+        {eu && (
+          <PedidosRecebidos recebidos={ajudaDados.recebidos} eu={eu} agora={ajudaDados.agora} onMudou={ajudaDados.recarregar} />
+        )}
         {driverTrips.length === 0 && store.isLoading ? (
           <SkeletonList count={3} />
         ) : driverTrips.length === 0 ? (
@@ -452,6 +481,7 @@ export default function DriverTripsPage() {
                     onDarBaixa={store.darBaixa}
                     onShowNameplate={openNameplate}
                     onRefresh={store.syncViagensSilent}
+                    ajuda={ajudaDoCartao(viagem)}
                     isNext={i === 0 && nActivas > 0}
                   />
                 </React.Fragment>
@@ -528,6 +558,19 @@ export default function DriverTripsPage() {
           date={String(proofTrip.date || proofTrip.flightDate || "")}
           onClose={() => setProofTrip(null)}
           onSubmit={() => { setProofTrip(null); store.syncViagensSilent(); }}
+        />
+      )}
+
+      {/* ── PEDIR AJUDA (ecrã inteiro) ── */}
+      {eu && ajudaResumo && (
+        <EcraPedirAjuda
+          viagem={ajudaResumo}
+          eu={eu}
+          pedido={ajudaDados.meus[ajudaResumo.viagemRef] ?? null}
+          agora={ajudaDados.agora}
+          onFechar={() => setAjudaViagem(null)}
+          onViagemSaiu={(ref) => { setPassaram((s) => new Set(s).add(ref)); store.syncViagensSilent(); }}
+          onMudou={ajudaDados.recarregar}
         />
       )}
 

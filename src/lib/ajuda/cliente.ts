@@ -41,6 +41,8 @@ export interface ClienteAjuda {
   pedirAoGrupo(p: PedirAoGrupo, resumo: ResumoViagemAjuda, deNome: string): Promise<PedidoAjuda>;
   cancelar(p: CancelarPedido): Promise<PedidoAjuda>;
   pedidoDaViagem(viagemRef: string): Promise<PedidoAjuda | null>;
+  /** GET ?action=ajudaMeusPedidos&motorista=<id> — o último pedido de cada viagem minha */
+  meusPedidos(motoristaId: string): Promise<PedidoAjuda[]>;
   recebidos(motoristaId: string): Promise<PedidoRecebido[]>;
   responder(p: ResponderPedido): Promise<RespostaResponder>;
   /** opcional: avisar a app quando algo muda (o real faz polling) */

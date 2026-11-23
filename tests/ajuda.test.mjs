@@ -28,6 +28,7 @@ import {
   textoConfirmarFicar,
   textoFicou,
   textoFaltam,
+  textoPilula,
   textoValor,
   linhasResumo,
   textosDoPedido,
@@ -135,8 +136,14 @@ test("textos: nome curto, rota, valor, faltam", () => {
   assert.equal(deOndeParaOnde({ origem: "Aeroporto de Lisboa", destino: "Hotel Sol" }), "Aeroporto de Lisboa → Hotel Sol");
   assert.equal(textoValor(35), "€35");
   assert.equal(textoValor(0), "");
-  assert.equal(textoFaltam(12), "Faltam 12 min");
-  assert.equal(textoFaltam(1), "Falta menos de 1 min");
+  assert.equal(textoFaltam(12), "Sem resposta, avisamos daqui a 12 min");
+  assert.equal(textoFaltam(0), "Sem resposta, avisamos dentro de 1 min");
+  assert.deepEqual(textoPilula(null, null), { texto: "Ajuda", tom: "normal" });
+  assert.deepEqual(textoPilula({ tipo: "colega", para: { nome: "Rui Costa" } }, "a_espera"), { texto: "À espera · Rui", tom: "espera" });
+  assert.deepEqual(textoPilula({ tipo: "colega", para: { nome: "Rui Costa" } }, "sem_resposta"), { texto: "Sem resposta", tom: "alerta" });
+  assert.deepEqual(textoPilula({ tipo: "grupo" }, "a_espera"), { texto: "Pedido ao grupo", tom: "espera" });
+  assert.deepEqual(textoPilula({ tipo: "grupo", ficouCom: { nome: "Ana Ferreira" } }, "aceite"), { texto: "Passou para Ana", tom: "feito" });
+  assert.deepEqual(textoPilula({ tipo: "colega", para: { nome: "Rui Costa" } }, "recusado"), { texto: "Ajuda", tom: "normal" });
   assert.equal(linhaColega({ categoria: "MPV", livreAte: "18:00" }), "MPV · livre até 18:00");
   assert.equal(linhaColega({ categoria: "Sedan", proximaViagem: "16:30" }), "Sedan · próxima viagem às 16:30");
   assert.equal(textoDeslizarColega("Rui Costa"), "Deslize para pedir a Rui Costa");

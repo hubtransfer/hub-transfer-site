@@ -130,6 +130,12 @@ export const clienteSimulado: ClienteAjuda = {
     return r ? semResumo(r) : null;
   },
 
+  async meusPedidos(motoristaId: string): Promise<PedidoAjuda[]> {
+    const refs = new Set<string>();
+    pedidos.forEach((p) => { if (p.de.id === motoristaId) refs.add(p.viagemRef); });
+    return [...refs].map((ref) => semResumo(ultimoDaViagem(ref)!));
+  },
+
   async recebidos(motoristaId: string): Promise<PedidoRecebido[]> {
     const out: PedidoRecebido[] = [];
     pedidos.forEach((r) => {
@@ -199,6 +205,17 @@ export const simular = {
     const r = pedidos.get(pedidoId);
     if (!r) return;
     r.estado = "aceite"; r.ficouCom = { id: quemId, nome: nomeDe(quemId) }; r.respondidoEm = agoraISO(); avisar();
+  },
+  /** Regista já uma recusa (para a lista deixar de mostrar esse colega). */
+  registarRecusa(viagemRef: string, deId: string, paraId: string) {
+    const criadoEm = agoraISO();
+    const r: Registo = {
+      id: `aj-${++seq}`, viagemRef, tipo: "colega",
+      de: { id: deId, nome: nomeDe(deId) }, para: { id: paraId, nome: nomeDe(paraId) },
+      estado: "recusado", criadoEm, expiraEm: prazoDoPedido(criadoEm), respondidoEm: criadoEm,
+      resumo: RESUMOS_INVENTADOS["demo-101"],
+    };
+    pedidos.set(r.id, r); avisar();
   },
   limpar() { pedidos.clear(); relogio = () => Date.now(); avisar(); },
 };

@@ -66,9 +66,27 @@ export function textoEspera(nome: string): { titulo: string; frase: string } {
   };
 }
 
-/** «Faltam 12 min para o aviso» */
+/** Contagem até ao aviso dos 15 minutos. */
 export function textoFaltam(min: number): string {
-  return min <= 1 ? "Falta menos de 1 min" : `Faltam ${min} min`;
+  return min <= 1
+    ? "Sem resposta, avisamos dentro de 1 min"
+    : `Sem resposta, avisamos daqui a ${min} min`;
+}
+
+/** A pílula no cartão da viagem, conforme o pedido. */
+export function textoPilula(
+  p: { tipo: "colega" | "grupo"; para?: { nome: string }; ficouCom?: { nome: string } } | null,
+  estado: string | null,
+): { texto: string; tom: "normal" | "espera" | "alerta" | "feito" } {
+  if (!p || !estado || estado === "cancelado" || estado === "recusado") return { texto: T.botao, tom: "normal" };
+  if (estado === "aceite" && p.ficouCom) return { texto: `Passou para ${primeiroNome(p.ficouCom.nome)}`, tom: "feito" };
+  if (estado === "sem_resposta") return { texto: "Sem resposta", tom: "alerta" };
+  if (p.tipo === "grupo") return { texto: "Pedido ao grupo", tom: "espera" };
+  return { texto: `À espera · ${primeiroNome(p.para?.nome ?? "")}`, tom: "espera" };
+}
+
+function primeiroNome(n: string): string {
+  return String(n || "").trim().split(/\s+/)[0] ?? "";
 }
 
 /** Aviso dos 15 minutos. */

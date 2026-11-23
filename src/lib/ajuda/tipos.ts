@@ -115,6 +115,8 @@ export type TipoPedido = "colega" | "grupo";
 /**
  * GET ?action=ajudaPedido&viagem=<rowIndex>  → o pedido em curso de uma viagem
  * (o que quem pediu vê). Também é a resposta de pedir/pedir ao grupo/cancelar.
+ * GET ?action=ajudaMeusPedidos&motorista=<id> → PedidoAjuda[] (o último de cada
+ * viagem de quem pede — é com isto que o cartão mostra «À espera de …»).
  */
 export interface PedidoAjuda {
   id: string;
