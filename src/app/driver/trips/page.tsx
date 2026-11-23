@@ -8,7 +8,8 @@ import DriverNameplate from "@/components/driver/DriverNameplate";
 import NoShowModal from "@/components/driver/NoShowModal";
 import { SkeletonList } from "@/components/trips/SkeletonCard";
 import { getSession, clearSession } from "@/lib/auth";
-import { crachaAtual } from "@/lib/cracha";
+import type { AuthSession } from "@/lib/auth";
+import { resolverIdentidade, apagarDadosMotorista, SessaoRecusadaErro, EVENTO_SESSAO_RECUSADA } from "@/lib/motoristaSessao";
 import ChangePasswordModal from "@/components/shared/ChangePasswordModal";
 import {
   HUB_CENTRAL_URL,
@@ -20,18 +21,8 @@ import {
   isNoShowViagem,
   isCanceladaViagem,
   fetchMotoristas,
-  chaveMotorista,
 } from "@/lib/trips";
 import type { HubViagem, Driver } from "@/lib/trips";
-import { clearCachedTrips } from "@/lib/trips-cache";
-
-/* ================================================================== */
-/*  Constants                                                          */
-/* ================================================================== */
-
-const LS_DRIVER_NAME = "hub_driver_name"; // legacy key for backward compat
-const LS_DRIVER_IDENTITY = "hub_driver_identity"; // nome EXACTO validado contra ?action=motoristas
-
 
 /* ================================================================== */
 /*  PAGE                                                               */
@@ -41,14 +32,15 @@ export default function DriverTripsPage() {
   const store = useDriverStore();
   const router = useRouter();
 
-  /* ── Identidade oficial do motorista ──
-     Só um nome da lista ?action=motoristas pode ser identidade.
-     Sem identidade validada: ZERO cartões — ecrã "Quem és tu?". */
-  const [identity, setIdentity] = useState("");
+  /* ── Quem está na app: só o motorista do crachá deste login ──
+     Nada guardado no telemóvel decide quem é o motorista e não há forma
+     de escolher outro nome (caso de 21/11). Se o nome do login não está na
+     lista oficial: «Peça ajuda à gestão». Crachá fora do prazo: login. */
+  const [sessao, setSessao] = useState<AuthSession | null | undefined>(undefined); // undefined = ainda não lida
+  const [agora, setAgora] = useState(0);
   const [officialDrivers, setOfficialDrivers] = useState<Driver[] | null>(null);
   const [driversFailed, setDriversFailed] = useState(false);
-  const [needsPicker, setNeedsPicker] = useState(false);
-  const [hasDriverContext, setHasDriverContext] = useState(false);
+  const [recusada, setRecusada] = useState(false); // o HUB-Central recusou o crachá
 
   const [changePwdOpen, setChangePwdOpen] = useState(false);
 
@@ -60,103 +52,80 @@ export default function DriverTripsPage() {
   /* ── Anexar provas a um no-show já marcado (linhas compactas) ── */
   const [proofTrip, setProofTrip] = useState<HubViagem | null>(null);
 
-  const adoptIdentity = useCallback(
-    (name: string, persist = true) => {
-      setIdentity(name);
-      setNeedsPicker(false);
-      if (persist) {
-        try { localStorage.setItem(LS_DRIVER_IDENTITY, name); } catch { /* */ }
-      }
-      store.setDriverName(name);
-    },
-    [store],
-  );
+  /* ── Ler a sessão agora e de 30 em 30 s (e ao voltar à app): o prazo conta ── */
+  const lerSessao = useCallback(() => {
+    setSessao(getSession());
+    setAgora(Date.now());
+  }, []);
+  useEffect(() => {
+    lerSessao();
+    const t = setInterval(lerSessao, 30_000);
+    const onVis = () => { if (document.visibilityState === "visible") lerSessao(); };
+    document.addEventListener("visibilitychange", onVis);
+    return () => { clearInterval(t); document.removeEventListener("visibilitychange", onVis); };
+  }, [lerSessao]);
 
-  /* ── Lista oficial de motoristas ── */
+  const identidade = useMemo(
+    () => (sessao === undefined ? null : resolverIdentidade(sessao, officialDrivers, driversFailed, agora)),
+    [sessao, officialDrivers, driversFailed, agora],
+  );
+  const estado = identidade?.estado ?? null;
+  const nomeConfirmado = identidade?.estado === "ok" ? identidade.nome : "";
+
+  /* ── Lista oficial de motoristas (só para confirmar o nome do login) ── */
   const loadOfficialDrivers = useCallback(async () => {
     setDriversFailed(false);
     try {
       setOfficialDrivers(await fetchMotoristas());
-    } catch {
-      setDriversFailed(true);
+    } catch (e) {
+      if (e instanceof SessaoRecusadaErro) setRecusada(true);
+      else setDriversFailed(true);
     }
   }, []);
-
+  const temMotorista = estado !== null && estado !== "login";
   useEffect(() => {
-    loadOfficialDrivers();
-  }, [loadOfficialDrivers]);
+    if (temMotorista && !officialDrivers) loadOfficialDrivers();
+  }, [temMotorista]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  /* ── Sessão/identidade guardada ── */
+  /* ── Um botão (estados da viagem, no-show, dar baixa, mensagem, senha) teve a sessão recusada ── */
   useEffect(() => {
-    let stored = "";
-    let legacy = "";
-    try {
-      stored = localStorage.getItem(LS_DRIVER_IDENTITY) || "";
-      legacy = localStorage.getItem(LS_DRIVER_NAME) || "";
-    } catch { /* */ }
-    const session = getSession();
-    const sessionName = session && session.role === "driver" ? session.name : "";
+    const recusou = () => setRecusada(true);
+    window.addEventListener(EVENTO_SESSAO_RECUSADA, recusou);
+    return () => window.removeEventListener(EVENTO_SESSAO_RECUSADA, recusou);
+  }, []);
 
-    if (!stored && !sessionName && !legacy) {
-      router.replace("/login");
-      return;
-    }
-    setHasDriverContext(true);
-    if (stored) {
-      // Já validada numa sessão anterior — usar já; revalida quando a lista chegar
-      adoptIdentity(stored, false);
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  /* ── Resolver identidade contra a lista oficial ── */
+  /* ── O HUB-Central recusou o crachá (senha mudou, inactivo…): apaga a sessão e volta à senha ── */
   useEffect(() => {
-    if (!officialDrivers || !hasDriverContext) return;
+    if (!recusada && !store.sessaoRecusada) return;
+    store.setDriverName("");
+    clearSession();
+    router.replace("/login");
+  }, [recusada, store.sessaoRecusada]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const match = (n: string): Driver | undefined => {
-      const k = chaveMotorista(n);
-      if (!k) return undefined;
-      return officialDrivers.find((d) => chaveMotorista(d.name) === k);
-    };
-
-    let stored = "";
-    let legacy = "";
-    try {
-      stored = localStorage.getItem(LS_DRIVER_IDENTITY) || "";
-      legacy = localStorage.getItem(LS_DRIVER_NAME) || "";
-    } catch { /* */ }
-    const session = getSession();
-    const sessionName = session && session.role === "driver" ? session.name : "";
-
-    // 1) Identidade guardada — revalidar (pode ter saído da folha)
-    if (stored) {
-      const m = match(stored);
-      if (m) { adoptIdentity(m.name); return; }
-      try { localStorage.removeItem(LS_DRIVER_IDENTITY); } catch { /* */ }
-      setIdentity("");
-      store.setDriverName("");
+  /* ── Sem motorista válido: apaga tudo e volta ao login ── */
+  useEffect(() => {
+    if (identidade?.estado !== "login") return;
+    // Outro papel (ex.: o gestor) não perde a sessão dele; só sai desta página.
+    if (identidade.motivo === "nao_e_motorista") {
+      try { apagarDadosMotorista(localStorage); } catch { /* */ }
+    } else {
+      clearSession();
     }
+    router.replace("/login");
+  }, [identidade, router]);
 
-    // 2) Nome da sessão de login ou legacy — adoptar se corresponder a um nome oficial
-    const m = match(sessionName) || match(legacy);
-    if (m) { adoptIdentity(m.name); return; }
-
-    // 3) Nada corresponde → "Quem és tu?" (nunca mostrar viagens de todos)
-    setNeedsPicker(true);
-  }, [officialDrivers, hasDriverContext]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* ── O store só conhece o motorista confirmado; sem ele, pára e esvazia ── */
+  useEffect(() => {
+    if (store.driverName !== nomeConfirmado) store.setDriverName(nomeConfirmado);
+  }, [nomeConfirmado]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── Auto-sync silencioso: intervalo gerido pelo useDriverStore com ping lastChange ── */
 
-  /* ── Logout ── */
+  /* ── Logout: o clearSession apaga a sessão, o nome e as viagens guardadas ── */
   const handleLogout = useCallback(() => {
     clearSession();
-    try { localStorage.removeItem(LS_DRIVER_IDENTITY); } catch { /* */ }
-    clearCachedTrips();
     router.replace("/login");
   }, [router]);
-
-  /* ── Sessão antiga (antes do crachá): faixa discreta, nunca bloqueia ── */
-  const [semCracha, setSemCracha] = useState(false);
-  useEffect(() => { setSemCracha(!crachaAtual()); }, []);
 
   /* ── Nameplate ── */
   const openNameplate = useCallback((name: string, destination?: string) => {
@@ -212,37 +181,21 @@ export default function DriverTripsPage() {
   /*  SEM IDENTIDADE VALIDADA → ZERO CARTÕES                           */
   /* ================================================================ */
 
-  if (!identity) {
-    // Ecrã "Quem és tu?" — só nomes da lista oficial, nunca texto livre, nunca "Todos"
-    if (needsPicker && officialDrivers) {
+  if (estado !== "ok" || !nomeConfirmado || recusada || store.sessaoRecusada) {
+    // Nunca há lista de nomes para escolher: o motorista é só o do login.
+    if (estado === "pede_ajuda") {
       return (
-        <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center px-6 py-10">
+        <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center px-6 py-10 text-center">
           <img src="/images/logo.png" alt="HUB Transfer" className="h-8 w-auto opacity-60 mb-8" />
-          <h1 className="text-2xl font-bold text-[#F0D030] mb-1">Quem és tu?</h1>
-          <p className="text-sm text-white/50 mb-6 text-center font-mono">
-            Escolhe o teu nome da lista oficial para veres as tuas viagens.
+          <h1 className="text-2xl font-bold text-[#F0D030] mb-3">Peça ajuda à gestão</h1>
+          <p className="text-sm text-white/60 max-w-xs leading-relaxed font-mono">
+            O seu nome não está na lista de motoristas da HUB, por isso não é possível mostrar viagens.
+            Fale com a gestão para confirmar o seu registo.
           </p>
-          <div className="w-full max-w-sm space-y-2">
-            {officialDrivers.map((d) => (
-              <button
-                key={d.name}
-                type="button"
-                onClick={() => adoptIdentity(d.name)}
-                className="w-full bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl px-4 py-3.5 text-left text-white font-mono hover:border-[#F0D030]/50 active:bg-[#F0D030]/10 transition-colors"
-              >
-                {d.name}
-              </button>
-            ))}
-            {officialDrivers.length === 0 && (
-              <p className="text-center text-white/40 text-sm font-mono py-6">
-                Nenhum motorista na lista oficial.
-              </p>
-            )}
-          </div>
           <button
             type="button"
             onClick={handleLogout}
-            className="mt-8 text-white/30 text-xs font-mono underline underline-offset-2"
+            className="mt-8 px-5 py-2.5 bg-white/5 text-white/70 rounded-lg text-sm font-mono active:bg-white/10 transition-colors"
           >
             Sair
           </button>
@@ -250,12 +203,12 @@ export default function DriverTripsPage() {
       );
     }
 
-    // Lista oficial indisponível (sem rede) e sem identidade validada → nunca mostrar viagens
-    if (driversFailed) {
+    // Lista oficial indisponível (sem rede) → nunca mostrar viagens
+    if (estado === "sem_ligacao") {
       return (
         <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center px-6">
           <p className="text-white/60 text-sm font-mono mb-4 text-center">
-            Sem ligação ao HUB Central.<br />Não é possível confirmar a tua identidade.
+            Sem ligação ao HUB Central.<br />Não é possível confirmar o seu nome.
           </p>
           <button
             type="button"
@@ -268,7 +221,7 @@ export default function DriverTripsPage() {
       );
     }
 
-    // A carregar a lista oficial
+    // A ler a sessão, a confirmar o nome, ou a caminho do login
     return (
       <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
         <div className="w-5 h-5 border-2 border-[#F0D030]/30 border-t-[#F0D030] rounded-full animate-spin" />
@@ -301,12 +254,6 @@ export default function DriverTripsPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {semCracha && (
-        <button type="button" onClick={handleLogout}
-          className="w-full px-4 py-2 bg-[#F0D030]/10 border-b border-[#F0D030]/20 text-[#F0D030] text-[11px] font-mono text-center leading-snug">
-          Para continuar a ver os contactos dos clientes, sai e volta a entrar.
-        </button>
-      )}
       {/* ── TOP BAR ── */}
       <header className="sticky top-0 z-50 bg-black/95 backdrop-blur-sm border-b border-white/5 px-4 py-3 flex items-center justify-between">
         <div className="min-w-0">
@@ -316,7 +263,7 @@ export default function DriverTripsPage() {
             className="text-[#F0D030] font-bold text-base truncate block"
             title="Sair"
           >
-            {store.driverName}
+            {nomeConfirmado}
           </button>
           <img src="/images/logo.png" alt="HUB Transfer" className="h-5 w-auto opacity-50 mt-0.5" />
         </div>

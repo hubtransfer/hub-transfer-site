@@ -5,9 +5,11 @@
 // Chamada via navigator.sendBeacon no clique (a página navega para o wa.me
 // logo a seguir; um fetch normal seria cancelado). O beacon não lê resposta,
 // por isso devolvemos sempre 204 — um erro aqui nunca pode partir a ida do
-// motorista para o WhatsApp.
+// motorista para o WhatsApp. Única excepção (23/11/2026): com a sessão recusada
+// pelo HUB-Central, responde { ok:false, motivo:"sessao" } para a app voltar à senha.
 
 import { HUB_CENTRAL_URL } from "@/lib/trips";
+import { crachaRecusado } from "@/lib/motoristaSessao";
 
 const GAS_URL = process.env.GAS_WEBAPP_URL || HUB_CENTRAL_URL;
 
@@ -61,6 +63,11 @@ export async function POST(req: Request) {
     const text = await res.text();
     try {
       const data = JSON.parse(text);
+      // Sessão recusada: a app do motorista lê isto (fetch com keepalive) e volta à senha.
+      // O sendBeacon ignora a resposta, por isso nada parte.
+      if (crachaRecusado(data)) {
+        return Response.json({ ok: false, motivo: "sessao" }, { status: 200 });
+      }
       if (!data.success) {
         console.error("[mensagem-enviada] GAS recusou:", data.message || text.slice(0, 200));
       }

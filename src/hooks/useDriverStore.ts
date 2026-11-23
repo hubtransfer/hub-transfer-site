@@ -12,6 +12,7 @@ import {
 } from '@/lib/trips';
 import { getCachedTrips, setCachedTrips, clearCachedTrips } from '@/lib/trips-cache';
 import { crachaPara } from '@/lib/auth';
+import { crachaRecusado } from '@/lib/motoristaSessao';
 
 // ── Helpers ─────────────────────────────────────────────────
 
@@ -39,6 +40,8 @@ interface DriverStore {
   stats: DriverStats;
   sortedViagens: HubViagem[];
   backgroundRefreshing: boolean;
+  /** O HUB-Central recusou o crachá ({ok:false, motivo:"sessao"}): a página volta à senha. */
+  sessaoRecusada: boolean;
   setDriverName: (name: string) => void;
   loadDate: (dateStr: string) => void;
   syncViagens: () => Promise<void>;
@@ -61,6 +64,7 @@ export function useDriverStore(): DriverStore {
   const [nameplateOpen, setNameplateOpen] = useState(false);
   const [nameplateName, setNameplateName] = useState('');
   const [backgroundRefreshing, setBackgroundRefreshing] = useState(false);
+  const [sessaoRecusada, setSessaoRecusada] = useState(false);
 
   const gasUrl = HUB_CENTRAL_URL;
 
@@ -104,7 +108,10 @@ export function useDriverStore(): DriverStore {
       const res = await fetch(url, { redirect: 'follow' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const json = await res.json();
+      if (crachaRecusado(json)) { setSessaoRecusada(true); return; }
       const raw: HubViagem[] = Array.isArray(json) ? json : (json.viagens || []);
+      // A resposta chegou depois de o motorista mudar ou sair: deita-a fora
+      if (chaveMotorista(driverNameRef.current) !== me) return;
 
       // Cinto e suspensórios: só viagens cujo driver é EXACTAMENTE este motorista.
       // Driver vazio nunca passa (chave vazia não corresponde a ninguém).
@@ -160,11 +167,7 @@ export function useDriverStore(): DriverStore {
     }
     setDriverNameState(name);
     driverNameRef.current = name;
-    try {
-      localStorage.setItem('hub_driver_name', name);
-    } catch {
-      // ignore
-    }
+    // O nome nunca se guarda no telemóvel: vem sempre da sessão do login (crachá).
     if (name && changed) syncViagens();
   }, [syncViagens]);
 
@@ -184,6 +187,8 @@ export function useDriverStore(): DriverStore {
         const url = `${gasUrl}?action=completar&id=${encodeURIComponent(id)}&row=${encodeURIComponent(rowIndex)}&t=${Date.now()}${crachaPara(gasUrl)}`;
         const res = await fetch(url, { redirect: 'follow' });
         const data = await res.json();
+        // Sessão recusada: nada fica marcado como feito; a página volta à senha
+        if (crachaRecusado(data)) { setSessaoRecusada(true); return; }
         if (data.success) {
           // Mark locally as done before re-syncing
           setViagens((prev) =>
@@ -256,6 +261,7 @@ export function useDriverStore(): DriverStore {
       try {
         const pingRes = await fetch(`${gasUrl}?action=lastChange&t=${Date.now()}${crachaPara(gasUrl)}`, { redirect: 'follow' });
         const pingJson = await pingRes.json();
+        if (crachaRecusado(pingJson)) { setSessaoRecusada(true); return; }
         const lc = (pingJson?.lastChange || '').toString();
         if (lc && lc === lastChangeRef.current) return;
         lastChangeRef.current = lc;
@@ -295,6 +301,7 @@ export function useDriverStore(): DriverStore {
     stats,
     sortedViagens,
     backgroundRefreshing,
+    sessaoRecusada,
     setDriverName,
     loadDate,
     syncViagens,
