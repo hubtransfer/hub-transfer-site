@@ -26,6 +26,61 @@ export function crachaRecusado(resposta: unknown): boolean {
   return r.ok === false && r.motivo === "sessao";
 }
 
+/** O nome do evento (no window) que avisa que o HUB-Central recusou o crachá num botão. */
+export const EVENTO_SESSAO_RECUSADA = "hub:sessao-recusada";
+
+/**
+ * Se a resposta for a recusa do crachá, avisa a página (evento no window, ou no
+ * `alvo` dado nos testes) e devolve true: quem chamou não pode mostrar que deu certo.
+ * Só a app do motorista ouve o evento e volta à senha; nas outras páginas não muda nada.
+ */
+export function avisarSeRecusada(
+  resposta: unknown,
+  alvo?: { dispatchEvent(e: Event): boolean } | null,
+): boolean {
+  if (!crachaRecusado(resposta)) return false;
+  const t = alvo ?? (typeof window !== "undefined" ? window : null);
+  try { t?.dispatchEvent(new Event(EVENTO_SESSAO_RECUSADA)); } catch { /* */ }
+  return true;
+}
+
+/**
+ * O crachá novo que o alterarSenha devolve (campo `cracha`) quando a senha mudou,
+ * ou null. Só aceita um crachá legível de motorista.
+ */
+export function crachaNovoDaSenha(resposta: unknown): string | null {
+  if (!resposta || typeof resposta !== "object" || Array.isArray(resposta)) return null;
+  const r = resposta as { success?: unknown; cracha?: unknown };
+  if (r.success !== true || typeof r.cracha !== "string") return null;
+  const c = lerCracha(r.cracha);
+  if (!c || (c.papel && c.papel !== "driver")) return null;
+  return r.cracha;
+}
+
+/**
+ * Guarda na sessão do login (hub_session) o crachá novo que o alterarSenha devolveu,
+ * para o motorista não ter de entrar outra vez. Só troca o crachá: o nome, o papel e o
+ * prazo da sessão ficam. Só aceita uma sessão de motorista e um crachá com o mesmo nome.
+ * Devolve true se guardou. Nunca falha.
+ */
+export function guardarCrachaNovo(
+  armazem: { getItem(k: string): string | null; setItem(k: string, v: string): void } | null | undefined,
+  novo: string,
+): boolean {
+  if (!armazem) return false;
+  try {
+    const s = JSON.parse(armazem.getItem("hub_session") || "null") as SessaoMotoristaLida & Record<string, unknown> | null;
+    if (!s || s.role !== "driver" || typeof s.name !== "string") return false;
+    const c = lerCracha(novo);
+    if (!c || (c.papel && c.papel !== "driver")) return false;
+    if (chaveNome(c.quem) !== chaveNome(s.name.trim().substring(0, 40))) return false;
+    armazem.setItem("hub_session", JSON.stringify({ ...s, cracha: novo }));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** Erro lançado quando o HUB-Central recusa o crachá: a app apaga a sessão e volta à senha. */
 export class SessaoRecusadaErro extends Error {
   constructor() {

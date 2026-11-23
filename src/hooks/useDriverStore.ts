@@ -187,6 +187,8 @@ export function useDriverStore(): DriverStore {
         const url = `${gasUrl}?action=completar&id=${encodeURIComponent(id)}&row=${encodeURIComponent(rowIndex)}&t=${Date.now()}${crachaPara(gasUrl)}`;
         const res = await fetch(url, { redirect: 'follow' });
         const data = await res.json();
+        // Sessão recusada: nada fica marcado como feito; a página volta à senha
+        if (crachaRecusado(data)) { setSessaoRecusada(true); return; }
         if (data.success) {
           // Mark locally as done before re-syncing
           setViagens((prev) =>

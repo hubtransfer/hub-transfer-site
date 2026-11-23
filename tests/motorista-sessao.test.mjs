@@ -14,6 +14,10 @@ import {
   prazoSessaoNova,
   crachaRecusado,
   SessaoRecusadaErro,
+  avisarSeRecusada,
+  EVENTO_SESSAO_RECUSADA,
+  crachaNovoDaSenha,
+  guardarCrachaNovo,
 } from "../src/lib/motoristaSessao.ts";
 
 const AGORA = Date.UTC(2026, 10, 23, 10, 0, 0);
@@ -196,4 +200,80 @@ test("crachá recusado: a sessão e os dados do motorista apagam-se e a app volt
   assert.deepEqual(ls.chaves(), []);
   // e sem sessão o estado é «login»
   assert.equal(resolverIdentidade(null, LISTA, false, AGORA).estado, "login");
+});
+
+// ── 23/11 (tarde): os botões e a mudança de senha ──
+
+/** Um alvo de eventos que conta quantas vezes a recusa foi avisada. */
+function alvoQueConta() {
+  const t = new EventTarget();
+  let n = 0;
+  t.addEventListener(EVENTO_SESSAO_RECUSADA, () => { n++; });
+  return { t, vezes: () => n };
+}
+
+test("cada botão com a sessão recusada avisa a página (e não pode dizer que deu certo)", () => {
+  // respostas inventadas dos pedidos: estados da viagem, no-show, dar baixa,
+  // mensagem enviada, registerNoShow e alterarSenha
+  const botoes = ["updateDriverStatus", "marcarNoShow", "completar", "motoristaMandouMsg", "registerNoShow", "alterarSenha"];
+  for (const acao of botoes) {
+    const a = alvoQueConta();
+    const recusa = { ok: false, success: false, motivo: "sessao", message: "sessão inválida (" + acao + ")" };
+    assert.equal(avisarSeRecusada(recusa, a.t), true, acao);
+    assert.equal(a.vezes(), 1, acao);
+  }
+});
+
+test("as respostas normais e os outros erros não fazem voltar à senha", () => {
+  const a = alvoQueConta();
+  for (const r of [
+    { success: true },
+    { success: false, error: "Senha actual incorrecta" },
+    { ok: false, success: false, motivo: "outro_motorista" },
+    { ok: false, motivo: "so_gestao" },
+    null,
+    undefined,
+    "texto",
+    [],
+  ]) {
+    assert.equal(avisarSeRecusada(r, a.t), false);
+  }
+  assert.equal(a.vezes(), 0);
+  // sem window nem alvo (como no servidor), também não falha
+  assert.equal(avisarSeRecusada({ ok: false, motivo: "sessao" }, null), true);
+});
+
+test("alterarSenha: o crachá novo só vem com a senha mudada e de um motorista", () => {
+  const novo = crachaFalso({ q: "Tomé Inventado", e: AGORA + 7 * 24 * HORA });
+  assert.equal(crachaNovoDaSenha({ success: true, message: "ok", cracha: novo }), novo);
+  assert.equal(crachaNovoDaSenha({ success: true, message: "ok" }), null);          // sem crachá: fica o antigo
+  assert.equal(crachaNovoDaSenha({ success: false, cracha: novo }), null);          // a senha não mudou
+  assert.equal(crachaNovoDaSenha({ success: true, cracha: "ilegivel" }), null);
+  assert.equal(crachaNovoDaSenha({ success: true, cracha: crachaFalso({ q: "Hotel Inventado", p: "hotel" }) }), null);
+  assert.equal(crachaNovoDaSenha(null), null);
+});
+
+test("alterarSenha: o crachá novo fica na sessão e o motorista continua dentro", () => {
+  const antiga = sessao("Tomé Inventado", { expiresAt: AGORA + 7 * 24 * HORA });
+  const ls = armazem({ hub_session: JSON.stringify(antiga) });
+  const novo = crachaFalso({ q: "Tomé Inventado", e: AGORA + 7 * 24 * HORA, g: "2" });
+  assert.equal(guardarCrachaNovo(ls, novo), true);
+  const s = JSON.parse(ls.getItem("hub_session"));
+  assert.equal(s.cracha, novo);
+  assert.equal(s.name, "Tomé Inventado");
+  assert.equal(s.role, "driver");
+  assert.equal(s.expiresAt, antiga.expiresAt);        // o prazo da sessão não muda
+  assert.equal(resolverIdentidade(s, LISTA, false, AGORA + 3 * 24 * HORA).estado, "ok");
+});
+
+test("alterarSenha: nunca guarda o crachá de outro nem numa sessão que não é de motorista", () => {
+  const ls = armazem({ hub_session: JSON.stringify(sessao("Tomé Inventado")) });
+  const antes = ls.getItem("hub_session");
+  assert.equal(guardarCrachaNovo(ls, crachaFalso({ q: "Xavier Fictício" })), false);
+  assert.equal(guardarCrachaNovo(ls, "ilegivel"), false);
+  assert.equal(ls.getItem("hub_session"), antes);
+  const gestao = armazem({ hub_session: JSON.stringify({ name: "Gestão Inventada", role: "admin", cracha: "x.y" }) });
+  assert.equal(guardarCrachaNovo(gestao, crachaFalso({ q: "Gestão Inventada" })), false);
+  assert.equal(guardarCrachaNovo(armazem({}), crachaFalso({ q: "Tomé Inventado" })), false);
+  assert.equal(guardarCrachaNovo(null, crachaFalso({ q: "Tomé Inventado" })), false);
 });

@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { CheckCircle, Target } from "lucide-react";
 import { HUB_CENTRAL_URL } from "@/lib/trips";
 import { crachaParam } from "@/lib/cracha";
+import { avisarSeRecusada } from "@/lib/motoristaSessao";
 
 type TripStatus = "PENDENTE" | "A_CAMINHO" | "NO_LOCAL" | "EM_VIAGEM" | "FINALIZADO";
 
@@ -52,14 +53,19 @@ function getGPS(): Promise<{ lat: number; lng: number } | null> {
   });
 }
 
-async function sendStatus(rowIndex: string, status: string, lat?: number, lng?: number) {
+/** false só quando o HUB-Central recusou o crachá ({ok:false, motivo:"sessao"}): a barra não avança. */
+async function sendStatus(rowIndex: string, status: string, lat?: number, lng?: number): Promise<boolean> {
   try {
     const timestamp = new Date().toISOString();
     const url = `${HUB_CENTRAL_URL}?action=updateDriverStatus&rowIndex=${encodeURIComponent(rowIndex)}&status=${encodeURIComponent(status)}&lat=${lat ?? ""}&lng=${lng ?? ""}&timestamp=${encodeURIComponent(timestamp)}&t=${Date.now()}${crachaParam()}`;
-    await fetch(url, { redirect: "follow" });
+    const res = await fetch(url, { redirect: "follow" });
+    let json: unknown = null;
+    try { json = await res.json(); } catch { /* resposta sem JSON: como antes */ }
+    if (avisarSeRecusada(json)) return false;
   } catch (err) {
     console.error("[SwipeBar] sendStatus error:", err);
   }
+  return true;
 }
 
 function mapInitialStatus(s: string): TripStatus {
@@ -130,7 +136,8 @@ export default function SwipeBar({ tripId, rowIndex, initialStatus, origin, dest
     setFlash(true);
     setTimeout(() => setFlash(false), 400);
     const coords = await getGPS();
-    await sendStatus(rowIndex, step.to, coords?.lat, coords?.lng);
+    const aceite = await sendStatus(rowIndex, step.to, coords?.lat, coords?.lng);
+    if (!aceite) { setSending(false); return; } // sessão recusada: nada avança (a app do motorista volta à senha)
     setStatus(step.to);
     onStatusChange?.(step.to);
     setSending(false);

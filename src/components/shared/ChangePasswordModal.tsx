@@ -2,7 +2,8 @@
 
 import { useState, useCallback } from "react";
 import { HUB_CENTRAL_URL } from "@/lib/trips";
-import { crachaCampo } from "@/lib/cracha";
+import { crachaCampo, comCracha } from "@/lib/cracha";
+import { avisarSeRecusada, crachaNovoDaSenha, guardarCrachaNovo } from "@/lib/motoristaSessao";
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
@@ -29,6 +30,35 @@ export default function ChangePasswordModal({ isOpen, onClose, tipo, userId }: C
 
     setLoading(true);
     try {
+      // Motorista (23/11/2026): por POST, com o crachá no corpo (as senhas deixam de ir
+      // no endereço). Com a senha mudada, o HUB-Central devolve um crachá novo (`cracha`):
+      // guarda-se na sessão para o motorista não ter de entrar outra vez.
+      if (tipo === "motorista") {
+        const res = await fetch(HUB_CENTRAL_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify(comCracha({
+            action: "alterarSenha",
+            tipo,
+            id: userId,
+            senhaActual: senhaActual.trim(),
+            novaSenha,
+          })),
+        });
+        const data = await res.json();
+        if (avisarSeRecusada(data)) {
+          setError("A sessão terminou. Entre outra vez com a sua senha.");
+          return;
+        }
+        if (data?.success) {
+          const novo = crachaNovoDaSenha(data);
+          if (novo) guardarCrachaNovo(localStorage, novo);
+          setSuccess(true);
+        } else {
+          setError(data?.message || data?.error || "Senha actual incorrecta.");
+        }
+        return;
+      }
       const params = new URLSearchParams({
         action: "alterarSenha",
         tipo,

@@ -9,7 +9,7 @@ import NoShowModal from "@/components/driver/NoShowModal";
 import { SkeletonList } from "@/components/trips/SkeletonCard";
 import { getSession, clearSession } from "@/lib/auth";
 import type { AuthSession } from "@/lib/auth";
-import { resolverIdentidade, apagarDadosMotorista, SessaoRecusadaErro } from "@/lib/motoristaSessao";
+import { resolverIdentidade, apagarDadosMotorista, SessaoRecusadaErro, EVENTO_SESSAO_RECUSADA } from "@/lib/motoristaSessao";
 import ChangePasswordModal from "@/components/shared/ChangePasswordModal";
 import {
   HUB_CENTRAL_URL,
@@ -86,6 +86,13 @@ export default function DriverTripsPage() {
   useEffect(() => {
     if (temMotorista && !officialDrivers) loadOfficialDrivers();
   }, [temMotorista]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* ── Um botão (estados da viagem, no-show, dar baixa, mensagem, senha) teve a sessão recusada ── */
+  useEffect(() => {
+    const recusou = () => setRecusada(true);
+    window.addEventListener(EVENTO_SESSAO_RECUSADA, recusou);
+    return () => window.removeEventListener(EVENTO_SESSAO_RECUSADA, recusou);
+  }, []);
 
   /* ── O HUB-Central recusou o crachá (senha mudou, inactivo…): apaga a sessão e volta à senha ── */
   useEffect(() => {
