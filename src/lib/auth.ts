@@ -2,6 +2,7 @@
 
 import { HUB_CENTRAL_URL } from "./trips";
 import { crachaParam } from "./cracha";
+import { apagarDadosMotorista } from "./motoristaSessao";
 
 export interface AuthSession {
   name: string;
@@ -56,11 +57,12 @@ export function setSession(session: AuthSession): void {
   if (!session.expiresAt) {
     session.expiresAt = Date.now() + SESSION_TTL;
   }
+  // Entrar apaga o nome e as viagens guardadas de qualquer motorista anterior:
+  // na app do motorista só o crachá deste login decide quem é (caso de 21/11).
+  apagarDadosMotorista(localStorage);
   localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-  // Also set legacy keys for backward compatibility
-  if (session.role === "driver") {
-    localStorage.setItem("hub_driver_name", session.name);
-  } else if (session.role === "hotel") {
+  // Also set legacy keys for backward compatibility (o motorista já não tem nenhuma)
+  if (session.role === "hotel") {
     localStorage.setItem("hub_hotel_name", session.name);
     if (session.code) localStorage.setItem("hub_hotel_code", session.code);
   }
@@ -68,8 +70,9 @@ export function setSession(session: AuthSession): void {
 
 export function clearSession(): void {
   try { localStorage.removeItem(SESSION_KEY); } catch { /* */ }
+  // Sair apaga também o nome e as viagens guardadas do motorista
+  try { apagarDadosMotorista(localStorage); } catch { /* */ }
   try {
-    localStorage.removeItem("hub_driver_name");
     localStorage.removeItem("hub_hotel_name");
     localStorage.removeItem("hub_hotel_code");
     localStorage.removeItem("hub_restaurante_session");

@@ -105,6 +105,8 @@ export function useDriverStore(): DriverStore {
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const json = await res.json();
       const raw: HubViagem[] = Array.isArray(json) ? json : (json.viagens || []);
+      // A resposta chegou depois de o motorista mudar ou sair: deita-a fora
+      if (chaveMotorista(driverNameRef.current) !== me) return;
 
       // Cinto e suspensórios: só viagens cujo driver é EXACTAMENTE este motorista.
       // Driver vazio nunca passa (chave vazia não corresponde a ninguém).
@@ -160,11 +162,7 @@ export function useDriverStore(): DriverStore {
     }
     setDriverNameState(name);
     driverNameRef.current = name;
-    try {
-      localStorage.setItem('hub_driver_name', name);
-    } catch {
-      // ignore
-    }
+    // O nome nunca se guarda no telemóvel: vem sempre da sessão do login (crachá).
     if (name && changed) syncViagens();
   }, [syncViagens]);
 
