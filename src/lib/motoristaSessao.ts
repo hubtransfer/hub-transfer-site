@@ -9,6 +9,31 @@
 //    oficial, a app diz «Peça ajuda à gestão»;
 //  - crachá fora do prazo → a app pede outra vez a senha.
 
+/** Quanto dura a sessão do motorista: 7 dias (decisão do Junior, 23/11/2026 — a
+ *  senha uma vez por semana). A gestão e os hotéis ficam com o prazo de sempre.
+ *  Enquanto o crachá do backend durar menos, manda o prazo mais curto. */
+export const SESSAO_MOTORISTA_MS = 7 * 24 * 60 * 60 * 1000;
+
+/** O prazo de uma sessão nova: 7 dias para o motorista; para os outros papéis, o de sempre. */
+export function prazoSessaoNova(papel: unknown, agora: number, ttlOutros: number): number {
+  return agora + (papel === "driver" ? SESSAO_MOTORISTA_MS : ttlOutros);
+}
+
+/** O HUB-Central recusou o crachá: { ok: false, motivo: "sessao" } (senha mudou, inactivo…). */
+export function crachaRecusado(resposta: unknown): boolean {
+  if (!resposta || typeof resposta !== "object" || Array.isArray(resposta)) return false;
+  const r = resposta as { ok?: unknown; motivo?: unknown };
+  return r.ok === false && r.motivo === "sessao";
+}
+
+/** Erro lançado quando o HUB-Central recusa o crachá: a app apaga a sessão e volta à senha. */
+export class SessaoRecusadaErro extends Error {
+  constructor() {
+    super("sessao");
+    this.name = "SessaoRecusadaErro";
+  }
+}
+
 /** As chaves do localStorage que guardam dados de um motorista (nunca a sessão). */
 export const CHAVES_DADOS_MOTORISTA = [
   "hub_driver_identity",   // nome escolhido no antigo «Quem és tu?» — já não se usa

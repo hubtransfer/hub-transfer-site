@@ -10,6 +10,10 @@ import {
   lerCracha,
   apagarDadosMotorista,
   CHAVES_DADOS_MOTORISTA,
+  SESSAO_MOTORISTA_MS,
+  prazoSessaoNova,
+  crachaRecusado,
+  SessaoRecusadaErro,
 } from "../src/lib/motoristaSessao.ts";
 
 const AGORA = Date.UTC(2026, 10, 23, 10, 0, 0);
@@ -146,4 +150,50 @@ test("a lista só confirma o próprio nome (acentos e maiúsculas à parte)", ()
 test("lista indisponível: nunca mostra viagens", () => {
   assert.equal(resolverIdentidade(sessao("Tomé Inventado"), null, true, AGORA).estado, "sem_ligacao");
   assert.equal(resolverIdentidade(sessao("Tomé Inventado"), null, false, AGORA).estado, "a_confirmar");
+});
+
+test("sessão nova: 7 dias para o motorista; gestão, hotéis e restaurantes como hoje", () => {
+  const OITO_HORAS = 8 * HORA; // o SESSION_TTL do auth.ts
+  assert.equal(SESSAO_MOTORISTA_MS, 7 * 24 * HORA);
+  assert.equal(prazoSessaoNova("driver", AGORA, OITO_HORAS), AGORA + 7 * 24 * HORA);
+  for (const papel of ["admin", "hotel", "restaurante", "", undefined]) {
+    assert.equal(prazoSessaoNova(papel, AGORA, OITO_HORAS), AGORA + OITO_HORAS, String(papel));
+  }
+});
+
+test("sessão de 7 dias com crachá de 12 h: vale o prazo mais curto; com crachá de 7 dias, os 7 dias", () => {
+  const s12 = sessao("Tomé Inventado", { expiresAt: prazoSessaoNova("driver", AGORA, 8 * HORA) });
+  assert.equal(motoristaDaSessao(s12, AGORA).prazo, AGORA + 12 * HORA);
+  assert.equal(resolverIdentidade(s12, LISTA, false, AGORA + 12 * HORA).estado, "login");
+  const s7d = sessao("Tomé Inventado", {
+    expiresAt: prazoSessaoNova("driver", AGORA, 8 * HORA),
+    cracha: crachaFalso({ q: "Tomé Inventado", e: AGORA + 7 * 24 * HORA }),
+  });
+  assert.equal(resolverIdentidade(s7d, LISTA, false, AGORA + 6 * 24 * HORA).estado, "ok");
+  assert.equal(resolverIdentidade(s7d, LISTA, false, AGORA + 7 * 24 * HORA).estado, "login");
+});
+
+test("o HUB-Central recusa o crachá: { ok: false, motivo: \"sessao\" }", () => {
+  assert.equal(crachaRecusado({ ok: false, motivo: "sessao" }), true);
+  // tudo o resto não é recusa da sessão
+  assert.equal(crachaRecusado({ ok: false, motivo: "erro ao ler as viagens" }), false);
+  assert.equal(crachaRecusado({ ok: true, motivo: "sessao" }), false);
+  assert.equal(crachaRecusado({ viagens: [{ id: "VIAGEM-INVENTADA-2" }] }), false);
+  assert.equal(crachaRecusado([{ ok: false, motivo: "sessao" }]), false);
+  assert.equal(crachaRecusado(null), false);
+  assert.equal(crachaRecusado("sessao"), false);
+  const e = new SessaoRecusadaErro();
+  assert.ok(e instanceof Error);
+  assert.equal(e.name, "SessaoRecusadaErro");
+});
+
+test("crachá recusado: a sessão e os dados do motorista apagam-se e a app volta à senha", () => {
+  // o que a página faz ao receber a recusa: clearSession (sessão + dados) → /login
+  const ls = armazem({ hub_session: JSON.stringify(sessao("Tomé Inventado")), hub_trips_cache: "{}", hub_driver_last_sync: "10:00" });
+  assert.equal(crachaRecusado({ ok: false, motivo: "sessao" }), true);
+  ls.removeItem("hub_session");
+  apagarDadosMotorista(ls);
+  assert.deepEqual(ls.chaves(), []);
+  // e sem sessão o estado é «login»
+  assert.equal(resolverIdentidade(null, LISTA, false, AGORA).estado, "login");
 });

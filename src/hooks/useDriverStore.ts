@@ -12,6 +12,7 @@ import {
 } from '@/lib/trips';
 import { getCachedTrips, setCachedTrips, clearCachedTrips } from '@/lib/trips-cache';
 import { crachaPara } from '@/lib/auth';
+import { crachaRecusado } from '@/lib/motoristaSessao';
 
 // ── Helpers ─────────────────────────────────────────────────
 
@@ -39,6 +40,8 @@ interface DriverStore {
   stats: DriverStats;
   sortedViagens: HubViagem[];
   backgroundRefreshing: boolean;
+  /** O HUB-Central recusou o crachá ({ok:false, motivo:"sessao"}): a página volta à senha. */
+  sessaoRecusada: boolean;
   setDriverName: (name: string) => void;
   loadDate: (dateStr: string) => void;
   syncViagens: () => Promise<void>;
@@ -61,6 +64,7 @@ export function useDriverStore(): DriverStore {
   const [nameplateOpen, setNameplateOpen] = useState(false);
   const [nameplateName, setNameplateName] = useState('');
   const [backgroundRefreshing, setBackgroundRefreshing] = useState(false);
+  const [sessaoRecusada, setSessaoRecusada] = useState(false);
 
   const gasUrl = HUB_CENTRAL_URL;
 
@@ -104,6 +108,7 @@ export function useDriverStore(): DriverStore {
       const res = await fetch(url, { redirect: 'follow' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const json = await res.json();
+      if (crachaRecusado(json)) { setSessaoRecusada(true); return; }
       const raw: HubViagem[] = Array.isArray(json) ? json : (json.viagens || []);
       // A resposta chegou depois de o motorista mudar ou sair: deita-a fora
       if (chaveMotorista(driverNameRef.current) !== me) return;
@@ -254,6 +259,7 @@ export function useDriverStore(): DriverStore {
       try {
         const pingRes = await fetch(`${gasUrl}?action=lastChange&t=${Date.now()}${crachaPara(gasUrl)}`, { redirect: 'follow' });
         const pingJson = await pingRes.json();
+        if (crachaRecusado(pingJson)) { setSessaoRecusada(true); return; }
         const lc = (pingJson?.lastChange || '').toString();
         if (lc && lc === lastChangeRef.current) return;
         lastChangeRef.current = lc;
@@ -293,6 +299,7 @@ export function useDriverStore(): DriverStore {
     stats,
     sortedViagens,
     backgroundRefreshing,
+    sessaoRecusada,
     setDriverName,
     loadDate,
     syncViagens,

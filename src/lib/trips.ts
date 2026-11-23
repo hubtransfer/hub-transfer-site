@@ -1,4 +1,5 @@
 import { crachaParam } from "./cracha";
+import { crachaRecusado, SessaoRecusadaErro } from "./motoristaSessao";
 // ─────────────────────────────────────────────────────────────
 //  trips.ts — Types, constants & business logic for the
 //  HUB Transfer operations panel (viagens-ops)
@@ -139,6 +140,7 @@ export async function fetchMotoristas(): Promise<Driver[]> {
   const res = await fetch(url, { redirect: 'follow' });
   if (!res.ok) throw new Error('HTTP ' + res.status);
   const data = await res.json();
+  if (crachaRecusado(data)) throw new SessaoRecusadaErro();
   const rawList: Record<string, unknown>[] = Array.isArray(data)
     ? data
     : Array.isArray(data?.motoristas)

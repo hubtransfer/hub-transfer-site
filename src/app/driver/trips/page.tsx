@@ -9,7 +9,7 @@ import NoShowModal from "@/components/driver/NoShowModal";
 import { SkeletonList } from "@/components/trips/SkeletonCard";
 import { getSession, clearSession } from "@/lib/auth";
 import type { AuthSession } from "@/lib/auth";
-import { resolverIdentidade, apagarDadosMotorista } from "@/lib/motoristaSessao";
+import { resolverIdentidade, apagarDadosMotorista, SessaoRecusadaErro } from "@/lib/motoristaSessao";
 import ChangePasswordModal from "@/components/shared/ChangePasswordModal";
 import {
   HUB_CENTRAL_URL,
@@ -40,6 +40,7 @@ export default function DriverTripsPage() {
   const [agora, setAgora] = useState(0);
   const [officialDrivers, setOfficialDrivers] = useState<Driver[] | null>(null);
   const [driversFailed, setDriversFailed] = useState(false);
+  const [recusada, setRecusada] = useState(false); // o HUB-Central recusou o crachá
 
   const [changePwdOpen, setChangePwdOpen] = useState(false);
 
@@ -76,14 +77,23 @@ export default function DriverTripsPage() {
     setDriversFailed(false);
     try {
       setOfficialDrivers(await fetchMotoristas());
-    } catch {
-      setDriversFailed(true);
+    } catch (e) {
+      if (e instanceof SessaoRecusadaErro) setRecusada(true);
+      else setDriversFailed(true);
     }
   }, []);
   const temMotorista = estado !== null && estado !== "login";
   useEffect(() => {
     if (temMotorista && !officialDrivers) loadOfficialDrivers();
   }, [temMotorista]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* ── O HUB-Central recusou o crachá (senha mudou, inactivo…): apaga a sessão e volta à senha ── */
+  useEffect(() => {
+    if (!recusada && !store.sessaoRecusada) return;
+    store.setDriverName("");
+    clearSession();
+    router.replace("/login");
+  }, [recusada, store.sessaoRecusada]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── Sem motorista válido: apaga tudo e volta ao login ── */
   useEffect(() => {
@@ -164,7 +174,7 @@ export default function DriverTripsPage() {
   /*  SEM IDENTIDADE VALIDADA → ZERO CARTÕES                           */
   /* ================================================================ */
 
-  if (estado !== "ok" || !nomeConfirmado) {
+  if (estado !== "ok" || !nomeConfirmado || recusada || store.sessaoRecusada) {
     // Nunca há lista de nomes para escolher: o motorista é só o do login.
     if (estado === "pede_ajuda") {
       return (

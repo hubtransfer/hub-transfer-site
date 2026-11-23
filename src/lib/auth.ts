@@ -2,7 +2,7 @@
 
 import { HUB_CENTRAL_URL } from "./trips";
 import { crachaParam } from "./cracha";
-import { apagarDadosMotorista } from "./motoristaSessao";
+import { apagarDadosMotorista, prazoSessaoNova } from "./motoristaSessao";
 
 export interface AuthSession {
   name: string;
@@ -14,7 +14,7 @@ export interface AuthSession {
 }
 
 const SESSION_KEY = "hub_session";
-const SESSION_TTL = 8 * 60 * 60 * 1000; // 8 hours
+const SESSION_TTL = 8 * 60 * 60 * 1000; // 8 hours (o motorista tem 7 dias: motoristaSessao.ts)
 
 export function getSession(): AuthSession | null {
   if (typeof window === "undefined") return null;
@@ -54,8 +54,9 @@ export function crachaPara(url: string | null | undefined): string {
 
 export function setSession(session: AuthSession): void {
   // Add expiry if not set
+  // Motorista: 7 dias; gestão, hotéis e restaurantes: as 8 h de sempre
   if (!session.expiresAt) {
-    session.expiresAt = Date.now() + SESSION_TTL;
+    session.expiresAt = prazoSessaoNova(session.role, Date.now(), SESSION_TTL);
   }
   // Entrar apaga o nome e as viagens guardadas de qualquer motorista anterior:
   // na app do motorista só o crachá deste login decide quem é (caso de 21/11).
