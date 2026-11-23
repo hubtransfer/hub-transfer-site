@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ajuda entre motoristas — ecrãs</title>
+<style>
+  :root { --fundo:#0A0A0A; --ouro:#F0D030; --texto:#E5E5E5; --cinza:#888; }
+  body { margin:0; background:var(--fundo); color:var(--texto); font-family:system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width:1400px; margin:0 auto; padding:24px 16px 48px; }
+  h1 { color:var(--ouro); font-size:22px; margin:0 0 4px; }
+  h2 { color:var(--ouro); font-size:15px; letter-spacing:.15em; text-transform:uppercase; margin:36px 0 12px; font-family:ui-monospace, Consolas, monospace; }
+  p.nota { color:var(--cinza); font-size:13px; margin:0 0 8px; line-height:1.5; }
+  .grelha { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:24px; }
+  figure { margin:0; }
+  figure img { width:100%; height:auto; border:1px solid #333; border-radius:22px; display:block; background:#000; }
+  figcaption { font-family:ui-monospace, Consolas, monospace; font-size:12px; color:var(--ouro); margin-bottom:8px; line-height:1.4; }
+  figcaption span { color:var(--cinza); display:block; }
+  .alto img { max-height:none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Ajuda entre motoristas — todos os ecrãs</h1>
+  <p class="nota">Ramo feature/ajuda-colegas · 23/11/2026 · telemóvel de 390 px. Nomes, viagens, horas e valores são todos inventados.</p>
+  <p class="nota">Para ver ao vivo: <code>npm run dev</code> e abrir <code>/driver/ajuda-demo</code> (só existe em desenvolvimento).</p>
+
+  <h2>O cartão da viagem</h2>
+  <div class="grelha">
+    <figure class="alto"><figcaption>01 · Cartões, todos os estados<span>«Ajuda», à espera, sem resposta, pedido ao grupo, passou para um colega; a viagem acabada não tem botão</span></figcaption><img src="imagens/01-cartoes-todos.png" alt="Lista de viagens com a pílula Ajuda em cada estado"></figure>
+    <figure><figcaption>01 · Cartões, primeiro ecrã<span>como o motorista vê ao abrir</span></figcaption><img src="imagens/01-cartoes.png" alt="Primeiro ecrã da lista de viagens"></figure>
+  </div>
+
+  <h2>Quem pede</h2>
+  <div class="grelha">
+    <figure><figcaption>02 · Pedir ajuda<span>colegas possíveis e «Pedir ao grupo»</span></figcaption><img src="imagens/02-lista.png" alt="Lista de colegas possíveis"></figure>
+    <figure><figcaption>03 · Nenhum colega possível<span>só «Pedir ao grupo»</span></figcaption><img src="imagens/03-sem-colegas.png" alt="Sem colegas possíveis"></figure>
+    <figure><figcaption>04 · Sem ligação<span>tentar outra vez ou pedir ao grupo</span></figcaption><img src="imagens/04-erro.png" alt="Erro ao carregar colegas"></figure>
+    <figure><figcaption>05 · Confirmar a deslizar<span>pedido a um colega</span></figcaption><img src="imagens/05-confirmar.png" alt="Deslizar para pedir a um colega"></figure>
+    <figure><figcaption>06 · Confirmar a deslizar<span>pedido ao grupo</span></figcaption><img src="imagens/06-confirmar-grupo.png" alt="Deslizar para pedir ao grupo"></figure>
+    <figure><figcaption>07 · À espera do colega<span>contagem até ao aviso e «Cancelar pedido»</span></figcaption><img src="imagens/07-espera.png" alt="À espera da resposta do colega"></figure>
+    <figure><figcaption>08 · À espera do grupo<span>fica com quem carregar primeiro em «Fico eu»</span></figcaption><img src="imagens/08-espera-grupo.png" alt="À espera do grupo"></figure>
+    <figure><figcaption>09 · 15 minutos sem resposta<span>«Pedir a outro colega»</span></figcaption><img src="imagens/09-sem-resposta.png" alt="Aviso de 15 minutos sem resposta"></figure>
+    <figure><figcaption>10 · Aceite<span>a viagem sai da lista de quem pediu</span></figcaption><img src="imagens/10-aceite.png" alt="O colega aceitou"></figure>
+    <figure><figcaption>11 · Recusado<span>volta à lista, sem esse colega</span></figcaption><img src="imagens/11-recusado.png" alt="O colega recusou"></figure>
+  </div>
+
+  <h2>Quem recebe</h2>
+  <div class="grelha">
+    <figure><figcaption>12 · Pedido no topo das viagens<span>«Sim, faço» / «Não posso», sem nome nem telefone do cliente</span></figcaption><img src="imagens/12-recebido.png" alt="Pedido recebido"></figure>
+    <figure><figcaption>13 · Confirmar antes de ficar<span>deslizar para ficar com a viagem</span></figcaption><img src="imagens/13-recebido-confirmar.png" alt="Confirmar antes de ficar com a viagem"></figure>
+    <figure><figcaption>14 · A viagem é sua<span>passa para a lista, com o cliente</span></figcaption><img src="imagens/14-recebido-feito.png" alt="A viagem passou para si"></figure>
+    <figure><figcaption>15 · Pedido do grupo<span>«Fico eu»</span></figcaption><img src="imagens/15-grupo.png" alt="Pedido ao grupo"></figure>
+    <figure><figcaption>16 · Outro colega foi mais rápido<span>no pedido ao grupo</span></figcaption><img src="imagens/16-grupo-ja-ficou.png" alt="Outro colega ficou com a viagem"></figure>
+  </div>
+</main>
+</body>
+</html>
