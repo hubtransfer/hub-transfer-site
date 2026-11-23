@@ -111,6 +111,11 @@ export function textoPrazoReserva(hora: string, min: number): string {
   return hora ? `Tem até às ${hora} · ${falta}` : `Tem ${min <= 1 ? "1 min" : `${min} min`}`;
 }
 
+/** Quem pediu, com o pedido reservado no grupo: «Se não confirmar em 7 min, o pedido volta ao grupo». */
+export function textoReservaQuemPediu(min: number): string {
+  return `Se não confirmar em ${Math.max(1, min)} min, o pedido volta ao grupo`;
+}
+
 /** A pílula no cartão da viagem, conforme o pedido. */
 export function textoPilula(
   p: { tipo: "colega" | "grupo"; para?: { nome: string }; ficouCom?: { nome: string } } | null,

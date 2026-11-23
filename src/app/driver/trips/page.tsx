@@ -31,6 +31,8 @@ import { useAjuda } from "@/components/driver/ajuda/useAjuda";
 import EcraPedirAjuda from "@/components/driver/ajuda/EcraPedirAjuda";
 import PedidosRecebidos from "@/components/driver/ajuda/PedidosRecebidos";
 import { viagemParaAjuda, viagemAceitaAjuda, refDaViagem } from "@/components/driver/ajuda/viagemParaAjuda";
+import EcraPedidoPorLink from "@/components/driver/ajuda/EcraPedidoPorLink";
+import { lerLinkDoPedido, type PassoLink } from "@/lib/ajuda/regras";
 
 /* ================================================================== */
 /*  Constants                                                          */
@@ -229,6 +231,34 @@ export default function DriverTripsPage() {
     const pil = textoPilula(p, p ? estadoEfectivo(p, ajudaDados.agora) : null);
     return { ...pil, onAbrir: () => setAjudaViagem(v) };
   }, [eu, ajudaDados.meus, ajudaDados.agora]);
+
+  // Entrada pelo link do WhatsApp: ?ajuda=<id do pedido>[&passo=confirmar].
+  // Guarda-se já na sessão do browser (se ainda não entrou, o login leva-o daqui
+  // e o link não se perde); abre-se quando houver motorista. Tira-se do endereço.
+  const [linkAjuda, setLinkAjuda] = useState<{ pedidoId: string; passo: PassoLink } | null>(null);
+  useEffect(() => {
+    if (!AJUDA_ACTIVA) return;
+    try {
+      const l = lerLinkDoPedido(window.location.search);
+      if (l) {
+        sessionStorage.setItem("hub_ajuda_link", JSON.stringify(l));
+        const u = new URL(window.location.href);
+        u.searchParams.delete("ajuda"); u.searchParams.delete("passo");
+        window.history.replaceState(null, "", u.pathname + u.search + u.hash);
+      }
+    } catch { /* */ }
+  }, []);
+  useEffect(() => {
+    if (!eu) return;
+    try {
+      const raw = sessionStorage.getItem("hub_ajuda_link");
+      if (!raw) return;
+      sessionStorage.removeItem("hub_ajuda_link");
+      const j = JSON.parse(raw) as { pedidoId?: string; passo?: string };
+      const l = lerLinkDoPedido(`ajuda=${encodeURIComponent(String(j.pedidoId ?? ""))}${j.passo === "confirmar" ? "&passo=confirmar" : ""}`);
+      if (l) setLinkAjuda(l);
+    } catch { /* */ }
+  }, [eu]);
 
   /* ── (heroId removed — cards self-expand on tap) ── */
 
@@ -558,6 +588,18 @@ export default function DriverTripsPage() {
           date={String(proofTrip.date || proofTrip.flightDate || "")}
           onClose={() => setProofTrip(null)}
           onSubmit={() => { setProofTrip(null); store.syncViagensSilent(); }}
+        />
+      )}
+
+      {/* ── PEDIDO ABERTO PELO LINK DO WHATSAPP (ecrã inteiro) ── */}
+      {eu && linkAjuda && (
+        <EcraPedidoPorLink
+          pedidoId={linkAjuda.pedidoId}
+          passo={linkAjuda.passo}
+          eu={eu}
+          agora={ajudaDados.agora}
+          onFechar={() => { setLinkAjuda(null); store.syncViagensSilent(); }}
+          onMudou={ajudaDados.recarregar}
         />
       )}
 

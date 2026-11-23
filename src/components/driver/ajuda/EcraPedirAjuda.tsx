@@ -1,28 +1,31 @@
 "use client";
 
-// Ecrã «Pedir ajuda» de uma viagem: resumo, colegas possíveis, «Pedir ao grupo»,
-// confirmação a deslizar e o estado do pedido (à espera, 15 min, aceite, recusado).
+// Ecrã «Pedir ajuda» de uma viagem: resumo, as duas escolhas no topo
+// («Pedir a um colega» / «Pedir ao grupo»), a lista dos colegas (só nome e
+// categoria), o motivo obrigatório, a confirmação a deslizar e o estado do
+// pedido (à espera, 15 min, reservada no grupo, aceite, recusado).
 // Nunca mostra a operadora, a referência nem o cliente.
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowLeft, ChevronRight, X, Users, Clock, CheckCircle, XCircle, AlertTriangle, Loader2 } from "lucide-react";
+import { ArrowLeft, ChevronRight, X, Users, Clock, CheckCircle, XCircle, AlertTriangle, Loader2, UserRound } from "lucide-react";
 import { ajuda, type ViagemParaAjuda } from "@/lib/ajuda/cliente";
-import type { ColegaPossivel, MotoristaRef, PedidoAjuda } from "@/lib/ajuda/tipos";
-import { estadoEfectivo, minutosAteExpirar } from "@/lib/ajuda/regras";
+import type { ColegaPossivel, MotivoAjuda, MotoristaRef, PedidoAjuda } from "@/lib/ajuda/tipos";
+import { estadoEfectivo, minutosAteExpirar, motivoValido } from "@/lib/ajuda/regras";
 import {
   T, linhaColega, textoDeslizarColega, textoEspera, textoFaltam,
-  textoSemResposta, textoAceite, textoRecusado,
+  textoSemResposta, textoAceite, textoRecusado, textoReservaQuemPediu,
 } from "@/lib/ajuda/textos";
 import DeslizarConfirmar from "./DeslizarConfirmar";
-import { ResumoViagem, Iniciais, Caixa } from "./partes";
+import { ResumoViagem, Iniciais, Caixa, EscolherMotivo } from "./partes";
 
 export type Fase =
+  | { t: "escolha" }
   | { t: "lista" }
   | { t: "confirmar"; colega: ColegaPossivel }
   | { t: "confirmarGrupo" };
 
 export default function EcraPedirAjuda({
-  viagem, eu, pedido, agora, onFechar, onViagemSaiu, onMudou, embutido = false, faseInicial,
+  viagem, eu, pedido, agora, onFechar, onViagemSaiu, onMudou, embutido = false, faseInicial, motivoInicial = null,
 }: {
   viagem: ViagemParaAjuda;
   eu: MotoristaRef;
@@ -36,15 +39,18 @@ export default function EcraPedirAjuda({
   /** só na página de demonstração: dentro de uma moldura, em vez de ecrã inteiro */
   embutido?: boolean;
   faseInicial?: Fase;
+  motivoInicial?: MotivoAjuda | null;
 }) {
-  const [fase, setFase] = useState<Fase>(faseInicial ?? { t: "lista" });
+  const recusado = pedido?.estado === "recusado";
+  const [fase, setFase] = useState<Fase>(faseInicial ?? (recusado ? { t: "lista" } : { t: "escolha" }));
+  const [motivo, setMotivo] = useState<MotivoAjuda | null>(motivoInicial ?? pedido?.motivo ?? null);
   const [colegas, setColegas] = useState<ColegaPossivel[] | null>(null);
   const [erro, setErro] = useState(false);
   const [ocupado, setOcupado] = useState(false);
   const [aviso, setAviso] = useState("");
 
   const estado = pedido ? estadoEfectivo(pedido, agora) : null;
-  const emCurso = !!pedido && (estado === "a_espera" || estado === "sem_resposta" || estado === "aceite");
+  const emCurso = !!pedido && (estado === "a_espera" || estado === "reservada" || estado === "sem_resposta" || estado === "aceite");
 
   // Só recarrega quando muda a viagem ou quem pede (não a cada render do pai)
   const viagemAtual = useRef(viagem);
@@ -59,40 +65,44 @@ export default function EcraPedirAjuda({
   // A lista volta a carregar sempre que se regressa a ela (ex.: depois de uma recusa)
   useEffect(() => { if (!emCurso && fase.t === "lista") void carregar(); }, [emCurso, fase.t, carregar]);
 
-  // Recusa: volta à lista com o aviso
+  // Recusa: volta à lista dos colegas, com o aviso
   useEffect(() => {
-    if (pedido?.estado === "recusado" && pedido.para) setAviso(textoRecusado(pedido.para.nome));
+    if (pedido?.estado === "recusado" && pedido.para) { setAviso(textoRecusado(pedido.para.nome)); setFase({ t: "lista" }); }
   }, [pedido?.id, pedido?.estado]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const pedir = useCallback(async (c: ColegaPossivel) => {
+  const enviar = useCallback(async (c: ColegaPossivel | null) => {
+    if (!motivoValido(motivo)) { setAviso(T.motivoFalta); return; }
     setOcupado(true);
     try {
-      await ajuda.pedirAColega({ viagemRef: viagem.viagemRef, de: eu.id, para: c.id }, viagem.resumo, eu.nome);
-      setAviso(""); setFase({ t: "lista" }); onMudou?.();
-    } catch { setAviso("Não foi possível enviar o pedido. Tente outra vez."); }
+      if (c) await ajuda.pedirAColega({ viagemRef: viagem.viagemRef, de: eu.id, para: c.id, motivo }, viagem.resumo, eu.nome);
+      else await ajuda.pedirAoGrupo({ viagemRef: viagem.viagemRef, de: eu.id, motivo }, viagem.resumo, eu.nome);
+      setAviso(""); setFase({ t: "escolha" }); onMudou?.();
+    } catch { setAviso(T.erroEnviar); }
     finally { setOcupado(false); }
-  }, [viagem, eu, onMudou]);
+  }, [viagem, eu, motivo, onMudou]);
 
-  const pedirGrupo = useCallback(async () => {
-    setOcupado(true);
-    try {
-      await ajuda.pedirAoGrupo({ viagemRef: viagem.viagemRef, de: eu.id }, viagem.resumo, eu.nome);
-      setAviso(""); setFase({ t: "lista" }); onMudou?.();
-    } catch { setAviso("Não foi possível enviar o pedido. Tente outra vez."); }
-    finally { setOcupado(false); }
-  }, [viagem, eu, onMudou]);
-
-  const cancelar = useCallback(async (depois?: string) => {
+  const cancelar = useCallback(async (depois: Fase, texto: string) => {
     if (!pedido) return;
     setOcupado(true);
     try {
       await ajuda.cancelar({ pedidoId: pedido.id, de: eu.id });
-      setAviso(depois ?? T.cancelado); setFase({ t: "lista" }); onMudou?.();
+      setAviso(texto); setFase(depois); onMudou?.();
     } catch { /* fica como estava */ }
     finally { setOcupado(false); }
   }, [pedido, eu, onMudou]);
 
-  const voltar = fase.t !== "lista" ? () => setFase({ t: "lista" }) : onFechar;
+  const voltar =
+    fase.t === "confirmar" ? () => setFase({ t: "lista" })
+    : fase.t !== "escolha" ? () => setFase({ t: "escolha" })
+    : onFechar;
+
+  const avisoCaixa = aviso && (
+    <div className={`rounded-xl px-4 py-3 text-sm flex items-start gap-2 ${
+      aviso === T.cancelado ? "bg-white/5 border border-white/10 text-[#BDBDBD]" : "bg-[#EF4444]/10 border border-[#EF4444]/30 text-[#FCA5A5]"
+    }`}>
+      <XCircle className="w-4 h-4 mt-0.5 flex-shrink-0" /> <span>{aviso}</span>
+    </div>
+  );
 
   return (
     <div className={`${embutido ? "absolute" : "fixed"} inset-0 z-[70] bg-black text-white overflow-y-auto`} role="dialog" aria-modal="true" aria-label={T.titulo}>
@@ -112,52 +122,54 @@ export default function EcraPedirAjuda({
       <div className="px-4 py-4 space-y-4 max-w-md mx-auto">
         <ResumoViagem r={viagem.resumo} />
 
-        {/* ── Pedido em curso ── */}
         {emCurso && pedido ? (
+          /* ── Pedido em curso ── */
           <EstadoDoPedido pedido={pedido} estado={estado!} agora={agora} ocupado={ocupado}
-            onCancelar={() => cancelar()}
-            onPedirOutro={() => cancelar("")}
+            onCancelar={() => cancelar({ t: "escolha" }, T.cancelado)}
+            onPedirOutro={() => cancelar({ t: "lista" }, "")}
             onSair={() => { onViagemSaiu?.(viagem.viagemRef); onFechar(); }} />
-        ) : fase.t === "confirmar" ? (
-          /* ── Confirmar o colega ── */
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 rounded-2xl border border-[#F0D030]/30 bg-[#1A1A00] px-4 py-3.5">
-              <Iniciais nome={fase.colega.nome} />
-              <div className="flex-1 min-w-0">
-                <p className="text-base font-bold text-white truncate">{fase.colega.nome}</p>
-                <p className="font-mono text-xs text-[#BDBDBD]">{linhaColega(fase.colega)}</p>
-              </div>
-            </div>
-            <DeslizarConfirmar texto={textoDeslizarColega(fase.colega.nome)} ocupado={ocupado} onConfirmar={() => pedir(fase.colega)} />
-            <p className="font-mono text-[11px] text-[#888] text-center">{textoEspera(fase.colega.nome).frase}</p>
-            <button type="button" onClick={() => setFase({ t: "lista" })} className="w-full h-12 font-mono text-sm text-white/50 underline underline-offset-2">
-              {T.voltar}
-            </button>
-          </div>
-        ) : fase.t === "confirmarGrupo" ? (
-          /* ── Confirmar o grupo ── */
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 rounded-2xl border border-[#F0D030]/30 bg-[#1A1A00] px-4 py-3.5">
-              <span className="w-10 h-10 rounded-full flex items-center justify-center bg-[#F0D030]/10 text-[#F0D030] border border-[#F0D030]/30"><Users className="w-5 h-5" /></span>
-              <div className="flex-1 min-w-0">
-                <p className="text-base font-bold text-white">{T.pedirGrupo}</p>
-                <p className="font-mono text-xs text-[#BDBDBD]">{T.pedirGrupoDica}</p>
-              </div>
-            </div>
-            <DeslizarConfirmar texto={T.deslizarGrupo} ocupado={ocupado} onConfirmar={pedirGrupo} />
-            <p className="font-mono text-[11px] text-[#888] text-center">{T.grupoEsperaDica}</p>
-            <button type="button" onClick={() => setFase({ t: "lista" })} className="w-full h-12 font-mono text-sm text-white/50 underline underline-offset-2">
-              {T.voltar}
-            </button>
-          </div>
-        ) : (
-          /* ── Lista dos colegas ── */
+
+        ) : fase.t === "escolha" ? (
+          /* ── As duas escolhas, logo no topo ── */
           <div className="space-y-3">
-            {aviso && (
-              <div className="rounded-xl px-4 py-3 bg-[#EF4444]/10 border border-[#EF4444]/30 text-sm text-[#FCA5A5] flex items-start gap-2">
-                <XCircle className="w-4 h-4 mt-0.5 flex-shrink-0" /> <span>{aviso}</span>
+            {avisoCaixa}
+            <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#F0D030] px-1">{T.escolhaTitulo}</p>
+            <Escolha icone={<UserRound className="w-5 h-5" />} titulo={T.pedirColega} dica={T.pedirColegaDica}
+              onClick={() => { setAviso(""); setFase({ t: "lista" }); }} />
+            <Escolha icone={<Users className="w-5 h-5" />} titulo={T.pedirGrupo} dica={T.pedirGrupoDica}
+              onClick={() => { setAviso(""); setFase({ t: "confirmarGrupo" }); }} />
+          </div>
+
+        ) : fase.t === "confirmar" || fase.t === "confirmarGrupo" ? (
+          /* ── Motivo + deslizar ── */
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 rounded-2xl border border-[#F0D030]/30 bg-[#1A1A00] px-4 py-3.5">
+              {fase.t === "confirmar"
+                ? <Iniciais nome={fase.colega.nome} />
+                : <span className="w-10 h-10 rounded-full flex items-center justify-center bg-[#F0D030]/10 text-[#F0D030] border border-[#F0D030]/30"><Users className="w-5 h-5" /></span>}
+              <div className="flex-1 min-w-0">
+                <p className="text-base font-bold text-white truncate">{fase.t === "confirmar" ? fase.colega.nome : T.pedirGrupo}</p>
+                <p className="font-mono text-xs text-[#BDBDBD]">{fase.t === "confirmar" ? linhaColega(fase.colega) : T.pedirGrupoDica}</p>
               </div>
-            )}
+            </div>
+            <EscolherMotivo valor={motivo} onEscolher={(m) => { setMotivo(m); setAviso(""); }} />
+            {aviso && aviso !== T.motivoFalta && avisoCaixa}
+            <DeslizarConfirmar
+              texto={fase.t === "confirmar" ? textoDeslizarColega(fase.colega.nome) : T.deslizarGrupo}
+              ocupado={ocupado} desactivado={!motivo}
+              onConfirmar={() => enviar(fase.t === "confirmar" ? fase.colega : null)} />
+            <p className="font-mono text-[11px] text-[#888] text-center">
+              {!motivo ? T.motivoFalta : fase.t === "confirmar" ? textoEspera(fase.colega.nome).frase : T.grupoEsperaDica}
+            </p>
+            <button type="button" onClick={voltar} className="w-full h-12 font-mono text-sm text-white/50 underline underline-offset-2">
+              {T.voltar}
+            </button>
+          </div>
+
+        ) : (
+          /* ── Lista dos colegas: só o nome e a categoria ── */
+          <div className="space-y-3">
+            {avisoCaixa}
             <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#F0D030] px-1">{T.subtitulo}</p>
 
             {colegas === null && !erro && (
@@ -193,9 +205,9 @@ export default function EcraPedirAjuda({
             {(colegas !== null || erro) && (
               <button type="button" onClick={() => { setAviso(""); setFase({ t: "confirmarGrupo" }); }}
                 className={`w-full h-14 rounded-xl font-mono text-base font-bold flex items-center justify-center gap-2.5 transition-colors ${
-                  colegas && colegas.length === 0
-                    ? "bg-[#F0D030] text-black active:bg-[#D4B820]"
-                    : "bg-transparent border border-[#F0D030]/40 text-[#F0D030] active:bg-[#F0D030]/10"
+                  colegas && colegas.length > 0
+                    ? "bg-transparent border border-[#F0D030]/40 text-[#F0D030] active:bg-[#F0D030]/10"
+                    : "bg-[#F0D030] text-black active:bg-[#D4B820]"
                 }`}>
                 <Users className="w-5 h-5" /> {T.pedirGrupo}
               </button>
@@ -207,7 +219,21 @@ export default function EcraPedirAjuda({
   );
 }
 
-/** O pedido depois de enviado: à espera, 15 min sem resposta, aceite, grupo. */
+function Escolha({ icone, titulo, dica, onClick }: { icone: React.ReactNode; titulo: string; dica: string; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick}
+      className="w-full flex items-center gap-3 rounded-2xl bg-[#1A1A1A] border border-[#F0D030]/30 px-4 py-4 text-left active:bg-[#F0D030]/10 hover:border-[#F0D030]/60 transition-colors">
+      <span className="w-11 h-11 rounded-full flex items-center justify-center bg-[#F0D030]/10 text-[#F0D030] border border-[#F0D030]/30 flex-shrink-0">{icone}</span>
+      <span className="flex-1 min-w-0">
+        <span className="block text-base font-bold text-white">{titulo}</span>
+        <span className="block text-xs text-[#BDBDBD] leading-snug">{dica}</span>
+      </span>
+      <ChevronRight className="w-5 h-5 text-[#F0D030]/70" />
+    </button>
+  );
+}
+
+/** O pedido depois de enviado: à espera, 15 min sem resposta, reservada (grupo), aceite. */
 export function EstadoDoPedido({
   pedido, estado, agora, ocupado, onCancelar, onPedirOutro, onSair,
 }: {
@@ -249,10 +275,13 @@ export function EstadoDoPedido({
     );
   }
 
-  // À espera (colega ou grupo)
+  // À espera (colega ou grupo) ou reservada (grupo: um colega aceitou e está a confirmar)
   const grupo = pedido.tipo === "grupo";
-  const e = grupo ? { titulo: T.grupoEspera, frase: T.grupoEsperaDica } : textoEspera(pedido.para?.nome ?? "");
-  const faltam = minutosAteExpirar(pedido.expiraEm, agora);
+  const reservada = estado === "reservada";
+  const e = reservada
+    ? { titulo: T.grupoReservada, frase: T.grupoReservadaDica }
+    : grupo ? { titulo: T.grupoEspera, frase: T.grupoEsperaDica } : textoEspera(pedido.para?.nome ?? "");
+  const faltam = minutosAteExpirar(reservada ? pedido.reservaExpiraEm : pedido.expiraEm, agora);
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-[#F0D030]/40 bg-[#1A1A00] px-4 py-4 space-y-3">
@@ -268,9 +297,10 @@ export function EstadoDoPedido({
             <p className="text-sm text-[#BDBDBD] leading-snug">{e.frase}</p>
           </div>
         </div>
-        {!grupo && (
+        {(!grupo || reservada) && (
           <p className="font-mono text-[11px] text-[#888] flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5" /> {textoFaltam(faltam)}
+            <Clock className="w-3.5 h-3.5" />
+            {reservada ? textoReservaQuemPediu(faltam) : textoFaltam(faltam)}
           </p>
         )}
       </div>

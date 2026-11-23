@@ -2,9 +2,10 @@
 
 // Peças comuns aos ecrãs da ajuda: o resumo da viagem e as iniciais do colega.
 import React from "react";
-import { ArrowRight } from "lucide-react";
-import type { ResumoViagemAjuda } from "@/lib/ajuda/tipos";
-import { textoValor } from "@/lib/ajuda/textos";
+import { ArrowRight, Plane, Lock } from "lucide-react";
+import type { MotivoAjuda, ResumoViagemAjuda } from "@/lib/ajuda/tipos";
+import { MOTIVOS } from "@/lib/ajuda/regras";
+import { T, NOME_MOTIVO, textoValor } from "@/lib/ajuda/textos";
 
 /** Cor do rótulo, como no cartão (CHEGADA amarelo, PARTIDA azul, TRANSFER verde-água). */
 export function corDoRotulo(rotulo: string): string {
@@ -16,7 +17,7 @@ export function corDoRotulo(rotulo: string): string {
   return "#C084FC";
 }
 
-/** Resumo da viagem: rótulo, hora, de onde para onde, data e valor (se o cartão o mostra). */
+/** Resumo da viagem: rótulo, dia, hora, voo, de onde para onde e valor (se o cartão o mostra). */
 export function ResumoViagem({ r, compacto = false }: { r: ResumoViagemAjuda; compacto?: boolean }) {
   const cor = corDoRotulo(r.rotulo);
   const valor = textoValor(r.valor);
@@ -39,6 +40,11 @@ export function ResumoViagem({ r, compacto = false }: { r: ResumoViagemAjuda; co
         </div>
         {valor && <span className="font-mono text-sm font-bold text-[#F0D030] flex-shrink-0">{valor}</span>}
       </div>
+      {r.voo && (
+        <p className="mt-1.5 font-mono text-[11px] text-[#BDBDBD] flex items-center gap-1.5">
+          <Plane className="w-3.5 h-3.5 text-[#888]" /> Voo {r.voo}
+        </p>
+      )}
     </div>
   );
 }
@@ -64,6 +70,33 @@ export function Caixa({
       <p className="text-base font-bold" style={{ color: cor }}>{titulo}</p>
       {frase && <p className="text-sm text-[#BDBDBD] leading-snug">{frase}</p>}
       {children}
+    </div>
+  );
+}
+
+/** O motivo: um toque obrigatório entre quatro. Só a gestão o vê. */
+export function EscolherMotivo({
+  valor, onEscolher,
+}: { valor: MotivoAjuda | null; onEscolher: (m: MotivoAjuda) => void }) {
+  return (
+    <div className="space-y-2">
+      <p className="text-sm font-bold text-white">{T.motivoTitulo}</p>
+      <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label={T.motivoTitulo}>
+        {MOTIVOS.map((m) => {
+          const sel = valor === m;
+          return (
+            <button key={m} type="button" role="radio" aria-checked={sel} onClick={() => onEscolher(m)}
+              className={`h-12 rounded-xl font-mono text-sm font-bold border transition-colors ${
+                sel ? "bg-[#F0D030] text-black border-[#F0D030]" : "bg-[#1A1A1A] text-white/80 border-[#2A2A2A] active:bg-white/10"
+              }`}>
+              {NOME_MOTIVO[m]}
+            </button>
+          );
+        })}
+      </div>
+      <p className="font-mono text-[11px] text-[#888] flex items-center gap-1.5">
+        <Lock className="w-3 h-3" /> {T.motivoDica}
+      </p>
     </div>
   );
 }

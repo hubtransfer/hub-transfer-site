@@ -13,11 +13,14 @@ export default function DeslizarConfirmar({
   onConfirmar,
   cor = "#F0D030",
   ocupado = false,
+  desactivado = false,
 }: {
   texto: string;
   onConfirmar: () => void;
   cor?: string;
   ocupado?: boolean;
+  /** ainda falta algo (ex.: o motivo): não desliza */
+  desactivado?: boolean;
 }) {
   const pistaRef = useRef<HTMLDivElement>(null);
   const inicioRef = useRef(0);
@@ -28,12 +31,12 @@ export default function DeslizarConfirmar({
   const max = () => Math.max(1, (pistaRef.current?.clientWidth ?? 300) - POLEGAR - 8);
 
   const onDown = useCallback((e: React.PointerEvent) => {
-    if (ocupado) return;
+    if (ocupado || desactivado) return;
     e.stopPropagation();
     (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
     inicioRef.current = e.clientX - x;
     setAArrastar(true);
-  }, [ocupado, x]);
+  }, [ocupado, desactivado, x]);
 
   const onMove = useCallback((e: React.PointerEvent) => {
     if (!aArrastar) return;
@@ -57,8 +60,9 @@ export default function DeslizarConfirmar({
   return (
     <div
       ref={pistaRef}
-      className="relative h-[60px] rounded-2xl overflow-hidden select-none touch-none"
-      style={{ background: "#141414", border: `1px solid ${cor}55` }}
+      className="relative h-[60px] rounded-2xl overflow-hidden select-none touch-none transition-opacity"
+      style={{ background: "#141414", border: `1px solid ${cor}55`, opacity: desactivado ? 0.35 : 1 }}
+      aria-disabled={desactivado || undefined}
     >
       {/* rasto */}
       <div className="absolute inset-y-0 left-0 rounded-2xl"
@@ -72,11 +76,12 @@ export default function DeslizarConfirmar({
       <button
         type="button"
         aria-label={texto}
+        disabled={desactivado}
         onPointerDown={onDown}
         onPointerMove={onMove}
         onPointerUp={onUp}
         onPointerCancel={onUp}
-        onKeyDown={(e) => { if (!ocupado && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); onConfirmar(); } }}
+        onKeyDown={(e) => { if (!ocupado && !desactivado && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); onConfirmar(); } }}
         className="absolute top-1 left-1 rounded-xl flex items-center justify-center text-black cursor-grab active:cursor-grabbing"
         style={{ width: POLEGAR, height: POLEGAR, background: cor, transform: `translateX(${x}px)`, transition: aArrastar ? "none" : "transform .25s ease" }}
       >
