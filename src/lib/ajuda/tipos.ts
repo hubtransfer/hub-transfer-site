@@ -210,6 +210,34 @@ export interface PedidoRecebido {
 export interface ResponderPedido {
   pedidoId: PedidoId;
   resposta: "sim" | "nao";
+  /** 24/11: o motorista viu o aviso vermelho e aceita mesmo assim («Aceitar mesmo assim») */
+  avisoVisto?: boolean;
+}
+
+// ── O aviso do tempo (24/11) ────────────────────────────────────
+
+/**
+ * O tempo já não impede ninguém de aceitar: o HUB-Central faz as contas
+ * com as outras viagens de quem vai aceitar e avisa.
+ *   verde    — folga boa: não se mostra nada (vem sem texto);
+ *   amarelo  — apertado ou atraso pequeno: o texto numa caixa amarela;
+ *   vermelho — atraso grande: caixa vermelha e «Aceitar mesmo assim»,
+ *              que repete o ajudaResponder com avisoVisto: true.
+ * Vem no ajudaRecebido (a entrada pelo link) e no ajudaResponder.
+ */
+export type CorAviso = "verde" | "amarelo" | "vermelho";
+
+export interface AvisoTempo {
+  cor: CorAviso;
+  /** o número do texto, arredondado a 5 */
+  minutos: number;
+  atraso: boolean;
+  folga: number;
+  conta: "anterior" | "seguinte" | "";
+  /** os minutos de atraso a partir dos quais é vermelho */
+  limite: number;
+  /** vazio no verde */
+  texto: string;
 }
 
 /**
@@ -230,8 +258,12 @@ export interface ConfirmarReserva {
  */
 export interface RespostaResponder {
   ok: boolean;
-  motivo?: "ja_ficou" | "reservada" | "cancelado" | "expirou";
-  pedido: PedidoRecebido;
+  /** aviso (24/11): vermelho sem o sinal — nada mudou; mostra-se o aviso e o «Aceitar mesmo assim» */
+  motivo?: "ja_ficou" | "reservada" | "cancelado" | "expirou" | "aviso";
+  /** no motivo «aviso» pode não vir */
+  pedido?: PedidoRecebido;
+  /** o aviso do tempo (no ok, se o backend o mandou; no motivo «aviso», sempre vermelho) */
+  aviso?: AvisoTempo;
 }
 
 /**
@@ -243,6 +275,8 @@ export interface RespostaRecebido {
   pedido: PedidoRecebido | null;
   podeAceitar?: boolean;
   razao?: string;
+  /** 24/11: o aviso do tempo para este motorista (só quando pode aceitar) */
+  aviso?: AvisoTempo;
 }
 
 // ── 5. O cliente: o que a app pede ao HUB-Central ───────────────
@@ -274,7 +308,7 @@ export interface ClienteAjuda {
   recebidos(): Promise<PedidoRecebido[]>;
   /** a entrada pelo link do WhatsApp */
   recebido(pedidoId: PedidoId): Promise<RespostaRecebido>;
-  /** ja_ficou / reservada / cancelado / expirou voltam como { ok: false, motivo }; os outros erros são AjudaErro */
+  /** ja_ficou / reservada / cancelado / expirou / aviso voltam como { ok: false, motivo }; os outros erros são AjudaErro */
   responder(p: ResponderPedido): Promise<RespostaResponder>;
   /** a segunda confirmação do grupo (mesmas regras do responder) */
   confirmar(p: ConfirmarReserva): Promise<RespostaResponder>;

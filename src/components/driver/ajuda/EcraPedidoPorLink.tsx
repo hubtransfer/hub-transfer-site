@@ -9,7 +9,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { X, CheckCircle, AlertTriangle, Info, Loader2, Clock, Users } from "lucide-react";
-import type { MotoristaRef, PedidoRecebido } from "@/lib/ajuda/tipos";
+import type { AvisoTempo, MotoristaRef, PedidoRecebido } from "@/lib/ajuda/tipos";
 import { textoDoErro } from "@/lib/ajuda/hubCentral";
 import { useClienteAjuda } from "./contexto";
 import { estadoEfectivo, horaDoPrazo, minutosAteExpirar, type PassoLink } from "@/lib/ajuda/regras";
@@ -35,6 +35,8 @@ export default function EcraPedidoPorLink({
   const ajuda = useClienteAjuda();
   const [p, setP] = useState<PedidoRecebido | null | undefined>(inicial);
   const [naoPode, setNaoPode] = useState<string | undefined>();
+  // 24/11: o aviso do tempo do ajudaRecebido (null = sem aviso). Na demonstração (inicial), o cartão lê-o.
+  const [avisoTempo, setAvisoTempo] = useState<AvisoTempo | null | undefined>(inicial === undefined ? null : undefined);
   const [erro, setErro] = useState("");
   const [desfecho, setDesfecho] = useState<Desfecho | undefined>();
 
@@ -45,6 +47,7 @@ export default function EcraPedidoPorLink({
       const r = await ajuda.recebido(pedidoId);
       setP(r.pedido);
       setNaoPode(r.podeAceitar === false ? (r.razao || "") || undefined : undefined);
+      setAvisoTempo(r.podeAceitar === false ? null : r.aviso ?? null);
     } catch (e) {
       setErro(textoDoErro(e, T.erroLink));
     }
@@ -76,7 +79,7 @@ export default function EcraPedidoPorLink({
     corpo = <SegundaConfirmacao p={p} eu={eu} agora={agora} onMudou={() => { onMudou?.(); void carregar(); }} onFechar={onFechar} />;
   } else {
     corpo = (
-      <CartaoRecebido p={p} eu={eu} agora={agora} naoPode={naoPode}
+      <CartaoRecebido p={p} eu={eu} agora={agora} naoPode={naoPode} avisoTempo={avisoTempo}
         desfecho={desfecho ?? desfechoDoPedido(p, eu, agora)}
         onDesfecho={(d) => { setDesfecho(d); onMudou?.(); }}
         onDispensar={onFechar}
@@ -120,6 +123,8 @@ export function SegundaConfirmacao({
     try {
       // Quem confirma é o do crachá: não leva «motorista»
       const r = await ajuda.confirmar({ pedidoId: p.id });
+      // A segunda confirmação não pede o sinal; se o backend o pedisse, não se mostra que deu certo
+      if (!r.ok && r.motivo === "aviso") { setErro(r.aviso?.texto || T.avisoVermelhoPadrao); return; }
       setResultado(r.ok ? "feito" : r.motivo === "ja_ficou" ? "ja_ficou" : r.motivo === "cancelado" ? "cancelado" : "prazo");
       onMudou?.();
     } catch (e) {

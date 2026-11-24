@@ -16,6 +16,7 @@
 //   · os outros erros chegam como AjudaErro, com o texto do backend.
 // ───────────────────────────────────────────────────────────────
 import type {
+  AvisoTempo,
   CancelarPedido,
   ClienteAjuda,
   ConfirmarReserva,
@@ -40,14 +41,69 @@ export class AjudaErro extends Error {
   texto: string;
   razao?: string;
   pedido?: unknown;
-  constructor(motivo: string, texto: string, razao?: string, pedido?: unknown) {
+  /** 24/11: o aviso do tempo que veio com a recusa (motivo «aviso») */
+  aviso?: unknown;
+  constructor(motivo: string, texto: string, razao?: string, pedido?: unknown, aviso?: unknown) {
     super(texto);
     this.name = "AjudaErro";
     this.motivo = motivo;
     this.texto = texto;
     if (razao) this.razao = razao;
     if (pedido !== undefined) this.pedido = pedido;
+    if (aviso !== undefined) this.aviso = aviso;
   }
+}
+
+// ── O aviso do tempo (24/11) ────────────────────────────────────
+
+const CORES_AVISO = new Set(["verde", "amarelo", "vermelho"]);
+
+/**
+ * Lê o aviso do tempo que veio do HUB-Central. Uma cor que não se conhece,
+ * ou um aviso que não é um objecto → null (fica como antes de haver aviso).
+ */
+export function lerAviso(x: unknown): AvisoTempo | null {
+  if (!x || typeof x !== "object" || Array.isArray(x)) return null;
+  const a = x as Record<string, unknown>;
+  const cor = typeof a.cor === "string" ? a.cor.trim().toLowerCase() : "";
+  if (!CORES_AVISO.has(cor)) return null;
+  const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : Number(v) || 0);
+  const conta = a.conta === "anterior" || a.conta === "seguinte" ? a.conta : "";
+  return {
+    cor: cor as AvisoTempo["cor"],
+    minutos: n(a.minutos),
+    atraso: a.atraso === true,
+    folga: n(a.folga),
+    conta,
+    limite: n(a.limite),
+    texto: typeof a.texto === "string" ? a.texto.trim() : "",
+  };
+}
+
+/**
+ * O que o ecrã do pedido mostra para um aviso:
+ *   nenhum   — sem aviso, verde, ou amarelo sem texto: os botões como antes;
+ *   amarelo  — o texto numa caixa amarela, os botões como antes;
+ *   vermelho — caixa vermelha «Atenção ao tempo» e «Aceitar mesmo assim» (com avisoVisto).
+ */
+export type MostraAviso =
+  | { tipo: "nenhum" }
+  | { tipo: "amarelo"; texto: string }
+  | { tipo: "vermelho"; texto: string };
+
+export function comoMostrarAviso(a: AvisoTempo | null | undefined, textoVermelhoPadrao: string): MostraAviso {
+  if (!a || a.cor === "verde") return { tipo: "nenhum" };
+  if (a.cor === "amarelo") return a.texto ? { tipo: "amarelo", texto: a.texto } : { tipo: "nenhum" };
+  return { tipo: "vermelho", texto: a.texto || textoVermelhoPadrao };
+}
+
+/**
+ * O pedido que o botão manda ao ajudaResponder. O sinal «avisoVisto» só vai
+ * num «sim» com a caixa vermelha à vista («Aceitar mesmo assim»); o «Não posso»
+ * nunca o leva.
+ */
+export function pedidoDeResposta(pedidoId: string, resposta: "sim" | "nao", vermelho: boolean): ResponderPedido {
+  return resposta === "sim" && vermelho ? { pedidoId, resposta, avisoVisto: true } : { pedidoId, resposta };
 }
 
 /**
@@ -65,7 +121,7 @@ export function lerResposta(json: unknown, avisarSessao: (j: unknown) => boolean
   const motivo = typeof j.motivo === "string" && j.motivo ? j.motivo : "erro";
   const texto = typeof j.texto === "string" && j.texto.trim() ? j.texto.trim() : TEXTO_ERRO;
   const razao = typeof j.razao === "string" && j.razao.trim() ? j.razao.trim() : undefined;
-  throw new AjudaErro(motivo, texto, razao, j.pedido);
+  throw new AjudaErro(motivo, texto, razao, j.pedido, j.aviso);
 }
 
 /**
@@ -230,12 +286,29 @@ export function criarClienteHubCentral(o: {
     });
   }
 
-  /** responder / confirmar: as recusas conhecidas voltam como { ok:false, motivo, pedido } */
+  /**
+   * responder / confirmar: as recusas conhecidas voltam como { ok:false, motivo, pedido }.
+   * 24/11: o motivo «aviso» (vermelho sem o sinal) volta como { ok:false, motivo:"aviso", aviso }
+   * — nada mudou no backend; o ecrã mostra o aviso e o «Aceitar mesmo assim».
+   */
   async function resposta(action: string, corpo: object): Promise<RespostaResponder> {
     try {
       const j = await post(action, corpo);
-      return { ok: true, pedido: j.pedido as PedidoRecebido };
+      const out: RespostaResponder = { ok: true, pedido: j.pedido as PedidoRecebido };
+      const aviso = lerAviso(j.aviso);
+      if (aviso) out.aviso = aviso;
+      return out;
     } catch (e) {
+      if (e instanceof AjudaErro && e.motivo === "aviso") {
+        // Sem um aviso que se leia, falha com o texto do backend (nenhum botão mostra que deu certo)
+        const lido = lerAviso(e.aviso);
+        if (!lido) throw e;
+        // O motivo «aviso» é sempre um vermelho: é ele que pede o sinal
+        const aviso: AvisoTempo = { ...lido, cor: "vermelho" };
+        const out: RespostaResponder = { ok: false, motivo: "aviso", aviso };
+        if (e.pedido && typeof e.pedido === "object") out.pedido = e.pedido as PedidoRecebido;
+        return out;
+      }
       if (e instanceof AjudaErro && RESPOSTAS_CONHECIDAS.has(e.motivo) && e.pedido && typeof e.pedido === "object") {
         return { ok: false, motivo: e.motivo as RespostaResponder["motivo"], pedido: e.pedido as PedidoRecebido };
       }
@@ -275,10 +348,15 @@ export function criarClienteHubCentral(o: {
       const out: RespostaRecebido = { pedido: (j.pedido as PedidoRecebido | null) ?? null };
       if (typeof j.podeAceitar === "boolean") out.podeAceitar = j.podeAceitar;
       if (typeof j.razao === "string" && j.razao.trim()) out.razao = j.razao.trim();
+      const aviso = lerAviso(j.aviso);
+      if (aviso) out.aviso = aviso;
       return out;
     },
     responder(p: ResponderPedido): Promise<RespostaResponder> {
-      return resposta("ajudaResponder", { pedidoId: p.pedidoId, resposta: p.resposta });
+      // O sinal só vai quando o motorista carregou em «Aceitar mesmo assim» (e só num «sim»)
+      const corpo: Record<string, unknown> = { pedidoId: p.pedidoId, resposta: p.resposta };
+      if (p.avisoVisto === true && p.resposta === "sim") corpo.avisoVisto = true;
+      return resposta("ajudaResponder", corpo);
     },
     confirmar(p: ConfirmarReserva): Promise<RespostaResponder> {
       return resposta("ajudaConfirmar", { pedidoId: p.pedidoId });
