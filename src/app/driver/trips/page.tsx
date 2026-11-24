@@ -21,8 +21,17 @@ import {
   isNoShowViagem,
   isCanceladaViagem,
   fetchMotoristas,
+  chaveMotorista,
 } from "@/lib/trips";
 import type { HubViagem, Driver } from "@/lib/trips";
+import { estadoEfectivo } from "@/lib/ajuda/regras";
+import { textoPilula } from "@/lib/ajuda/textos";
+import { useAjuda } from "@/components/driver/ajuda/useAjuda";
+import EcraPedirAjuda from "@/components/driver/ajuda/EcraPedirAjuda";
+import PedidosRecebidos from "@/components/driver/ajuda/PedidosRecebidos";
+import { viagemParaAjuda, viagemAceitaAjuda, refDaViagem } from "@/components/driver/ajuda/viagemParaAjuda";
+import EcraPedidoPorLink from "@/components/driver/ajuda/EcraPedidoPorLink";
+import { lerLinkDoPedido, type PassoLink } from "@/lib/ajuda/regras";
 
 /* ================================================================== */
 /*  PAGE                                                               */
@@ -175,6 +184,57 @@ export default function DriverTripsPage() {
     return { total: contam.length, chegadas, recolhas, totalPay, done };
   }, [driverTrips]);
 
+  /* ── Ajuda entre motoristas ──
+     Só aparece se o HUB-Central disser que está ligada para ESTE motorista
+     (em TESTE só os nomes do teste; LIGADA todos). Desligada, fora do teste,
+     sem resposta ou recusada → nem o botão nem os pedidos aparecem.
+     Quem pede/responde é o do crachá; `eu` serve só para comparar nomes. */
+  const eu = useMemo(
+    () => (nomeConfirmado ? { id: chaveMotorista(nomeConfirmado), nome: nomeConfirmado } : null),
+    [nomeConfirmado],
+  );
+  const ajudaDados = useAjuda(!!eu && estado === "ok" && !recusada && !store.sessaoRecusada);
+  const ajudaLigada = !!eu && ajudaDados.ligada;
+  const [ajudaViagem, setAjudaViagem] = useState<HubViagem | null>(null);
+  const ajudaResumo = useMemo(() => (ajudaViagem ? viagemParaAjuda(ajudaViagem) : null), [ajudaViagem]);
+  // Viagens que passaram para um colega: saem já da lista (o getViagens confirma no próximo sync)
+  const [passaram, setPassaram] = useState<Set<string>>(new Set());
+  const ajudaDoCartao = useCallback((v: HubViagem) => {
+    if (!ajudaLigada || !viagemAceitaAjuda(v)) return undefined;
+    const p = ajudaDados.meus[refDaViagem(v)] ?? null;
+    const pil = textoPilula(p, p ? estadoEfectivo(p, ajudaDados.agora) : null);
+    return { ...pil, onAbrir: () => setAjudaViagem(v) };
+  }, [ajudaLigada, ajudaDados.meus, ajudaDados.agora]);
+
+  // Entrada pelo link do WhatsApp: ?ajuda=<id do pedido>[&passo=confirmar].
+  // Guarda-se já na sessão do browser (se ainda não entrou, o login leva-o daqui
+  // e o link não se perde); abre-se quando houver motorista. Tira-se do endereço.
+  const [linkAjuda, setLinkAjuda] = useState<{ pedidoId: string; passo: PassoLink } | null>(null);
+  useEffect(() => {
+    try {
+      const l = lerLinkDoPedido(window.location.search);
+      if (l) {
+        sessionStorage.setItem("hub_ajuda_link", JSON.stringify(l));
+        const u = new URL(window.location.href);
+        u.searchParams.delete("ajuda"); u.searchParams.delete("passo");
+        window.history.replaceState(null, "", u.pathname + u.search + u.hash);
+      }
+    } catch { /* */ }
+  }, []);
+  // Só depois de o HUB-Central responder: ligada → abre; desligada → o link esquece-se.
+  useEffect(() => {
+    if (!eu || !ajudaDados.verificada) return;
+    try {
+      const raw = sessionStorage.getItem("hub_ajuda_link");
+      if (!raw) return;
+      sessionStorage.removeItem("hub_ajuda_link");
+      if (!ajudaDados.ligada) return;
+      const j = JSON.parse(raw) as { pedidoId?: string; passo?: string };
+      const l = lerLinkDoPedido(`ajuda=${encodeURIComponent(String(j.pedidoId ?? ""))}${j.passo === "confirmar" ? "&passo=confirmar" : ""}`);
+      if (l) setLinkAjuda(l);
+    } catch { /* */ }
+  }, [eu, ajudaDados.verificada, ajudaDados.ligada]);
+
   /* ── (heroId removed — cards self-expand on tap) ── */
 
   /* ================================================================ */
@@ -236,6 +296,7 @@ export default function DriverTripsPage() {
   // NO_SHOW dá baixa: sai das ativas e junta-se às terminadas (com selo próprio)
   const nonDoneTrips = driverTrips.filter(
     (v) =>
+      !passaram.has(refDaViagem(v)) &&
       !isNoShowViagem(v) &&
       !v.concluida &&
       v.status !== "CONCLUIDA" &&
@@ -364,6 +425,10 @@ export default function DriverTripsPage() {
 
       {/* ── TRIP CARDS ── */}
       <div className="px-4 pb-8 space-y-2">
+        {/* ── PEDIDOS DE AJUDA RECEBIDOS — no topo ── */}
+        {eu && ajudaLigada && (
+          <PedidosRecebidos recebidos={ajudaDados.recebidos} eu={eu} agora={ajudaDados.agora} onMudou={ajudaDados.recarregar} />
+        )}
         {driverTrips.length === 0 && store.isLoading ? (
           <SkeletonList count={3} />
         ) : driverTrips.length === 0 ? (
@@ -399,6 +464,7 @@ export default function DriverTripsPage() {
                     onDarBaixa={store.darBaixa}
                     onShowNameplate={openNameplate}
                     onRefresh={store.syncViagensSilent}
+                    ajuda={ajudaDoCartao(viagem)}
                     isNext={i === 0 && nActivas > 0}
                   />
                 </React.Fragment>
@@ -475,6 +541,31 @@ export default function DriverTripsPage() {
           date={String(proofTrip.date || proofTrip.flightDate || "")}
           onClose={() => setProofTrip(null)}
           onSubmit={() => { setProofTrip(null); store.syncViagensSilent(); }}
+        />
+      )}
+
+      {/* ── PEDIDO ABERTO PELO LINK DO WHATSAPP (ecrã inteiro) ── */}
+      {eu && ajudaLigada && linkAjuda && (
+        <EcraPedidoPorLink
+          pedidoId={linkAjuda.pedidoId}
+          passo={linkAjuda.passo}
+          eu={eu}
+          agora={ajudaDados.agora}
+          onFechar={() => { setLinkAjuda(null); store.syncViagensSilent(); }}
+          onMudou={ajudaDados.recarregar}
+        />
+      )}
+
+      {/* ── PEDIR AJUDA (ecrã inteiro) ── */}
+      {eu && ajudaLigada && ajudaResumo && (
+        <EcraPedirAjuda
+          viagem={ajudaResumo}
+          eu={eu}
+          pedido={ajudaDados.meus[ajudaResumo.viagemRef] ?? null}
+          agora={ajudaDados.agora}
+          onFechar={() => setAjudaViagem(null)}
+          onViagemSaiu={(ref) => { setPassaram((s) => new Set(s).add(ref)); store.syncViagensSilent(); }}
+          onMudou={ajudaDados.recarregar}
         />
       )}
 

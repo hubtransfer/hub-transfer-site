@@ -204,6 +204,8 @@ interface DriverTripCardProps {
   onCancelar?: (viagem: HubViagem, inicial?: OpcaoCancelar) => void;  // admin only — janela Cancelar / No-show
   onRefresh?: () => void;  // triggered after each swipe to re-fetch fresh data
   mode?: "driver" | "admin";
+  /** «Ajuda» (só motorista): pílula discreta no topo do cartão; a página decide se aparece */
+  ajuda?: { texto: string; tom: "normal" | "espera" | "alerta" | "feito"; onAbrir: () => void };
   isNext?: boolean;     // first non-done trip gets hero treatment
   isHistorical?: boolean; // viewing past date — don't dim completed trips
 }
@@ -220,6 +222,7 @@ export default function DriverTripCard({
   onCancelar,
   onRefresh,
   mode = "driver",
+  ajuda,
   isNext = false,
   isHistorical = false,
 }: DriverTripCardProps) {
@@ -514,6 +517,27 @@ export default function DriverTripCard({
         <div className="px-4 pt-3 flex items-center justify-between">
           <span className="font-semibold font-mono leading-none" style={{ fontSize: "0.65rem", letterSpacing: "0.5px", color: c.hex }}>{rotulo}</span>
           <div className="flex items-center gap-2">
+          {/* Ajuda — só no motorista, só em viagens por acabar (a página decide).
+              stopPropagation: tocar na pílula não expande o cartão nem arma o deslizar. */}
+          {mode === "driver" && ajuda && !isDone && !encerrada && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); ajuda.onAbrir(); }}
+              onPointerDown={(e) => e.stopPropagation()}
+              className="inline-flex items-center gap-1 h-6 px-2 rounded-full font-mono text-[10px] font-semibold leading-none whitespace-nowrap border transition-colors"
+              style={
+                ajuda.tom === "alerta" ? { color: "#F59E0B", borderColor: "#F59E0B80", background: "#F59E0B1A" }
+                : ajuda.tom === "espera" ? { color: "#F0D030", borderColor: "#F0D03080", background: "#F0D0301A" }
+                : ajuda.tom === "feito" ? { color: "#22C55E", borderColor: "#22C55E80", background: "#22C55E1A" }
+                : { color: "#9CA3AF", borderColor: "#3A3A3A", background: "transparent" }
+              }
+            >
+              {ajuda.tom === "espera" && <span className="w-1.5 h-1.5 rounded-full bg-[#F0D030] animate-pulse" />}
+              {ajuda.tom === "alerta" && <span aria-hidden>⚠</span>}
+              {ajuda.tom === "normal" && <span aria-hidden>🤝</span>}
+              {ajuda.texto}
+            </button>
+          )}
           {/* Controlo de espera — o chip só existe com esperaEstado preenchido.
               Gestão: painel completo com acções. Motorista: variante SÓ LEITURA
               (chip + cabeçalho + linha do tempo + telefone), sem onRefresh
