@@ -9,10 +9,11 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { CheckCircle, Users, HandHelping, Info, Clock, MessageCircle, AlertTriangle } from "lucide-react";
-import { ajuda } from "@/lib/ajuda/cliente";
 import type { MotoristaRef, PedidoRecebido } from "@/lib/ajuda/tipos";
+import { textoDoErro } from "@/lib/ajuda/hubCentral";
+import { useClienteAjuda } from "./contexto";
 import { estadoEfectivo, horaDoPrazo, minutosAteExpirar, pedidosPorResponder, reservasMinhas } from "@/lib/ajuda/regras";
-import { T, textoQuemPede, textoConfirmarFicar, textoFicou, textoPrazoReserva } from "@/lib/ajuda/textos";
+import { T, textoQuemPede, textoConfirmarFicar, textoFicou, textoPrazoReserva, textoNaoPode } from "@/lib/ajuda/textos";
 import DeslizarConfirmar from "./DeslizarConfirmar";
 import { ResumoViagem, Caixa } from "./partes";
 
@@ -88,7 +89,7 @@ export default function PedidosRecebidos({
 }
 
 export function CartaoRecebido({
-  p, eu, agora, desfecho, aviso, onDesfecho, onDispensar, onNaoPosso, onReservou, faseInicial = "pedido",
+  p, eu, agora, desfecho, aviso, naoPode, onDesfecho, onDispensar, onNaoPosso, onReservou, faseInicial = "pedido",
 }: {
   p: PedidoRecebido;
   eu: MotoristaRef;
@@ -96,6 +97,8 @@ export function CartaoRecebido({
   desfecho?: Desfecho;
   /** aviso por cima do pedido (ex.: «O prazo acabou: o pedido voltou ao grupo.») */
   aviso?: string;
+  /** grupo, pelo link: o backend disse que este motorista não pode aceitar, e porquê */
+  naoPode?: string;
   onDesfecho: (d: Desfecho) => void;
   onDispensar: () => void;
   onNaoPosso: () => void;
@@ -105,19 +108,32 @@ export function CartaoRecebido({
   faseInicial?: "pedido" | "confirmar";
 }) {
   const [fase, setFase] = useState<"pedido" | "confirmar">(faseInicial);
+  const ajuda = useClienteAjuda();
   const [ocupado, setOcupado] = useState(false);
+  const [erro, setErro] = useState("");
   const grupo = p.tipo === "grupo";
 
   const responder = useCallback(async (resposta: "sim" | "nao") => {
-    setOcupado(true);
+    setOcupado(true); setErro("");
     try {
-      const r = await ajuda.responder({ pedidoId: p.id, motorista: eu.id, resposta });
-      if (resposta === "nao") { onNaoPosso(); return; }
+      // Quem responde é o do crachá: a resposta não leva «motorista»
+      const r = await ajuda.responder({ pedidoId: p.id, resposta });
+      // Só se mostra que deu certo quando o backend disse ok
       if (!r.ok) { onDesfecho(r.motivo === "reservada" ? "outro_a_confirmar" : (r.motivo ?? "ja_ficou")); return; }
+      if (resposta === "nao") { onNaoPosso(); return; }
       if (grupo) onReservou?.(); else onDesfecho("feito");
-    } catch { /* fica como estava; tenta outra vez */ }
+    } catch (e) {
+      // Recusado (nao_pode com a razão, sessão, sem rede…): fica como estava e diz porquê
+      setErro(textoDoErro(e, T.erroResponder));
+    }
     finally { setOcupado(false); }
-  }, [p.id, eu.id, grupo, onDesfecho, onNaoPosso, onReservou]);
+  }, [p.id, grupo, onDesfecho, onNaoPosso, onReservou, ajuda]);
+
+  const caixaErro = erro && (
+    <p role="alert" className="rounded-lg px-3 py-2 bg-[#EF4444]/10 border border-[#EF4444]/30 text-sm text-[#FCA5A5] flex items-start gap-2">
+      <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" /> {erro}
+    </p>
+  );
 
   const moldura = "rounded-2xl border border-l-4 px-4 py-3.5 space-y-3";
 
@@ -184,7 +200,13 @@ export function CartaoRecebido({
       <p className="text-base font-bold text-white leading-snug">{textoQuemPede(p)}</p>
       <ResumoViagem r={p.viagem} compacto />
 
+      {caixaErro}
       {grupo ? (
+        naoPode ? (
+          <p className="rounded-lg px-3 py-2 bg-white/5 border border-white/10 text-sm text-[#BDBDBD] flex items-start gap-2">
+            <Info className="w-4 h-4 mt-0.5 flex-shrink-0" /> {textoNaoPode(naoPode)}
+          </p>
+        ) : (
         <>
           <p className="font-mono text-[11px] text-[#888] leading-snug">{T.grupoComoFunciona}</p>
           <button type="button" disabled={ocupado} onClick={() => responder("sim")}
@@ -192,6 +214,7 @@ export function CartaoRecebido({
             {ocupado ? T.aAceitar : T.aceitar}
           </button>
         </>
+        )
       ) : fase === "pedido" ? (
         <>
           <p className="font-mono text-[11px] text-[#888]">{T.semCliente}</p>

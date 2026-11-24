@@ -1,67 +1,27 @@
 // ───────────────────────────────────────────────────────────────
-//  ajuda/cliente.ts — o único sítio onde a app fala com quem guarda
-//  os pedidos de ajuda. Hoje: o simulado (dados inventados).
+//  ajuda/cliente.ts — o cliente da «Ajuda» que a app do motorista usa:
+//  o do HUB-Central (hubCentral.ts), com o crachá da sessão.
 //
-//  ╔══════════════════════════════════════════════════════════════╗
-//  ║  LIGAR AO HUB-CENTRAL AQUI                                     ║
-//  ║  1. Escrever `clienteHubCentral: ClienteAjuda` com fetch ao    ║
-//  ║     HUB_CENTRAL_URL (actions em src/lib/ajuda/tipos.ts),       ║
-//  ║     sempre com crachaParam() como os outros pedidos.           ║
-//  ║  2. Trocar `ajuda = clienteSimulado` por `clienteHubCentral`.  ║
-//  ║  3. Trocar AJUDA_ACTIVA para `true` quando for para o ar.      ║
-//  ╚══════════════════════════════════════════════════════════════╝
+//  Não há interruptor aqui: é o HUB-Central que diz se a ajuda está
+//  ligada para este motorista (DESLIGADA ou TESTE sem o nome dele →
+//  { ok:false, motivo:"desligada" | "fora_do_teste" } → nada aparece).
+//  Ver useAjuda.ts.
+//
+//  O simulado (dados inventados) só entra na página de demonstração,
+//  pelo AjudaClienteContexto — nunca é importado daqui.
 // ───────────────────────────────────────────────────────────────
-import type {
-  CancelarPedido,
-  ConfirmarReserva,
-  MotoristaRef,
-  PedidoAjuda,
-  PedidoRecebido,
-  PedirAColega,
-  PedirAoGrupo,
-  ResponderPedido,
-  RespostaColegas,
-  RespostaResponder,
-  ResumoViagemAjuda,
-} from "./tipos";
-import { clienteSimulado } from "./simulado";
+import type { ClienteAjuda } from "./tipos";
+import { criarClienteHubCentral } from "./hubCentral";
+import { HUB_CENTRAL_URL } from "@/lib/trips";
+import { crachaParam, crachaCampo } from "@/lib/cracha";
+import { avisarSeRecusada } from "@/lib/motoristaSessao";
 
-/** O que a app sabe da viagem quando pede a lista de colegas. */
-export interface ViagemParaAjuda {
-  /** ID da viagem (coluna A da Central), NÃO o rowIndex — nunca se mostra nem vai em links */
-  viagemRef: string;
-  /** categoriaNome do cartão («MPV»); vazio = qualquer carro */
-  categoria: string;
-  duracaoMin?: number;
-  resumo: ResumoViagemAjuda;
-}
+export type { ClienteAjuda, ViagemParaAjuda } from "./tipos";
 
-export interface ClienteAjuda {
-  colegas(v: ViagemParaAjuda, quem: MotoristaRef): Promise<RespostaColegas>;
-  pedirAColega(p: PedirAColega, resumo: ResumoViagemAjuda, deNome: string): Promise<PedidoAjuda>;
-  pedirAoGrupo(p: PedirAoGrupo, resumo: ResumoViagemAjuda, deNome: string): Promise<PedidoAjuda>;
-  cancelar(p: CancelarPedido): Promise<PedidoAjuda>;
-  pedidoDaViagem(viagemRef: string): Promise<PedidoAjuda | null>;
-  /** GET ?action=ajudaMeusPedidos&motorista=<id> — o último pedido de cada viagem minha */
-  meusPedidos(motoristaId: string): Promise<PedidoAjuda[]>;
-  recebidos(motoristaId: string): Promise<PedidoRecebido[]>;
-  /** GET ?action=ajudaRecebido&pedido=<id>&motorista=<id> — a entrada pelo link do WhatsApp; null = não existe / não é para si */
-  recebido(pedidoId: string, motoristaId: string): Promise<PedidoRecebido | null>;
-  responder(p: ResponderPedido): Promise<RespostaResponder>;
-  /** POST ?action=ajudaConfirmar — a segunda confirmação do grupo */
-  confirmar(p: ConfirmarReserva): Promise<RespostaResponder>;
-  /** opcional: avisar a app quando algo muda (o real faz polling) */
-  aoMudar?(f: () => void): () => void;
-}
-
-/**
- * A «Ajuda» só aparece fora de produção enquanto os dados forem
- * inventados — assim, mesmo que este ramo vá para o ar por engano,
- * nenhum motorista vê colegas inventados.
- */
-export const AJUDA_ACTIVA = process.env.NODE_ENV !== "production";
-
-/** Intervalo do polling dos pedidos (s) — o real; o simulado avisa logo. */
-export const AJUDA_POLL_S = 15;
-
-export const ajuda: ClienteAjuda = clienteSimulado;
+export const clienteHubCentral: ClienteAjuda = criarClienteHubCentral({
+  url: HUB_CENTRAL_URL,
+  buscar: (url, init) => fetch(url, init),
+  crachaParam,
+  crachaCampo,
+  avisarSessao: (j) => avisarSeRecusada(j),
+});

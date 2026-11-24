@@ -8,8 +8,9 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowLeft, ChevronRight, X, Users, Clock, CheckCircle, XCircle, AlertTriangle, Loader2, UserRound } from "lucide-react";
-import { ajuda, type ViagemParaAjuda } from "@/lib/ajuda/cliente";
-import type { ColegaPossivel, MotivoAjuda, MotoristaRef, PedidoAjuda } from "@/lib/ajuda/tipos";
+import type { ColegaPossivel, MotivoAjuda, MotoristaRef, PedidoAjuda, ViagemParaAjuda } from "@/lib/ajuda/tipos";
+import { textoDoErro } from "@/lib/ajuda/hubCentral";
+import { useClienteAjuda } from "./contexto";
 import { estadoEfectivo, minutosAteExpirar, motivoValido } from "@/lib/ajuda/regras";
 import {
   T, linhaColega, textoDeslizarColega, textoEspera, textoFaltam,
@@ -45,7 +46,8 @@ export default function EcraPedirAjuda({
   const [fase, setFase] = useState<Fase>(faseInicial ?? (recusado ? { t: "lista" } : { t: "escolha" }));
   const [motivo, setMotivo] = useState<MotivoAjuda | null>(motivoInicial ?? pedido?.motivo ?? null);
   const [colegas, setColegas] = useState<ColegaPossivel[] | null>(null);
-  const [erro, setErro] = useState(false);
+  const ajuda = useClienteAjuda();
+  const [erro, setErro] = useState(""); // texto do erro da lista ("" = sem erro)
   const [ocupado, setOcupado] = useState(false);
   const [aviso, setAviso] = useState("");
 
@@ -57,10 +59,10 @@ export default function EcraPedirAjuda({
   const euRef = useRef(eu);
   useEffect(() => { viagemAtual.current = viagem; euRef.current = eu; });
   const carregar = useCallback(async () => {
-    setErro(false); setColegas(null);
-    try { setColegas((await ajuda.colegas(viagemAtual.current, euRef.current)).colegas); }
-    catch { setErro(true); }
-  }, [viagem.viagemRef, eu.id]); // eslint-disable-line react-hooks/exhaustive-deps
+    setErro(""); setColegas(null);
+    try { setColegas((await ajuda.colegas(viagemAtual.current)).colegas); }
+    catch (e) { setErro(textoDoErro(e, T.erro)); }
+  }, [viagem.viagemRef, eu.id, ajuda]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // A lista volta a carregar sempre que se regressa a ela (ex.: depois de uma recusa)
   useEffect(() => { if (!emCurso && fase.t === "lista") void carregar(); }, [emCurso, fase.t, carregar]);
@@ -74,22 +76,30 @@ export default function EcraPedirAjuda({
     if (!motivoValido(motivo)) { setAviso(T.motivoFalta); return; }
     setOcupado(true);
     try {
-      if (c) await ajuda.pedirAColega({ viagemRef: viagem.viagemRef, de: eu.id, para: c.id, motivo }, viagem.resumo, eu.nome);
-      else await ajuda.pedirAoGrupo({ viagemRef: viagem.viagemRef, de: eu.id, motivo }, viagem.resumo, eu.nome);
+      // Quem pede é o do crachá: o pedido não leva «de»
+      if (c) await ajuda.pedirAColega({ viagemRef: viagem.viagemRef, para: c.id, motivo }, viagem.resumo);
+      else await ajuda.pedirAoGrupo({ viagemRef: viagem.viagemRef, motivo }, viagem.resumo);
       setAviso(""); setFase({ t: "escolha" }); onMudou?.();
-    } catch { setAviso(T.erroEnviar); }
+    } catch (e) {
+      // Recusado: diz porquê (texto do backend) e não mostra o pedido como enviado
+      setAviso(textoDoErro(e, T.erroEnviar));
+      onMudou?.(); // ex.: «Já há um pedido em curso» → o pedido que existe aparece
+    }
     finally { setOcupado(false); }
-  }, [viagem, eu, motivo, onMudou]);
+  }, [viagem, motivo, onMudou, ajuda]);
 
   const cancelar = useCallback(async (depois: Fase, texto: string) => {
     if (!pedido) return;
     setOcupado(true);
     try {
-      await ajuda.cancelar({ pedidoId: pedido.id, de: eu.id });
+      await ajuda.cancelar({ pedidoId: pedido.id });
       setAviso(texto); setFase(depois); onMudou?.();
-    } catch { /* fica como estava */ }
+    } catch (e) {
+      // Não cancelou: fica como estava e diz porquê
+      setAviso(textoDoErro(e, T.erroCancelar)); onMudou?.();
+    }
     finally { setOcupado(false); }
-  }, [pedido, eu, onMudou]);
+  }, [pedido, onMudou, ajuda]);
 
   const voltar =
     fase.t === "confirmar" ? () => setFase({ t: "lista" })
@@ -123,11 +133,14 @@ export default function EcraPedirAjuda({
         <ResumoViagem r={viagem.resumo} />
 
         {emCurso && pedido ? (
-          /* ── Pedido em curso ── */
+          /* ── Pedido em curso (com o aviso, se o cancelamento foi recusado) ── */
+          <>
+          {avisoCaixa}
           <EstadoDoPedido pedido={pedido} estado={estado!} agora={agora} ocupado={ocupado}
             onCancelar={() => cancelar({ t: "escolha" }, T.cancelado)}
             onPedirOutro={() => cancelar({ t: "lista" }, "")}
             onSair={() => { onViagemSaiu?.(viagem.viagemRef); onFechar(); }} />
+          </>
 
         ) : fase.t === "escolha" ? (
           /* ── As duas escolhas, logo no topo ── */
@@ -179,7 +192,7 @@ export default function EcraPedirAjuda({
             )}
             {erro && (
               <div className="text-center py-8 space-y-3">
-                <p className="text-sm text-white/60 font-mono">{T.erro}</p>
+                <p className="text-sm text-white/60 font-mono">{erro}</p>
                 <button type="button" onClick={carregar}
                   className="px-5 py-2.5 bg-[#F0D030]/20 text-[#F0D030] rounded-lg text-sm font-bold font-mono">{T.tentar}</button>
               </div>

@@ -9,8 +9,9 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { X, CheckCircle, AlertTriangle, Info, Loader2, Clock, Users } from "lucide-react";
-import { ajuda } from "@/lib/ajuda/cliente";
 import type { MotoristaRef, PedidoRecebido } from "@/lib/ajuda/tipos";
+import { textoDoErro } from "@/lib/ajuda/hubCentral";
+import { useClienteAjuda } from "./contexto";
 import { estadoEfectivo, horaDoPrazo, minutosAteExpirar, type PassoLink } from "@/lib/ajuda/regras";
 import { T, textoFicou, textoPrazoReserva } from "@/lib/ajuda/textos";
 import DeslizarConfirmar from "./DeslizarConfirmar";
@@ -31,18 +32,37 @@ export default function EcraPedidoPorLink({
   /** só na página de demonstração: o pedido já carregado (null = não existe) */
   inicial?: PedidoRecebido | null;
 }) {
+  const ajuda = useClienteAjuda();
   const [p, setP] = useState<PedidoRecebido | null | undefined>(inicial);
+  const [naoPode, setNaoPode] = useState<string | undefined>();
+  const [erro, setErro] = useState("");
   const [desfecho, setDesfecho] = useState<Desfecho | undefined>();
 
+  // O motorista é o do crachá: o pedido só leva o id opaco do pedido
   const carregar = useCallback(async () => {
-    try { setP(await ajuda.recebido(pedidoId, eu.id)); } catch { setP(null); }
-  }, [pedidoId, eu.id]);
+    setErro("");
+    try {
+      const r = await ajuda.recebido(pedidoId);
+      setP(r.pedido);
+      setNaoPode(r.podeAceitar === false ? (r.razao || "") || undefined : undefined);
+    } catch (e) {
+      setErro(textoDoErro(e, T.erroLink));
+    }
+  }, [pedidoId, ajuda]);
   useEffect(() => { if (inicial === undefined) void carregar(); }, [carregar, inicial]);
 
   const titulo = passo === "confirmar" ? T.segundaTitulo : T.recebidoTitulo;
 
   let corpo: React.ReactNode;
-  if (p === undefined) {
+  if (erro && p === undefined) {
+    corpo = (
+      <div className="space-y-4">
+        <Caixa cor="#F59E0B" icone={<AlertTriangle className="w-8 h-8" />} titulo={erro} />
+        <button type="button" onClick={() => void carregar()}
+          className="w-full h-12 rounded-xl bg-[#F0D030]/20 text-[#F0D030] font-mono text-sm font-bold">{T.tentar}</button>
+      </div>
+    );
+  } else if (p === undefined) {
     corpo = (
       <div className="flex items-center justify-center gap-2 py-16 text-white/50 font-mono text-sm">
         <Loader2 className="w-4 h-4 animate-spin" /> {T.linkACarregar}
@@ -56,7 +76,7 @@ export default function EcraPedidoPorLink({
     corpo = <SegundaConfirmacao p={p} eu={eu} agora={agora} onMudou={() => { onMudou?.(); void carregar(); }} onFechar={onFechar} />;
   } else {
     corpo = (
-      <CartaoRecebido p={p} eu={eu} agora={agora}
+      <CartaoRecebido p={p} eu={eu} agora={agora} naoPode={naoPode}
         desfecho={desfecho ?? desfechoDoPedido(p, eu, agora)}
         onDesfecho={(d) => { setDesfecho(d); onMudou?.(); }}
         onDispensar={onFechar}
@@ -90,18 +110,24 @@ export function SegundaConfirmacao({
   onMudou?: () => void;
   onFechar: () => void;
 }) {
+  const ajuda = useClienteAjuda();
   const [ocupado, setOcupado] = useState(false);
+  const [erro, setErro] = useState("");
   const [resultado, setResultado] = useState<"feito" | "prazo" | "ja_ficou" | "cancelado" | null>(null);
 
   const confirmar = useCallback(async () => {
-    setOcupado(true);
+    setOcupado(true); setErro("");
     try {
-      const r = await ajuda.confirmar({ pedidoId: p.id, motorista: eu.id });
+      // Quem confirma é o do crachá: não leva «motorista»
+      const r = await ajuda.confirmar({ pedidoId: p.id });
       setResultado(r.ok ? "feito" : r.motivo === "ja_ficou" ? "ja_ficou" : r.motivo === "cancelado" ? "cancelado" : "prazo");
       onMudou?.();
-    } catch { /* fica como estava; tenta outra vez */ }
+    } catch (e) {
+      // Recusado: não diz que ficou com a viagem; mostra porquê
+      setErro(textoDoErro(e, T.erroResponder));
+    }
     finally { setOcupado(false); }
-  }, [p.id, eu.id, onMudou]);
+  }, [p.id, onMudou, ajuda]);
 
   // O que o pedido já diz, antes de deslizar
   const estado = estadoEfectivo(p, agora);
@@ -151,6 +177,11 @@ export function SegundaConfirmacao({
       <p className="font-mono text-xs text-[#F0D030] flex items-center gap-1.5">
         <Clock className="w-3.5 h-3.5" /> {textoPrazoReserva(horaDoPrazo(p.reservaExpiraEm), minutosAteExpirar(p.reservaExpiraEm, agora))}
       </p>
+      {erro && (
+        <p role="alert" className="rounded-lg px-3 py-2 bg-[#EF4444]/10 border border-[#EF4444]/30 text-sm text-[#FCA5A5] flex items-start gap-2">
+          <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" /> {erro}
+        </p>
+      )}
       <DeslizarConfirmar texto={T.deslizarSegunda} cor="#22C55E" ocupado={ocupado} onConfirmar={confirmar} />
       <p className="font-mono text-[11px] text-[#888] text-center">{T.semCliente}</p>
     </div>

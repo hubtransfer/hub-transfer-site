@@ -36,6 +36,9 @@ export const T = {
   pedirOutro: "Pedir a outro colega",
   voltarViagens: "Voltar às viagens",
   erroEnviar: "Não foi possível enviar o pedido. Tente outra vez.",
+  erroCancelar: "Não foi possível cancelar o pedido. Tente outra vez.",
+  erroResponder: "Não foi possível enviar a resposta. Tente outra vez.",
+  erroLink: "Não foi possível abrir o pedido. Tente outra vez.",
   // quem pediu, grupo
   grupoEspera: "Pedido enviado ao grupo",
   grupoEsperaDica: "A viagem continua consigo até um colega aceitar e confirmar.",
@@ -147,6 +150,10 @@ export function textoAceite(nome: string): { titulo: string; frase: string } {
     titulo: `${nome} ficou com a viagem`,
     frase: "A viagem saiu da sua lista. Obrigado por avisar a tempo.",
   };
+}
+/** «nao_pode»: o backend diz porquê este motorista não pode ficar com a viagem. */
+export function textoNaoPode(razao: string): string {
+  return `Não pode ficar com esta viagem: ${String(razao || "").trim().replace(/\.$/, "")}.`;
 }
 export function textoRecusado(nome: string): string {
   return `${nome} não pode fazer esta viagem. Escolha outro colega.`;

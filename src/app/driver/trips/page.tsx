@@ -24,7 +24,6 @@ import {
   chaveMotorista,
 } from "@/lib/trips";
 import type { HubViagem, Driver } from "@/lib/trips";
-import { AJUDA_ACTIVA } from "@/lib/ajuda/cliente";
 import { estadoEfectivo } from "@/lib/ajuda/regras";
 import { textoPilula } from "@/lib/ajuda/textos";
 import { useAjuda } from "@/components/driver/ajuda/useAjuda";
@@ -185,29 +184,33 @@ export default function DriverTripsPage() {
     return { total: contam.length, chegadas, recolhas, totalPay, done };
   }, [driverTrips]);
 
-  /* ── Ajuda entre motoristas (dados inventados; só fora de produção — ver lib/ajuda/cliente.ts) ── */
+  /* ── Ajuda entre motoristas ──
+     Só aparece se o HUB-Central disser que está ligada para ESTE motorista
+     (em TESTE só os nomes do teste; LIGADA todos). Desligada, fora do teste,
+     sem resposta ou recusada → nem o botão nem os pedidos aparecem.
+     Quem pede/responde é o do crachá; `eu` serve só para comparar nomes. */
   const eu = useMemo(
-    () => (AJUDA_ACTIVA && nomeConfirmado ? { id: chaveMotorista(nomeConfirmado), nome: nomeConfirmado } : null),
+    () => (nomeConfirmado ? { id: chaveMotorista(nomeConfirmado), nome: nomeConfirmado } : null),
     [nomeConfirmado],
   );
-  const ajudaDados = useAjuda(eu);
+  const ajudaDados = useAjuda(!!eu && estado === "ok" && !recusada && !store.sessaoRecusada);
+  const ajudaLigada = !!eu && ajudaDados.ligada;
   const [ajudaViagem, setAjudaViagem] = useState<HubViagem | null>(null);
   const ajudaResumo = useMemo(() => (ajudaViagem ? viagemParaAjuda(ajudaViagem) : null), [ajudaViagem]);
   // Viagens que passaram para um colega: saem já da lista (o getViagens confirma no próximo sync)
   const [passaram, setPassaram] = useState<Set<string>>(new Set());
   const ajudaDoCartao = useCallback((v: HubViagem) => {
-    if (!eu || !viagemAceitaAjuda(v)) return undefined;
+    if (!ajudaLigada || !viagemAceitaAjuda(v)) return undefined;
     const p = ajudaDados.meus[refDaViagem(v)] ?? null;
     const pil = textoPilula(p, p ? estadoEfectivo(p, ajudaDados.agora) : null);
     return { ...pil, onAbrir: () => setAjudaViagem(v) };
-  }, [eu, ajudaDados.meus, ajudaDados.agora]);
+  }, [ajudaLigada, ajudaDados.meus, ajudaDados.agora]);
 
   // Entrada pelo link do WhatsApp: ?ajuda=<id do pedido>[&passo=confirmar].
   // Guarda-se já na sessão do browser (se ainda não entrou, o login leva-o daqui
   // e o link não se perde); abre-se quando houver motorista. Tira-se do endereço.
   const [linkAjuda, setLinkAjuda] = useState<{ pedidoId: string; passo: PassoLink } | null>(null);
   useEffect(() => {
-    if (!AJUDA_ACTIVA) return;
     try {
       const l = lerLinkDoPedido(window.location.search);
       if (l) {
@@ -218,17 +221,19 @@ export default function DriverTripsPage() {
       }
     } catch { /* */ }
   }, []);
+  // Só depois de o HUB-Central responder: ligada → abre; desligada → o link esquece-se.
   useEffect(() => {
-    if (!eu) return;
+    if (!eu || !ajudaDados.verificada) return;
     try {
       const raw = sessionStorage.getItem("hub_ajuda_link");
       if (!raw) return;
       sessionStorage.removeItem("hub_ajuda_link");
+      if (!ajudaDados.ligada) return;
       const j = JSON.parse(raw) as { pedidoId?: string; passo?: string };
       const l = lerLinkDoPedido(`ajuda=${encodeURIComponent(String(j.pedidoId ?? ""))}${j.passo === "confirmar" ? "&passo=confirmar" : ""}`);
       if (l) setLinkAjuda(l);
     } catch { /* */ }
-  }, [eu]);
+  }, [eu, ajudaDados.verificada, ajudaDados.ligada]);
 
   /* ── (heroId removed — cards self-expand on tap) ── */
 
@@ -421,7 +426,7 @@ export default function DriverTripsPage() {
       {/* ── TRIP CARDS ── */}
       <div className="px-4 pb-8 space-y-2">
         {/* ── PEDIDOS DE AJUDA RECEBIDOS — no topo ── */}
-        {eu && (
+        {eu && ajudaLigada && (
           <PedidosRecebidos recebidos={ajudaDados.recebidos} eu={eu} agora={ajudaDados.agora} onMudou={ajudaDados.recarregar} />
         )}
         {driverTrips.length === 0 && store.isLoading ? (
@@ -540,7 +545,7 @@ export default function DriverTripsPage() {
       )}
 
       {/* ── PEDIDO ABERTO PELO LINK DO WHATSAPP (ecrã inteiro) ── */}
-      {eu && linkAjuda && (
+      {eu && ajudaLigada && linkAjuda && (
         <EcraPedidoPorLink
           pedidoId={linkAjuda.pedidoId}
           passo={linkAjuda.passo}
@@ -552,7 +557,7 @@ export default function DriverTripsPage() {
       )}
 
       {/* ── PEDIR AJUDA (ecrã inteiro) ── */}
-      {eu && ajudaResumo && (
+      {eu && ajudaLigada && ajudaResumo && (
         <EcraPedirAjuda
           viagem={ajudaResumo}
           eu={eu}

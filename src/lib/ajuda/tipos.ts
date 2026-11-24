@@ -2,9 +2,9 @@
 //  ajuda/tipos.ts — «Ajuda»: um motorista pede a um colega (ou ao
 //  grupo) que faça uma viagem dele. Pedidos 97 e 98 do Junior, 23/11/2026.
 //
-//  Estes são os dados que a app vai PEDIR AO HUB-CENTRAL. Por agora
-//  quem responde é src/lib/ajuda/simulado.ts (dados inventados);
-//  o sítio onde se liga ao backend é src/lib/ajuda/cliente.ts.
+//  Estes são os dados que a app pede ao HUB-CENTRAL (AJUDA_MOTORISTAS.js),
+//  pelo cliente de src/lib/ajuda/hubCentral.ts. O simulado (dados
+//  inventados) só serve a página de demonstração.
 //
 //  Regra de ouro: nada do que um COLEGA recebe leva a operadora, o
 //  código dela, a referência da reserva, o nome ou o telefone do
@@ -71,7 +71,7 @@ export type MotivoAjuda = "doente" | "carro_avariado" | "atrasado" | "outro";
 // ── 1. Colegas possíveis de uma viagem ──────────────────────────
 
 /**
- * GET ?action=ajudaColegas&viagem=<ViagemId>&motorista=<quem pede>
+ * GET ?action=ajudaColegas&viagemRef=<ViagemId>&cracha=… (quem pede é o do crachá)
  * Um colega que PODE fazer a viagem: trabalha nesse dia, tem um carro
  * igual ou maior (regra em CARROS_QUE_SERVEM) e está livre à hora.
  * Só o nome e a categoria: sem «livre até», sem «próxima viagem».
@@ -105,25 +105,25 @@ export interface MotoristaNoDia extends MotoristaRef {
 
 // ── 2. Pedir, pedir ao grupo, cancelar ──────────────────────────
 
-/** POST ?action=ajudaPedir  { viagemRef, de, para, motivo } */
+// Quem pede, responde ou confirma é SEMPRE o motorista do crachá: nenhum
+// pedido leva «de» nem «motorista» (o HUB-Central recusa-os se não forem do crachá).
+
+/** POST action=ajudaPedir  { viagemRef, para, motivo, cracha } */
 export interface PedirAColega {
   viagemRef: ViagemId;
-  de: string;    // id de quem pede
-  para: string;  // id do colega escolhido
+  para: string;  // id (chave do nome) do colega escolhido
   motivo: MotivoAjuda;
 }
 
-/** POST ?action=ajudaPedirGrupo  { viagemRef, de, motivo } */
+/** POST action=ajudaPedirGrupo  { viagemRef, motivo, cracha } */
 export interface PedirAoGrupo {
   viagemRef: ViagemId;
-  de: string;
   motivo: MotivoAjuda;
 }
 
-/** POST ?action=ajudaCancelar  { pedidoId, de } — só quem pediu cancela */
+/** POST action=ajudaCancelar  { pedidoId, cracha } — só quem pediu cancela */
 export interface CancelarPedido {
   pedidoId: PedidoId;
-  de: string;
 }
 
 // ── 3. O estado do pedido ───────────────────────────────────────
@@ -146,7 +146,7 @@ export type TipoPedido = "colega" | "grupo";
 /**
  * O pedido como QUEM PEDIU o vê (e a gestão).
  * GET ?action=ajudaPedido&viagem=<ViagemId>   → o pedido em curso de uma viagem
- * GET ?action=ajudaMeusPedidos&motorista=<id> → PedidoAjuda[] (o último de cada
+ * GET ?action=ajudaMeusPedidos&cracha=… → PedidoAjuda[] (o último de cada
  * viagem de quem pede — é com isto que o cartão mostra «À espera de …»).
  * Também é a resposta de pedir / pedir ao grupo / cancelar.
  */
@@ -177,8 +177,8 @@ export interface PedidoAjuda {
 // ── 4. Os pedidos que um motorista recebeu ──────────────────────
 
 /**
- * GET ?action=ajudaRecebidos&motorista=<id>      → PedidoRecebido[]
- * GET ?action=ajudaRecebido&pedido=<PedidoId>&motorista=<id> → PedidoRecebido
+ * GET ?action=ajudaRecebidos&cracha=…      → PedidoRecebido[]
+ * GET ?action=ajudaRecebido&pedido=<PedidoId>&cracha=… → RespostaRecebido
  *     (a entrada pelo link do WhatsApp; o motorista é o da sessão/crachá)
  *
  * Antes de ficar com a viagem, o colega NÃO vê o nome nem o telefone do
@@ -202,25 +202,23 @@ export interface PedidoRecebido {
 }
 
 /**
- * POST ?action=ajudaResponder  { pedidoId, motorista, resposta }
+ * POST action=ajudaResponder  { pedidoId, resposta, cracha }
  * Pedido a um colega: «Sim, faço» → "sim" (já confirmado a deslizar); «Não posso» → "nao".
  * Pedido ao grupo: só «Aceitar» → "sim". Fica reservada para quem chegou
  * primeiro e o HUB-Central manda-lhe a mensagem privada da segunda confirmação.
  */
 export interface ResponderPedido {
   pedidoId: PedidoId;
-  motorista: string;
   resposta: "sim" | "nao";
 }
 
 /**
- * POST ?action=ajudaConfirmar  { pedidoId, motorista }
+ * POST action=ajudaConfirmar  { pedidoId, cracha }
  * A segunda confirmação (grupo), pelo link da mensagem privada:
  * «Confirmo que faço esta viagem». Só aqui a viagem muda de mãos.
  */
 export interface ConfirmarReserva {
   pedidoId: PedidoId;
-  motorista: string;
 }
 
 /**
@@ -234,4 +232,52 @@ export interface RespostaResponder {
   ok: boolean;
   motivo?: "ja_ficou" | "reservada" | "cancelado" | "expirou";
   pedido: PedidoRecebido;
+}
+
+/**
+ * GET action=ajudaRecebido&pedido=<PedidoId>&cracha=… — a entrada pelo link.
+ * pedido null = não existe ou não é para este motorista. No grupo à espera,
+ * o backend diz só a ele se pode aceitar e, se não puder, porquê (razao).
+ */
+export interface RespostaRecebido {
+  pedido: PedidoRecebido | null;
+  podeAceitar?: boolean;
+  razao?: string;
+}
+
+// ── 5. O cliente: o que a app pede ao HUB-Central ───────────────
+
+/** O que a app sabe da viagem quando pede a lista de colegas. */
+export interface ViagemParaAjuda {
+  /** ID da viagem (coluna A da Central), NÃO o rowIndex — nunca se mostra nem vai em links */
+  viagemRef: string;
+  /** categoriaNome do cartão («MPV»); vazio = qualquer carro */
+  categoria: string;
+  duracaoMin?: number;
+  resumo: ResumoViagemAjuda;
+}
+
+/**
+ * As acções da ajuda. Nenhuma leva quem é o motorista: é o crachá da sessão
+ * que o diz ao HUB-Central. O verdadeiro está em hubCentral.ts; o simulado
+ * (dados inventados) só na página de demonstração.
+ * Um erro do backend chega como AjudaErro (hubCentral.ts) com o texto dele.
+ */
+export interface ClienteAjuda {
+  colegas(v: ViagemParaAjuda): Promise<RespostaColegas>;
+  pedirAColega(p: PedirAColega, resumo: ResumoViagemAjuda): Promise<PedidoAjuda>;
+  pedirAoGrupo(p: PedirAoGrupo, resumo: ResumoViagemAjuda): Promise<PedidoAjuda>;
+  cancelar(p: CancelarPedido): Promise<PedidoAjuda>;
+  /** o último pedido de cada viagem minha (dos últimos dias) */
+  meusPedidos(): Promise<PedidoAjuda[]>;
+  /** os pedidos que me chegaram */
+  recebidos(): Promise<PedidoRecebido[]>;
+  /** a entrada pelo link do WhatsApp */
+  recebido(pedidoId: PedidoId): Promise<RespostaRecebido>;
+  /** ja_ficou / reservada / cancelado / expirou voltam como { ok: false, motivo }; os outros erros são AjudaErro */
+  responder(p: ResponderPedido): Promise<RespostaResponder>;
+  /** a segunda confirmação do grupo (mesmas regras do responder) */
+  confirmar(p: ConfirmarReserva): Promise<RespostaResponder>;
+  /** só o simulado: avisa logo quando algo muda */
+  aoMudar?(f: () => void): () => void;
 }

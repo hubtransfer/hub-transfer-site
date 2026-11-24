@@ -8,8 +8,9 @@
 import React, { useEffect, useState } from "react";
 import type { HubViagem } from "@/lib/trips";
 import type { MotivoAjuda, MotoristaRef, PedidoAjuda, PedidoRecebido } from "@/lib/ajuda/tipos";
-import type { ViagemParaAjuda } from "@/lib/ajuda/cliente";
-import { simular, RESUMOS_INVENTADOS } from "@/lib/ajuda/simulado";
+import type { ViagemParaAjuda } from "@/lib/ajuda/tipos";
+import { simular, RESUMOS_INVENTADOS, clienteSimuladoPara } from "@/lib/ajuda/simulado";
+import { AjudaClienteContexto } from "./contexto";
 import { textoPilula } from "@/lib/ajuda/textos";
 import DriverTripCard from "@/components/driver/DriverTripCard";
 import EcraPedirAjuda, { type Fase } from "./EcraPedirAjuda";
@@ -21,6 +22,8 @@ const AGORA = Date.parse("2026-11-24T10:04:00Z");
 const CRIADO = "2026-11-24T10:00:00.000Z";
 const EXPIRA = "2026-11-24T10:15:00.000Z";
 const RESERVA_ATE = "2026-11-24T10:11:00.000Z"; // aceitou às 10:01 → 7 min para confirmar
+// Os ecrãs da demo falam com o simulado (dados inventados), nunca com o HUB-Central
+const SIMULADO = clienteSimuladoPara(EU);
 const RUI: MotoristaRef = { id: "rui-costa", nome: "Rui Costa" };
 const ANA: MotoristaRef = { id: "ana-ferreira", nome: "Ana Ferreira" };
 const PAULO: MotoristaRef = { id: "paulo-nunes", nome: "Paulo Nunes" };
@@ -139,6 +142,7 @@ export default function AjudaDemo() {
   const reservadaMinha = recebidoGrupo({ estado: "reservada", reservadaParaMim: true, reservaExpiraEm: RESERVA_ATE });
 
   return (
+    <AjudaClienteContexto.Provider value={SIMULADO}>
     <SoUm.Provider value={so}>
     <main className={so ? "min-h-screen bg-black text-white" : "min-h-screen bg-[#0A0A0A] text-white p-6"}>
       {!so && (
@@ -241,5 +245,6 @@ export default function AjudaDemo() {
       </div>
     </main>
     </SoUm.Provider>
+    </AjudaClienteContexto.Provider>
   );
 }

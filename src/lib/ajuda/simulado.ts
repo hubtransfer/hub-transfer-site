@@ -4,25 +4,35 @@
 //  chama o Apps Script, a Z-API nem outro serviço: vive na memória
 //  do browser e desaparece ao recarregar a página.
 //
-//  Quando o backend existir, quem o substitui é src/lib/ajuda/cliente.ts
-//  (ver «LIGAR AO HUB-CENTRAL AQUI»).
+//  SÓ para a página de demonstração (dev), pelo AjudaClienteContexto.
+//  A app verdadeira usa o cliente do HUB-Central (hubCentral.ts).
+//  Aqui, ao contrário do backend, o «motorista» vai nos pedidos: o
+//  simulado não tem crachá. clienteSimuladoPara(eu) esconde-o da app.
 // ───────────────────────────────────────────────────────────────
 import type {
-  CancelarPedido,
-  ConfirmarReserva,
+  CancelarPedido as CancelarSemQuem,
+  ClienteAjuda,
+  ConfirmarReserva as ConfirmarSemQuem,
   MotoristaNoDia,
   MotoristaRef,
   PedidoAjuda,
   PedidoRecebido,
-  PedirAColega,
-  PedirAoGrupo,
-  ResponderPedido,
+  PedirAColega as PedirAColegaSemQuem,
+  PedirAoGrupo as PedirAoGrupoSemQuem,
+  ResponderPedido as ResponderSemQuem,
   RespostaColegas,
   RespostaResponder,
   ResumoViagemAjuda,
+  ViagemParaAjuda,
 } from "./tipos";
 import { colegasPossiveis, prazoDoPedido, prazoDaReserva, estadoEfectivo, motivoValido } from "./regras";
-import type { ClienteAjuda, ViagemParaAjuda } from "./cliente";
+
+// Os pedidos do simulado levam quem pede / responde (o simulado não tem crachá)
+type PedirAColega = PedirAColegaSemQuem & { de: string };
+type PedirAoGrupo = PedirAoGrupoSemQuem & { de: string };
+type CancelarPedido = CancelarSemQuem & { de: string };
+type ResponderPedido = ResponderSemQuem & { motorista: string };
+type ConfirmarReserva = ConfirmarSemQuem & { motorista: string };
 
 /** Motoristas inventados para um dia qualquer. */
 export const MOTORISTAS_INVENTADOS: MotoristaNoDia[] = [
@@ -98,8 +108,8 @@ function ultimoDaViagem(viagemRef: string): Registo | undefined {
   return ult;
 }
 
-/** O cliente simulado — mesma interface que o cliente real terá. */
-export const clienteSimulado: ClienteAjuda = {
+/** O motor do simulado (com ids explícitos). A app usa clienteSimuladoPara(eu). */
+export const clienteSimulado = {
   async colegas(v: ViagemParaAjuda, quem: MotoristaRef): Promise<RespostaColegas> {
     await espera(500);
     if (v.viagemRef.includes("sem-colegas")) return { viagemRef: v.viagemRef, resumo: v.resumo, colegas: [] };
@@ -233,6 +243,23 @@ export const clienteSimulado: ClienteAjuda = {
 
   aoMudar(f: () => void) { ouvintes.add(f); return () => { ouvintes.delete(f); }; },
 };
+
+/** O simulado com a interface da app (ClienteAjuda), como se `eu` estivesse no crachá. */
+export function clienteSimuladoPara(eu: MotoristaRef): ClienteAjuda {
+  const m = clienteSimulado;
+  return {
+    colegas: (v) => m.colegas(v, eu),
+    pedirAColega: (p, resumo) => m.pedirAColega({ ...p, de: eu.id }, resumo, eu.nome),
+    pedirAoGrupo: (p, resumo) => m.pedirAoGrupo({ ...p, de: eu.id }, resumo, eu.nome),
+    cancelar: (p) => m.cancelar({ ...p, de: eu.id }),
+    meusPedidos: () => m.meusPedidos(eu.id),
+    recebidos: () => m.recebidos(eu.id),
+    recebido: async (id) => ({ pedido: await m.recebido(id, eu.id) }),
+    responder: (p) => m.responder({ ...p, motorista: eu.id }),
+    confirmar: (p) => m.confirmar({ ...p, motorista: eu.id }),
+    aoMudar: (f) => m.aoMudar(f),
+  };
+}
 
 // ── Só para a página de demonstração (dev): mexer no «outro lado» ──
 
