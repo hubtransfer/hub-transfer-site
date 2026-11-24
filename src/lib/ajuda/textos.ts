@@ -52,6 +52,10 @@ export const T = {
   naoPosso: "Não posso",
   aceitar: "Aceitar",
   aAceitar: "A aceitar…",
+  // o aviso do tempo (24/11): o texto vem do HUB-Central; estes são só o título e os botões
+  avisoTitulo: "Atenção ao tempo",
+  aceitarMesmoAssim: "Aceitar mesmo assim",
+  avisoVermelhoPadrao: "Pelas nossas contas, chega bastante atrasado a esta viagem ou à seguinte.",
   confirmarTitulo: "Ficar com esta viagem?",
   deslizarFicar: "Deslize para ficar com a viagem",
   semCliente: "O nome e o contacto do cliente aparecem depois de ficar com a viagem.",

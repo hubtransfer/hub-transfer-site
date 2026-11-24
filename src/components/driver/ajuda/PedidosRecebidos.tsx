@@ -9,8 +9,8 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { CheckCircle, Users, HandHelping, Info, Clock, MessageCircle, AlertTriangle } from "lucide-react";
-import type { MotoristaRef, PedidoRecebido } from "@/lib/ajuda/tipos";
-import { textoDoErro } from "@/lib/ajuda/hubCentral";
+import type { AvisoTempo, MotoristaRef, PedidoRecebido } from "@/lib/ajuda/tipos";
+import { comoMostrarAviso, pedidoDeResposta, textoDoErro } from "@/lib/ajuda/hubCentral";
 import { useClienteAjuda } from "./contexto";
 import { estadoEfectivo, horaDoPrazo, minutosAteExpirar, pedidosPorResponder, reservasMinhas } from "@/lib/ajuda/regras";
 import { T, textoQuemPede, textoConfirmarFicar, textoFicou, textoPrazoReserva, textoNaoPode } from "@/lib/ajuda/textos";
@@ -88,8 +88,32 @@ export default function PedidosRecebidos({
   );
 }
 
+/**
+ * O aviso do tempo por cima dos botões (24/11): amarelo como nota, vermelho
+ * como alerta «Atenção ao tempo». O verde não mostra nada.
+ */
+export function CaixaAvisoTempo({ aviso }: { aviso: AvisoTempo | null | undefined }) {
+  const m = comoMostrarAviso(aviso, T.avisoVermelhoPadrao);
+  if (m.tipo === "nenhum") return null;
+  if (m.tipo === "amarelo") {
+    return (
+      <p data-aviso="amarelo" className="rounded-lg px-3 py-2 bg-[#F59E0B]/10 border border-[#F59E0B]/30 text-sm text-[#FCD34D] flex items-start gap-2">
+        <Clock className="w-4 h-4 mt-0.5 flex-shrink-0" /> {m.texto}
+      </p>
+    );
+  }
+  return (
+    <div role="alert" data-aviso="vermelho" className="rounded-lg px-3 py-2.5 bg-[#EF4444]/10 border border-[#EF4444]/40 space-y-1">
+      <p className="text-sm font-bold text-[#F87171] flex items-center gap-2">
+        <AlertTriangle className="w-4 h-4 flex-shrink-0" /> {T.avisoTitulo}
+      </p>
+      <p className="text-sm text-[#FCA5A5] leading-snug">{m.texto}</p>
+    </div>
+  );
+}
+
 export function CartaoRecebido({
-  p, eu, agora, desfecho, aviso, naoPode, onDesfecho, onDispensar, onNaoPosso, onReservou, faseInicial = "pedido",
+  p, eu, agora, desfecho, aviso, naoPode, avisoTempo, onDesfecho, onDispensar, onNaoPosso, onReservou, faseInicial = "pedido",
 }: {
   p: PedidoRecebido;
   eu: MotoristaRef;
@@ -99,6 +123,11 @@ export function CartaoRecebido({
   aviso?: string;
   /** grupo, pelo link: o backend disse que este motorista não pode aceitar, e porquê */
   naoPode?: string;
+  /**
+   * 24/11: o aviso do tempo já lido do ajudaRecebido (pelo link). undefined =
+   * o cartão lê-o ele mesmo (a lista do topo não o traz); null = sem aviso.
+   */
+  avisoTempo?: AvisoTempo | null;
   onDesfecho: (d: Desfecho) => void;
   onDispensar: () => void;
   onNaoPosso: () => void;
@@ -113,13 +142,41 @@ export function CartaoRecebido({
   const [erro, setErro] = useState("");
   const grupo = p.tipo === "grupo";
 
+  // O aviso do tempo: o que veio do link, ou o que o cartão leu do ajudaRecebido;
+  // um motivo «aviso» numa resposta passa à frente de ambos.
+  const [avisoLido, setAvisoLido] = useState<AvisoTempo | null>(null);
+  const [avisoDaResposta, setAvisoDaResposta] = useState<AvisoTempo | null>(null);
+  const porAceitar = !desfecho && estadoEfectivo(p, agora) === "a_espera" && !(grupo && naoPode);
+  const lerAqui = avisoTempo === undefined && porAceitar;
+  useEffect(() => {
+    if (!lerAqui) return;
+    let vivo = true;
+    ajuda.recebido(p.id)
+      .then((r) => { if (vivo) setAvisoLido(r.podeAceitar === false ? null : r.aviso ?? null); })
+      .catch(() => { /* sem aviso à vista: num vermelho, o backend continua a pedir o sinal */ });
+    return () => { vivo = false; };
+  }, [lerAqui, p.id, ajuda]);
+  const avisoActual = avisoDaResposta ?? (avisoTempo === undefined ? avisoLido : avisoTempo);
+  const vermelho = comoMostrarAviso(avisoActual, T.avisoVermelhoPadrao).tipo === "vermelho";
+
   const responder = useCallback(async (resposta: "sim" | "nao") => {
     setOcupado(true); setErro("");
     try {
-      // Quem responde é o do crachá: a resposta não leva «motorista»
-      const r = await ajuda.responder({ pedidoId: p.id, resposta });
+      // Quem responde é o do crachá: a resposta não leva «motorista».
+      // O sinal «avisoVisto» só vai num «sim» com a caixa vermelha à vista («Aceitar mesmo assim»).
+      const r = await ajuda.responder(pedidoDeResposta(p.id, resposta, vermelho));
+      // Vermelho sem o sinal: nada mudou — mostra o aviso e o «Aceitar mesmo assim»
+      if (!r.ok && r.motivo === "aviso") {
+        if (r.aviso) setAvisoDaResposta(r.aviso); else setErro(T.avisoVermelhoPadrao);
+        setFase("pedido");
+        return;
+      }
       // Só se mostra que deu certo quando o backend disse ok
-      if (!r.ok) { onDesfecho(r.motivo === "reservada" ? "outro_a_confirmar" : (r.motivo ?? "ja_ficou")); return; }
+      if (!r.ok) {
+        const m = r.motivo;
+        onDesfecho(m === "reservada" ? "outro_a_confirmar" : m === "cancelado" || m === "expirou" ? m : "ja_ficou");
+        return;
+      }
       if (resposta === "nao") { onNaoPosso(); return; }
       if (grupo) onReservou?.(); else onDesfecho("feito");
     } catch (e) {
@@ -127,7 +184,7 @@ export function CartaoRecebido({
       setErro(textoDoErro(e, T.erroResponder));
     }
     finally { setOcupado(false); }
-  }, [p.id, grupo, onDesfecho, onNaoPosso, onReservou, ajuda]);
+  }, [p.id, grupo, vermelho, onDesfecho, onNaoPosso, onReservou, ajuda]);
 
   const caixaErro = erro && (
     <p role="alert" className="rounded-lg px-3 py-2 bg-[#EF4444]/10 border border-[#EF4444]/30 text-sm text-[#FCA5A5] flex items-start gap-2">
@@ -200,6 +257,7 @@ export function CartaoRecebido({
       <p className="text-base font-bold text-white leading-snug">{textoQuemPede(p)}</p>
       <ResumoViagem r={p.viagem} compacto />
 
+      {!(grupo && naoPode) && <CaixaAvisoTempo aviso={avisoActual} />}
       {caixaErro}
       {grupo ? (
         naoPode ? (
@@ -210,8 +268,10 @@ export function CartaoRecebido({
         <>
           <p className="font-mono text-[11px] text-[#888] leading-snug">{T.grupoComoFunciona}</p>
           <button type="button" disabled={ocupado} onClick={() => responder("sim")}
-            className="w-full h-14 rounded-xl bg-[#F0D030] text-black font-mono text-base font-bold active:bg-[#D4B820] disabled:opacity-60">
-            {ocupado ? T.aAceitar : T.aceitar}
+            className={`w-full h-14 rounded-xl font-mono text-base font-bold disabled:opacity-60 ${vermelho
+              ? "bg-[#EF4444] text-white active:bg-[#DC2626]"
+              : "bg-[#F0D030] text-black active:bg-[#D4B820]"}`}>
+            {ocupado ? T.aAceitar : vermelho ? T.aceitarMesmoAssim : T.aceitar}
           </button>
         </>
         )
@@ -224,8 +284,10 @@ export function CartaoRecebido({
               {T.naoPosso}
             </button>
             <button type="button" disabled={ocupado} onClick={() => setFase("confirmar")}
-              className="h-14 rounded-xl bg-[#F0D030] text-black font-mono text-base font-bold active:bg-[#D4B820] disabled:opacity-60">
-              {T.simFaco}
+              className={`h-14 rounded-xl font-mono font-bold disabled:opacity-60 ${vermelho
+                ? "bg-[#EF4444] text-white text-sm leading-tight active:bg-[#DC2626]"
+                : "bg-[#F0D030] text-black text-base active:bg-[#D4B820]"}`}>
+              {vermelho ? T.aceitarMesmoAssim : T.simFaco}
             </button>
           </div>
         </>
