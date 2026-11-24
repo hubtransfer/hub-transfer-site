@@ -4,6 +4,7 @@ import React, { useState, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { ehHubCentral } from "@/lib/auth";
 import { comCracha } from "@/lib/cracha";
+import { avisarSeRecusada } from "@/lib/motoristaSessao";
 
 /* ─── Types ─── */
 
@@ -182,6 +183,7 @@ export default function NoShowModal({ isOpen, tripId, clientName, driverName, ga
 
       const d = date || new Date().toISOString().slice(0, 10);
       let savedRemote = false;
+      let recusada = false;
 
       // Try POST to GAS backend
       if (gasUrl) {
@@ -209,7 +211,11 @@ export default function NoShowModal({ isOpen, tripId, clientName, driverName, ga
           });
 
           const result = await res.json();
-          if (result.success) {
+          // Sessão recusada ({ok:false, motivo:"sessao"}): não diz que guardou nem marca o
+          // no-show; a app do motorista volta à senha.
+          if (avisarSeRecusada(result)) {
+            recusada = true;
+          } else if (result.success) {
             savedRemote = true;
           }
         } catch (err) {
@@ -219,6 +225,12 @@ export default function NoShowModal({ isOpen, tripId, clientName, driverName, ga
 
       // Fallback: always save to localStorage too
       saveToLocal(d, proofs);
+
+      if (recusada) {
+        setToast("A sessão terminou — entre outra vez com a sua senha");
+        setTimeout(() => { setToast(""); onClose(); }, 1500);
+        return;
+      }
 
       setToast(savedRemote ? "Provas guardadas com sucesso" : "Provas guardadas localmente");
       setTimeout(() => {

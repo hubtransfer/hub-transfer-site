@@ -29,6 +29,7 @@ import LiveProgressStrip from "@/components/live/LiveProgressStrip";
 import { statusMotoristaToPasso, type LiveTsPassos } from "@/lib/live";
 import EsperaControl from "@/components/admin/EsperaControl";
 import { crachaParam, comCracha } from "@/lib/cracha";
+import { avisarSeRecusada } from "@/lib/motoristaSessao";
 import { rotuloMotorista, rotuloGestor, tipoNoCartao } from "@/lib/rotuloViagem";
 
 
@@ -140,13 +141,32 @@ function urlDoAudio(v: HubViagem): string {
 // o canal (whatsapp/sms) vai entre parênteses no campo motorista, texto livre.
 // sendBeacon porque o clique navega para o wa.me/sms:: um fetch normal era
 // cancelado a meio pelo browser e o registo perdia-se sem erro nenhum.
-function registarContactoCliente(v: HubViagem, motorista: string, canal: string) {
+// 23/11/2026: onde o browser deixa, vai por fetch com keepalive (também sobrevive
+// à navegação) para se ler a resposta: com a sessão recusada ({ok:false,
+// motivo:"sessao"}) o botão desfaz a hora e a app do motorista volta à senha.
+function suportaKeepalive(): boolean {
+  try { return typeof Request !== "undefined" && "keepalive" in new Request("/"); } catch { return false; }
+}
+
+function registarContactoCliente(v: HubViagem, motorista: string, canal: string, onRecusada?: () => void) {
   const payload = JSON.stringify(comCracha({
     rowIndex: v.rowIndex ?? "",  // o MESMO identificador do updateDriverStatus
     id: v.id,                    // reserva, se não houver rowIndex
     motorista: `${motorista} (${canal})`.trim(),
   }));
   const url = "/api/motorista/mensagem-enviada";
+  if (onRecusada && suportaKeepalive()) {
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: payload,
+      keepalive: true,
+    })
+      .then((r) => (r.status === 204 ? null : r.json().catch(() => null)))
+      .then((json) => { if (avisarSeRecusada(json)) onRecusada?.(); })
+      .catch(() => {});
+    return;
+  }
   const enviou =
     typeof navigator !== "undefined" &&
     typeof navigator.sendBeacon === "function" &&
@@ -361,10 +381,11 @@ export default function DriverTripCard({
   // Regista o contacto (qualquer canal) e marca a hora optimista — chamado
   // ANTES do window.open: o beacon sobrevive à navegação, um fetch não.
   const registarContacto = useCallback((canal: string) => {
-    registarContactoCliente(viagem, driverNameProp || viagem.driver || "", canal);
+    registarContactoCliente(viagem, driverNameProp || viagem.driver || "", canal,
+      mode === "admin" ? undefined : () => setWaHora(horaRegistada));  // gestor: como antes (sendBeacon)
     const agora = new Date();
     setWaHora(`${String(agora.getDate()).padStart(2, "0")}/${String(agora.getMonth() + 1).padStart(2, "0")} ${String(agora.getHours()).padStart(2, "0")}:${String(agora.getMinutes()).padStart(2, "0")}`);
-  }, [viagem, driverNameProp]);
+  }, [viagem, driverNameProp, mode, horaRegistada]);
 
   /* ─ Expand / Collapse ─ */
   const [expanded, setExpanded] = useState(false);
@@ -1046,14 +1067,34 @@ export default function DriverTripCard({
         onSubmit={(id) => {
           // Folha = fonte de verdade: persistir NO_SHOW via marcarNoShow.
           // Nunca "completar" aqui — escreveria CONCLUIDA por cima do no-show.
+          // Sessão recusada ({ok:false, motivo:"sessao"}): nada se marca aqui como no-show
+          // (a app do motorista volta à senha).
           const rowIndex = String(viagem.rowIndex ?? "").trim();
-          if (rowIndex) {
+          if (rowIndex && mode === "admin") {
+            // Gestor: exactamente como antes (o crachá da gestão nunca é recusado com «sessao»)
             fetch(`${HUB_CENTRAL_URL}?action=marcarNoShow&rowIndex=${encodeURIComponent(rowIndex)}&t=${Date.now()}${crachaParam()}`, { redirect: "follow" })
               .catch((err) => console.error("marcarNoShow error:", err))
               .finally(() => { onRefresh?.(); });
+            if (onNoShow) onNoShow(id);
+            return;
+          }
+          if (rowIndex) {
+            fetch(`${HUB_CENTRAL_URL}?action=marcarNoShow&rowIndex=${encodeURIComponent(rowIndex)}&t=${Date.now()}${crachaParam()}`, { redirect: "follow" })
+              .then((r) => r.json().catch(() => null))
+              .then((json) => {
+                if (avisarSeRecusada(json)) return;
+                if (onNoShow) onNoShow(id);
+                onRefresh?.();
+              })
+              .catch((err) => {
+                console.error("marcarNoShow error:", err);
+                if (onNoShow) onNoShow(id);
+                onRefresh?.();
+              });
+            return;
           }
           if (onNoShow) onNoShow(id);
-          else if (!rowIndex) onDarBaixa(viagem.id, "", id);
+          else onDarBaixa(viagem.id, "", id);
         }}
       />
     </motion.div>
