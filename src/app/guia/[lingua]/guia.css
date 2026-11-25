@@ -1,0 +1,527 @@
+/* Guia «Lisboa à sua mesa» em A4 — identidade da /lisboa: preto #111110, amarelo #FACF09, Montserrat,
+   títulos em itálico e maiúsculas, o canto em triângulo amarelo. Cada .gx-folha é uma página A4. */
+
+@page {
+  size: A4;
+  margin: 0;
+}
+
+html:has(.gx),
+html:has(.gx) body {
+  margin: 0;
+  background: #d9d7d0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.gx {
+  --gx-ink: #111110;
+  --gx-yel: #facf09;
+  --gx-soft: #f5f4f0;
+  --gx-mut: #5c5b57;
+  --gx-line: #e4e2dc;
+  font-family: var(--gx-font), system-ui, sans-serif;
+  color: var(--gx-ink);
+  font-size: 11pt;
+  line-height: 1.45;
+}
+.gx *,
+.gx *::before,
+.gx *::after {
+  box-sizing: border-box;
+}
+.gx a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ---------- a folha ---------- */
+.gx-folha {
+  position: relative;
+  width: 210mm;
+  height: 297mm;
+  margin: 0 auto;
+  padding: 16mm 15mm 20mm;
+  overflow: hidden;
+  background: #fff;
+  break-after: page;
+  page-break-after: always;
+  display: flex;
+  flex-direction: column;
+}
+.gx-folha:last-child {
+  break-after: auto;
+  page-break-after: auto;
+}
+@media screen {
+  .gx {
+    padding: 24px 0;
+  }
+  .gx-folha {
+    margin-bottom: 24px;
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.18);
+  }
+}
+.gx-escura {
+  background: var(--gx-ink);
+  color: #fff;
+}
+.gx-canto {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border-right: 34mm solid var(--gx-yel);
+  border-top: 34mm solid transparent;
+}
+
+/* ---------- fotografias ---------- */
+.gx-img {
+  object-fit: cover;
+}
+.gx-sem-foto {
+  position: absolute;
+  inset: 0;
+  background: var(--gx-soft);
+}
+
+/* ---------- tipografia ---------- */
+.gx-titulo {
+  margin: 0;
+  font-size: 40pt;
+  line-height: 1;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}
+.gx-sobretitulo {
+  margin: 0 0 3mm;
+  color: var(--gx-yel);
+  font-size: 10pt;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.gx-boas-vindas {
+  margin: 6mm 0 0;
+  max-width: 150mm;
+  font-size: 13pt;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.88);
+}
+.gx-h2 {
+  margin: 0;
+  font-size: 24pt;
+  line-height: 1.05;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+.gx-h3 {
+  margin: 8mm 0 3mm;
+  font-size: 13pt;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+}
+.gx-sub {
+  margin: 2mm 0 0;
+  color: var(--gx-mut);
+  font-size: 11pt;
+}
+
+/* ---------- botões ---------- */
+.gx-botao {
+  display: inline-flex;
+  align-items: center;
+  gap: 2.5mm;
+  align-self: flex-start;
+  padding: 3.2mm 6mm;
+  border-radius: 99px;
+  background: var(--gx-yel);
+  color: var(--gx-ink) !important;
+  font-size: 11pt;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.gx-botao--tinta {
+  margin-top: auto;
+  padding: 2.4mm 4.5mm;
+  background: var(--gx-ink);
+  color: #fff !important;
+  font-size: 9.5pt;
+}
+.gx-botao--whats {
+  background: #25d366;
+  color: #fff !important;
+}
+
+/* ---------- números ---------- */
+.gx-numero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 10mm;
+  height: 10mm;
+  border-radius: 50%;
+  background: var(--gx-yel);
+  color: var(--gx-ink);
+  font-size: 13pt;
+  font-weight: 800;
+}
+.gx-numero--foto {
+  position: absolute;
+  left: 3mm;
+  top: 3mm;
+  z-index: 1;
+  box-shadow: 0 0.5mm 2mm rgba(0, 0, 0, 0.25);
+}
+
+/* ---------- 1. capa ---------- */
+.gx-capa {
+  padding: 0;
+}
+.gx-capa-foto {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 62%;
+}
+.gx-capa-veu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 62%;
+  background: linear-gradient(180deg, rgba(17, 17, 16, 0.6) 0%, rgba(17, 17, 16, 0) 22%, rgba(17, 17, 16, 0) 60%, #111110 100%);
+  pointer-events: none;
+}
+.gx-logo-capa {
+  position: absolute;
+  left: 15mm;
+  top: 14mm;
+  z-index: 1;
+}
+.gx-logo-capa img {
+  display: block;
+  height: 13mm;
+  width: auto;
+}
+.gx-capa-texto {
+  position: relative;
+  margin-top: auto;
+  padding: 0 15mm 30mm;
+  display: flex;
+  flex-direction: column;
+}
+.gx-capa-texto .gx-botao {
+  margin-top: 8mm;
+}
+
+/* ---------- 2. como usar ---------- */
+.gx-passos {
+  list-style: none;
+  margin: 8mm 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5mm;
+}
+.gx-passos li {
+  display: flex;
+  align-items: flex-start;
+  gap: 5mm;
+}
+.gx-passos p {
+  margin: 1.5mm 0 0;
+  font-size: 12.5pt;
+  line-height: 1.45;
+}
+.gx-exemplo {
+  margin-top: 9mm;
+}
+.gx-exemplo-foto {
+  position: relative;
+  display: block;
+  height: 92mm;
+  border-radius: 4mm;
+  overflow: hidden;
+}
+.gx-indice {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.gx-indice li {
+  display: flex;
+  align-items: baseline;
+  gap: 3mm;
+  padding: 2.6mm 0;
+  border-bottom: 0.3mm solid var(--gx-line);
+  font-size: 12pt;
+  font-weight: 700;
+}
+.gx-indice li::after {
+  content: "";
+  order: 1;
+  flex: 1;
+  border-bottom: 0.4mm dotted #bdbab2;
+}
+.gx-indice span {
+  order: 2;
+  color: var(--gx-mut);
+}
+
+/* ---------- 3–8. pratos e lugares ---------- */
+.gx-cabeca {
+  margin-bottom: 6mm;
+  padding-left: 4mm;
+  border-left: 1.6mm solid var(--gx-yel);
+}
+.gx-cabeca--curta {
+  margin-bottom: 5mm;
+}
+.gx-grelha {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5mm;
+  min-height: 0;
+}
+.gx-grelha--pratos {
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+.gx-grelha--lugares {
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  align-content: start;
+}
+.gx-cartao {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border: 0.3mm solid var(--gx-line);
+  border-radius: 4mm;
+  overflow: hidden;
+  background: #fff;
+}
+.gx-cartao-foto {
+  position: relative;
+  display: block;
+  flex: none;
+  height: 58mm;
+}
+.gx-grelha--lugares .gx-cartao {
+  flex-direction: row;
+}
+.gx-cartao-foto--lugar {
+  height: auto;
+  width: 40mm;
+}
+.gx-cartao-corpo {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  padding: 4mm 4.5mm 4.5mm;
+}
+.gx-cartao h3 {
+  margin: 0 0 1.5mm;
+  font-size: 13pt;
+  line-height: 1.15;
+  font-weight: 800;
+}
+.gx-grelha--lugares .gx-cartao h3 {
+  font-size: 11.5pt;
+}
+.gx-cartao p {
+  margin: 0 0 3mm;
+  font-size: 10pt;
+  line-height: 1.4;
+  color: var(--gx-mut);
+}
+.gx-cartao .gx-zona {
+  margin-bottom: 1.5mm;
+  font-size: 8.5pt;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gx-ink);
+}
+.gx-rodape {
+  position: absolute;
+  left: 15mm;
+  right: 15mm;
+  bottom: 8mm;
+  display: flex;
+  justify-content: space-between;
+  padding-top: 2.5mm;
+  border-top: 0.3mm solid var(--gx-line);
+  font-size: 8.5pt;
+  font-weight: 600;
+  color: var(--gx-mut);
+}
+
+/* ---------- 9. a mesa ---------- */
+.gx-mesa {
+  padding: 0;
+}
+.gx-mesa-foto {
+  position: relative;
+  display: block;
+  height: 120mm;
+  flex: none;
+}
+.gx-mesa-texto {
+  display: flex;
+  flex-direction: column;
+  padding: 12mm 15mm 0;
+}
+.gx-titulo--mesa {
+  font-size: 32pt;
+}
+.gx-mesa-sub {
+  margin: 3mm 0 0;
+  color: var(--gx-yel);
+  font-size: 16pt;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+}
+.gx-botoes {
+  display: flex;
+  flex-direction: column;
+  gap: 4mm;
+  margin-top: 9mm;
+}
+.gx-codigo {
+  margin: 7mm 0 0;
+  font-size: 10pt;
+  color: rgba(255, 255, 255, 0.7);
+}
+.gx-codigo b {
+  color: #fff;
+}
+
+/* ---------- 10. contracapa ---------- */
+.gx-contra {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.gx-logo-contra img {
+  display: block;
+  height: 20mm;
+  width: auto;
+}
+.gx-lema {
+  margin: 10mm 0 0;
+  font-size: 20pt;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+  color: var(--gx-yel);
+}
+.gx-contra-txt {
+  margin: 3mm 0 0;
+  font-size: 12pt;
+  color: rgba(255, 255, 255, 0.8);
+}
+.gx-contactos {
+  list-style: none;
+  margin: 14mm 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4mm;
+}
+.gx-contactos li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5mm;
+}
+.gx-contactos span {
+  font-size: 8.5pt;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+.gx-contactos a {
+  font-size: 16pt;
+  font-weight: 800;
+}
+.gx-licenca {
+  position: absolute;
+  bottom: 14mm;
+  left: 15mm;
+  right: 40mm;
+  margin: 0;
+  font-size: 9pt;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: left;
+}
+
+/* última página dos lugares: o convite para o jantar */
+.gx-jantar {
+  justify-content: center;
+  padding: 6mm;
+  border: 0;
+  background: var(--gx-ink);
+  color: #fff;
+}
+.gx-jantar h3 {
+  margin: 0 0 2mm;
+  font-size: 16pt;
+  font-style: italic;
+  text-transform: uppercase;
+  color: var(--gx-yel);
+}
+.gx-jantar p {
+  margin: 0 0 5mm;
+  font-size: 11pt;
+  color: rgba(255, 255, 255, 0.85);
+}
+.gx-faixa {
+  position: relative;
+  display: block;
+  grid-column: 1 / -1;
+  border-radius: 4mm;
+  overflow: hidden;
+}
+.gx-faixa-texto {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 4mm;
+  padding: 14mm 6mm 5mm;
+  background: linear-gradient(180deg, rgba(17, 17, 16, 0), rgba(17, 17, 16, 0.85));
+  color: #fff;
+}
+.gx-faixa-texto b {
+  font-size: 18pt;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+}
+.gx-faixa-texto span {
+  flex: none;
+  padding: 2.4mm 4.5mm;
+  border-radius: 99px;
+  background: var(--gx-yel);
+  color: var(--gx-ink);
+  font-size: 9.5pt;
+  font-weight: 800;
+}
+.gx-grelha--lugares .gx-jantar {
+  flex-direction: column;
+  align-items: flex-start;
+}
