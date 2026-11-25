@@ -3,7 +3,7 @@ import PaginaPrato from "@/components/lisboa/PaginaPrato";
 import { metadadosPrato, paramsPratos, viewportLisboa } from "@/lib/lisboa/metadados";
 import { pratoPorSlug } from "@/lib/lisboa/pratos";
 
-/* Página de um prato — pt. As três versões ligam-se entre si (o endereço do prato é o mesmo nas três línguas). */
+/* Página de um prato — inglês, a língua principal (/lisboa/prato/{slug}). O endereço do prato é o mesmo nas cinco línguas. */
 type Props = { params: Promise<{ prato: string }> };
 
 export const dynamicParams = false;
@@ -11,11 +11,11 @@ export const generateStaticParams = paramsPratos;
 export const viewport = viewportLisboa;
 
 export async function generateMetadata({ params }: Props) {
-  return metadadosPrato("pt", (await params).prato);
+  return metadadosPrato("en", (await params).prato);
 }
 
 export default async function Page({ params }: Props) {
   const prato = pratoPorSlug((await params).prato);
   if (!prato) notFound();
-  return <PaginaPrato lingua="pt" prato={prato} />;
+  return <PaginaPrato lingua="en" prato={prato} />;
 }

@@ -8,8 +8,11 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      // Os guias em PDF apontam para o endereço antigo (com #p-1 … #p-21; o browser mantém a âncora).
-      { source: "/monte-a-sua-lisboa", destination: "/lisboa", permanent: true },
+      // Os guias em PDF portugueses apontam para o endereço antigo (com #p-1 … #p-21; o browser mantém a âncora).
+      { source: "/monte-a-sua-lisboa", destination: "/pt/lisboa", permanent: true },
+      // O inglês passou a ser a língua principal da /lisboa (E7): /en/lisboa → /lisboa.
+      { source: "/en/lisboa", destination: "/lisboa", permanent: true },
+      { source: "/en/lisboa/prato/:prato", destination: "/lisboa/prato/:prato", permanent: true },
     ];
   },
 };

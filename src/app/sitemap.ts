@@ -1,5 +1,8 @@
 import type { MetadataRoute } from "next";
+import { alternativas } from "@/lib/lisboa/metadados";
 import { PRATOS } from "@/lib/lisboa/pratos";
+import { ROTAS, rotaPrato } from "@/lib/lisboa/textos";
+import { LINGUAS } from "@/lib/lisboa/tipos";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://hubtransfer.pt";
@@ -11,29 +14,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 1,
     },
-    ...(["/lisboa", "/en/lisboa", "/es/lisboa"] as const).map((p) => ({
-      url: `${baseUrl}${p}`,
+    // /lisboa nas cinco línguas (en é a principal, x-default)
+    ...LINGUAS.map((l) => ({
+      url: `${baseUrl}${ROTAS[l]}`,
       lastModified: new Date(),
       changeFrequency: "monthly" as const,
       priority: 0.8,
-      alternates: {
-        languages: { "pt-PT": `${baseUrl}/lisboa`, en: `${baseUrl}/en/lisboa`, es: `${baseUrl}/es/lisboa` },
-      },
+      alternates: { languages: alternativas((x) => `${baseUrl}${ROTAS[x]}`) },
     })),
-    // páginas dos pratos da /lisboa (o mesmo endereço do prato nas três línguas)
+    // páginas dos pratos da /lisboa (o mesmo endereço do prato nas cinco línguas)
     ...PRATOS.flatMap((prato) =>
-      (["/lisboa", "/en/lisboa", "/es/lisboa"] as const).map((p) => ({
-        url: `${baseUrl}${p}/prato/${prato.slug}`,
+      LINGUAS.map((l) => ({
+        url: `${baseUrl}${rotaPrato(l, prato.slug)}`,
         lastModified: new Date(),
         changeFrequency: "monthly" as const,
         priority: 0.6,
-        alternates: {
-          languages: {
-            "pt-PT": `${baseUrl}/lisboa/prato/${prato.slug}`,
-            en: `${baseUrl}/en/lisboa/prato/${prato.slug}`,
-            es: `${baseUrl}/es/lisboa/prato/${prato.slug}`,
-          },
-        },
+        alternates: { languages: alternativas((x) => `${baseUrl}${rotaPrato(x, prato.slug)}`) },
       }))
     ),
     {

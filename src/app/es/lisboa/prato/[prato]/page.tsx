@@ -3,7 +3,7 @@ import PaginaPrato from "@/components/lisboa/PaginaPrato";
 import { metadadosPrato, paramsPratos, viewportLisboa } from "@/lib/lisboa/metadados";
 import { pratoPorSlug } from "@/lib/lisboa/pratos";
 
-/* Página de um prato — es. As três versões ligam-se entre si (o endereço do prato é o mesmo nas três línguas). */
+/* Página de um prato — espanhol (/es/lisboa/prato/{slug}). O endereço do prato é o mesmo nas cinco línguas. */
 type Props = { params: Promise<{ prato: string }> };
 
 export const dynamicParams = false;

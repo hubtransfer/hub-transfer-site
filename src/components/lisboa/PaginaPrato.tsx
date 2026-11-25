@@ -5,7 +5,9 @@ import BotaoMesa, { MedirAoAbrir } from "./BotaoMesa";
 import Carrossel from "./Carrossel";
 import FormularioMesa from "./FormularioMesa";
 import ProtecaoFotos from "./ProtecaoFotos";
+import SeletorLinguas from "./SeletorLinguas";
 import { CONFIG_LISBOA } from "@/lib/lisboa/config";
+import { listaRestaurantes } from "@/lib/lisboa/formulario";
 import { imagensPrato } from "@/lib/lisboa/imagens";
 import { PRATOS } from "@/lib/lisboa/pratos";
 import { paraVista, restaurantesDoPrato } from "@/lib/lisboa/restaurantes";
@@ -13,7 +15,7 @@ import { ROTAS, TEXTOS, rotaPrato } from "@/lib/lisboa/textos";
 import { LINGUAS, type Lingua, type Prato } from "@/lib/lisboa/tipos";
 import "./lisboa.css";
 
-/* Página de um prato — /lisboa/prato/{slug}, /en/lisboa/prato/{slug}, /es/lisboa/prato/{slug}.
+/* Página de um prato — /lisboa/prato/{slug} (en), /pt/…, /es/…, /fr/…, /it/lisboa/prato/{slug}.
    a) fotografias, nome e o que é; b) «Onde o provamos»; c) «Já tem um restaurante em mente?»; d) «Ver outros pratos».
    Sem preços, sem notas do Google, sem fotografias dos restaurantes (os cartões usam as do prato). */
 
@@ -32,6 +34,7 @@ export default function PaginaPrato({ lingua, prato }: { lingua: Lingua; prato: 
   const restaurantes = restaurantesDoPrato(prato.n).map((r) => paraVista(r, lingua));
   const outros = PRATOS.filter((p) => p.n !== prato.n);
   const pratoPedido = { n: prato.n, nome };
+  const rotasPrato = Object.fromEntries(LINGUAS.map((l) => [l, rotaPrato(l, prato.slug)])) as Record<Lingua, string>;
 
   return (
     <div lang={lingua} className={`lx ${montserrat.variable}`}>
@@ -44,20 +47,7 @@ export default function PaginaPrato({ lingua, prato }: { lingua: Lingua; prato: 
           <Link href={ROTAS[lingua]} aria-label={t.pVoltar} prefetch={false}>
             <Image src="/images/logo.png" alt="HUB Transfer" width={828} height={204} sizes="140px" className="lx-logo" priority />
           </Link>
-          <nav className="lx-linguas" aria-label={t.aLingua}>
-            {LINGUAS.map((l) => (
-              <Link
-                key={l}
-                href={rotaPrato(l, prato.slug)}
-                hrefLang={l}
-                lang={l}
-                aria-current={l === lingua ? "page" : undefined}
-                prefetch={false}
-              >
-                {l.toUpperCase()}
-              </Link>
-            ))}
-          </nav>
+          <SeletorLinguas lingua={lingua} rotas={rotasPrato} rotulo={t.aLingua} />
         </div>
       </header>
 
@@ -168,7 +158,7 @@ export default function PaginaPrato({ lingua, prato }: { lingua: Lingua; prato: 
         </footer>
       </main>
 
-      <FormularioMesa lingua={lingua} t={t} />
+      <FormularioMesa lingua={lingua} t={t} restaurantes={listaRestaurantes(lingua)} />
     </div>
   );
 }

@@ -1,9 +1,20 @@
-/* Título, descrição, imagem de partilha e as três línguas para os motores de busca. */
+/* Título, descrição, imagem de partilha e as cinco línguas para os motores de busca (x-default = inglês, /lisboa). */
 
 import type { Metadata, Viewport } from "next";
 import { PRATOS, pratoPorSlug } from "./pratos";
 import { ROTAS, TEXTOS, rotaPrato } from "./textos";
-import type { Lingua } from "./tipos";
+import { LINGUAS, type Lingua } from "./tipos";
+
+/** hreflang de cada língua (o português é o de Portugal). */
+export const HREFLANG: Record<Lingua, string> = { en: "en", pt: "pt-PT", es: "es", fr: "fr", it: "it" };
+
+/** en, pt-PT, es, fr, it e x-default (inglês) para um endereço. */
+export function alternativas(rota: (l: Lingua) => string): Record<string, string> {
+  const a: Record<string, string> = {};
+  for (const l of LINGUAS) a[HREFLANG[l]] = rota(l);
+  a["x-default"] = rota("en");
+  return a;
+}
 
 export function metadadosLisboa(lingua: Lingua): Metadata {
   const t = TEXTOS[lingua];
@@ -12,12 +23,7 @@ export function metadadosLisboa(lingua: Lingua): Metadata {
     description: t.metaDesc,
     alternates: {
       canonical: ROTAS[lingua],
-      languages: {
-        "pt-PT": ROTAS.pt,
-        en: ROTAS.en,
-        es: ROTAS.es,
-        "x-default": ROTAS.en,
-      },
+      languages: alternativas((l) => ROTAS[l]),
     },
     openGraph: {
       title: t.metaTitle,
@@ -25,7 +31,7 @@ export function metadadosLisboa(lingua: Lingua): Metadata {
       url: ROTAS[lingua],
       siteName: "HUB Transfer",
       locale: t.ogLocale,
-      alternateLocale: (["pt", "en", "es"] as const).filter((l) => l !== lingua).map((l) => TEXTOS[l].ogLocale),
+      alternateLocale: LINGUAS.filter((l) => l !== lingua).map((l) => TEXTOS[l].ogLocale),
       type: "website",
       images: [{ url: "/lisboa/hero/hero-mesa-a.jpg", width: 2400, height: 1350, alt: t.titleA + t.titleEm + t.titleB }],
     },
@@ -45,6 +51,9 @@ const TITULO_PRATO: Record<Lingua, string> = {
   pt: "{d} em Lisboa: reservamos a sua mesa sem custo | HUB Transfer",
   en: "{d} in Lisbon: we book your table free of charge | HUB Transfer",
   es: "{d} en Lisboa: reservamos su mesa sin coste | HUB Transfer",
+  // tradução por rever
+  fr: "{d} à Lisbonne : nous réservons votre table sans frais | HUB Transfer",
+  it: "{d} a Lisbona: prenotiamo il suo tavolo senza costi | HUB Transfer",
 };
 
 /** Os 8 pratos, para gerar as páginas no build. */
@@ -62,12 +71,7 @@ export function metadadosPrato(lingua: Lingua, slug: string): Metadata {
     description,
     alternates: {
       canonical: rotaPrato(lingua, slug),
-      languages: {
-        "pt-PT": rotaPrato("pt", slug),
-        en: rotaPrato("en", slug),
-        es: rotaPrato("es", slug),
-        "x-default": rotaPrato("en", slug),
-      },
+      languages: alternativas((l) => rotaPrato(l, slug)),
     },
     openGraph: {
       title,

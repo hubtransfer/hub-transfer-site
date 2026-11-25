@@ -109,7 +109,7 @@ export default function PhoneInput({
         type="tel"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder || "+351 968 698 138"}
+        placeholder={placeholder || "+351 912 345 678"}
         className="w-full h-[44px] bg-white/[0.06] border border-white/[0.12] rounded-lg pl-11 pr-3 text-[#F5F5F5] text-sm placeholder-[#666] focus:outline-none focus:border-[#F0D030] transition-colors font-mono"
       />
     </div>

@@ -342,7 +342,7 @@ const RODAPE = {
  ]
 };
 const PROIBIDAS = ["90", "reembols", "refund", "rembours", "rimbors", "10 €", "€10", "Garantia", "Guarantee", "Garantía", "Garantie", "Garanzia"];
-const NUMERO_WA = " (+351 968 698 138)"; // o número a seguir ao «WhatsApp da HUB», fora da frase aprovada
+const NUMERO_WA = " (+351 928 121 564)"; // o número a seguir ao «WhatsApp da HUB», fora da frase aprovada
 
 const ENT = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " };
 function decode(s) {

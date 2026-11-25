@@ -3,9 +3,10 @@
    n = número do lugar (os guias em PDF apontam para #p-1 … #p-21; não renumerar).
    min = tempo sugerido no local, em minutos. promptImagem = descrição usada para criar as imagens (nunca vai para a página). */
 
-import type { Lugar } from "./tipos";
+import { LUGARES_FR_IT } from "./lugares-fr-it";
+import type { Lugar, SemFrIt } from "./tipos";
 
-export const LUGARES: Lugar[] = [
+const BASE: SemFrIt<Lugar>[] = [
   {
     "n": 1,
     "id": "praca-comercio",
@@ -511,3 +512,6 @@ export const LUGARES: Lugar[] = [
     "promptImagem": "Cascais bay with colorful fishing boats, sandy beach and white houses, sunny morning, travel photography"
   }
 ];
+
+/** Os 21 lugares nas cinco línguas (francês e italiano: tradução por rever, em lugares-fr-it.ts). */
+export const LUGARES: Lugar[] = BASE.map((l) => ({ ...l, ...LUGARES_FR_IT[l.n] }));

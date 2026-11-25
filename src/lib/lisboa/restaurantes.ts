@@ -7,9 +7,12 @@
      tipo     "típico" ou "especial"
      ambiente uma frase por língua
      reserva  como a equipa reserva: SÓ PARA USO INTERNO, nunca aparece na página
+     foto     (opcional) fotografia do próprio restaurante, ex. "/lisboa/restaurantes/r07.jpg" — só quando houver
+              parceria e autorização; sem ela, a lista do formulário usa a fotografia do prato principal desse restaurante
    Na página: etiqueta sempre «Recomendado pela HUB» (nunca «parceiro»), sem notas do Google, sem preços
    e sem fotografias dos restaurantes (o cartão usa a fotografia do prato). */
 
+import { AMBIENTE_FR_IT } from "./pratos-fr-it";
 import type { Lingua } from "./tipos";
 
 export type Restaurante = {
@@ -20,10 +23,11 @@ export type Restaurante = {
   tipo: "típico" | "especial";
   ambiente: Record<Lingua, string>;
   reserva: string;
+  foto?: string;
 };
 
 // prettier-ignore
-export const RESTAURANTES: Restaurante[] = [
+const BASE: (Omit<Restaurante, "ambiente"> & { ambiente: Record<"pt" | "en" | "es", string> })[] = [
   { codigo: "R01", nome: "Marisqueira Uma", bairro: "Baixa", pratos: [1, 6], tipo: "típico", reserva: "Google", ambiente: { pt: "Casa pequena e sempre cheia, dedicada ao arroz de marisco.", en: "A small, always busy place devoted to seafood rice.", es: "Casa pequeña y siempre llena, dedicada al arroz de marisco." } },
   { codigo: "R02", nome: "Azul Seafood", bairro: "Praça do Comércio", pratos: [1, 5], tipo: "especial", reserva: "Google", ambiente: { pt: "Esplanada na maior praça de Lisboa, com marisco fresco.", en: "A terrace on Lisbon's largest square, with fresh seafood.", es: "Terraza en la plaza más grande de Lisboa, con marisco fresco." } },
   { codigo: "R03", nome: "Frade dos Mares", bairro: "Santos", pratos: [2], tipo: "especial", reserva: "Google/TheFork", ambiente: { pt: "Sala acolhedora, conhecida pelo polvo.", en: "A cosy dining room, known for its octopus.", es: "Sala acogedora, conocida por el pulpo." } },
@@ -36,6 +40,12 @@ export const RESTAURANTES: Restaurante[] = [
   { codigo: "R10", nome: "Via Graça", bairro: "Graça", pratos: ["vista"], tipo: "especial", reserva: "Google/TheFork", ambiente: { pt: "Terraço com vista para o castelo, o rio e Alfama.", en: "A terrace overlooking the castle, the river and Alfama.", es: "Terraza con vistas al castillo, el río y Alfama." } },
   { codigo: "R11", nome: "SUD Lisboa", bairro: "Belém", pratos: ["vista"], tipo: "especial", reserva: "Google", ambiente: { pt: "Terraço junto ao rio, com o pôr do sol e a ponte.", en: "A riverside terrace, with the sunset and the bridge.", es: "Terraza junto al río, con la puesta de sol y el puente." } },
 ];
+
+/** Com o ambiente em francês e italiano (tradução por rever, em pratos-fr-it.ts). */
+export const RESTAURANTES: Restaurante[] = BASE.map((r) => ({ ...r, ambiente: { ...r.ambiente, ...AMBIENTE_FR_IT[r.codigo] } }));
+
+/** Fotografia dos restaurantes «com vista»: um lugar nosso dessa zona (Graça, Belém). */
+export const LUGAR_DA_VISTA: Record<string, number> = { R10: 7, R11: 16 };
 
 export const restaurantesDoPrato = (n: number) => RESTAURANTES.filter((r) => r.pratos.includes(n));
 export const restaurantesComVista = () => RESTAURANTES.filter((r) => r.pratos.includes("vista"));

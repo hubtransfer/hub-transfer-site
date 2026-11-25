@@ -14,7 +14,7 @@ const DADOS = {
     "Transfer privado no Aeroporto de Lisboa com monitorização de voo em tempo real",
   url: SITE_URL,
   logo: `${SITE_URL}/images/logo.png`,
-  telephone: "+351968698138",
+  telephone: "+351928121564",
   email: "contacto@hubtransfer.pt",
   address: {
     "@type": "PostalAddress",
