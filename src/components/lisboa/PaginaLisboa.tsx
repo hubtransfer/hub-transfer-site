@@ -5,24 +5,27 @@ import BotaoMesa from "./BotaoMesa";
 import Carrossel from "./Carrossel";
 import FormularioMesa from "./FormularioMesa";
 import Planeador, { type LugarVista } from "./Planeador";
+import BarraTopo from "./BarraTopo";
 import ProtecaoFotos from "./ProtecaoFotos";
 import { CONFIG_LISBOA } from "@/lib/lisboa/config";
+import { listaRestaurantes } from "@/lib/lisboa/formulario";
 import { imagensHero, imagensLugar, imagensPrato } from "@/lib/lisboa/imagens";
 import { LUGARES } from "@/lib/lisboa/lugares";
 import { ESTILOS_JANTAR, PRATOS } from "@/lib/lisboa/pratos";
-import { paraVista, restaurantesComVista } from "@/lib/lisboa/restaurantes";
+import { VISTAS_FR_IT } from "@/lib/lisboa/pratos-fr-it";
+import { LUGAR_DA_VISTA, paraVista, restaurantesComVista } from "@/lib/lisboa/restaurantes";
 import { ROTAS, TEXTOS, rotaPrato } from "@/lib/lisboa/textos";
-import { LINGUAS, type Lingua } from "@/lib/lisboa/tipos";
+import type { Lingua } from "@/lib/lisboa/tipos";
 import "./lisboa.css";
 
-/* «Lisboa à sua mesa» — /lisboa, /en/lisboa, /es/lisboa.
+/* «Lisboa à sua mesa» — /lisboa (en), /pt/lisboa, /es/lisboa, /fr/lisboa, /it/lisboa.
    Estrutura, textos e identidade do protótipo validado (19/11/2026). A página NUNCA mostra preços. */
 
 /* «Uma mesa com vista»: a fotografia é a de um lugar nosso dessa zona, com a legenda da vista
    (nunca apresentada como o restaurante: não temos autorização para usar fotografias dos restaurantes). */
 const VISTAS: Record<string, { lugar: number; legenda: Record<Lingua, string> }> = {
-  R10: { lugar: 7, legenda: { pt: "Vista da Graça", en: "View from Graça", es: "Vista desde Graça" } },
-  R11: { lugar: 16, legenda: { pt: "Vista de Belém", en: "View from Belém", es: "Vista desde Belém" } },
+  R10: { lugar: LUGAR_DA_VISTA.R10, legenda: { pt: "Vista da Graça", en: "View from Graça", es: "Vista desde Graça", ...VISTAS_FR_IT.R10 } },
+  R11: { lugar: LUGAR_DA_VISTA.R11, legenda: { pt: "Vista de Belém", en: "View from Belém", es: "Vista desde Belém", ...VISTAS_FR_IT.R11 } },
 };
 
 const montserrat = Montserrat({
@@ -56,24 +59,14 @@ export default function PaginaLisboa({ lingua }: { lingua: Lingua }) {
       <script dangerouslySetInnerHTML={{ __html: `try{localStorage.setItem("hub-lang","${lingua}")}catch(e){}` }} />
       <ProtecaoFotos />
 
+      <BarraTopo lingua={lingua} rotas={ROTAS} rotulo={t.aLingua} logo={{ href: "/", rotulo: "HUB Transfer" }} />
+
       {/* a) Topo */}
       <header className={hero ? "lx-hero" : "lx-hero lx-hero--sem"}>
         {hero && (
           <Image src={hero} alt="" fill priority fetchPriority="high" sizes="(max-width: 767px) and (orientation: portrait) 82vh, 100vw" quality={60} className="lx-hero-img" draggable={false} />
         )}
         <div className="lx-hero-veu" aria-hidden="true" />
-        <div className="lx-wrap lx-hero-top">
-          <Link href="/" aria-label="HUB Transfer" prefetch={false}>
-            <Image src="/images/logo.png" alt="HUB Transfer" width={828} height={204} sizes="140px" className="lx-logo" priority />
-          </Link>
-          <nav className="lx-linguas" aria-label={t.aLingua}>
-            {LINGUAS.map((l) => (
-              <Link key={l} href={ROTAS[l]} hrefLang={l} lang={l} aria-current={l === lingua ? "page" : undefined} prefetch={false}>
-                {l.toUpperCase()}
-              </Link>
-            ))}
-          </nav>
-        </div>
         <div className="lx-wrap lx-hero-corpo">
           <h1 className="lx-h1">
             {t.titleA}
@@ -174,7 +167,7 @@ export default function PaginaLisboa({ lingua }: { lingua: Lingua }) {
           )}
         </footer>
       </main>
-      <FormularioMesa lingua={lingua} t={t} />
+      <FormularioMesa lingua={lingua} t={t} restaurantes={listaRestaurantes(lingua)} />
     </div>
   );
 }

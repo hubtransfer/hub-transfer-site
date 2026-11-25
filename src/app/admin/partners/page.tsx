@@ -97,7 +97,7 @@ function AdminSection({ adminName }: { adminName: string }) {
       <div className="flex items-center gap-2 pt-2 border-t border-[#2A2A2A]">
         <label className="text-xs text-[#888] flex-shrink-0 font-mono">Email recuperação:</label>
         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-          placeholder="admin@hubtransferencia.com"
+          placeholder="admin@hubtransfer.pt"
           className="flex-1 h-8 bg-[#0A0A0A] border border-[#2A2A2A] rounded px-2 text-xs text-[#F5F5F5] placeholder-[#666] focus:outline-none focus:border-[#F0D030] font-mono" />
         <button onClick={handleSaveEmail}
           className="h-8 px-3 text-[10px] font-bold bg-[#222] text-[#D0D0D0] rounded hover:text-[#F5F5F5] cursor-pointer">

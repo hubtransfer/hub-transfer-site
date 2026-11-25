@@ -1,12 +1,15 @@
 /* «O que se come em Portugal»: os 8 pratos (constante DISHES do protótipo validado, 19/11/2026;
    pratos 05, 07 e 08 trocados no pedido E6). Nomes e frases aprovados pelo Junior: não reescrever sem o pedido dele.
    n = número do prato (imagens public/lisboa/pratos/prato-0n-a.jpg … -d.jpg).
-   slug = endereço da página do prato (/lisboa/prato/{slug}), igual nas três línguas.
+   slug = endereço da página do prato (/lisboa/prato/{slug}), igual nas cinco línguas.
    sobre = as linhas da página do prato: só factos, sem preços nem promessas. */
 
-import type { EstiloJantar, Prato } from "./tipos";
+import { ESTILOS_FR_IT, PRATOS_FR_IT } from "./pratos-fr-it";
+import type { EstiloJantar, Prato, SemFrIt } from "./tipos";
 
-export const PRATOS: Prato[] = [
+type PratoBase = SemFrIt<Omit<Prato, "sobre">> & { sobre: Record<"pt" | "en" | "es", string[]> };
+
+const BASE_PRATOS: PratoBase[] = [
   {
     n: 1,
     slug: "arroz-de-marisco",
@@ -201,11 +204,17 @@ export const PRATOS: Prato[] = [
   },
 ];
 
+/** Os 8 pratos nas cinco línguas (francês e italiano: tradução por rever, em pratos-fr-it.ts). */
+export const PRATOS: Prato[] = BASE_PRATOS.map((p) => {
+  const t = PRATOS_FR_IT[p.n];
+  return { ...p, fr: t.fr, it: t.it, sobre: { ...p.sobre, fr: t.sobre.fr, it: t.sobre.it } };
+});
+
 /** Prato pelo endereço (ou undefined). */
 export const pratoPorSlug = (slug: string) => PRATOS.find((p) => p.slug === slug);
 
 /* «Acabe o dia à mesa»: estilos de restaurante (constante RESTS do protótipo). */
-export const ESTILOS_JANTAR: EstiloJantar[] = [
+const BASE_ESTILOS: SemFrIt<EstiloJantar>[] = [
   {
     id: "equipa",
     pt: ["Deixe connosco", "Sugerimos o restaurante certo para o seu gosto."],
@@ -231,3 +240,5 @@ export const ESTILOS_JANTAR: EstiloJantar[] = [
     es: ["Cena con fado", "Fado en directo, en Alfama o el Bairro Alto."],
   },
 ];
+
+export const ESTILOS_JANTAR: EstiloJantar[] = BASE_ESTILOS.map((e) => ({ ...e, ...ESTILOS_FR_IT[e.id] }));

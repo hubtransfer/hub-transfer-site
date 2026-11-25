@@ -58,7 +58,8 @@
   overflow: hidden;
   background: var(--lx-ink);
   color: #fff;
-  padding: max(18px, env(safe-area-inset-top)) 0 40px;
+  /* o topo começa por baixo da barra fixa (logótipo + línguas) */
+  padding: var(--lx-barra) 0 40px;
   min-height: min(88svh, 720px);
   display: flex;
   flex-direction: column;
@@ -92,43 +93,134 @@
 .lx-hero > *:not(.lx-hero-img):not(.lx-hero-veu) {
   position: relative;
 }
-.lx-hero-top {
+/* Barra fixa no topo (como a da página inicial): logótipo + línguas, sempre à mão, com a zona segura do iPhone.
+   --lx-barra é a altura que a página reserva para ela: nada fica tapado, nem ao saltar para #p-1…#p-21. */
+:root:has(.lx) {
+  --lx-barra: calc(64px + env(safe-area-inset-top));
+  scroll-padding-top: calc(var(--lx-barra) + 8px);
+}
+.lx-barra {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 45;
+  padding-top: env(safe-area-inset-top);
+  color: #fff;
+  background: linear-gradient(180deg, rgba(17, 17, 16, 0.55), rgba(17, 17, 16, 0));
+  transition: background-color 0.25s, box-shadow 0.25s;
+}
+.lx-barra[data-escura] {
+  background: rgba(17, 17, 16, 0.96);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+@supports (backdrop-filter: blur(8px)) {
+  .lx-barra[data-escura] {
+    background: rgba(17, 17, 16, 0.86);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+}
+.lx-barra-in {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 64px;
 }
-.lx-hero-top > a {
+.lx-barra-logo {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
+}
+.lx-barra-espaco {
+  height: var(--lx-barra);
+  background: var(--lx-ink);
 }
 .lx-logo {
   height: 32px;
   width: auto;
   display: block;
 }
+/* Seletor de línguas: o mesmo da página inicial (bandeiras de /public/flags, sem sigla, 44×44, a ativa com contorno dourado) */
 .lx-linguas {
-  display: flex;
-  gap: 4px;
+  --lx-ouro: #f0d030;
+  position: relative;
 }
-.lx-linguas a {
+.lx-linguas-linha {
+  display: none;
+}
+.lx-lingua {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 2px;
   min-width: 44px;
   min-height: 44px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 99px;
+  padding: 0;
+  border: 0;
+  background: none;
   color: #fff;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  cursor: pointer;
   text-decoration: none;
 }
-.lx-linguas a[aria-current="page"] {
-  background: #fff;
-  color: var(--lx-ink);
-  border-color: #fff;
+.lx-bandeira {
+  display: block;
+  width: 32px;
+  height: 24px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  opacity: 0.45;
+  transition: opacity 0.2s, border-color 0.2s;
+}
+.lx-bandeira img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.lx-lingua:hover .lx-bandeira {
+  opacity: 0.75;
+}
+.lx-lingua[aria-current="page"] .lx-bandeira,
+.lx-lingua--atual .lx-bandeira {
+  opacity: 1;
+  border-color: var(--lx-ouro);
+  box-shadow: 0 0 0 1px var(--lx-ouro);
+}
+.lx-lingua--atual {
+  padding: 0 4px;
+}
+.lx-seta {
+  opacity: 0.85;
+  transition: transform 0.2s;
+}
+.lx-lingua--atual[aria-expanded="true"] .lx-seta {
+  transform: rotate(180deg);
+}
+.lx-linguas-lista {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 30;
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 8px;
+  background: rgba(17, 17, 16, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+/* as cinco cabem numa linha a partir de 400px (logótipo 130px + 5 × 44px + margens) */
+@media (min-width: 400px) {
+  .lx-linguas-linha {
+    display: flex;
+  }
+  .lx-linguas-menu {
+    display: none;
+  }
 }
 .lx-hero-corpo {
   margin-top: auto;
@@ -634,6 +726,23 @@
   font: inherit;
   font-size: 16px; /* 16px: o iPhone não aproxima a página ao tocar */
 }
+/* E8 · iPhone: os campos de dia e hora têm uma largura mínima própria e saíam do ecrã.
+   Sem a aparência nativa, ficam na largura da coluna como os outros. */
+.lx input[type="date"],
+.lx input[type="time"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  line-height: 1.5;
+  text-align: left;
+}
+.lx input[type="date"]::-webkit-date-and-time-value,
+.lx input[type="time"]::-webkit-date-and-time-value {
+  text-align: left;
+  margin: 0;
+}
 .lx-rota {
   margin-top: 16px;
 }
@@ -971,11 +1080,6 @@
 }
 
 /* ---------- E6: página do prato ---------- */
-.lx-topo {
-  background: var(--lx-ink);
-  color: #fff;
-  padding: max(10px, env(safe-area-inset-top)) 0 10px;
-}
 .lx-main--prato {
   padding-top: 4px;
   padding-bottom: calc(48px + env(safe-area-inset-bottom));
@@ -1264,6 +1368,317 @@
 }
 .lx input[aria-invalid="true"] {
   border-color: #b42318;
+}
+
+/* ---------- E8: o pedido em 4 passos ---------- */
+.lx-etapas {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lx-etapas li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--lx-mut);
+  text-align: center;
+}
+/* a linha entre os pontos (pontilhada, como a barra do logótipo) */
+.lx-etapas li + li::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  right: 50%;
+  width: 100%;
+  border-top: 2px dotted var(--lx-line);
+}
+.lx-etapas li[data-estado]::before {
+  border-top-style: solid;
+  border-color: var(--lx-ink);
+}
+.lx-etapa-ponto {
+  position: relative;
+  z-index: 1;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--lx-line);
+  background: #fff;
+}
+.lx-etapas li[data-estado="feito"] .lx-etapa-ponto {
+  background: var(--lx-ink);
+  border-color: var(--lx-ink);
+}
+.lx-etapas li[data-estado="atual"] .lx-etapa-ponto {
+  background: var(--lx-yel);
+  border-color: var(--lx-ink);
+}
+.lx-etapas li[data-estado="atual"] {
+  color: var(--lx-ink);
+  font-weight: 800;
+}
+/* nomes longos (ex.: «Getting there») passam a duas linhas, nunca cortados */
+.lx-etapa-nome {
+  max-width: 100%;
+  padding: 0 2px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.lx-etapa {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  outline: none;
+}
+.lx-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.lx-pergunta {
+  margin: 0;
+  padding: 0;
+}
+.lx-texto-passo {
+  margin: -4px 0 0;
+}
+.lx-opcoes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  outline: none;
+}
+.lx-opcao {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 52px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--lx-line);
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.lx-opcao--destaque {
+  border-color: var(--lx-ink);
+}
+.lx-opcao:has(input:checked) {
+  border-color: var(--lx-ink);
+  background: var(--lx-yel-soft);
+  box-shadow: inset 0 0 0 1px var(--lx-ink);
+}
+.lx-opcao input {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin: 1px 0 0;
+  accent-color: var(--lx-ink);
+}
+.lx .lx-opcao > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--lx-ink);
+}
+.lx-opcao b {
+  font-size: 16px;
+}
+.lx-opcao small {
+  font-size: 14px;
+  color: var(--lx-mut);
+  line-height: 1.4;
+}
+.lx-detalhe,
+.lx-sitio {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.lx-sitio-pergunta {
+  margin: 0;
+  font-weight: 800;
+}
+.lx-gps {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--lx-line);
+  border-radius: 99px;
+  background: var(--lx-soft);
+  color: var(--lx-ink);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.lx-gps:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+.lx-escolhido a {
+  color: var(--lx-ink);
+  font-weight: 700;
+}
+.lx-campo-hora {
+  max-width: 220px;
+}
+.lx-nota {
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--lx-yel);
+  background: var(--lx-soft);
+  font-size: 14px;
+  line-height: 1.45;
+}
+/* lista dos restaurantes («Mudar») */
+.lx-lista-rest {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.lx-lista-titulo {
+  margin: 0;
+  font-weight: 800;
+}
+.lx-lista-rest ul {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lx-item-rest {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 64px;
+  padding: 6px 10px 6px 6px;
+  border: 1px solid var(--lx-line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--lx-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.lx-item-rest[aria-pressed="true"] {
+  border-color: var(--lx-ink);
+  background: var(--lx-yel-soft);
+}
+.lx-item-rest > span:last-child {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.lx-item-rest b {
+  font-size: 16px;
+}
+.lx-item-rest small {
+  font-size: 13px;
+  color: var(--lx-mut);
+  line-height: 1.35;
+}
+.lx-miniatura {
+  position: relative;
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 9px;
+  overflow: hidden;
+  background: var(--lx-soft);
+}
+.lx-miniatura img {
+  object-fit: cover;
+}
+.lx-outro {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px dashed #cfccc4;
+  border-radius: 12px;
+}
+.lx-lista-rest > .lx-mudar {
+  align-self: flex-start;
+  padding-left: 0;
+}
+/* resumo */
+.lx-resumo dl {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  border: 1px solid var(--lx-line);
+  border-radius: 12px;
+}
+.lx-resumo dl > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0 8px;
+  padding: 10px 6px 10px 12px;
+}
+.lx-resumo dl > div + div {
+  border-top: 1px solid var(--lx-line);
+}
+.lx-resumo dt {
+  grid-column: 1;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--lx-mut);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.lx-resumo dd {
+  grid-column: 1;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.lx-resumo dd span {
+  font-size: 14px;
+  color: var(--lx-mut);
+}
+.lx-resumo .lx-mudar {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+.lx-resumo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+/* Voltar + Continuar */
+.lx-folha-acoes {
+  display: flex;
+  gap: 8px;
+}
+.lx-folha-acoes .lx-folha-botao {
+  flex: 1 1 auto;
+  width: auto;
+}
+.lx-folha-voltar {
+  flex: none;
+  min-height: 52px;
+  padding: 0 16px;
 }
 
 /* ---------- telemóvel ---------- */

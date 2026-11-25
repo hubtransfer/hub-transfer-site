@@ -3,10 +3,11 @@
 export const COMPANY = {
   name: "HUB Transfer",
   slogan: "Transfer and Tourism",
-  website: "www.hubtransferencia.com",
+  website: "hubtransfer.pt",
   email: "contacto@hubtransfer.pt",
-  whatsapp: "+351968698138",
-  whatsappFormatted: "+351 968 698 138",
+  // o número dos clientes: o WhatsApp da HUB com a assistente (pedido E9, 25/11/2026)
+  whatsapp: "+351928121564",
+  whatsappFormatted: "+351 928 121 564",
   director: "Junior Gutierez",
   location: "Lisboa, Portugal",
   rnavt: "12529",
