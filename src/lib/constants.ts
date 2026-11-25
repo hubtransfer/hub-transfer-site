@@ -3,7 +3,7 @@
 export const COMPANY = {
   name: "HUB Transfer",
   slogan: "Transfer and Tourism",
-  website: "www.hubtransferencia.com",
+  website: "hubtransfer.pt",
   email: "contacto@hubtransfer.pt",
   // o número dos clientes: o WhatsApp da HUB com a assistente (pedido E9, 25/11/2026)
   whatsapp: "+351928121564",

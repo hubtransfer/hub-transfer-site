@@ -58,7 +58,8 @@
   overflow: hidden;
   background: var(--lx-ink);
   color: #fff;
-  padding: max(18px, env(safe-area-inset-top)) 0 40px;
+  /* o topo começa por baixo da barra fixa (logótipo + línguas) */
+  padding: var(--lx-barra) 0 40px;
   min-height: min(88svh, 720px);
   display: flex;
   flex-direction: column;
@@ -92,15 +93,48 @@
 .lx-hero > *:not(.lx-hero-img):not(.lx-hero-veu) {
   position: relative;
 }
-.lx-hero-top {
+/* Barra fixa no topo (como a da página inicial): logótipo + línguas, sempre à mão, com a zona segura do iPhone.
+   --lx-barra é a altura que a página reserva para ela: nada fica tapado, nem ao saltar para #p-1…#p-21. */
+:root:has(.lx) {
+  --lx-barra: calc(64px + env(safe-area-inset-top));
+  scroll-padding-top: calc(var(--lx-barra) + 8px);
+}
+.lx-barra {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 45;
+  padding-top: env(safe-area-inset-top);
+  color: #fff;
+  background: linear-gradient(180deg, rgba(17, 17, 16, 0.55), rgba(17, 17, 16, 0));
+  transition: background-color 0.25s, box-shadow 0.25s;
+}
+.lx-barra[data-escura] {
+  background: rgba(17, 17, 16, 0.96);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+@supports (backdrop-filter: blur(8px)) {
+  .lx-barra[data-escura] {
+    background: rgba(17, 17, 16, 0.86);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+}
+.lx-barra-in {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 64px;
 }
-.lx-hero-top > a {
+.lx-barra-logo {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
+}
+.lx-barra-espaco {
+  height: var(--lx-barra);
+  background: var(--lx-ink);
 }
 .lx-logo {
   height: 32px;
@@ -1046,11 +1080,6 @@
 }
 
 /* ---------- E6: página do prato ---------- */
-.lx-topo {
-  background: var(--lx-ink);
-  color: #fff;
-  padding: max(10px, env(safe-area-inset-top)) 0 10px;
-}
 .lx-main--prato {
   padding-top: 4px;
   padding-bottom: calc(48px + env(safe-area-inset-bottom));

@@ -5,7 +5,7 @@ import BotaoMesa, { MedirAoAbrir } from "./BotaoMesa";
 import Carrossel from "./Carrossel";
 import FormularioMesa from "./FormularioMesa";
 import ProtecaoFotos from "./ProtecaoFotos";
-import SeletorLinguas from "./SeletorLinguas";
+import BarraTopo from "./BarraTopo";
 import { CONFIG_LISBOA } from "@/lib/lisboa/config";
 import { listaRestaurantes } from "@/lib/lisboa/formulario";
 import { imagensPrato } from "@/lib/lisboa/imagens";
@@ -42,14 +42,9 @@ export default function PaginaPrato({ lingua, prato }: { lingua: Lingua; prato: 
       <ProtecaoFotos />
       <MedirAoAbrir evento="VerPrato" dados={{ prato: prato.n, lingua }} />
 
-      <header className="lx-topo">
-        <div className="lx-wrap lx-hero-top">
-          <Link href={ROTAS[lingua]} aria-label={t.pVoltar} prefetch={false}>
-            <Image src="/images/logo.png" alt="HUB Transfer" width={828} height={204} sizes="140px" className="lx-logo" priority />
-          </Link>
-          <SeletorLinguas lingua={lingua} rotas={rotasPrato} rotulo={t.aLingua} />
-        </div>
-      </header>
+      <BarraTopo lingua={lingua} rotas={rotasPrato} rotulo={t.aLingua} logo={{ href: ROTAS[lingua], rotulo: t.pVoltar }} solida />
+      {/* o espaço da barra fixa: o conteúdo começa por baixo dela */}
+      <div className="lx-barra-espaco" aria-hidden="true" />
 
       <main className="lx-wrap lx-main lx-main--prato">
         <Link href={`${ROTAS[lingua]}#pratos`} className="lx-voltar">

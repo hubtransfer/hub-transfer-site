@@ -5,7 +5,7 @@ import BotaoMesa from "./BotaoMesa";
 import Carrossel from "./Carrossel";
 import FormularioMesa from "./FormularioMesa";
 import Planeador, { type LugarVista } from "./Planeador";
-import SeletorLinguas from "./SeletorLinguas";
+import BarraTopo from "./BarraTopo";
 import ProtecaoFotos from "./ProtecaoFotos";
 import { CONFIG_LISBOA } from "@/lib/lisboa/config";
 import { listaRestaurantes } from "@/lib/lisboa/formulario";
@@ -59,18 +59,14 @@ export default function PaginaLisboa({ lingua }: { lingua: Lingua }) {
       <script dangerouslySetInnerHTML={{ __html: `try{localStorage.setItem("hub-lang","${lingua}")}catch(e){}` }} />
       <ProtecaoFotos />
 
+      <BarraTopo lingua={lingua} rotas={ROTAS} rotulo={t.aLingua} logo={{ href: "/", rotulo: "HUB Transfer" }} />
+
       {/* a) Topo */}
       <header className={hero ? "lx-hero" : "lx-hero lx-hero--sem"}>
         {hero && (
           <Image src={hero} alt="" fill priority fetchPriority="high" sizes="(max-width: 767px) and (orientation: portrait) 82vh, 100vw" quality={60} className="lx-hero-img" draggable={false} />
         )}
         <div className="lx-hero-veu" aria-hidden="true" />
-        <div className="lx-wrap lx-hero-top">
-          <Link href="/" aria-label="HUB Transfer" prefetch={false}>
-            <Image src="/images/logo.png" alt="HUB Transfer" width={828} height={204} sizes="140px" className="lx-logo" priority />
-          </Link>
-          <SeletorLinguas lingua={lingua} rotas={ROTAS} rotulo={t.aLingua} />
-        </div>
         <div className="lx-wrap lx-hero-corpo">
           <h1 className="lx-h1">
             {t.titleA}

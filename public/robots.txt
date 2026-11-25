@@ -4,4 +4,4 @@ Disallow: /portal
 Disallow: /admin
 Disallow: /driver
 
-Sitemap: https://hub-transfer-site.vercel.app/sitemap.xml
+Sitemap: https://hubtransfer.pt/sitemap.xml
