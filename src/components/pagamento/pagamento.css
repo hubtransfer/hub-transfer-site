@@ -1,0 +1,111 @@
+/* Páginas de pagamento (E11): vivem dentro de .lx (a identidade da /lisboa); prefixo pg-. */
+
+.lx[data-pagina] {
+  background: var(--lx-soft);
+}
+
+.pg-main {
+  min-height: calc(100svh - var(--lx-barra));
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: clamp(24px, 8vh, 72px);
+  padding-bottom: calc(40px + env(safe-area-inset-bottom));
+}
+.pg-cartao {
+  width: 100%;
+  max-width: 520px;
+  background: #fff;
+  border: 1px solid var(--lx-line);
+  border-radius: var(--lx-radius);
+  padding: clamp(24px, 6vw, 40px);
+  box-shadow: 0 1px 2px rgba(17, 17, 16, 0.04), 0 12px 32px rgba(17, 17, 16, 0.06);
+}
+.pg-icone {
+  display: inline-grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  margin-bottom: 18px;
+}
+.pg-cartao--ok .pg-icone {
+  background: var(--lx-yel);
+  color: var(--lx-ink);
+}
+.pg-cartao--ko .pg-icone {
+  background: var(--lx-soft);
+  color: var(--lx-mut);
+  border: 1px solid var(--lx-line);
+}
+.pg-titulo {
+  margin: 0 0 12px;
+  font-family: inherit;
+  font-size: clamp(24px, 6.4vw, 32px);
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.pg-texto {
+  margin: 0 0 16px;
+  color: var(--lx-mut);
+  text-wrap: pretty;
+}
+.pg-texto--forte {
+  color: var(--lx-ink);
+  font-weight: 600;
+}
+.pg-ref {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  border: 1px dashed var(--lx-line);
+  border-radius: 10px;
+  background: var(--lx-soft);
+}
+.pg-ref-rotulo {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--lx-mut);
+}
+.pg-ref-valor {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+.pg-whats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 52px;
+  margin-top: 8px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #25d366;
+  color: #0b2614;
+  font-size: 16px;
+  font-weight: 800;
+  text-align: center;
+  text-decoration: none;
+  transition: transform 0.15s var(--lx-ease), background 0.15s;
+}
+.pg-whats:hover {
+  background: #1fc15b;
+}
+.pg-whats:active {
+  transform: scale(0.97);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pg-whats {
+    transition: none;
+  }
+}
