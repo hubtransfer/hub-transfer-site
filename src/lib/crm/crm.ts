@@ -1,7 +1,8 @@
 // ───────────────────────────────────────────────────────────────
 //  crm/crm.ts — o CRM da assistente (E20): tipos da API (E17,
 //  CRM_ASSISTENTE.js), a sessão no navegador, as etiquetas, os
-//  eventos em linguagem simples e o guião da chamada (PT + EN).
+//  eventos em linguagem simples, o guião curto por etiqueta (E21)
+//  e o placar do dia.
 // ───────────────────────────────────────────────────────────────
 
 export type Etiqueta = "QUENTE" | "RECUPERAR" | "AVALIAR_CHAMADA" | "MORNO" | "";
@@ -58,6 +59,8 @@ export interface RespostaFila extends RespostaBase {
   mostrados: number;
   foraDaFila: Record<string, number>;
   clientes: Cartao[];
+  /** opcional: os contadores do dia vindos do backend (mandam sobre os do aparelho) */
+  placar?: PlacarBackend;
 }
 
 export interface RespostaCliente extends RespostaBase {
@@ -263,65 +266,215 @@ export function eventoSimples(e: Evento): string {
   return partes.join(" · ");
 }
 
-// ── O guião da chamada ──────────────────────────────────────────
+// ── O guião curto (E21): só o desta etiqueta, em PT, + a frase-chave na língua do cliente ──
 
-export interface Fala {
-  id: string;
+export interface Perfil {
+  /** «Gostou muito» — o que aconteceu, em linguagem simples */
   titulo: string;
-  pt: string;
-  en: string;
+  emoji: string;
+  /** «agradecer e propor» — o que fazer */
+  accao: string;
+  /** classes do selo (tema claro) */
+  selo: string;
+  /** pede as estrelas na hora de registar */
+  pedeNota: boolean;
 }
 
-export function guiao(c: Cartao, oferta?: Oferta | null): Fala[] {
-  const nome = c.nome || "";
-  const ola = (s: string) => (nome ? s.replace("{nome}", nome) : s.replace(" {nome}", ""));
-  const motivoPt = c.motivo || "o que correu mal";
-  const motivoEn = c.motivo || "what went wrong";
+export const PERFIS: Record<string, Perfil> = {
+  QUENTE: { titulo: "Gostou muito", emoji: "⭐", accao: "agradecer e propor", selo: "bg-[#e3f5e9] text-[#14532d]", pedeNota: false },
+  RECUPERAR: { titulo: "Ficou desiludido", emoji: "🛠️", accao: "pedir desculpa", selo: "bg-[#fde8dc] text-[#7c2d12]", pedeNota: false },
+  AVALIAR_CHAMADA: { titulo: "Ainda não avaliou", emoji: "📞", accao: "perguntar a nota", selo: "bg-[#e0edfb] text-[#1e3a8a]", pedeNota: true },
+  MORNO: { titulo: "Já viajou", emoji: "🌤️", accao: "saber como correu", selo: "bg-[#eceef1] text-[#33383e]", pedeNota: true },
+};
+export const PERFIL_SEM_ETIQUETA: Perfil = { titulo: "Cliente", emoji: "👤", accao: "saber como correu", selo: "bg-[#eceef1] text-[#33383e]", pedeNota: true };
+export const perfil = (etiqueta: string): Perfil => PERFIS[String(etiqueta).toUpperCase()] || PERFIL_SEM_ETIQUETA;
+
+/** Só o primeiro nome (nunca o nome completo no ecrã). */
+export const primeiroNome = (nome: string) => String(nome || "").trim().split(/\s+/)[0] || "";
+
+/** Dias inteiros entre «yyyy-MM-dd…» e hoje (Lisboa). null se não houver data. */
+export function diasDesde(data: string, hoje = hojeLisboa()): number | null {
+  const a = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(data || ""));
+  const b = /^(\d{4})-(\d{2})-(\d{2})/.exec(hoje);
+  if (!a || !b) return null;
+  const d = (Date.UTC(+b[1], +b[2] - 1, +b[3]) - Date.UTC(+a[1], +a[2] - 1, +a[3])) / 86_400_000;
+  return Math.max(0, Math.round(d));
+}
+
+export function textoDias(n: number | null): string {
+  if (n === null) return "";
+  if (n === 0) return "Viajou hoje";
+  if (n === 1) return "Viajou ontem";
+  return `Viajou há ${n} dias`;
+}
+
+/** Os produtos comprados, em linguagem simples. */
+const NOMES_PRODUTO: Record<string, string> = { TRANSFER: "Transfer", MESA: "Mesa num restaurante", TOUR: "Tour" };
+export const nomeProduto = (p: string) =>
+  NOMES_PRODUTO[String(p).toUpperCase()] ||
+  String(p)
+    .replace(/_/g, " ")
+    .toLowerCase()
+    .replace(/^./, (c) => c.toUpperCase());
+
+/** Três passos curtos, em PT, só para esta etiqueta. */
+export function guiaoCurto(c: Cartao, oferta?: Oferta | null): string[] {
   const pct = c.aSeguir?.presente?.pct || 10;
-  const ofertaPt = oferta?.nome || "na sua próxima reserva";
-  const ofertaEn = oferta?.nome || "your next booking";
-  const falas: Fala[] = [
-    {
-      id: "abertura",
-      titulo: "Abertura",
-      pt: ola("Olá {nome}, fala da HUB Transfer, quem o levou em Lisboa. Tem um minuto?"),
-      en: ola("Hello {nome}, this is HUB Transfer, we drove you in Lisbon. Do you have a minute?"),
-    },
-  ];
-  const et = String(c.etiqueta).toUpperCase();
-  if (et === "AVALIAR_CHAMADA" || et === "MORNO") {
-    falas.push({ id: "nota", titulo: "Pedir a nota", pt: "De 1 a 5, como foi a sua viagem connosco?", en: "From 1 to 5, how was your ride with us?" });
-  } else if (et === "QUENTE") {
-    falas.push({
-      id: "google",
-      titulo: "Nota 5 — pedir o Google",
-      pt: "Muito obrigado! Posso mandar-lhe pelo WhatsApp o link para deixar essas 5 estrelas no Google? Demora 10 segundos.",
-      en: "Thank you so much! May I send you the link on WhatsApp to leave those 5 stars on Google? It takes 10 seconds.",
-    });
-  } else if (et === "RECUPERAR") {
-    falas.push({
-      id: "recuperar",
-      titulo: "Recuperar",
-      pt: `Vi a sua avaliação e peço-lhe desculpa por ${motivoPt}. Para compensar, queria oferecer-lhe ${pct}% em ${ofertaPt}.`,
-      en: `I saw your rating and I'm sorry about ${motivoEn}. To make it up to you, I'd like to offer you ${pct}% off ${ofertaEn}.`,
-    });
+  const proposta = oferta?.nome || "uma mesa para jantar, com transporte à porta";
+  switch (String(c.etiqueta).toUpperCase()) {
+    case "QUENTE":
+      return ["Agradeça as 5 estrelas.", "Peça a nota no Google: o link vai pelo WhatsApp e demora 10 segundos.", `Proponha: ${proposta}.`];
+    case "RECUPERAR":
+      return [
+        c.motivo ? `Peça desculpa por «${c.motivo}».` : "Peça desculpa pelo que correu mal.",
+        `Ofereça ${pct}% de desconto: ${oferta?.nome || "na próxima reserva"}.`,
+        "Se disser «vou pensar», combine o dia para voltar a ligar.",
+      ];
+    case "AVALIAR_CHAMADA":
+      return [
+        "Apresente-se: HUB Transfer, quem o levou em Lisboa.",
+        "Pergunte a nota da viagem, de 1 a 5.",
+        `Nota 5: peça o Google. Nota baixa: peça desculpa e ofereça ${pct}%.`,
+      ];
+    default:
+      return ["Pergunte como correu a viagem e a estadia.", "Peça a nota, de 1 a 5.", `Proponha: ${proposta}.`];
   }
-  falas.push(
-    {
-      id: "oferta",
-      titulo: "Oferta",
-      pt: "Já tem mesa para jantar em Lisboa? Reservamos por si e levamo-lo à porta.",
-      en: "Do you already have a table for dinner in Lisbon? We book it for you and take you to the door.",
-    },
-    { id: "fecho", titulo: "Fecho", pt: "Posso enviar-lhe agora o link para confirmar?", en: "Shall I send you the link now to confirm?" },
-    {
-      id: "pensar",
-      titulo: "Se disser «vou pensar»",
-      pt: "Claro. Quando lhe posso ligar para decidirmos?",
-      en: "Of course. When can I call you back to decide?",
-    },
-  );
-  return falas;
+}
+
+type Frases = Record<"PT" | "EN" | "ES" | "FR" | "IT", string>;
+
+const OLA: Frases = {
+  PT: "Olá {nome}, fala da HUB Transfer.",
+  EN: "Hello {nome}, this is HUB Transfer.",
+  ES: "Hola {nome}, le llamo de HUB Transfer.",
+  FR: "Bonjour {nome}, ici HUB Transfer.",
+  IT: "Buongiorno {nome}, sono di HUB Transfer.",
+};
+
+const CHAVE: Record<string, Frases> = {
+  QUENTE: {
+    PT: "Posso mandar-lhe o link para deixar as 5 estrelas no Google?",
+    EN: "May I send you the link to leave your 5 stars on Google?",
+    ES: "¿Le puedo enviar el enlace para dejar sus 5 estrellas en Google?",
+    FR: "Puis-je vous envoyer le lien pour laisser vos 5 étoiles sur Google ?",
+    IT: "Posso mandarle il link per lasciare le sue 5 stelle su Google?",
+  },
+  RECUPERAR: {
+    PT: "Pedimos desculpa. Queremos oferecer-lhe {pct}% na próxima reserva.",
+    EN: "We're very sorry. We'd like to offer you {pct}% off your next booking.",
+    ES: "Lo sentimos mucho. Queremos ofrecerle un {pct}% de descuento en su próxima reserva.",
+    FR: "Toutes nos excuses. Nous aimerions vous offrir {pct} % sur votre prochaine réservation.",
+    IT: "Ci scusiamo molto. Vorremmo offrirle il {pct}% di sconto sulla prossima prenotazione.",
+  },
+  AVALIAR_CHAMADA: {
+    PT: "De 1 a 5, como foi a sua viagem connosco?",
+    EN: "From 1 to 5, how was your ride with us?",
+    ES: "Del 1 al 5, ¿qué tal fue su viaje con nosotros?",
+    FR: "De 1 à 5, comment s'est passé votre trajet avec nous ?",
+    IT: "Da 1 a 5, com'è andato il viaggio con noi?",
+  },
+  MORNO: {
+    PT: "Como correu a sua estadia em Lisboa?",
+    EN: "How was your stay in Lisbon?",
+    ES: "¿Qué tal su estancia en Lisboa?",
+    FR: "Comment s'est passé votre séjour à Lisbonne ?",
+    IT: "Com'è andato il soggiorno a Lisbona?",
+  },
+};
+
+const LANG_HTML: Record<string, string> = { PT: "pt-PT", EN: "en", ES: "es", FR: "fr", IT: "it" };
+
+/** A frase-chave na língua do cliente (cumprimento + pedido). Línguas desconhecidas → inglês. */
+export function fraseChave(c: Cartao): { lingua: string; lang: string; ola: string; frase: string } {
+  const l = (["PT", "EN", "ES", "FR", "IT"].includes(String(c.lingua)) ? c.lingua : "EN") as keyof Frases;
+  const nome = primeiroNome(c.nome);
+  const pct = String(c.aSeguir?.presente?.pct || 10);
+  const ola = nome ? OLA[l].replace("{nome}", nome) : OLA[l].replace(" {nome}", "");
+  const frases = CHAVE[String(c.etiqueta).toUpperCase()] || CHAVE.MORNO;
+  return { lingua: l, lang: LANG_HTML[l], ola, frase: frases[l].replace("{pct}", pct) };
+}
+
+// ── O placar do dia (contadores da assistente) ──────────────────
+// Se o backend mandar «placar» no crmFila, manda o backend. Senão, conta-se neste aparelho
+// (localStorage, só números e refs C-…; nunca o crachá nem dados do cliente).
+
+export const META_DIARIA = 20;
+export const CHAVE_PLACAR = "hub_crm_placar";
+
+export interface Dia {
+  chamadas: number;
+  atendidas: number;
+  vendas: number;
+  /** refs C-… já ligadas hoje (para não voltarem à fila neste aparelho) */
+  refs: string[];
+}
+
+export interface PlacarBackend {
+  chamadas?: number;
+  atendidas?: number;
+  vendasHoje?: number;
+  vendasSemana?: number;
+  meta?: number;
+}
+
+const DIA_VAZIO = (): Dia => ({ chamadas: 0, atendidas: 0, vendas: 0, refs: [] });
+
+function lerTudo(): Record<string, Dia> {
+  try {
+    const o = JSON.parse(localStorage.getItem(CHAVE_PLACAR) || "{}");
+    return o && typeof o === "object" && !Array.isArray(o) ? o : {};
+  } catch {
+    return {};
+  }
+}
+
+export function lerDia(dia = hojeLisboa()): Dia {
+  const d = lerTudo()[dia];
+  return d ? { ...DIA_VAZIO(), ...d } : DIA_VAZIO();
+}
+
+/** Vendas dos últimos 7 dias (hoje incluído), contadas neste aparelho. */
+export function vendasSemana(dia = hojeLisboa()): number {
+  const fim = Date.parse(`${dia}T12:00:00Z`);
+  return Object.entries(lerTudo()).reduce((s, [k, v]) => {
+    const t = Date.parse(`${k}T12:00:00Z`);
+    return Number.isFinite(t) && fim - t >= 0 && fim - t < 7 * 86_400_000 ? s + (Number(v?.vendas) || 0) : s;
+  }, 0);
+}
+
+const NAO_ATENDIDAS = new Set(["NAO_ATENDEU", "NUMERO_ERRADO"]);
+
+export function contarChamada(ref: string, resultado: string, dia = hojeLisboa()): Dia {
+  const tudo = lerTudo();
+  const d = { ...DIA_VAZIO(), ...(tudo[dia] || {}) };
+  d.chamadas += 1;
+  if (!NAO_ATENDIDAS.has(resultado)) d.atendidas += 1;
+  if (resultado === "COMPROU") d.vendas += 1;
+  if (!d.refs.includes(ref)) d.refs = [...d.refs, ref];
+  tudo[dia] = d;
+  for (const k of Object.keys(tudo).sort().slice(0, -8)) delete tudo[k]; // só os últimos 8 dias
+  try {
+    localStorage.setItem(CHAVE_PLACAR, JSON.stringify(tudo));
+  } catch {
+    /* sem armazenamento: conta só nesta página */
+  }
+  return d;
+}
+
+/** A frase de incentivo, conforme o progresso. */
+export function incentivo(feitas: number, meta: number): string {
+  if (meta > 0 && feitas >= meta) return "Meta cumprida 🎉";
+  if (feitas === 0) return "Vamos a isso! A primeira chamada abre o dia.";
+  const r = feitas / Math.max(1, meta);
+  if (r < 0.5) return "Bom começo!";
+  if (r < 0.75) return "A meio caminho!";
+  return "Falta pouco!";
+}
+
+/** «Bom dia» / «Boa tarde» / «Boa noite», à hora de Lisboa. */
+export function saudacao(agora = new Date()): string {
+  const h = Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Lisbon", hour: "2-digit", hourCycle: "h23" }).format(agora));
+  return h < 6 ? "Boa noite" : h < 13 ? "Bom dia" : h < 20 ? "Boa tarde" : "Boa noite";
 }
 
 /** Hoje em Lisboa, «yyyy-MM-dd» (para o mínimo do campo «Ligar em»). */
