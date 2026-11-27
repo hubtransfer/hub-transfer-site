@@ -12,6 +12,9 @@ const nextConfig: NextConfig = {
     return [
       { source: "/pagamento/:pagina*", headers: noindex },
       { source: "/:lingua(pt|es|fr|it)/pagamento/:pagina*", headers: noindex },
+      // CRM da assistente (E20): página interna, nunca indexada.
+      { source: "/assistente/:p*", headers: noindex },
+      { source: "/api/assistente", headers: noindex },
     ];
   },
   async redirects() {
