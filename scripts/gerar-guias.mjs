@@ -1,11 +1,12 @@
-// npm run guias — faz os 5 guias em PDF «Lisboa à sua mesa» a partir do site (pedido E9, Fase B).
+// npm run guias — faz os 5 guias em PDF «Lisboa à sua mesa» a partir do site (pedido E9, Fase B; formato de telemóvel no E18).
 //
 //   npm run build && npm run guias          arranca o site (next start), faz os PDF e desliga-o
 //   npm run guias -- --url http://localhost:3000   usa um site que já esteja a correr (ex.: npm run dev)
 //
 // Grava sempre nos mesmos endereços: public/guia/HUB-Transfer-Lisboa-EN.pdf, -PT, -ES, -FR e -IT.
-// A4, com os fundos e com as ligações clicáveis. Cada PDF tem de ficar abaixo dos 5 MB (para o WhatsApp):
-// se passar, o comando falha e diz qual.
+// Páginas de 390×844 (a proporção de um iPhone), uma só coluna, com os fundos e com as ligações clicáveis
+// (as do índice saltam dentro do PDF). Cada PDF deve ficar abaixo dos 3 MB (aviso) e tem de ficar abaixo dos 5 MB
+// (para o WhatsApp; se passar, o comando falha e diz qual). Se o texto de alguma página não couber nela, também falha.
 // Primeira vez neste computador: npx playwright install chromium
 
 import { spawn, spawnSync } from "node:child_process";
@@ -16,6 +17,9 @@ import { chromium } from "playwright";
 const LINGUAS = ["en", "pt", "es", "fr", "it"];
 const PASTA = path.join(process.cwd(), "public", "guia");
 const LIMITE = 5 * 1024 * 1024;
+const PREFERIDO = 3 * 1024 * 1024;
+const LARGURA = 390;
+const ALTURA = 844;
 
 const arg = process.argv.indexOf("--url");
 let base = arg > -1 ? process.argv[arg + 1].replace(/\/$/, "") : "";
@@ -51,7 +55,7 @@ fs.mkdirSync(PASTA, { recursive: true });
 const browser = await chromium.launch();
 let falhou = false;
 try {
-  const ctx = await browser.newContext({ viewport: { width: 794, height: 1123 } });
+  const ctx = await browser.newContext({ viewport: { width: LARGURA + 1, height: ALTURA } /* +1: o PDF arredonda a página a 293 pt (390,7 px) */ });
   // As fotografias em JPEG (não AVIF/WebP): o PDF guarda o JPEG como vem e fica leve.
   await ctx.route("**/_next/image**", (rota) =>
     rota.continue({ headers: { ...rota.request().headers(), accept: "image/jpeg,image/*;q=0.8" } })
@@ -63,15 +67,27 @@ try {
     await page.waitForFunction(() => [...document.images].every((img) => img.complete && img.naturalWidth > 0), null, { timeout: 60000 });
     await page.evaluate(() => document.fonts.ready);
     const fotos = await page.evaluate(() => document.images.length);
+    // nenhuma página pode ter texto a mais (ficaria cortado no PDF)
+    const cortadas = await page.evaluate(() =>
+      [...document.querySelectorAll(".gx-folha")]
+        .map((f, i) => ({ i: i + 1, a: [f, ...f.querySelectorAll(".gx-item-corpo, .gx-mesa-texto, .gx-capa-texto, .gx-indice, .gx-passos")].some((e) => e.scrollHeight > e.clientHeight + 1) }))
+        .filter((x) => x.a)
+        .map((x) => x.i)
+    );
+    if (cortadas.length) {
+      falhou = true;
+      console.error(`✗ /guia/${l}: o texto não cabe na(s) página(s) ${cortadas.join(", ")}`);
+    }
     await page.emulateMedia({ media: "print" });
     const ficheiro = path.join(PASTA, `HUB-Transfer-Lisboa-${l.toUpperCase()}.pdf`);
-    await page.pdf({ path: ficheiro, format: "A4", printBackground: true, preferCSSPageSize: true, margin: { top: 0, right: 0, bottom: 0, left: 0 } });
+    await page.pdf({ path: ficheiro, width: `${293 / 72}in`, height: `${633 / 72}in` /* 293 × 633 pt, como o @page do guia.css */, printBackground: true, preferCSSPageSize: true, margin: { top: 0, right: 0, bottom: 0, left: 0 } });
     const tamanho = fs.statSync(ficheiro).size;
     const mb = (tamanho / 1024 / 1024).toFixed(2);
     if (tamanho >= LIMITE) {
       falhou = true;
       console.error(`✗ ${path.relative(process.cwd(), ficheiro)} — ${mb} MB (acima dos 5 MB)`);
-    } else console.log(`✓ ${path.relative(process.cwd(), ficheiro)} — ${mb} MB, ${fotos} imagens`);
+    } else if (tamanho >= PREFERIDO) console.warn(`! ${path.relative(process.cwd(), ficheiro)} — ${mb} MB (acima dos 3 MB preferidos), ${fotos} imagens`);
+    else console.log(`✓ ${path.relative(process.cwd(), ficheiro)} — ${mb} MB, ${fotos} imagens`);
     await page.emulateMedia({ media: "screen" });
   }
 } finally {
