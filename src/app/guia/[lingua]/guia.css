@@ -1,8 +1,11 @@
-/* Guia «Lisboa à sua mesa» em A4 — identidade da /lisboa: preto #111110, amarelo #FACF09, Montserrat,
-   títulos em itálico e maiúsculas, o canto em triângulo amarelo. Cada .gx-folha é uma página A4. */
+/* Guia «Lisboa à sua mesa» para o telemóvel (pedido E18) — identidade da /lisboa: preto #111110, amarelo #FACF09,
+   Montserrat, títulos em itálico e maiúsculas, o canto em triângulo amarelo.
+   Cada .gx-folha é uma página de 390×844 px (a proporção de um iPhone), numa só coluna. Aberto à largura do ecrã,
+   1 px desta página = 1 ponto do ecrã: o texto de leitura fica com 17–19 pt sem zoom e os botões com 60 pt de altura.
+   Medidas em px de propósito (é um ecrã, não papel). */
 
 @page {
-  size: A4;
+  size: 293pt 633pt; /* = 390,7 × 844 px, em pontos inteiros (o PDF arredonda ao ponto) */
   margin: 0;
 }
 
@@ -18,11 +21,12 @@ html:has(.gx) body {
   --gx-ink: #111110;
   --gx-yel: #facf09;
   --gx-soft: #f5f4f0;
-  --gx-mut: #5c5b57;
+  --gx-mut: #4a4945;
   --gx-line: #e4e2dc;
+  --gx-lado: 22px;
   font-family: var(--gx-font), system-ui, sans-serif;
   color: var(--gx-ink);
-  font-size: 11pt;
+  font-size: 18px;
   line-height: 1.45;
 }
 .gx *,
@@ -38,10 +42,10 @@ html:has(.gx) body {
 /* ---------- a folha ---------- */
 .gx-folha {
   position: relative;
-  width: 210mm;
-  height: 297mm;
+  width: 390px;
+  height: 844px;
   margin: 0 auto;
-  padding: 16mm 15mm 20mm;
+  padding: 28px var(--gx-lado) 72px;
   overflow: hidden;
   background: #fff;
   break-after: page;
@@ -62,6 +66,12 @@ html:has(.gx) body {
     box-shadow: 0 6px 30px rgba(0, 0, 0, 0.18);
   }
 }
+@media print {
+  /* o PDF arredonda a largura da página ao ponto: a folha ocupa-a toda (sem fio branco à direita) */
+  .gx-folha {
+    width: 100%;
+  }
+}
 .gx-escura {
   background: var(--gx-ink);
   color: #fff;
@@ -72,8 +82,9 @@ html:has(.gx) body {
   bottom: 0;
   width: 0;
   height: 0;
-  border-right: 34mm solid var(--gx-yel);
-  border-top: 34mm solid transparent;
+  border-right: 64px solid var(--gx-yel);
+  border-top: 64px solid transparent;
+  pointer-events: none;
 }
 
 /* ---------- fotografias ---------- */
@@ -89,70 +100,71 @@ html:has(.gx) body {
 /* ---------- tipografia ---------- */
 .gx-titulo {
   margin: 0;
-  font-size: 40pt;
-  line-height: 1;
+  font-size: 46px;
+  line-height: 0.98;
   font-weight: 800;
   font-style: italic;
   text-transform: uppercase;
   letter-spacing: -0.02em;
+  overflow-wrap: break-word;
 }
 .gx-sobretitulo {
-  margin: 0 0 3mm;
+  margin: 0 0 10px;
   color: var(--gx-yel);
-  font-size: 10pt;
+  font-size: 14px;
   font-weight: 800;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 .gx-boas-vindas {
-  margin: 6mm 0 0;
-  max-width: 150mm;
-  font-size: 13pt;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.88);
+  margin: 16px 0 0;
+  font-size: 18px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.9);
 }
 .gx-h2 {
   margin: 0;
-  font-size: 24pt;
-  line-height: 1.05;
+  font-size: 32px;
+  line-height: 1.04;
   font-weight: 800;
   font-style: italic;
   text-transform: uppercase;
   letter-spacing: -0.01em;
 }
-.gx-h3 {
-  margin: 8mm 0 3mm;
-  font-size: 13pt;
-  font-weight: 800;
-  font-style: italic;
-  text-transform: uppercase;
-}
 .gx-sub {
-  margin: 2mm 0 0;
+  margin: 8px 0 0;
   color: var(--gx-mut);
-  font-size: 11pt;
+  font-size: 17px;
+  line-height: 1.4;
+}
+.gx-seccao {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gx-mut);
 }
 
-/* ---------- botões ---------- */
+/* ---------- botões (área de toque: 60 px de altura, toda a largura) ---------- */
 .gx-botao {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 2.5mm;
-  align-self: flex-start;
-  padding: 3.2mm 6mm;
+  justify-content: center;
+  gap: 10px;
+  min-height: 60px;
+  padding: 12px 22px;
   border-radius: 99px;
   background: var(--gx-yel);
   color: var(--gx-ink) !important;
-  font-size: 11pt;
+  font-size: 19px;
   font-weight: 800;
   line-height: 1.2;
+  text-align: center;
 }
 .gx-botao--tinta {
-  margin-top: auto;
-  padding: 2.4mm 4.5mm;
   background: var(--gx-ink);
   color: #fff !important;
-  font-size: 9.5pt;
 }
 .gx-botao--whats {
   background: #25d366;
@@ -165,333 +177,249 @@ html:has(.gx) body {
   align-items: center;
   justify-content: center;
   flex: none;
-  width: 10mm;
-  height: 10mm;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: var(--gx-yel);
   color: var(--gx-ink);
-  font-size: 13pt;
+  font-size: 21px;
   font-weight: 800;
 }
 .gx-numero--foto {
   position: absolute;
-  left: 3mm;
-  top: 3mm;
+  left: 14px;
+  top: 14px;
   z-index: 1;
-  box-shadow: 0 0.5mm 2mm rgba(0, 0, 0, 0.25);
+  width: 52px;
+  height: 52px;
+  font-size: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ---------- rodapé: ↑ índice (salta no PDF) · página · site ---------- */
+.gx-rodape {
+  position: absolute;
+  left: var(--gx-lado);
+  right: var(--gx-lado);
+  bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 48px;
+  border-top: 1px solid var(--gx-line);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gx-mut);
+}
+.gx-rodape a {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+.gx-rodape-indice {
+  color: var(--gx-ink);
+}
+.gx-rodape--escura {
+  right: 70px;
+  border-top-color: rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.65);
+}
+.gx-rodape--escura .gx-rodape-indice {
+  color: var(--gx-yel);
 }
 
 /* ---------- 1. capa ---------- */
 .gx-capa {
   padding: 0;
 }
-.gx-capa-foto {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 62%;
-}
+.gx-capa-foto,
 .gx-capa-veu {
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
-  height: 62%;
-  background: linear-gradient(180deg, rgba(17, 17, 16, 0.6) 0%, rgba(17, 17, 16, 0) 22%, rgba(17, 17, 16, 0) 60%, #111110 100%);
+  height: 50%;
+}
+.gx-capa-veu {
+  background: linear-gradient(180deg, rgba(17, 17, 16, 0.6) 0%, rgba(17, 17, 16, 0) 25%, rgba(17, 17, 16, 0) 55%, #111110 100%);
   pointer-events: none;
 }
 .gx-logo-capa {
   position: absolute;
-  left: 15mm;
-  top: 14mm;
+  left: var(--gx-lado);
+  top: 64px; /* abaixo da barra de estado do telemóvel */
   z-index: 1;
 }
 .gx-logo-capa img {
   display: block;
-  height: 13mm;
+  height: 44px;
   width: auto;
 }
 .gx-capa-texto {
   position: relative;
   margin-top: auto;
-  padding: 0 15mm 30mm;
+  padding: 0 var(--gx-lado) 36px;
   display: flex;
   flex-direction: column;
 }
 .gx-capa-texto .gx-botao {
-  margin-top: 8mm;
+  margin-top: 24px;
 }
 
-/* ---------- 2. como usar ---------- */
+/* ---------- 2. índice ---------- */
+.gx-pagina-indice {
+  padding-top: 76px;
+}
+.gx-pagina-indice .gx-h2 {
+  font-size: 40px;
+}
+.gx-indice {
+  list-style: none;
+  margin: 28px 0 0;
+  padding: 0;
+}
+.gx-indice a {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 84px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+}
+.gx-indice-nome {
+  flex: 1;
+  font-size: 21px;
+  line-height: 1.2;
+  font-weight: 800;
+}
+.gx-indice-pag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  min-width: 48px;
+  height: 48px;
+  padding: 0 10px;
+  border-radius: 99px;
+  background: var(--gx-yel);
+  color: var(--gx-ink);
+  font-size: 19px;
+  font-weight: 800;
+}
+
+/* ---------- 3. como usar ---------- */
 .gx-passos {
   list-style: none;
-  margin: 8mm 0 0;
+  margin: 24px 0 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 5mm;
+  gap: 18px;
 }
 .gx-passos li {
   display: flex;
   align-items: flex-start;
-  gap: 5mm;
+  gap: 14px;
 }
 .gx-passos p {
-  margin: 1.5mm 0 0;
-  font-size: 12.5pt;
-  line-height: 1.45;
-}
-.gx-exemplo {
-  margin-top: 9mm;
+  margin: 8px 0 0;
+  font-size: 18px;
+  line-height: 1.42;
 }
 .gx-exemplo-foto {
   position: relative;
   display: block;
-  height: 92mm;
-  border-radius: 4mm;
-  overflow: hidden;
-}
-.gx-indice {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.gx-indice li {
-  display: flex;
-  align-items: baseline;
-  gap: 3mm;
-  padding: 2.6mm 0;
-  border-bottom: 0.3mm solid var(--gx-line);
-  font-size: 12pt;
-  font-weight: 700;
-}
-.gx-indice li::after {
-  content: "";
-  order: 1;
   flex: 1;
-  border-bottom: 0.4mm dotted #bdbab2;
-}
-.gx-indice span {
-  order: 2;
-  color: var(--gx-mut);
+  min-height: 0;
+  margin: 24px calc(-1 * var(--gx-lado)) 0;
 }
 
-/* ---------- 3–8. pratos e lugares ---------- */
+/* ---------- pratos e lugares: um por página ---------- */
+.gx-item {
+  padding-top: 24px;
+}
 .gx-cabeca {
-  margin-bottom: 6mm;
-  padding-left: 4mm;
-  border-left: 1.6mm solid var(--gx-yel);
+  flex: none;
+  margin-bottom: 18px;
+  padding-left: 14px;
+  border-left: 6px solid var(--gx-yel);
 }
-.gx-cabeca--curta {
-  margin-bottom: 5mm;
-}
-.gx-grelha {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 5mm;
-  min-height: 0;
-}
-.gx-grelha--pratos {
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-}
-.gx-grelha--lugares {
-  grid-template-rows: repeat(3, minmax(0, 1fr));
-  align-content: start;
-}
-.gx-cartao {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  border: 0.3mm solid var(--gx-line);
-  border-radius: 4mm;
-  overflow: hidden;
-  background: #fff;
-}
-.gx-cartao-foto {
+.gx-item-foto {
   position: relative;
   display: block;
   flex: none;
-  height: 58mm;
+  height: 400px;
+  margin: 0 calc(-1 * var(--gx-lado));
 }
-.gx-grelha--lugares .gx-cartao {
-  flex-direction: row;
+.gx-item-foto--curta {
+  height: 300px;
 }
-.gx-cartao-foto--lugar {
-  height: auto;
-  width: 40mm;
-}
-.gx-cartao-corpo {
+.gx-item-corpo {
   display: flex;
   flex-direction: column;
   flex: 1;
-  min-width: 0;
-  padding: 4mm 4.5mm 4.5mm;
+  min-height: 0;
+  padding-top: 20px;
 }
-.gx-cartao h3 {
-  margin: 0 0 1.5mm;
-  font-size: 13pt;
-  line-height: 1.15;
+.gx-item-nome {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.08;
   font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
 }
-.gx-grelha--lugares .gx-cartao h3 {
-  font-size: 11.5pt;
-}
-.gx-cartao p {
-  margin: 0 0 3mm;
-  font-size: 10pt;
-  line-height: 1.4;
+.gx-item-txt {
+  margin: 10px 0 0;
+  font-size: 19px;
+  line-height: 1.42;
   color: var(--gx-mut);
 }
-.gx-cartao .gx-zona {
-  margin-bottom: 1.5mm;
-  font-size: 8.5pt;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+.gx-item-corpo .gx-botao {
+  margin-top: auto;
+}
+.gx-zona {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--gx-ink);
 }
-.gx-rodape {
-  position: absolute;
-  left: 15mm;
-  right: 15mm;
-  bottom: 8mm;
-  display: flex;
-  justify-content: space-between;
-  padding-top: 2.5mm;
-  border-top: 0.3mm solid var(--gx-line);
-  font-size: 8.5pt;
-  font-weight: 600;
-  color: var(--gx-mut);
-}
 
-/* ---------- 9. a mesa ---------- */
-.gx-mesa {
-  padding: 0;
+/* ---------- o convite para o jantar ---------- */
+.gx-jantar-folha {
+  padding: 0 0 72px;
 }
-.gx-mesa-foto {
-  position: relative;
-  display: block;
-  height: 120mm;
-  flex: none;
-}
-.gx-mesa-texto {
-  display: flex;
-  flex-direction: column;
-  padding: 12mm 15mm 0;
-}
-.gx-titulo--mesa {
-  font-size: 32pt;
-}
-.gx-mesa-sub {
-  margin: 3mm 0 0;
-  color: var(--gx-yel);
-  font-size: 16pt;
-  font-weight: 800;
-  font-style: italic;
-  text-transform: uppercase;
-}
-.gx-botoes {
-  display: flex;
-  flex-direction: column;
-  gap: 4mm;
-  margin-top: 9mm;
-}
-.gx-codigo {
-  margin: 7mm 0 0;
-  font-size: 10pt;
-  color: rgba(255, 255, 255, 0.7);
-}
-.gx-codigo b {
-  color: #fff;
-}
-
-/* ---------- 10. contracapa ---------- */
-.gx-contra {
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-.gx-logo-contra img {
-  display: block;
-  height: 20mm;
-  width: auto;
-}
-.gx-lema {
-  margin: 10mm 0 0;
-  font-size: 20pt;
-  font-weight: 800;
-  font-style: italic;
-  text-transform: uppercase;
-  color: var(--gx-yel);
-}
-.gx-contra-txt {
-  margin: 3mm 0 0;
-  font-size: 12pt;
-  color: rgba(255, 255, 255, 0.8);
-}
-.gx-contactos {
-  list-style: none;
-  margin: 14mm 0 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4mm;
-}
-.gx-contactos li {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5mm;
-}
-.gx-contactos span {
-  font-size: 8.5pt;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
-}
-.gx-contactos a {
-  font-size: 16pt;
-  font-weight: 800;
-}
-.gx-licenca {
-  position: absolute;
-  bottom: 14mm;
-  left: 15mm;
-  right: 40mm;
-  margin: 0;
-  font-size: 9pt;
-  color: rgba(255, 255, 255, 0.6);
-  text-align: left;
-}
-
-/* última página dos lugares: o convite para o jantar */
 .gx-jantar {
-  justify-content: center;
-  padding: 6mm;
-  border: 0;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  padding: 44px var(--gx-lado) 32px;
   background: var(--gx-ink);
   color: #fff;
 }
-.gx-jantar h3 {
-  margin: 0 0 2mm;
-  font-size: 16pt;
+.gx-jantar-titulo {
+  margin: 0 0 12px;
+  font-size: 32px;
+  line-height: 1.05;
+  font-weight: 800;
   font-style: italic;
   text-transform: uppercase;
   color: var(--gx-yel);
 }
 .gx-jantar p {
-  margin: 0 0 5mm;
-  font-size: 11pt;
-  color: rgba(255, 255, 255, 0.85);
+  margin: 0 0 24px;
+  font-size: 19px;
+  line-height: 1.42;
+  color: rgba(255, 255, 255, 0.88);
 }
 .gx-faixa {
   position: relative;
   display: block;
-  grid-column: 1 / -1;
-  border-radius: 4mm;
-  overflow: hidden;
+  flex: 1;
+  min-height: 0;
 }
 .gx-faixa-texto {
   position: absolute;
@@ -499,29 +427,139 @@ html:has(.gx) body {
   right: 0;
   bottom: 0;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 4mm;
-  padding: 14mm 6mm 5mm;
-  background: linear-gradient(180deg, rgba(17, 17, 16, 0), rgba(17, 17, 16, 0.85));
+  flex-direction: column;
+  gap: 14px;
+  padding: 80px var(--gx-lado) 22px;
+  background: linear-gradient(180deg, rgba(17, 17, 16, 0), rgba(17, 17, 16, 0.88));
   color: #fff;
 }
 .gx-faixa-texto b {
-  font-size: 18pt;
+  font-size: 30px;
+  line-height: 1.05;
   font-weight: 800;
   font-style: italic;
   text-transform: uppercase;
 }
 .gx-faixa-texto span {
-  flex: none;
-  padding: 2.4mm 4.5mm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 60px;
   border-radius: 99px;
   background: var(--gx-yel);
   color: var(--gx-ink);
-  font-size: 9.5pt;
+  font-size: 19px;
   font-weight: 800;
 }
-.gx-grelha--lugares .gx-jantar {
+
+/* ---------- a mesa ---------- */
+.gx-mesa {
+  padding: 0;
+}
+.gx-mesa-foto {
+  position: relative;
+  display: block;
+  height: 250px;
+  flex: none;
+}
+.gx-mesa-texto {
+  display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  padding: 26px var(--gx-lado) 0;
+}
+.gx-titulo--mesa {
+  font-size: 34px;
+}
+.gx-mesa-sub {
+  margin: 8px 0 0;
+  color: var(--gx-yel);
+  font-size: 20px;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+}
+.gx-mesa-txt {
+  margin: 14px 0 0;
+  font-size: 18px;
+  line-height: 1.42;
+  color: rgba(255, 255, 255, 0.9);
+}
+.gx-botoes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 22px;
+}
+.gx-codigo {
+  margin: 16px 0 0;
+  font-size: 16px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.75);
+}
+.gx-codigo b {
+  color: #fff;
+}
+
+/* ---------- contracapa ---------- */
+.gx-contra {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.gx-logo-contra img {
+  display: block;
+  height: 64px;
+  width: auto;
+}
+.gx-lema {
+  margin: 32px 0 0;
+  font-size: 30px;
+  line-height: 1.1;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+  color: var(--gx-yel);
+}
+.gx-contra-txt {
+  margin: 12px 0 0;
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.85);
+}
+.gx-contactos {
+  list-style: none;
+  margin: 44px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.gx-contactos li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.gx-contactos span {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+.gx-contactos a {
+  display: block;
+  padding: 6px 0;
+  font-size: 24px;
+  font-weight: 800;
+}
+.gx-licenca {
+  position: absolute;
+  bottom: 28px;
+  left: var(--gx-lado);
+  right: 80px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.65);
+  text-align: left;
 }
