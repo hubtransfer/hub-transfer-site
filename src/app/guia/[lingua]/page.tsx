@@ -3,21 +3,23 @@ import { notFound } from "next/navigation";
 import { Montserrat } from "next/font/google";
 import { ficheiroGuia, ligacoesGuia, TEXTOS_GUIA, whatsappEscrito } from "@/lib/lisboa/guia";
 import { codigoWhats } from "@/lib/lisboa/config";
-import { imagensHero, imagensLugar, imagensPrato } from "@/lib/lisboa/imagens";
+import { imagensHero } from "@/lib/lisboa/imagens";
 import { LUGARES } from "@/lib/lisboa/lugares";
 import { PRATOS } from "@/lib/lisboa/pratos";
 import { TEXTOS } from "@/lib/lisboa/textos";
 import { LINGUAS, type Lingua } from "@/lib/lisboa/tipos";
-import Foto from "./Foto";
 import "./guia.css";
 
-/* Guia «Lisboa à sua mesa» para ler no telemóvel (pedido E18; antes A4 em duas colunas, pedido E9) —
+/* Guia «Lisboa à sua mesa» para ler no telemóvel (pedidos E18 e E19; antes A4 em duas colunas, pedido E9) —
    /guia/en, /guia/pt, /guia/es, /guia/fr, /guia/it. É daqui que o comando «npm run guias» faz os PDF
-   (public/guia/HUB-Transfer-Lisboa-XX.pdf). Cada página tem 390×844 (a proporção de um iPhone) e uma só coluna:
-   aberta à largura do ecrã, cada px desta página é um ponto do ecrã (texto de leitura ≥ 17 px).
-   Páginas: 1 capa · 2 índice · 3 como usar · um prato por página · um lugar por página · o jantar · a mesa · contracapa.
+   (public/guia/HUB-Transfer-Lisboa-XX.pdf). Cada página tem 390×760 e uma só coluna: aberta à largura do ecrã,
+   cada px desta página é um ponto do ecrã (texto de leitura ≥ 17 px) e a página inteira cabe entre as barras do leitor.
+   Páginas: 1 capa · 2 índice · 3 como usar · entrada dos pratos · um prato por página · entrada dos lugares ·
+   um lugar por página · o jantar · a mesa · contracapa.
+   Fotografias: public/guia/fotos/, feitas por «npm run fotos-guia» (corte pelo ponto de foco de
+   src/lib/lisboa/enquadramentos-guia.json e só depois a marca de água). Pratos e lugares: todas em 6:5.
    Sem preços. Cada número, fotografia e botão abre o site na língua do guia, com os UTM da campanha;
-   o índice e o «↑» de cada rodapé saltam dentro do próprio PDF.
+   o índice, as páginas de entrada e o «↑» de cada rodapé saltam dentro do próprio PDF.
    Não aparece nos motores de busca nem no sitemap. */
 
 const montserrat = Montserrat({ subsets: ["latin"], variable: "--gx-font", display: "block", style: ["normal", "italic"] });
@@ -39,16 +41,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-/** Largura das fotografias no PDF (px do otimizador do site): nítidas no telemóvel e cada PDF abaixo dos 3 MB. */
-const FOTO = 828;
+/** Fotografias do guia: já cortadas à medida, com a marca de água gravada depois do corte (npm run fotos-guia). */
+const foto = (nome: string) => `/guia/fotos/${nome}.jpg`;
+const dois = (n: number) => String(n).padStart(2, "0");
 
-// números das páginas (o índice mostra-os e salta para elas)
+// números das páginas (o índice e as páginas de entrada mostram-nos e saltam para eles)
 const P_INDICE = 2;
 const P_COMO = 3;
-const P_PRATOS = 4;
-const P_LUGARES = P_PRATOS + PRATOS.length;
-const P_JANTAR = P_LUGARES + LUGARES.length;
+const P_PRATOS = 4; // página de entrada dos pratos; um prato por página a seguir
+const P_LUGARES = P_PRATOS + 1 + PRATOS.length; // página de entrada dos lugares; um lugar por página a seguir
+const P_JANTAR = P_LUGARES + 1 + LUGARES.length;
 const P_MESA = P_JANTAR + 1;
+
+function Img({ nome }: { nome: string }) {
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={foto(nome)} alt="" className="gx-img" draggable={false} />;
+}
 
 export default async function Guia({ params }: Props) {
   const { lingua } = await params;
@@ -57,18 +65,22 @@ export default async function Guia({ params }: Props) {
   const g = TEXTOS_GUIA[lingua];
   const ir = ligacoesGuia(lingua);
   const zap = whatsappEscrito();
-  const capa = imagensHero()[0];
+  const temCapa = imagensHero().length > 0;
   const fado = PRATOS.find((p) => p.slug === "jantar-com-fado") ?? PRATOS[PRATOS.length - 1];
 
+  // rodapé: «↑ Neste guia» à esquerda (salta para o índice) · «hubtransfer.pt · página N» à direita
   const rodape = (pagina: number, escura = false) => (
     <footer className={`gx-rodape${escura ? " gx-rodape--escura" : ""}`}>
       <a href="#indice" className="gx-rodape-indice">
         ↑ {g.indice}
       </a>
-      <span>
-        {g.pagina} {pagina}
+      <span className="gx-rodape-direita">
+        <a href={ir.pagina}>hubtransfer.pt</a>
+        <span>
+          {" · "}
+          {g.pagina.toLowerCase()} {pagina}
+        </span>
       </span>
-      <a href={ir.pagina}>hubtransfer.pt</a>
     </footer>
   );
 
@@ -78,9 +90,9 @@ export default async function Guia({ params }: Props) {
     <div lang={lingua} className={`gx ${montserrat.variable}`}>
       {/* 1. Capa */}
       <section className="gx-folha gx-escura gx-capa">
-        {capa && (
+        {temCapa && (
           <a href={ir.pagina} className="gx-capa-foto" aria-label={t.pVoltar}>
-            <Foto src={capa} largura={FOTO} />
+            <Img nome="capa" />
           </a>
         )}
         <div className="gx-capa-veu" />
@@ -134,31 +146,40 @@ export default async function Guia({ params }: Props) {
           ))}
         </ol>
         <a href={ir.lugar(7)} className="gx-exemplo-foto">
-          <Foto src={imagensLugar(7)[0]} largura={FOTO} />
+          <Img nome="como" />
           <span className="gx-numero gx-numero--foto">7</span>
         </a>
         {rodape(P_COMO)}
       </section>
 
-      {/* Os 8 pratos, um por página */}
+      {/* Entrada dos pratos: o título, a frase e os 8 pratos (cada um salta para a sua página) */}
+      <section id="pratos" className="gx-folha gx-escura gx-entrada">
+        <h2 className="gx-titulo gx-titulo--entrada">
+          <a href={ir.pratos}>{t.pratos}</a>
+        </h2>
+        <p className="gx-entrada-sub">{t.pratosSub}</p>
+        <ul className="gx-entrada-lista">
+          {PRATOS.map((p, i) => (
+            <li key={p.n}>
+              <a href={`#prato-${p.n}`}>
+                <span>{p[lingua][0]}</span>
+                <span className="gx-entrada-pag">{P_PRATOS + 1 + i}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        {rodape(P_PRATOS, true)}
+        <span className="gx-canto" />
+      </section>
+
+      {/* Os 8 pratos, um por página, todos com a mesma fotografia 6:5 */}
       {PRATOS.map((p, i) => {
         const [nome, frase] = p[lingua];
         return (
-          <section key={`p${p.n}`} id={i === 0 ? "pratos" : undefined} className="gx-folha gx-item">
-            <header className="gx-cabeca">
-              {i === 0 ? (
-                <>
-                  <h2 className="gx-h2">
-                    <a href={ir.pratos}>{t.pratos}</a>
-                  </h2>
-                  <p className="gx-sub">{t.pratosSub}</p>
-                </>
-              ) : (
-                <p className="gx-seccao">{t.pratos}</p>
-              )}
-            </header>
-            <a href={ir.prato(p.slug)} className={`gx-item-foto${i === 0 ? " gx-item-foto--curta" : ""}`} aria-label={nome}>
-              <Foto src={imagensPrato(p.n)[0]} largura={FOTO} />
+          <section key={`p${p.n}`} id={`prato-${p.n}`} className="gx-folha gx-item">
+            <p className="gx-seccao">{t.pratos}</p>
+            <a href={ir.prato(p.slug)} className="gx-item-foto" aria-label={nome}>
+              <Img nome={`prato-${dois(p.n)}`} />
             </a>
             <div className="gx-item-corpo">
               <h3 className="gx-item-nome">
@@ -166,35 +187,39 @@ export default async function Guia({ params }: Props) {
               </h3>
               <p className="gx-item-txt">{frase}</p>
               <a className="gx-botao gx-botao--tinta" href={ir.prato(p.slug)}>
-                {g.ondeProvar} {seta}
+                <span>{g.ondeProvar} {seta}</span>
               </a>
             </div>
-            {rodape(P_PRATOS + i)}
+            {rodape(P_PRATOS + 1 + i)}
           </section>
         );
       })}
 
-      {/* Os 21 lugares, um por página */}
+      {/* Entrada dos lugares: o título, a frase e os 21 números (cada um salta para a sua página) */}
+      <section id="lugares" className="gx-folha gx-escura gx-entrada">
+        <h2 className="gx-titulo gx-titulo--entrada">{t.choose}</h2>
+        <p className="gx-entrada-sub">{t.brS}</p>
+        <ul className="gx-entrada-numeros">
+          {LUGARES.map((l) => (
+            <li key={l.n}>
+              <a href={`#lugar-${l.n}`} aria-label={`${l.n}. ${l[lingua].nome}`}>
+                {l.n}
+              </a>
+            </li>
+          ))}
+        </ul>
+        {rodape(P_LUGARES, true)}
+        <span className="gx-canto" />
+      </section>
+
+      {/* Os 21 lugares, um por página, todos com a mesma fotografia 6:5 */}
       {LUGARES.map((l, i) => {
         const txt = l[lingua];
         return (
-          <section key={`l${l.n}`} id={i === 0 ? "lugares" : undefined} className="gx-folha gx-item">
-            <header className="gx-cabeca">
-              {i === 0 ? (
-                <>
-                  <h2 className="gx-h2">{t.choose}</h2>
-                  <p className="gx-sub">{t.brS}</p>
-                </>
-              ) : (
-                <p className="gx-seccao">{t.choose}</p>
-              )}
-            </header>
-            <a
-              href={ir.lugar(l.n)}
-              className={`gx-item-foto${i === 0 ? " gx-item-foto--curta" : ""}`}
-              aria-label={`${l.n}. ${txt.nome}`}
-            >
-              <Foto src={imagensLugar(l.n)[0]} largura={FOTO} />
+          <section key={`l${l.n}`} id={`lugar-${l.n}`} className="gx-folha gx-item">
+            <p className="gx-seccao">{t.choose}</p>
+            <a href={ir.lugar(l.n)} className="gx-item-foto" aria-label={`${l.n}. ${txt.nome}`}>
+              <Img nome={`lugar-${dois(l.n)}`} />
               <span className="gx-numero gx-numero--foto">{l.n}</span>
             </a>
             <div className="gx-item-corpo">
@@ -204,25 +229,25 @@ export default async function Guia({ params }: Props) {
               </h3>
               <p className="gx-item-txt">{txt.txt}</p>
               <a className="gx-botao gx-botao--tinta" href={ir.lugar(l.n)}>
-                {g.verJuntar} {seta}
+                <span>{g.verJuntar} {seta}</span>
               </a>
             </div>
-            {rodape(P_LUGARES + i)}
+            {rodape(P_LUGARES + 1 + i)}
           </section>
         );
       })}
 
-      {/* O convite para o jantar (no A4 ocupava o resto da última página dos lugares) */}
+      {/* O convite para o jantar */}
       <section id="jantar" className="gx-folha gx-jantar-folha">
         <aside className="gx-jantar">
           <h2 className="gx-jantar-titulo">{t.eT}</h2>
           <p>{t.eS}</p>
           <a className="gx-botao" href={ir.whatsapp}>
-            {t.own2} {seta}
+            <span>{t.own2} {seta}</span>
           </a>
         </aside>
         <a className="gx-faixa" href={ir.prato(fado.slug)}>
-          <Foto src={imagensPrato(fado.n)[0]} largura={FOTO} />
+          <Img nome="jantar" />
           <span className="gx-faixa-texto">
             <b>{fado[lingua][0]}</b>
             <span>
@@ -235,9 +260,9 @@ export default async function Guia({ params }: Props) {
 
       {/* Uma mesa à sua espera */}
       <section id="mesa" className="gx-folha gx-escura gx-mesa">
-        {capa && (
+        {temCapa && (
           <a href={ir.pagina} className="gx-mesa-foto" aria-label={t.pVoltar}>
-            <Foto src={capa} largura={FOTO} />
+            <Img nome="mesa" />
           </a>
         )}
         <div className="gx-mesa-texto">

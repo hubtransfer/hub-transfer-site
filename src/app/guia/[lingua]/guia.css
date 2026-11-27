@@ -1,11 +1,12 @@
-/* Guia «Lisboa à sua mesa» para o telemóvel (pedido E18) — identidade da /lisboa: preto #111110, amarelo #FACF09,
+/* Guia «Lisboa à sua mesa» para o telemóvel (pedidos E18 e E19) — identidade da /lisboa: preto #111110, amarelo #FACF09,
    Montserrat, títulos em itálico e maiúsculas, o canto em triângulo amarelo.
-   Cada .gx-folha é uma página de 390×844 px (a proporção de um iPhone), numa só coluna. Aberto à largura do ecrã,
-   1 px desta página = 1 ponto do ecrã: o texto de leitura fica com 17–19 pt sem zoom e os botões com 60 pt de altura.
+   Cada .gx-folha é uma página de 390×760 px, numa só coluna (cabe inteira entre as barras do leitor de PDF do iPhone).
+   Aberto à largura do ecrã, 1 px desta página = 1 ponto do ecrã: o texto de leitura fica com 17–21 pt sem zoom
+   e os botões com 60 pt de altura. As fotografias vêm já cortadas na proporção exata de cada caixa (npm run fotos-guia).
    Medidas em px de propósito (é um ecrã, não papel). */
 
 @page {
-  size: 293pt 633pt; /* = 390,7 × 844 px, em pontos inteiros (o PDF arredonda ao ponto) */
+  size: 293pt 570pt; /* = 390,7 × 760 px, em pontos inteiros (o PDF arredonda ao ponto) */
   margin: 0;
 }
 
@@ -43,7 +44,7 @@ html:has(.gx) body {
 .gx-folha {
   position: relative;
   width: 390px;
-  height: 844px;
+  height: 760px;
   margin: 0 auto;
   padding: 28px var(--gx-lado) 72px;
   overflow: hidden;
@@ -89,7 +90,11 @@ html:has(.gx) body {
 
 /* ---------- fotografias ---------- */
 .gx-img {
-  object-fit: cover;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* a foto já tem a proporção da caixa: não corta nada */
 }
 .gx-sem-foto {
   position: absolute;
@@ -153,15 +158,16 @@ html:has(.gx) body {
   justify-content: center;
   gap: 10px;
   min-height: 60px;
-  padding: 12px 22px;
+  padding: 12px 18px;
   border-radius: 99px;
   background: var(--gx-yel);
   color: var(--gx-ink) !important;
-  font-size: 19px;
+  font-size: 18.5px;
   font-weight: 800;
   line-height: 1.2;
   text-align: center;
 }
+/* o texto e a seta vão juntos (espaço inseparável): a seta nunca fica sozinha noutra linha */
 .gx-botao--tinta {
   background: var(--gx-ink);
   color: #fff !important;
@@ -219,6 +225,12 @@ html:has(.gx) body {
 .gx-rodape-indice {
   color: var(--gx-ink);
 }
+.gx-rodape-direita {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  white-space: pre;
+}
 .gx-rodape--escura {
   right: 70px;
   border-top-color: rgba(255, 255, 255, 0.18);
@@ -238,7 +250,7 @@ html:has(.gx) body {
   left: 0;
   right: 0;
   top: 0;
-  height: 50%;
+  height: 380px; /* a foto «capa» tem 390×380 */
 }
 .gx-capa-veu {
   background: linear-gradient(180deg, rgba(17, 17, 16, 0.6) 0%, rgba(17, 17, 16, 0) 25%, rgba(17, 17, 16, 0) 55%, #111110 100%);
@@ -247,7 +259,7 @@ html:has(.gx) body {
 .gx-logo-capa {
   position: absolute;
   left: var(--gx-lado);
-  top: 64px; /* abaixo da barra de estado do telemóvel */
+  top: 28px;
   z-index: 1;
 }
 .gx-logo-capa img {
@@ -268,7 +280,7 @@ html:has(.gx) body {
 
 /* ---------- 2. índice ---------- */
 .gx-pagina-indice {
-  padding-top: 76px;
+  padding-top: 64px;
 }
 .gx-pagina-indice .gx-h2 {
   font-size: 40px;
@@ -282,8 +294,8 @@ html:has(.gx) body {
   display: flex;
   align-items: center;
   gap: 14px;
-  min-height: 84px;
-  padding: 12px 0;
+  min-height: 78px;
+  padding: 10px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.16);
 }
 .gx-indice-nome {
@@ -310,11 +322,11 @@ html:has(.gx) body {
 /* ---------- 3. como usar ---------- */
 .gx-passos {
   list-style: none;
-  margin: 24px 0 0;
+  margin: 20px 0 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
 }
 .gx-passos li {
   display: flex;
@@ -323,47 +335,46 @@ html:has(.gx) body {
 }
 .gx-passos p {
   margin: 8px 0 0;
-  font-size: 18px;
-  line-height: 1.42;
+  font-size: 17.5px;
+  line-height: 1.4;
 }
 .gx-exemplo-foto {
   position: relative;
   display: block;
-  flex: 1;
-  min-height: 0;
-  margin: 24px calc(-1 * var(--gx-lado)) 0;
+  flex: none;
+  height: 220px; /* a foto «como» tem 390×220 */
+  margin: 20px calc(-1 * var(--gx-lado)) 0;
 }
 
 /* ---------- pratos e lugares: um por página ---------- */
 .gx-item {
   padding-top: 24px;
 }
-.gx-cabeca {
+.gx-item .gx-seccao {
   flex: none;
-  margin-bottom: 18px;
-  padding-left: 14px;
-  border-left: 6px solid var(--gx-yel);
+  margin-bottom: 14px;
+  padding-left: 12px;
+  border-left: 5px solid var(--gx-yel);
 }
+/* todas as fotos dos pratos e dos lugares: 390×325 (6:5) */
 .gx-item-foto {
   position: relative;
   display: block;
   flex: none;
-  height: 400px;
+  height: 325px;
   margin: 0 calc(-1 * var(--gx-lado));
 }
-.gx-item-foto--curta {
-  height: 300px;
-}
+/* texto e botão seguidos, logo a seguir à fotografia; o rodapé fica no fundo */
 .gx-item-corpo {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-height: 0;
+  flex: none;
+  max-height: calc(760px - 24px - 34px - 325px - 72px);
   padding-top: 20px;
 }
 .gx-item-nome {
   margin: 0;
-  font-size: 30px;
+  font-size: 31px;
   line-height: 1.08;
   font-weight: 800;
   font-style: italic;
@@ -372,12 +383,12 @@ html:has(.gx) body {
 }
 .gx-item-txt {
   margin: 10px 0 0;
-  font-size: 19px;
+  font-size: 20px;
   line-height: 1.42;
   color: var(--gx-mut);
 }
 .gx-item-corpo .gx-botao {
-  margin-top: auto;
+  margin-top: 22px;
 }
 .gx-zona {
   margin: 0 0 6px;
@@ -393,7 +404,8 @@ html:has(.gx) body {
   padding: 0 0 72px;
 }
 .gx-jantar {
-  flex: none;
+  flex: 1;
+  justify-content: center;
   display: flex;
   flex-direction: column;
   padding: 44px var(--gx-lado) 32px;
@@ -418,8 +430,8 @@ html:has(.gx) body {
 .gx-faixa {
   position: relative;
   display: block;
-  flex: 1;
-  min-height: 0;
+  flex: none;
+  height: 340px; /* a foto «jantar» tem 390×340 */
 }
 .gx-faixa-texto {
   position: absolute;
@@ -460,13 +472,15 @@ html:has(.gx) body {
 .gx-mesa-foto {
   position: relative;
   display: block;
-  height: 250px;
+  height: 200px; /* a foto «mesa» tem 390×200 */
   flex: none;
 }
 .gx-mesa-texto {
   display: flex;
   flex-direction: column;
-  padding: 26px var(--gx-lado) 0;
+  flex: 1;
+  min-height: 0;
+  padding: 22px var(--gx-lado) 0;
 }
 .gx-titulo--mesa {
   font-size: 34px;
@@ -562,4 +576,62 @@ html:has(.gx) body {
   line-height: 1.4;
   color: rgba(255, 255, 255, 0.65);
   text-align: left;
+}
+
+/* ---------- entradas das secções (pratos, lugares): título, frase e saltos para cada página ---------- */
+.gx-entrada {
+  padding-top: 64px;
+}
+.gx-titulo--entrada {
+  font-size: 38px;
+  line-height: 1.02;
+  color: #fff;
+}
+.gx-entrada-sub {
+  margin: 14px 0 0;
+  font-size: 18px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.88);
+}
+.gx-entrada-lista {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+}
+.gx-entrada-lista a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 18px;
+  font-weight: 700;
+}
+.gx-entrada-lista a > span:first-child {
+  flex: 1;
+}
+.gx-entrada-pag {
+  color: var(--gx-yel);
+  font-weight: 800;
+}
+.gx-entrada-numeros {
+  list-style: none;
+  margin: 28px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  justify-items: center;
+}
+.gx-entrada-numeros a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--gx-yel);
+  color: var(--gx-ink);
+  font-size: 22px;
+  font-weight: 800;
 }
