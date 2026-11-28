@@ -1,0 +1,139 @@
+/* /assistente — CRM da assistente, tema claro (E21).
+   Da família de /motoristas e /lisboa: papel claro, asfalto #0B0C0C, amarelo do logótipo #F2CF32,
+   Barlow + Barlow Condensed, a «placa» de cantos largos. Tudo dentro de .crm: o resto do site não muda. */
+
+html:has(.crm) {
+  color-scheme: light;
+  background: #f1f2f4;
+}
+html:has(.crm) body {
+  background: #f1f2f4;
+  color: #0b0c0c;
+}
+html:has(.crm) ::selection {
+  background: #f2cf32;
+  color: #0b0c0c;
+}
+
+.crm {
+  --papel: #ffffff;
+  --betao: #f1f2f4;
+  --asfalto: #0b0c0c;
+  --amarelo: #f2cf32;
+  --amarelo-claro: #fff7d1;
+  --sinal: #5e646b;
+  --linha: #d9dce0;
+  --verde: #15803d;
+  --sombra: 0 1px 2px rgba(11, 12, 12, 0.06), 0 8px 24px rgba(11, 12, 12, 0.07);
+  --display: var(--crm-font-display), "Arial Narrow", Arial, sans-serif;
+  --texto: var(--crm-font-texto), "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+  min-height: 100dvh;
+  background: var(--betao);
+  color: var(--asfalto);
+  font-family: var(--texto);
+  font-size: 18px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+.crm :focus-visible {
+  outline: 3px solid var(--asfalto);
+  outline-offset: 3px;
+}
+.crm-display {
+  font-family: var(--display);
+  letter-spacing: -0.005em;
+}
+
+/* A estrada do dia: asfalto com o tracejado da marca; o troço feito fica amarelo. */
+.crm-estrada {
+  position: relative;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--asfalto);
+  overflow: hidden;
+}
+.crm-estrada::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%);
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.55) 0 8px, transparent 8px 16px);
+}
+.crm-estrada-feito {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+  background: var(--amarelo);
+  transition: width 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.crm-estrada-feito::after {
+  content: "";
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  transform: translateY(-50%);
+  background: var(--asfalto);
+}
+
+/* Celebração ao gravar */
+.crm-celebrar {
+  animation: crm-entra 0.25s ease-out both;
+}
+.crm-selo-ok {
+  animation: crm-pop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+.crm-confete {
+  position: absolute;
+  top: -12px;
+  width: 10px;
+  height: 16px;
+  border-radius: 2px;
+  animation: crm-cai 1.6s cubic-bezier(0.3, 0.6, 0.4, 1) forwards;
+}
+.crm-cartao-entra {
+  animation: crm-desliza 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes crm-entra {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes crm-pop {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+}
+@keyframes crm-cai {
+  to {
+    transform: translate3d(var(--dx, 0), 105dvh, 0) rotate(var(--rot, 540deg));
+    opacity: 0.9;
+  }
+}
+@keyframes crm-desliza {
+  from {
+    transform: translateX(28px);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .crm-celebrar,
+  .crm-selo-ok,
+  .crm-cartao-entra {
+    animation: none;
+  }
+  .crm-confete {
+    display: none;
+  }
+  .crm-estrada-feito {
+    transition: none;
+  }
+}
